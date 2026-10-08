@@ -1,0 +1,132 @@
+Key,Turkish(tr)
+genel.geri,Geri
+genel.tamam,Tamam
+menu.baslik,TheLighter
+menu.alt_baslik,Gizli sorulu parti oyunu
+menu.elden_ele,Elden ele oyna
+menu.online,Online oyna
+menu.online_yakinda,Online mod yakında.
+menu.nasil_oynanir,Nasıl oynanır?
+nasil.baslik,Nasıl oynanır?
+nasil.metin,"1. Sırası gelen, gruptan birini seçer ve ona gizli bir soru sorar. Örnek: ""Grupta sırrını en kolay kim açık eder?""
+
+2. Soruyu alan, cevap olarak gördüğü kişiye çakmağı verir.
+
+3. Çakmağı veren ile alan bir mini oyun oynar.
+
+4. Çakmağı alan kazanırsa soru herkese ifşa olur. Veren kazanırsa soru güme gider, kimse öğrenemez.
+
+5. Sonuç ne olursa olsun sıra çakmağı alana geçer.
+
+Elden ele modda tek telefon elden ele dolaşır. Ekranda ""Telefonu Ayşe'ye ver"" yazınca telefonu ver, başkası bakmasın."
+kurulum.baslik,Oyuncular
+kurulum.aciklama,{0}–{1} kişi. Sıra rastgele birinden başlar.
+kurulum.ekle,+ Oyuncu ekle
+kurulum.sil,Sil
+kurulum.mini_oyun,Mini oyun
+kurulum.tur,Kaç tur?
+kurulum.tur_sayi,{0} tur
+kurulum.tur_sinirsiz,Sınırsız
+kurulum.basla,Başla
+kurulum.hata_bos,{0}. oyuncunun adı boş.
+kurulum.hata_ayni,"""{0}"" iki kez yazılmış."
+kurulum.hata_az,En az {0} oyuncu lazım.
+oyun.menu,Menü
+oyun.menu_baslik,Oyun durdu
+oyun.devam,Devam et
+oyun.bitir,Oyunu bitir
+oyun.ana_menu,Ana menüye dön
+oyun.menu_ipucu,Menü açıkken süre işlemez.
+oyun.tur_sinirli,Tur {0}/{1}
+oyun.tur_sinirsiz,Tur {0}
+oyun.bekleniyor,Bekleniyor...
+perde.sira,Sıra {1}
+perde.sordu,"{0}, {2} bir soru sordu."
+perde.telefonu_ver,Telefonu {1} ver
+perde.bakmasin,Başkası ekrana bakmasın.
+perde.hazirim,"Hazırım, ben {0}"
+soru.baslik,"Sıra sende, {0}"
+soru.aciklama,Sorunu yaz ve kime soracağını seç. Soruyu sadece o görecek.
+soru.oneri,Öneri çek
+soru.kime,Kime soruyorsun?
+soru.gonder,Soruyu gönder
+soru.fisildadim,Fısıldadım
+soru.fisildadim_ipucu,Soruyu kulağına söylediysen yazmadan buna bas.
+cevap.sordu,{0} sana sordu:
+cevap.fisildadi,{0} soruyu kulağına fısıldadı.
+cevap.fisildadi_bilgi,Soruyu sadece sen duydun. Cevabını düşün.
+cevap.basili_tut,Okumak için basılı tut
+cevap.kime,Çakmağı kime veriyorsun?
+cevap.kime_ipucu,Sorunun cevabı kim? ({0} ve sen hariç)
+cevap.ver,Çakmağı ver
+mini.ad.Tkm,Taş-Kağıt-Makas
+mini.ad.TekCift,Tek-Çift
+mini.ad.Zar,Zar
+mini.ad.Karisik,Karışık
+mini.kural.Tkm,"Önce soruyu alan, sonra çakmağı alan gizlice seçer. Taş makası, makas kağıdı, kağıt taşı yener. Berabere biterse bir el daha; 3. beraberlikte zar atılır."
+mini.kural.TekCift,"Soruyu alan, toplamın tek mi çift mi çıkacağını seçer ve gizlice 1 ile 5 arasında bir sayı seçer. Sonra çakmağı alan da bir sayı seçer. Toplam onun dediği gibi çıkarsa soruyu alan kazanır."
+mini.kural.Zar,"İkiniz de zar atarsınız, büyük atan kazanır."
+mini.kural.Karisik,Her tur başka bir mini oyun.
+mini.perde_verdi,{0} çakmağı {2} verdi!
+mini.perde_anlam,{1} kazanırsa soru herkese açılır. {0} kazanırsa soru güme gider.
+mini.perde_yerlesim,"Telefonu ikinizin arasına koyun. Alt taraf {0}, üst taraf {1}."
+mini.perde_hazir,Hazırız
+mini.rol_b,Kazanırsan soru gizli kalır.
+mini.rol_c,Kazanırsan soru herkese açılır.
+mini.sec,Gizlice seç
+mini.sayi_sec,Gizlice bir sayı seç
+mini.bakma,{0} seçiyor. Bakma!
+mini.sectin_bakma,Seçtin. {0} seçerken bakma!
+mini.tek,Tek
+mini.cift,Çift
+mini.tas,Taş
+mini.kagit,Kağıt
+mini.makas,Makas
+mini.zar_at,Zar at
+mini.zar_attin,Attın. {0} bekleniyor...
+mini.bekle,Sonuç açılıyor...
+mini.beraberlik,{0}. beraberlik ({1}). Bir el daha!
+el.ikili,{0}: {1}   ·   {2}: {3}
+el.tekcift,"{0} ""{1}"" dedi   ·   {2} + {3} = {4} ({5})"
+el.oynamadi,oynamadı
+el.kazandi,{0} kazandı!
+el.sure_doldu,Süre doldu. Hamle yapmayan kaybeder.
+sonuc.ifsa_baslik,İFŞA!
+sonuc.ifsa_soru,“{0}”
+sonuc.ifsa_fisilti,"{0}, soruyu yüksek sesle söyle!"
+sonuc.soran_cevap,Soran: {0}   ·   Cevap: {1}
+sonuc.gume_baslik,Soru güme gitti
+sonuc.gume_alt,Soruyu kimse öğrenemeyecek.
+sonuc.sira,Sıra {1} geçiyor.
+sonuc.son_tur,Son tur bitti.
+son.baslik,Oyun bitti
+son.ifsalar,İfşa olan sorular
+son.ifsa_yok,Hiçbir soru ifşa olmadı. Sır küpüsünüz!
+son.fisilti,(Fısıldanan bir soru)
+son.tekrar,Tekrar oyna
+perde.sira_rastgele,Sıra rastgele {1}
+perde.sure_doldu_a,{1} süresi doldu.
+perde.sure_doldu_b,"{0} süresinde seçmedi, soru güme gitti."
+mini.ad.Reaksiyon,Reaksiyon
+mini.kural.Reaksiyon,"Ekran yeşile dönünce kendi yarına bas. Hızlı olan kazanır, kırmızıyken basan kaybeder."
+mini.tekcift_tahmin,Toplam tek mi çift mi?
+mini.once_tekcift,Önce tek mi çift mi seç.
+mini.zar_atti,zar attı
+mini.reaksiyon_bekle,Bekle...
+mini.reaksiyon_bas,BAS!
+mini.reaksiyon_bastin,Bastın!
+mini.reaksiyon_erken,Erken bastın!
+el.erken,erken bastı
+el.ms,{0} ms
+el.zarla_karar,"3. beraberlik, zarla karar: {0} {1}   ·   {2} {3}"
+son.tur,{0} tur oynandı.
+son.sayaclar,Kim ne yaptı?
+son.sayac,{0}: {1} kez gösterildi · {2} ifşa · {3} saklama
+hata.Tamam,
+hata.SiraSendeDegil,Sıra sende değil.
+hata.Secilemez,Bu kişi seçilemez.
+hata.YanlisAsama,Şu an bunu yapamazsın.
+hata.GecersizGirdi,Olmadı: soru boş ya da çok uzun olabilir.
+hata.HakKalmadi,Bunu zaten yaptın.
+hata.HavuzBos,Henüz soru paketi yok.
+hata.OyuncuSayisiGecersiz,Oyuncu sayısı uygun değil.

@@ -1,0 +1,588 @@
+/* TheLighter: bütün ekranların görünüşü. Ölçüler 1080x1920 dikey referansa göre (Uygulama.cs). */
+
+:root {
+    --arka: #15121A;
+    --yuzey: #221D29;
+    --yuzey-2: #2E2737;
+    --cizgi: #433A4F;
+    --yazi: #F4EEE6;
+    --yazi-soluk: #A79FB0;
+    --yazi-koyu: #1A1208;
+    --alev: #FF8A1F;
+    --alev-acik: #FFA24D;
+    --alev-koyu: #3A2A1A;
+    --kirmizi: #FF5A5F;
+}
+
+/* ---------- Temel ---------- */
+
+.kok {
+    flex-grow: 1;
+    align-items: center;
+    background-color: var(--arka);
+}
+
+.sahne {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.ekran {
+    flex-grow: 1;
+    padding: 48px 56px;
+}
+
+.esnek {
+    flex-grow: 1;
+}
+
+.gizli {
+    display: none;
+}
+
+.satir {
+    flex-direction: row;
+    align-items: center;
+}
+
+.kaydirma {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.kok .unity-label {
+    color: var(--yazi);
+    font-size: 40px;
+    white-space: normal;
+    padding: 0;
+    margin: 6px 0;
+}
+
+.kok .baslik {
+    font-size: 64px;
+    -unity-font-style: bold;
+    margin: 8px 0 16px 0;
+}
+
+.kok .alt-baslik {
+    font-size: 44px;
+    -unity-font-style: bold;
+    margin: 32px 0 8px 0;
+}
+
+.kok .aciklama {
+    color: var(--yazi-soluk);
+    font-size: 40px;
+}
+
+.kok .ipucu {
+    color: var(--yazi-soluk);
+    font-size: 32px;
+    -unity-text-align: middle-center;
+}
+
+.kok .orta {
+    -unity-text-align: middle-center;
+}
+
+.kok .hata {
+    color: var(--kirmizi);
+    font-size: 36px;
+    -unity-text-align: middle-center;
+}
+
+.kok .sure {
+    font-size: 80px;
+    -unity-font-style: bold;
+    color: var(--alev);
+    min-width: 120px;
+    -unity-text-align: middle-right;
+}
+
+.kok .sure-az {
+    color: var(--kirmizi);
+}
+
+.kok .sayac {
+    color: var(--yazi-soluk);
+    font-size: 32px;
+}
+
+/* ---------- Butonlar ---------- */
+
+.unity-button.buton {
+    background-color: var(--yuzey-2);
+    color: var(--yazi);
+    border-width: 0;
+    border-radius: 28px;
+    padding: 24px 40px;
+    margin: 10px 0;
+    min-height: 120px;
+    font-size: 44px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    transition-property: background-color, opacity;
+    transition-duration: 0.12s;
+}
+
+.unity-button.buton:hover {
+    background-color: var(--cizgi);
+}
+
+.unity-button.buton:active {
+    background-color: var(--alev-koyu);
+}
+
+.unity-button.buton:disabled {
+    opacity: 0.35;
+}
+
+.unity-button.buton-birincil {
+    background-color: var(--alev);
+    color: var(--yazi-koyu);
+}
+
+.unity-button.buton-birincil:hover {
+    background-color: var(--alev-acik);
+}
+
+.unity-button.buton-birincil:active {
+    background-color: var(--alev-acik);
+}
+
+.unity-button.buton-ikincil {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 3px;
+    border-color: var(--cizgi);
+}
+
+.unity-button.buton-buyuk {
+    min-height: 160px;
+    font-size: 54px;
+}
+
+.unity-button.buton-kucuk {
+    min-height: 0;
+    padding: 16px 32px;
+    margin: 0;
+    font-size: 34px;
+    border-radius: 20px;
+}
+
+/* ---------- Ana menü ---------- */
+
+.kok .logo {
+    font-size: 150px;
+    -unity-font-style: bold;
+    color: var(--alev);
+    -unity-text-align: middle-center;
+}
+
+.kok .logo-alt {
+    font-size: 44px;
+    color: var(--yazi-soluk);
+    -unity-text-align: middle-center;
+}
+
+.menu-perde {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(10, 8, 14, 0.92);
+    justify-content: center;
+    padding: 80px 56px;
+}
+
+.menu-kutu {
+    background-color: var(--yuzey);
+    border-radius: 36px;
+    padding: 48px;
+    max-height: 100%;
+}
+
+/* ---------- Kurulum ---------- */
+
+.isim-satiri {
+    flex-direction: row;
+    align-items: center;
+    margin: 6px 0;
+}
+
+.kok .isim-no {
+    width: 80px;
+    color: var(--yazi-soluk);
+    -unity-text-align: middle-left;
+}
+
+.isim-kutusu {
+    flex-grow: 1;
+    margin: 0 16px 0 0;
+}
+
+.isim-kutusu .unity-base-text-field__input {
+    background-color: var(--yuzey);
+    border-color: var(--cizgi);
+    border-width: 3px;
+    border-radius: 20px;
+    padding: 16px 24px;
+    min-height: 100px;
+    font-size: 44px;
+    color: var(--yazi);
+    -unity-text-align: middle-left;
+}
+
+.secenekler {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.unity-button.secenek {
+    min-height: 100px;
+    margin: 8px 16px 8px 0;
+    padding: 16px 32px;
+    font-size: 38px;
+}
+
+.unity-button.secenek.secili {
+    background-color: var(--alev);
+    color: var(--yazi-koyu);
+}
+
+/* ---------- Oyun ekranı ---------- */
+
+.oyun-ekrani {
+    padding: 0;
+}
+
+.ust-cubuk {
+    flex-direction: row;
+    align-items: center;
+    padding: 24px 56px 0 56px;
+}
+
+.kok .ust-cubuk-yazi {
+    color: var(--yazi-soluk);
+    font-size: 36px;
+}
+
+.govde {
+    flex-grow: 1;
+}
+
+.parca {
+    flex-grow: 1;
+    padding: 32px 56px 48px 56px;
+}
+
+/* Oyuncu seçme çipleri */
+
+.cipler {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.unity-button.cip {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--yuzey);
+    border-width: 4px;
+    border-color: var(--yuzey);
+    border-radius: 60px;
+    padding: 16px 32px;
+    margin: 8px 16px 8px 0;
+    min-height: 0;
+}
+
+.unity-button.cip.secili {
+    border-color: var(--alev);
+    background-color: var(--alev-koyu);
+}
+
+.renk-noktasi {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    margin-right: 16px;
+}
+
+.kok .cip-yazi {
+    font-size: 42px;
+    margin: 0;
+}
+
+/* Perde */
+
+.perde {
+    align-items: stretch;
+}
+
+.perde-renk {
+    width: 180px;
+    height: 180px;
+    border-radius: 90px;
+    align-self: center;
+    margin-bottom: 40px;
+}
+
+.kok .perde-ust {
+    color: var(--yazi-soluk);
+    font-size: 46px;
+    -unity-text-align: middle-center;
+}
+
+.kok .perde-buyuk {
+    font-size: 96px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin: 24px 0;
+}
+
+.kok .perde-alt {
+    color: var(--yazi-soluk);
+    font-size: 38px;
+    -unity-text-align: middle-center;
+    margin-bottom: 24px;
+}
+
+/* Soru sorma */
+
+.soru-kutusu {
+    margin: 16px 0 0 0;
+}
+
+.soru-kutusu .unity-base-text-field__input {
+    background-color: var(--yuzey);
+    border-color: var(--cizgi);
+    border-width: 3px;
+    border-radius: 24px;
+    padding: 24px;
+    min-height: 280px;
+    font-size: 46px;
+    color: var(--yazi);
+    -unity-text-align: upper-left;
+}
+
+.soru-kutusu .unity-text-element {
+    white-space: normal;
+}
+
+/* Cevap seçme: basılı tut ve oku */
+
+.okuma-alani {
+    background-color: var(--yuzey);
+    border-color: var(--alev);
+    border-width: 4px;
+    border-radius: 32px;
+    min-height: 440px;
+    padding: 40px;
+    margin: 16px 0 8px 0;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.okuma-alani.basili {
+    background-color: var(--alev-koyu);
+}
+
+.kok .okuma-ipucu {
+    color: var(--yazi-soluk);
+    font-size: 46px;
+    -unity-text-align: middle-center;
+}
+
+.kok .okuma-soru {
+    font-size: 60px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* Mini oyun: bölünmüş ekran */
+
+.bolunmus {
+    padding: 0;
+}
+
+.yari {
+    flex-grow: 1;
+    flex-basis: 0;
+    padding: 36px 48px;
+}
+
+.ters {
+    rotate: 180deg;
+}
+
+.ayrac {
+    height: 8px;
+    background-color: var(--alev);
+}
+
+.kok .yari-isim {
+    font-size: 56px;
+    -unity-font-style: bold;
+}
+
+.kok .yari-rol {
+    color: var(--yazi-soluk);
+    font-size: 36px;
+}
+
+.kok .yari-durum {
+    font-size: 50px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.kok .banner {
+    background-color: var(--alev-koyu);
+    color: var(--alev);
+    border-radius: 20px;
+    padding: 16px 24px;
+    margin: 12px 0;
+    font-size: 38px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.secimler {
+    flex-direction: row;
+    margin: 16px -8px 0 -8px;
+}
+
+.unity-button.secim {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin: 8px;
+    padding: 16px 8px;
+    min-height: 220px;
+    font-size: 46px;
+}
+
+/* Sonuç: ifşa, güme, devir */
+
+.el-karti {
+    background-color: var(--yuzey);
+    border-radius: 28px;
+    padding: 28px 36px;
+}
+
+.kok .el-hamleler {
+    font-size: 44px;
+    -unity-text-align: middle-center;
+}
+
+.kok .el-kazanan {
+    font-size: 52px;
+    -unity-font-style: bold;
+    color: var(--alev);
+    -unity-text-align: middle-center;
+}
+
+.ifsa-karti {
+    background-color: var(--alev);
+    border-radius: 40px;
+    padding: 56px 48px;
+}
+
+.kok .ifsa-karti .unity-label {
+    color: var(--yazi-koyu);
+    -unity-text-align: middle-center;
+}
+
+.kok .ifsa-baslik {
+    font-size: 72px;
+    -unity-font-style: bold;
+    letter-spacing: 8px;
+}
+
+.kok .ifsa-soru {
+    font-size: 66px;
+    -unity-font-style: bold;
+    margin: 32px 0;
+}
+
+.kok .ifsa-alt {
+    font-size: 40px;
+}
+
+.gume-karti {
+    background-color: var(--yuzey);
+    border-radius: 40px;
+    padding: 56px 48px;
+}
+
+.kok .gume-baslik {
+    font-size: 72px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin: 16px 0;
+}
+
+/* Oyun sonu */
+
+.son-kart {
+    background-color: var(--yuzey);
+    border-radius: 24px;
+    padding: 24px 32px;
+    margin: 8px 0;
+}
+
+.kok .son-soru {
+    font-size: 44px;
+    -unity-font-style: bold;
+}
+
+/* Mini oyun: başlık ve küçük seçimler */
+
+.yari-baslik {
+    flex-shrink: 0;
+}
+
+.unity-button.secim.secim-kucuk {
+    min-height: 120px;
+}
+
+.unity-button.secim.secili {
+    background-color: var(--alev);
+    color: var(--yazi-koyu);
+}
+
+/* Reaksiyon */
+
+.reaksiyon-alani {
+    flex-grow: 1;
+    margin-top: 24px;
+    border-radius: 36px;
+    justify-content: center;
+    align-items: center;
+    transition-property: background-color;
+    transition-duration: 0.05s;
+}
+
+.reaksiyon-bekle {
+    background-color: #B3262B;
+}
+
+.reaksiyon-yesil {
+    background-color: #2DBE6C;
+}
+
+.reaksiyon-basildi {
+    background-color: var(--yuzey-2);
+}
+
+.kok .reaksiyon-yazi {
+    font-size: 88px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* Oyun sonu sayaçları */
+
+.son-satir {
+    margin: 4px 0;
+}

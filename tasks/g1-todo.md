@@ -29,6 +29,20 @@ Kapsam: tur akışı, seçim kuralları, mini oyunlar, süreler, Curcuna, görü
 - [ ] Birleştirme: Arda'nın ekranları motora bağlanırken çıkan kural hataları
 - [ ] Playtest 1'i ayarla: ≥4 kişi, elden ele, 30 dk
 
+## S4'ün ilk yarısı — sunucu iskeleti (öne çekildi)
+
+Neden şimdi: Arda'yı beklerken yapılabilecek, Playtest 1'in sonucundan etkilenmeyen tek büyük iş. Sunucu kural motorunu ağa taşıyor, kurallar değişse de sunucu değişmiyor.
+
+- [x] Protokol yazıldı: `docs/Protokol.md` (taslak, oturumda onaylanacak)
+- [x] Sunucu: `Sunucu/Cakmak.Sunucu` (.NET 10, ASP.NET Core, WebSocket). Oda kodu, katılma, anahtarla geri dönüş, ayarlar, başlat, komutlar, 100 ms saat, herkese kendi görünümü
+- [x] Kara kutu testleri: `Sunucu/SunucuTestleri` (alt ajan, sadece protokolden yazdı): 49 test, 5'i bilerek bozulup doğrulandı
+- [x] Bağımsız kod incelemesi (alt ajan): gizlilik sızıntısı ve kilit hatası yok. 1 hata (aynı alan iki kez → bağlantı düşüyordu), 3 risk (saat hatası sunucuyu durdurur, sessiz kopan fark edilmez, sınırsız kuyruk), 1 not (eski cihaz açık kalıyordu) düzeltildi. Her biri önce kırmızı testle gösterildi
+- [x] Kendi bulduğum: online'da Reaksiyon seçilebiliyordu (planda sadece elden ele). Kapatıldı
+- [x] Öz inceleme: online "öneri çek" testi yoktu, eklendi (bozup doğrulandı). Sunucu gerçek süreç olarak da çalıştırıldı: Node WebSocket istemcisiyle 4 kişi, oda, öneri, soru, gizlilik → geçti. **Toplam: 82 kural + 57 sunucu testi**
+- [x] Oyunda kurucu koparsa kuruculuk ilk bağlı oyuncuya geçiyor (Ana Plan 6.1). Yoksa sınırsız oyunu kimse bitiremiyordu
+- [ ] S5'e kalanlar: sohbet, atma, kopanı 60 sn bekleme, AFK etiketi, geç gelen, Temiz filtresi, boş odayı bir süre tutma, isimlerde görünmez karakter
+- [ ] Kurulum (VPS, alan adı, Caddy): Enes hazır olunca
+
 ## Sözleşmeye önerilen değişiklikler (oturumda onaylanacak)
 
 | # | Ana Plan 5.1'de | Kodda | Neden |

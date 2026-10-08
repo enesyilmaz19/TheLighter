@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    Online mod sunucusu. Kural kodu kopyalanmıyor: Unity'deki Assets/Kurallar aynen derleniyor.
+    Soru paketleri Assets/Icerik'ten çıktı klasörüne kopyalanıyor.
+    Çalıştırmak:  dotnet run (proje klasöründe), adres: ws://localhost:5000/ws (ASPNETCORE_URLS ile değişir)
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>Cakmak.Sunucu</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Assets\Kurallar\**\*.cs" Link="Kurallar\%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="..\..\Assets\Icerik\*.txt" Link="Icerik\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

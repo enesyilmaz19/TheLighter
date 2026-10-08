@@ -1,0 +1,59 @@
+# --- Unity (GitHub'ın Unity şablonu) ---
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Aa]ssets/Plugins/Editor/JetBrains*
+.vs/
+.vscode/
+.idea/
+.gradle/
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+*.unitypackage.meta
+*.app
+crashlytics-build.properties
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# --- Sunucu (.NET) ---
+# Unity'nin ürettiği .csproj/.sln dosyaları yukarıda yok sayılıyor.
+# Sunucunun kendi proje dosyaları ise repoda olmalı:
+!Sunucu/**/*.csproj
+!Sunucu/*.sln
+!Sunucu/*.slnx
+Sunucu/**/bin/
+Sunucu/**/obj/
+
+# --- İşletim sistemi ---
+.DS_Store
+Thumbs.db
+desktop.ini

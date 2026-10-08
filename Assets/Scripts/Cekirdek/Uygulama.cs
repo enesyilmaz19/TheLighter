@@ -15,7 +15,6 @@ namespace TheLighter.Istemci
     {
         const string TemaYolu = "TheLighter/Tema";
         const string StilYolu = "TheLighter/Stil";
-        const string PaketYolu = "Paketler";
         static readonly Vector2Int ReferansCozunurluk = new Vector2Int(1080, 1920);
 
         static Uygulama ornek;
@@ -139,16 +138,17 @@ namespace TheLighter.Istemci
         }
 
         /// <summary>
-        /// "Öneri çek" için soru paketleri. Paketler Enes'in (Assets/Icerik/), düz metin, her satır bir soru.
-        /// Çalışırken okunabilmeleri için bir Resources klasöründe "Paketler" altında olmaları bekleniyor:
-        /// Assets/Icerik/Resources/Paketler/*.txt (Enes'le konuşulacak). Paket yoksa öneri çek "havuz boş" der.
+        /// "Öneri çek" için soru paketleri: Enes'in Assets/Icerik/*.txt dosyaları, <see cref="PaketListesi"/> üzerinden.
+        /// Paket yoksa öneri çek "henüz soru paketi yok" der.
         /// </summary>
         static List<string> OneriSorulariniYukle()
         {
             var sorular = new List<string>();
-            foreach (var dosya in Resources.LoadAll<TextAsset>(PaketYolu))
-                sorular.AddRange(Paket.Ayristir(dosya.text));
-            if (sorular.Count == 0) Debug.LogWarning("[TheLighter] Soru paketi bulunamadı: Resources/" + PaketYolu + "/*.txt");
+            var liste = Resources.Load<PaketListesi>(PaketListesi.ResourcesYolu);
+            if (liste != null)
+                foreach (var paket in liste.Paketler)
+                    if (paket != null) sorular.AddRange(Paket.Ayristir(paket.text));
+            if (sorular.Count == 0) Debug.LogWarning("[TheLighter] Soru paketi yok. Menü → TheLighter → Soru paketlerini güncelle.");
             return sorular;
         }
 

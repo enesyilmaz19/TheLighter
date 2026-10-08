@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Kural testlerini Unity açmadan koşar:  dotnet test Sunucu/KuralTestleri
+    Dosyalar kopyalanmıyor. Unity'deki Kurallar ve Kurallar.Tests klasörleri aynen derleniyor.
+    LangVersion 9: Unity 6 daha yenisini derlemiyor, burada da yakalansın.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Assets\Kurallar\**\*.cs" />
+    <Compile Include="..\..\Assets\Kurallar.Tests\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- NUnit 3: Unity Test Framework de NUnit 3 kullanıyor, aynı API -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+
+</Project>

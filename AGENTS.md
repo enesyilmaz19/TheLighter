@@ -39,6 +39,7 @@ Gizli sorulu sosyal parti oyunu. A, B'ye gizlice soru sorar. B çakmağı cevab�
 - **Rastgelelik tohumla:** `System.Random(tohum)`. Aynı tohum = aynı oyun.
 - **Hata fırlatma.** Her komut `Sonuc` döner (`Tamam` ya da hata kodu).
 - Her kural değişikliğine test. Yeni testi yazınca **bir kere bilerek boz**, kırmızıya döndüğünü gör, sonra geri al.
+- **Testleri koşmak:** `dotnet test Sunucu/KuralTestleri` (Unity açmadan, birkaç saniye) ya da Unity → Window → General → Test Runner → EditMode. Kural koduna dokunan her değişiklikten sonra yeşil olmalı.
 
 ## İstemci (Unity tarafı)
 

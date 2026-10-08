@@ -54,6 +54,13 @@ Gizli sorulu sosyal parti oyunu. A, B'ye gizlice soru sorar. B çakmağı cevab�
 - Gizli görev metni sadece sahibinin görünümünde.
 - Kızgın Çakmak eşiği hiçbir görünümde yok.
 
+## Gizli bilgiler (repo herkese açık olabilir)
+
+- **Anahtar, şifre, API anahtarı, keystore, sunucu IP'si ya da bağlantı dizesi repoya asla girmez.** Koda gömülmez, örnek dosyaya da yazılmaz.
+- Yerel ayarlar git'in yok saydığı dosyalarda durur: `.env`, `*.local.json`, `appsettings.Development.json`, `*.keystore`.
+- Bir gizli bilgi yanlışlıkla commit'lendiyse **silmek yetmez**, geçmişte kalır. Dur, kullanıcına haber ver: o anahtar hemen iptal edilip yenisi alınmalı.
+- Commit'ten önce `git diff --staged`'e bak. Uzun rastgele dizeler ya da `key`, `secret`, `password` içeren satırlar varsa commit'leme, sor.
+
 ## İsimlendirme
 
 - Kod isimleri **Türkçe ama ASCII:** `SoruSor`, `GorunumAl`, `Oyuncu`. `ş ğ ı ö ü ç` sadece metinlerde ve yorumlarda.

@@ -53,6 +53,16 @@ crashlytics-build.properties
 Sunucu/**/bin/
 Sunucu/**/obj/
 
+# --- Gizli bilgiler: asla repoya girmez ---
+.env
+.env.*
+*.local.json
+appsettings.Development.json
+*.keystore
+*.jks
+*.pfx
+*.pem
+
 # --- İşletim sistemi ---
 .DS_Store
 Thumbs.db

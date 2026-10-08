@@ -1,0 +1,127 @@
+# Paket: Genel
+# Her satır bir soru. Boş satırlar ve # ile başlayanlar okunmaz.
+# Kurallar (IcerikTestleri kontrol ediyor):
+#   - Cevabı gruptan biri olmalı: soruda "kim / kime / kimi / kiminle / kimin" geçsin
+#   - En fazla 140 karakter, soru işaretiyle bitsin
+#   - Aynı soru iki kez olmasın
+#   - Dış görünüşle dalga geçen soru yok (zorbalığa döner)
+
+# --- Güven ve sır ---
+Grupta sırrını en son kime anlatırsın?
+Grupta sır tutamayacak kişi kim?
+Başın belaya girse ilk kimi ararsın?
+Grupta en kolay yalan söyleyen kim?
+Grupta kimin yalanını hemen anlarsın?
+Telefonunu kilidi açık halde kime bir saatliğine verirsin?
+Grupta kime borç para vermezsin?
+Grupta kim arkandan konuşur sence?
+Bir ceset saklaman gerekse yardıma kimi çağırırsın?
+Grupta kimin şifresini tahmin edebilirsin?
+
+# --- Yolculuk ve birlikte yaşamak ---
+Kiminle tatile gitmek istemezsin?
+Issız bir adaya kiminle düşmek isterdin?
+Kiminle ev arkadaşı olmak istemezsin?
+Uzun bir araba yolculuğunda kimin yanında oturmak istemezsin?
+Grupta kim hazırlanırken herkesi bekletir?
+Grupta kim her yere geç kalır?
+Kiminle bir hafta aynı odada kalabilirsin?
+Kiminle iş kurardın?
+Kiminle asla iş kurmazsın?
+Zombi kıyametinde grupta ilk kim ölür?
+
+# --- Gelecek tahmini ---
+Grupta kim ilk evlenir?
+Grupta kim en çok para kazanır?
+Grupta kim ünlü olur?
+Grupta kim 40 yaşında hâlâ annesiyle yaşar?
+Grupta kim yurt dışına taşınıp bir daha dönmez?
+Grupta kim ilk çocuk sahibi olur?
+Grupta kim bir gün karakolluk olur?
+Grupta kim en uzun yaşar?
+Grupta kim politikacı olur?
+On yıl sonra grupta kiminle hâlâ görüşürsün?
+
+# --- Karakter ---
+Grupta en inatçı kim?
+Grupta en çok kim alınır?
+Grupta en kötü şakaları kim yapar?
+Grupta kim en çok kendini över?
+Grupta en dağınık kim?
+Grupta kim en çok telefona bakar?
+Grupta kim tartışmada haksız olduğunu asla kabul etmez?
+Grupta kim en çok olay çıkarır?
+Grupta en cimri kim?
+Grupta en cömert kim?
+
+# --- Aşk ve ilişki ---
+Grupta kim en çabuk âşık olur?
+Grupta kimin sevgilisini kıskanırsın?
+Grupta kim eski sevgilisine hâlâ yazıyordur?
+Grupta kim ilk buluşmada en çok rezil olur?
+Grupta kimden ilişki tavsiyesi alırsın?
+Grupta kimden asla ilişki tavsiyesi almazsın?
+Grupta kim gizlice birinden hoşlanıyor?
+Grupta en romantik kim?
+Grupta kim sevgilisinden en çok azar yer?
+Kimin düğününde en çok eğlenirsin?
+
+# --- Rezillik ve cesaret ---
+Grupta kim korku filminde ilk çığlığı atar?
+Grupta kim bir iddia için her şeyi yapar?
+Grupta en kötü dansı kim eder?
+Grupta kim karaokede mikrofonu bırakmaz?
+Grupta kim en saçma şeylere para harcar?
+Grupta kim iddiada her şeyini kaybeder?
+Grupta kim yanlış kişiye mesaj atmıştır?
+Grupta kim kopya çekerken yakalanır?
+Grupta kim yemek yapmayı hiç bilmez?
+Grupta kim en çok yer?
+
+# --- Güvendiğin kişi ---
+Zor bir sınavda grupta kimin yanına oturmak isterdin?
+Grupta kim kriz anında en sakin kalır?
+Grupta en iyi sırrı kim saklar?
+Grupta kimin tavsiyesine en çok güvenirsin?
+Kaybolsan seni grupta kim bulur?
+Grupta kimin müzik zevki en kötü?
+Grupta kimin giyim tarzını hiç anlamıyorsun?
+Grupta en iyi pazarlığı kim yapar?
+Grupta kimin annesi seni en çok sever?
+Grupta seni en iyi kim tanıyor?
+
+# --- Hayali durumlar ---
+Bir günlüğüne kimin hayatını yaşamak isterdin?
+Bir soygun yapsan ekibe ilk kimi alırsın?
+Gruptan kimi uzaya gönderirdin?
+Bir yarışma programında grupta ilk kim elenir?
+Grupta kim bir gün tarikat kurar?
+Kiminle bir gün boyunca hiç konuşmadan durabilirsin?
+Bir film çekseniz kötü adamı kim oynar?
+Kimi bir hafta telefonsuz bırakmak isterdin?
+Grupta kim bilgi yarışmasında büyük ödülü kazanır?
+Grupta kim ünlü biriyle fotoğraf için her şeyi yapar?
+
+# --- Grubun içi ---
+Grupta kimi daha yakından tanımak isterdin?
+Grupta kiminle en son tartıştın?
+Grupta şu an kime biraz kızgınsın?
+Grupta kimden özür dilemen gerekiyor?
+Grupta kime teşekkür etmeyi unuttun?
+Grupta kimin bu gruba katılacağını hiç düşünmezdin?
+Grupta kimi ilk gördüğünde sevmemiştin?
+Grupta kim sana en çok benziyor?
+Grupta kiminle hiç baş başa kalmadın?
+Grupta kim seni kıskanıyor sence?
+
+# --- Telefon ve sosyal medya ---
+Grupta kimin telefon galerisini görmek isterdin?
+Grupta en çok story'yi kim atar?
+Grupta mesajlara en geç kim döner?
+Grupta kimin arama geçmişi en tuhaftır?
+Grupta kim gece 3'te mesaj atar?
+Grupta kim grup sohbetini sessize almıştır?
+Grupta en uzun sesli mesajı kim atar?
+Grupta kimin bildirimleri hiç susmaz?
+Grupta kim ünlülerin altına yorum yazar?
+Grupta kimin gizli bir hesabı vardır?

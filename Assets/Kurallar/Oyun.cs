@@ -447,7 +447,7 @@ namespace Cakmak.Kurallar
 
         OyuncuDurumu Bul(OyuncuId id) => oyuncular.Find(o => o.Id == id);
 
-        List<OyuncuId> Secilebilir(OyuncuId haric1, OyuncuId? haric2 = null)
+        List<OyuncuId> Secilebilir(OyuncuId? haric1 = null, OyuncuId? haric2 = null)
         {
             var liste = new List<OyuncuId>();
             foreach (var o in oyuncular)
@@ -457,9 +457,7 @@ namespace Cakmak.Kurallar
 
         OyuncuId RastgeleOyuncu(OyuncuId? haric1 = null, OyuncuId? haric2 = null)
         {
-            var adaylar = new List<OyuncuId>();
-            foreach (var o in oyuncular)
-                if (o.Id != haric1 && o.Id != haric2) adaylar.Add(o.Id);
+            var adaylar = Secilebilir(haric1, haric2);
             return adaylar[rastgele.Next(adaylar.Count)];
         }
 

@@ -21,6 +21,14 @@ Kapsam: tur akışı, seçim kuralları, mini oyunlar, süreler, Curcuna, görü
 - [x] Adım 7 — 1.000 rastgele oyun, aynı tohum = aynı oyun, 7 bilerek bozma (7'si de yakalandı)
 - [x] Adım 8 — Unity'de doğrulama (geçici 6000.6.4f1 projesinde EditMode testleri) + `.meta` dosyaları
 
+## S2 — G1 tarafı
+
+- [x] Genel paket taslağı: `Assets/Icerik/Genel.txt`, 100 soru, hepsi "kim" sorusu (branch `g1/genel-paket`)
+- [x] İçerik testi: `Icerik/` altındaki **her** paket otomatik kontrol ediliyor (≤140 karakter, `?` ile bitiyor, "kim" geçiyor, tekrar yok). 3 şekilde bozuldu, 3'ü de yakalandı
+- [ ] **Enes:** paketi düzenle (sil, değiştir, arkadaşların sorularını ekle). Sonra test + commit
+- [ ] Birleştirme: Arda'nın ekranları motora bağlanırken çıkan kural hataları
+- [ ] Playtest 1'i ayarla: ≥4 kişi, elden ele, 30 dk
+
 ## Sözleşmeye önerilen değişiklikler (oturumda onaylanacak)
 
 | # | Ana Plan 5.1'de | Kodda | Neden |

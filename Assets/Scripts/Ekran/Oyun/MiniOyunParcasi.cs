@@ -240,7 +240,7 @@ namespace TheLighter.Istemci
                 case MiniOyunTuru.TekCift:
                     return x.Sayi.ToString();
                 case MiniOyunTuru.Reaksiyon:
-                    return x.Sayi < Oyun.ReaksiyonEnAzMs ? Metin.Al("el.erken") : Metin.Al("el.ms", x.Sayi);
+                    return x.Erken ? Metin.Al("el.erken") : Metin.Al("el.ms", x.Sayi);
                 default:
                     return Metin.Al("mini.zar_atti");
             }

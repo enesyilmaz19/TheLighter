@@ -367,7 +367,7 @@ Mikrofon izni olduğu için Play Store gizlilik metni istiyor.
 | **Tek-Çift** | B "tek/çift" der, ikisi gizlice 1–5 seçer, toplam belirler | Adil | Sırayla |
 | **Zar** | Sunucu iki zar atar, büyük kazanır | Adil | Tek dokunuş |
 | **Sayı tahmini** *(sonra)* | Sunucu 1–100 arası sayı tutar, yakın tahmin kazanır | Adil | Sırayla |
-| **Reaksiyon** | "Yeşil olunca bas", erken basan kaybeder | Telefonlar arası dokunma gecikmesi farkı var | **Adil**, aynı cihaz |
+| **Reaksiyon** | "Yeşil olunca bas", erken basan kaybeder. **Süre dolsa da:** erken basan kaybeder, öbürü basmamış olsa bile *(2026-10-10, Arda'nın editör testinden)* | Telefonlar arası dokunma gecikmesi farkı var | **Adil**, aynı cihaz |
 | **Zamanlama çubuğu** *(sonra)* | Çubuğu ortada durdur. Herkes kendi ekranında, sonucu yollar | Ölçüm telefonda, gecikme etkilemez | Sırayla |
 
 **Kural:** Gizli seçim ve şans oyunları her yerde adil. Beceri oyunları sadece aynı cihazda adil. Online beceri oyununda süre telefonda ölçülür, sunucu sadece sonucu karşılaştırır.

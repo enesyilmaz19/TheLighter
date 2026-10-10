@@ -68,6 +68,37 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(g.SonMiniOyun.SureDoldu, Is.True);
         }
 
+        // Arda'nın editör testinde bulundu: süre dolma yolunda erken basış "hamle yaptı" sayılıp kazandırıyordu.
+        // Kural: kırmızıyken basan kaybeder, süre dolsa da.
+        [TestCase(-1, null, true)]   // B erken bastı, C basmadı → C kazanır
+        [TestCase(null, -1, false)]  // C erken bastı, B basmadı → B kazanır
+        [TestCase(50, null, true)]   // 80 ms altı da erken sayılır
+        [TestCase(250, null, false)] // B düzgün bastı, C basmadı → B kazanır
+        [TestCase(null, 250, true)]  // C düzgün bastı, B basmadı → C kazanır
+        public void Reaksiyonda_sure_dolunca_erken_basan_kaybeder(int? bMs, int? cMs, bool cKazanir)
+        {
+            var oyun = Yeni(ayarla: x => x.MiniOyun = MiniOyunTuru.Reaksiyon);
+            SorVeSec(oyun, "Soru?", out _, out var b, out var c);
+            if (bMs.HasValue) oyun.MiniOyunHamlesi(b, Hamle.Reaksiyon(bMs.Value));
+            if (cMs.HasValue) oyun.MiniOyunHamlesi(c, Hamle.Reaksiyon(cMs.Value));
+
+            Saniye(oyun, 10.1);
+            var g = Durum(oyun);
+            Assert.That(g.Asama, Is.EqualTo(cKazanir ? Asama.Ifsa : Asama.Gume));
+            Assert.That(g.SonMiniOyun.SureDoldu, Is.True);
+        }
+
+        [Test]
+        public void Reaksiyonda_ikisi_de_erken_basip_sure_dolarsa_berabere_kurali()
+        {
+            // İkisi de erken basarsa hamleler tamamlanır, süre dolmadan berabere olur (mevcut kural).
+            var oyun = Yeni(ayarla: x => x.MiniOyun = MiniOyunTuru.Reaksiyon);
+            SorVeSec(oyun, "Soru?", out _, out var b, out var c);
+            oyun.MiniOyunHamlesi(b, Hamle.Reaksiyon(-1));
+            oyun.MiniOyunHamlesi(c, Hamle.Reaksiyon(-1));
+            Assert.That(Durum(oyun).Beraberlik, Is.EqualTo(1));
+        }
+
         [Test]
         public void Kalan_sure_gorunumde_azalir()
         {

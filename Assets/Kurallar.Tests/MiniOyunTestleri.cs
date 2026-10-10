@@ -150,6 +150,16 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(Durum(oyun).Asama, Is.EqualTo(cKazanir ? Asama.Ifsa : Asama.Gume));
         }
 
+        [TestCase(-1, true)]
+        [TestCase(79, true)]
+        [TestCase(80, false)]
+        [TestCase(400, false)]
+        public void Hamle_Erken_esigi_kuralin_tek_tanimi(int ms, bool erken)
+        {
+            Assert.That(Hamle.Reaksiyon(ms).Erken, Is.EqualTo(erken));
+            Assert.That(Hamle.TasKagitMakas(TkmSecim.Tas).Erken, Is.False, "reaksiyon dışı hamle hiç erken değildir");
+        }
+
         [TestCase(-1, -1)]
         [TestCase(250, 250)]
         public void Reaksiyon_ikisi_de_erken_ya_da_esitse_berabere(int bMs, int cMs)

@@ -41,22 +41,39 @@ namespace Cakmak.Kurallar.Tests
             var robot = new Random(tohum * 7919);
             int kisi = 4 + robot.Next(7);
             var mod = (OyunModu)robot.Next(3);
+            bool s3 = robot.Next(2) == 0;
             var oyun = Yeni(kisi, tohum, x =>
             {
                 x.Mod = mod;
                 x.MiniOyun = MiniOyunlar[robot.Next(MiniOyunlar.Length)];
-                x.TurSayisi = 3 + robot.Next(6);
+                x.TurSayisi = s3 ? 6 + robot.Next(10) : 3 + robot.Next(6);
                 x.OneriSorulari = new[] { "Öneri A?", "Öneri B?" };
+                if (!s3) return;
+                // S3: cezalar, görevler, kaos turları rastgele açılır.
+                x.CezaSeviyesi = (CezaSeviyesi)robot.Next(mod == OyunModu.Temiz ? 2 : 3);
+                x.GizliGorevler = robot.Next(2) == 0;
+                x.KaosTurlari = robot.Next(3) != 0;
+                x.TekCihaz = robot.Next(2) == 0;
+                x.SesliCezalar = new[] { "Sesli ceza 1", "Sesli ceza 2" };
             });
 
             var kayit = new StringBuilder();
-            oyun.OlayOldu += o => kayit.Append(o.Tur).Append(o.A).Append(o.B).Append(o.C).Append(o.Kim).Append(o.Soru).Append(';');
+            oyun.OlayOldu += o => kayit.Append(o.Tur).Append(o.A).Append(o.B).Append(o.C).Append(o.Kim).Append(o.Soru)
+                .Append(o.Ceza?.Tur).Append(o.Ceza?.Metin).Append(o.Kaos).Append(';');
 
             string gizli = null;
             for (int adim = 0; adim < 5000; adim++)
             {
                 var g = Durum(oyun);
-                if (g.Asama == Asama.OyunSonu) return kayit.ToString();
+                if (g.Asama == Asama.OyunSonu)
+                {
+                    // Aynı tohum aynı özeti de vermeli: unvanlar, görevler, ifşalar.
+                    var ozet = oyun.Ozet();
+                    foreach (var u in ozet.Unvanlar) kayit.Append(u.Tur).Append(u.Kim).Append(u.Deger).Append(',');
+                    foreach (var gs in ozet.Gorevler) kayit.Append(gs.Kim).Append(gs.Gorev.Tur).Append(gs.Gorev.Hedef).Append(gs.Basarili).Append(',');
+                    foreach (var k in ozet.IfsaOlanlar) kayit.Append(k.Soru).Append(',');
+                    return kayit.ToString();
+                }
                 Degismezler(oyun, g, gizli, tohum);
 
                 int zar = robot.Next(10);
@@ -71,12 +88,13 @@ namespace Cakmak.Kurallar.Tests
                         break;
 
                     case Asama.SoruSorma:
-                        var a = g.A.Value;
+                        var a = TekrarYardim.GercekA(oyun);
                         var liste = oyun.GorunumAl(a).Secilebilir;
                         if (mod != OyunModu.Curcuna && robot.Next(4) == 0) oyun.OneriCek(a);
-                        gizli = robot.Next(5) == 0 ? null : "Gizli " + tohum + "-" + adim + "?";
-                        Assert.That(oyun.SoruSor(a, liste[robot.Next(liste.Count)], gizli), Is.EqualTo(Sonuc.Tamam));
-                        if (mod == OyunModu.Curcuna) gizli = oyun.GorunumAl(Durum(oyun).B.Value).Soru;
+                        var yazilan = robot.Next(5) == 0 ? null : "Gizli " + tohum + "-" + adim + "?";
+                        Assert.That(oyun.SoruSor(a, liste[robot.Next(liste.Count)], yazilan), Is.EqualTo(Sonuc.Tamam));
+                        // Atanan soru zorunlu olabilir (Curcuna, Kör Soru, havuzdan sor cezası): B'nin gördüğü esas.
+                        gizli = oyun.GorunumAl(Durum(oyun).B.Value).Soru;
                         break;
 
                     case Asama.CevapSecme:
@@ -88,6 +106,19 @@ namespace Cakmak.Kurallar.Tests
                     case Asama.MiniOyun:
                         var oynayan = robot.Next(2) == 0 ? g.B.Value : g.C.Value;
                         oyun.MiniOyunHamlesi(oynayan, RastgeleHamle(g.MiniOyun, robot));
+                        break;
+
+                    case Asama.Oylama:
+                        var oylayan = g.Oylayanlar[robot.Next(g.Oylayanlar.Count)];
+                        oyun.Oy(oylayan, robot.Next(2) == 0);
+                        break;
+
+                    case Asama.IkiyeKatla:
+                        if (robot.Next(2) == 0) oyun.IkiyeKatla(g.KararVeren.Value); else oyun.KarariGec(g.KararVeren.Value);
+                        break;
+
+                    case Asama.Bedel:
+                        if (robot.Next(2) == 0) oyun.BedelOde(g.KararVeren.Value); else oyun.KarariGec(g.KararVeren.Value);
                         break;
 
                     case Asama.Ifsa:
@@ -104,14 +135,25 @@ namespace Cakmak.Kurallar.Tests
         {
             string t = "tohum " + tohum + ", aşama " + g.Asama;
 
+            var gercekA = g.Asama == Asama.SoruToplama ? (OyuncuId?)null : TekrarYardim.GercekA(oyun);
             if (g.Asama == Asama.SoruSorma)
-                Assert.That(oyun.GorunumAl(g.A.Value).Secilebilir, Is.Not.Empty, t + ": A'nın seçeneği yok");
+                Assert.That(oyun.GorunumAl(gercekA.Value).Secilebilir, Is.Not.Empty, t + ": A'nın seçeneği yok");
+
+            // S3 gizliliği
+            if (g.Kaos == KaosKurali.SoranGizli)
+                foreach (var o in g.Oyuncular)
+                    if (o.Id != gercekA) Assert.That(oyun.GorunumAl(o.Id).A, Is.Null, t + ": Soran Gizli'de A göründü");
+            if (g.Kaos == KaosKurali.KorSoru && g.Asama == Asama.SoruSorma)
+                Assert.That(oyun.GorunumAl(gercekA.Value).AtananSoru, Is.Null, t + ": Kör Soru'da A soruyu gördü");
+            if (g.Kaos == KaosKurali.KorSoru && gizli != null && gercekA.HasValue && g.Asama != Asama.Ifsa)
+                Assert.That(oyun.GorunumAl(gercekA.Value).Soru, Is.Not.EqualTo(gizli), t + ": Kör Soru'da A soruyu gördü");
             if (g.Asama == Asama.CevapSecme)
                 Assert.That(oyun.GorunumAl(g.B.Value).Secilebilir, Is.Not.Empty, t + ": B'nin seçeneği yok");
 
-            if (g.Asama == Asama.CevapSecme || g.Asama == Asama.MiniOyun)
+            if (g.Asama == Asama.CevapSecme || g.Asama == Asama.MiniOyun || g.Asama == Asama.Oylama
+                || g.Asama == Asama.IkiyeKatla || g.Asama == Asama.Bedel)
             {
-                Assert.That(g.C == g.A || g.C == g.B, Is.False, t + ": C, A ya da B olamaz");
+                Assert.That(g.C == g.B || (g.Kaos != KaosKurali.SoranGizli && g.C == gercekA), Is.False, t + ": C, A ya da B olamaz");
                 foreach (var o in g.Oyuncular)
                     if (o.Id != g.B && gizli != null)
                         Assert.That(oyun.GorunumAl(o.Id).Soru, Is.Null, t + ": soru B dışına sızdı");
@@ -130,11 +172,15 @@ namespace Cakmak.Kurallar.Tests
         {
             var kim = g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id;
             var hedef = g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id;
-            switch (robot.Next(4))
+            switch (robot.Next(8))
             {
                 case 0: oyun.SoruSor(kim, hedef, "?"); break;
                 case 1: oyun.CevapSec(kim, hedef); break;
                 case 2: oyun.MiniOyunHamlesi(kim, Hamle.ZarAt()); break;
+                case 3: oyun.Oy(kim, robot.Next(2) == 0); break;
+                case 4: oyun.IkiyeKatla(kim); break;
+                case 5: oyun.BedelOde(kim); break;
+                case 6: oyun.KarariGec(kim); break;
                 default: oyun.HavuzaSoruEkle(kim, ""); break;
             }
         }

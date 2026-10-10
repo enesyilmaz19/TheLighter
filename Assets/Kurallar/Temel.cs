@@ -49,8 +49,11 @@ namespace Cakmak.Kurallar
         SoruSorma,     // A, B'yi seçer ve soruyu gönderir
         CevapSecme,    // B, C'yi seçer
         MiniOyun,      // B ile C oynar
-        Ifsa,          // C kazandı, soru herkese açık
-        Gume,          // B kazandı, soru gizli kaldı
+        Oylama,        // kaos Grup Kararı: mini oyun yerine A ve B dışındakiler oylar
+        IkiyeKatla,    // kaos İkiye Katla: kaybeden "bir el daha" der mi (5 sn)
+        Bedel,         // soru ifşa olmak üzere: B bedel öder mi (5 sn)
+        Ifsa,          // soru herkese açık
+        Gume,          // soru gizli kaldı
         OyunSonu,
     }
 
@@ -103,5 +106,17 @@ namespace Cakmak.Kurallar
         public int SonucSuresiSn = 6;
         /// <summary>Seçilen paketlerin soruları (<see cref="Paket.Ayristir"/> ile). Öneri çek ve Curcuna boşlukları buradan.</summary>
         public IReadOnlyList<string> OneriSorulari = Array.Empty<string>();
+
+        // --- S3: tekrar oynatma (Ana Plan 8). Varsayılan hepsi kapalı; "Hızlı başla" istemcide açar.
+
+        /// <summary>Temiz modda en fazla Hafif.</summary>
+        public CezaSeviyesi CezaSeviyesi = CezaSeviyesi.Kapali;
+        public bool GizliGorevler;
+        public bool KaosTurlari;
+        /// <summary>🗣️ sesli ceza metinleri (Assets/Icerik/Cezalar.csv, <see cref="Paket.Ayristir"/> ile). Sadece Cesur'da çekilir.</summary>
+        public IReadOnlyList<string> SesliCezalar = Array.Empty<string>();
+        public int KararSuresiSn = 5;
+        /// <summary>Elden ele (tek cihaz). Açıkken kaos turlarında "Soran Gizli" çıkmaz: herkes telefonu kimin tuttuğunu görüyor.</summary>
+        public bool TekCihaz;
     }
 }

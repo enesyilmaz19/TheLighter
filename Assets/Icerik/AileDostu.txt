@@ -1,0 +1,75 @@
+# Paket: Aile Dostu
+# Her satır bir soru. Boş satırlar ve # ile başlayanlar okunmaz.
+# Anne baba, 13 yaş üstü kuzenler ve öğretmenlerle oynanabilir: aşk, eski sevgili, parti, alkol yok.
+
+# --- Günlük hâller ---
+Grupta sabah alarmını en çok kim erteler?
+Grupta kim her şeyi son dakikaya bırakır?
+Grupta anahtarını en çok kim kaybeder?
+Grupta kim telefon elindeyken telefonunu arar?
+Grupta kim telefonunu hep yüzde 1 şarjla gezdirir?
+Grupta kim bir diziyi tek gecede bitirir?
+Grupta kim aynı şarkıyı bir hafta boyunca dinler?
+Grupta kim kedi videolarını herkese tek tek atar?
+Kahvaltı sofrasından en son kim kalkar?
+Grupta kim menüye bakarken en çok kararsız kalır?
+
+# --- Evde ---
+Bulaşık sırası gelince grupta kim ortadan kaybolur?
+Misafir gelince grupta kim hemen odasına kaçar?
+Grupta kim kumandayı eline alınca bir daha bırakmaz?
+Grupta kim bir şeyi kaybedince bütün evi ayağa kaldırır?
+Grupta kim bir saksı çiçeğini bir haftada kurutur?
+Grupta kim yemeğin tadına bakmadan tuz ekler?
+Grupta kim maç izlerken televizyona bağırır?
+Kalabalık sofralarda herkesi en çok kim güldürür?
+
+# --- Yetenekler ---
+Grupta en güzel şarkıyı kim söyler?
+Bozulan bir şeyi grupta kim tamir eder?
+Bir sofra kurulacak olsa mutfağı grupta kime bırakırsın?
+Grupta en iyi taklidi kim yapar?
+Grupta fıkrayı en iyi kim anlatır?
+Grupta resmi en güzel kim çizer?
+Telefonun bozulsa grupta kime götürürsün?
+Grupta kim doğum günlerini hiç unutmaz?
+Grupta çayı en güzel kim demler?
+Grupta kim tavlada kimseye yenilmez?
+Grupta en güzel hediyeyi kim seçer?
+
+# --- Komik anlar ---
+Grupta kim "çekiniz" yazan kapıyı iter?
+Grupta kim sokakta yabancı birini tanıdık sanıp el sallar?
+Grupta kim en olmadık anda gülme krizine girer?
+Grupta kim kendi esprisine herkesten önce güler?
+Grupta kim uykusunda konuşur sence?
+Grupta kim filmlerde en çabuk ağlar?
+Grupta kim film izlerken her sahneye yorum yapar?
+Grupta kim bir şey anlatırken sonunu unutur?
+Grupta kim oyunda yenilince hemen "bir el daha" der?
+Grupta en çok "ben demiştim" diyen kim?
+Grupta kim örümcek görünce odayı terk eder?
+Lunaparkta en korkunç alete grupta ilk kim biner?
+
+# --- Hayal et ---
+Hep beraber bir sihir okuluna gitseniz ilk gün bir şeyi kim patlatır?
+Grupta kim süper gücü olsa onu en saçma şeye harcar?
+Hayvanlarla konuşmak mümkün olsa grupta kim en çok sohbet ederdi?
+Zamanda yolculuk yapsanız grupta kim geçmişte kalmak ister?
+Uzaylılar gelse onlarla konuşmaya grupta kim gider?
+Grupta kim bir gün kendi kitabını yazar?
+Grupta kim bir gün işe yarar bir şey icat eder?
+Grupta kim en saçma dalda dünya rekoru kırar?
+Grupta kim bir yetenek yarışmasında finale kalır?
+Grupta kim çok sevilen bir öğretmen olurdu?
+Grupta kimin hayatı çizgi film olsa en çok izlenirdi?
+
+# --- Biz bize ---
+Grupta seni en çok kim güldürür?
+Canın sıkılınca grupta kimin yanında olmak istersin?
+Grupta kimin yeteneği sende de olsun isterdin?
+Grupta kimin enerjisi hiç bitmez?
+Grupta en sabırlı kim?
+Grupta kim girdiği her ortamı neşelendirir?
+Grupta kim seni en iyi dinler?
+Grupta kimin kahkahası en bulaşıcı?

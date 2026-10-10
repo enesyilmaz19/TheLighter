@@ -51,6 +51,34 @@ namespace Cakmak.Kurallar
         /// <summary>Ifsa aşamasında herkese açık soru. Fısıltıysa boş, A sesli söyler.</summary>
         public string IfsaSoru;
         public bool IfsaFisilti;
+
+        // --- S3: tekrar oynatma ---
+
+        /// <summary>Bu turun kaos kuralı (yoksa Yok). Tur başında duyurulur.</summary>
+        public KaosKurali Kaos;
+        /// <summary>Kızgın Çakmak açıksa çakmağın ısısı, kapalıysa null. Eşik hiçbir görünümde yok.</summary>
+        public IsiSeviyesi? Isi;
+        /// <summary>Sadece sana: gizli görevin. Görevler kapalıysa null.</summary>
+        public Gorev Gorevin;
+        /// <summary>IkiyeKatla ve Bedel aşamasında karar verecek kişi.</summary>
+        public OyuncuId? KararVeren;
+        /// <summary>Oylama aşamasında: sen oy verdin mi (sadece oy verebilenler için anlamlı).</summary>
+        public bool OyVerdin;
+        /// <summary>Oylama aşamasında oy verebilecekler (A ve B hariç herkes).</summary>
+        public IReadOnlyList<OyuncuId> Oylayanlar = Array.Empty<OyuncuId>();
+        public int OyKullanan;
+        /// <summary>Ifsa/Gume aşamasında, Grup Kararı oylamasının sonucu. Oylama olmadıysa null.</summary>
+        public OylamaSonucu SonOylama;
+        /// <summary>Gume aşamasında: soru bedelle gizli kaldı.</summary>
+        public bool BedelOdendi;
+        /// <summary>Bu turda çekilen cezalar (yanma, kaybetme, bedel). Tur başında boşalır.</summary>
+        public IReadOnlyList<CezaCekimi> TurCezalari = Array.Empty<CezaCekimi>();
+    }
+
+    public sealed class OylamaSonucu
+    {
+        public int Ifsa;
+        public int Gume;
     }
 
     /// <summary>Herkesin görebildiği oyuncu bilgisi ve oyun sonu sayaçları.</summary>
@@ -66,6 +94,16 @@ namespace Cakmak.Kurallar
         public int IfsaEttirme;     // C olarak kazandı
         public int Saklama;         // B olarak kazandı, soru güme gitti
         public int MiniOyunKazanma;
+
+        // --- S3 ---
+        public int OynadigiMiniOyun;
+        public int CezaCekme;
+        public int Yanma;           // Kızgın Çakmak
+        public int BedelOdeme;
+        public int BedelHakki;      // kalan
+        public int KaosKazanma;     // kaos turunda kazandığı mini oyun
+        /// <summary>Üstündeki ⚙️ kısıtlamalar (🤡, havuzdan sor...). Herkese açık.</summary>
+        public IReadOnlyList<Ceza> Kisitlamalar = Array.Empty<Ceza>();
     }
 
     public sealed class MiniOyunSonucu
@@ -79,6 +117,8 @@ namespace Cakmak.Kurallar
         public bool ZarlaKarar;
         public bool SureDoldu;
         public bool CKazandi;
+        /// <summary>İkiye Katla kabul edildi, bu ikinci el.</summary>
+        public bool Katlandi;
 
         internal MiniOyunSonucu Kopya() => (MiniOyunSonucu)MemberwiseClone();
     }
@@ -93,6 +133,12 @@ namespace Cakmak.Kurallar
         Gume,           // metin yok
         SureDoldu,      // Kim: süresi dolan. Ardından TurBasladi gelir
         OyunBitti,
+        KaosBasladi,    // Kaos: bu turun kuralı
+        Yandi,          // Kim: Kızgın Çakmak'ta yanan (ardından CezaCekildi gelir)
+        CezaCekildi,    // Kim + Ceza
+        IkiyeKatlandi,  // Kim: bir el daha isteyen
+        BedelOdendi,    // Kim: bedel ödeyen B
+        OyVerildi,      // Kim: oy veren. Oyun ne olduğu gizli
     }
 
     public sealed class Olay
@@ -104,5 +150,7 @@ namespace Cakmak.Kurallar
         public OyuncuId? Kim;
         /// <summary>Sadece Ifsa olayında. Fısıltıysa boş.</summary>
         public string Soru;
+        public Ceza Ceza;
+        public KaosKurali Kaos;
     }
 }

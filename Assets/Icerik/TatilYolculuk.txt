@@ -1,0 +1,68 @@
+# Paket: Tatil & Yolculuk
+# Her satır bir soru. Boş satırlar ve # ile başlayanlar okunmaz.
+
+# --- Hazırlık ---
+Grupta kim bavulunu yola çıkmadan bir saat önce hazırlar?
+Grupta kim üç günlük tatile koca bir valizle gelir?
+Grupta kim yola çıkınca "ocağı kapattım mı?" diye panik yapar?
+Grupta kim tatil planını dakika dakika yapar?
+Grupta kim tatile son anda "ben de geliyorum" der?
+Grupta kim havalimanına kimliğini unutup gelir?
+Grupta kim valizine en gereksiz şeyleri koyar?
+Bir gezi planlanacaksa grupta kim başa geçer?
+
+# --- Yolda ---
+Arabada müziği grupta kim kimseye bırakmaz?
+Grupta kim arabaya biner binmez uyur?
+Grupta kim beş dakikada bir "daha ne kadar var?" diye sorar?
+Grupta kim navigasyonu dinlemeyip herkesi yanlış yola sokar?
+Grupta kim yolculuğa bir çanta dolusu atıştırmalıkla gelir?
+Grupta kim her molada mutlaka tost ayran ister?
+Uzun yolda direksiyonu grupta kime emanet edersin?
+Grupta kim otobüste yanındakiyle hemen arkadaş olur?
+
+# --- Havalimanı ve uçak ---
+Grupta kim uçağa son anda koşarak yetişir?
+Grupta kim havalimanına üç saat önceden gider?
+Grupta kim havalimanında güvenlikten geçerken hep öter?
+Grupta kim uçakta cam kenarını kimseye vermez?
+Grupta kim uçak inince ilk alkışı başlatır?
+
+# --- Otel ---
+Grupta kim otel kahvaltısını hep kaçırır?
+Grupta kim otelden minik şampuanları toplayıp eve getirir?
+Grupta kim otelde resepsiyona her şeyi şikâyet eder?
+Grupta kim otelde animasyon ekibiyle sahneye çıkar?
+Grupta kim otel havuzundan hiç çıkmaz?
+
+# --- Deniz ve plaj ---
+Grupta kim denize girmeden önce yarım saat kıyıda bekler?
+Grupta kim güneş kremini hep unutur?
+Grupta kim plajda en güzel kumdan kaleyi yapar?
+Grupta kim şezlong kapmak için sabahın köründe havlu bırakır?
+Grupta kim denizde herkese su sıçratır?
+Tatilde paraşüte grupta ilk kim biner?
+
+# --- Kamp ---
+Kampta çadırı grupta kim tek başına kurar?
+Kamp ateşi başında en korkunç hikâyeyi kim anlatır?
+Kampta gece bir ses duyunca herkesi kim uyandırır?
+Kampta yemeği grupta kim yakar?
+Grupta kim kampta telefon çekmiyor diye dertlenir?
+
+# --- Gezip görmek ---
+Grupta kim gittiği her yerde yerel yemekleri dener?
+Grupta kim tatilde bile köfte patates arar?
+Grupta kim yurt dışında derdini el kol hareketleriyle anlatır?
+Grupta kim müzede her tabelayı tek tek okur?
+Grupta kim hediyelik eşya dükkânından eli boş çıkmaz?
+Grupta kim her tatil dönüşü herkese magnet getirir?
+Grupta kim tatilde öğlene kadar uyur?
+Grupta kim tatilde herkesle kanka olup döner?
+Grupta kim bir gün sırt çantasıyla dünyayı dolaşır?
+Kiminle bir yaz boyunca karavanla gezerdin?
+
+# --- Dönüş ---
+Grupta kim tatilin son günü "dönmüyorum" diye tutturur?
+Grupta kim tatil dönüşü bir hafta boyunca tatili anlatır?
+Grupta kim tatilden döner dönmez yeni tatil planlar?

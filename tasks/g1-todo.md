@@ -66,6 +66,57 @@ Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hi�
 - [ ] Play formları: gizlilik politikası linki · Veri Güvenliği formu · içerik derecelendirme anketi (kullanıcı içeriği: evet). 13+ olduğu için Families programına girmiyor
 - [ ] KVKK aydınlatma metni (VERBİS'ten muaf olsa da zorunlu). Toplanan veri az: isim, IP, rapor gelirse son 50 mesaj. Kesin hüküm için bir hukukçuya danışılmalı
 
+## S3 — Tekrar oynatma (kurallar G1'de bitti, 2026-10-10)
+
+Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
+
+- [x] Cezalar: seviye (Kapalı/Hafif/Cesur), kaybeden çeker, 4 ⚙️ kısıtlama (🤡 2 tur, havuzdan sor, beraberlik rakibin, sorun ifşa) + 🗣️ sesli kartlar
+- [x] Bedel (kişi başı 2), Kızgın Çakmak (gizli eşik 8–15 devir)
+- [x] Kaos turları (her 5 turda bir, 8 kural), Grup Kararı oylaması, İkiye Katla
+- [x] Gizli görevler (8 tür, herkese aynı zorluk), unvanlar (15 tür, en uç 3), oyun özeti, grup kaydı
+- [x] İçerik: Aile Dostu 60, Okul 50, Tatil & Yolculuk 50 soru + 25 sesli ceza (alt ajan yazdı, testler geçti; **Enes düzenleyecek**)
+- [x] Testler: 154 kural (62'si yeni) + 1.000 rastgele oyunun yarısı S3 açık. 22 S3 kuralı bilerek bozuldu, 22'si de yakalandı. Unity'de 173/173 (Arda'nın 19'u dahil)
+- [x] **Bağımsız inceleme (alt ajan):** soru metni sızıntısı yok (600 oyun, 49.000 adım), determinizm temiz. Bulunan 5 hata + 2 risk düzeltildi, her biri önce kırmızı testle gösterildi:
+  - Kızgın Çakmak eşiği ısı değişiminden kesin hesaplanıyordu → göstergeye her devirde ±1 gizli gürültü
+  - Curcuna'da güme giden soru grup paketine giriyordu → güme olunca listeden de siliniyor
+  - Soran Gizli'de A 5 yoldan anlaşılıyordu (önceki C, sayaç, harcanan kart, süre olayı, özet) → A rastgele, sayaç ve kart tur sonuna erteleniyor
+  - Özet oyun ortasında herkesin görevini veriyordu → oyun bitmeden gizli kısımlar boş
+  - Ters Dünya + Bedel'de asıl kaybeden cezadan kaçıyordu · "beraberlik rakibin" kartı Zar/Tek-Çift'te hiç kalkmıyordu · İkiye Katla iki el sayıyordu · AFK oylayıcılar C'yi cezalandırabiliyordu
+- [ ] Online (sunucu + protokol) S3 alanları: `ayarlar`'a ceza/görev/kaos, `durum`'a yeni alanlar, `oy`/`ikiyeKatla`/`bedelOde`/`karariGec` komutları
+- [ ] "≥20 görev" ve "30 unvan" hedefi: şimdilik 8 görev türü (hedef/adet ile çeşitleniyor) ve 15 unvan
+
+### S3 sözleşme eklemeleri (Arda'nın ekranları için)
+
+| Ne | Kodda |
+|---|---|
+| Ayarlar | `CezaSeviyesi` (varsayılan Kapali), `GizliGorevler`, `KaosTurlari` (varsayılan kapalı; "Hızlı başla" açar), `SesliCezalar` (`Assets/Icerik/Cezalar.csv` → `Paket.Ayristir`), `KararSuresiSn` (5), **`TekCihaz` (elden elede true yapın)** |
+| Yeni aşamalar | `Oylama` (Grup Kararı), `IkiyeKatla` (kaybeden karar verir, 5 sn), `Bedel` (B karar verir, 5 sn). Sıra: mini oyun → İkiye Katla? → Bedel? → Ifsa/Gume |
+| Yeni komutlar | `Oy(kim, ifsa)`, `IkiyeKatla(kim)`, `BedelOde(kim)`, `KarariGec(kim)` ("hayır"), `Ozet()`, `GrupKaydi.Isle(eski, ozet)` |
+| Görünüm | `Kaos`, `Isi` (Cesur'da; Soğuk/Ilık/Sıcak/Kızgın), `Gorevin` (sadece sahibine), `KararVeren`, `Oylayanlar`/`OyVerdin`/`OyKullanan`, `SonOylama`, `BedelOdendi`, `TurCezalari` |
+| Oyuncu durumu | `BedelHakki`, `Kisitlamalar` (herkese açık: 🤡 vb.), `CezaCekme`, `Yanma`, `BedelOdeme`, `KaosKazanma`, `OynadigiMiniOyun` |
+| Olaylar | `KaosBasladi`, `Yandi`, `CezaCekildi`, `IkiyeKatlandi`, `BedelOdendi`, `OyVerildi` |
+| Metinler (G2) | Görev, unvan, kısıtlama ve kaos metinleri koda gömülü değil: türü + hedef + adet geliyor, metin `Metinler.csv`'de (G2). Sesli ceza metni kartla birlikte geliyor |
+
+### S3 kararları (Ana Plan'da açık kalan, oturumda onaylanacak)
+
+| # | Karar | Neden |
+|---|---|---|
+| 1 | Bedel'in 2 kartı kaybedenin normal kartının **yerine** geçer | Plan "B iki ceza çeker" diyor, üstüne mi yerine mi yazmıyor |
+| 2 | Hafif'te Bedel 2 ⚙️ kart (sesli kart Cesur'da) | Hafif'te sesli kart yok, plan Bedel'i Hafif'e de koyuyor |
+| 3 | Unvan **tekrar edebilir**, grup hafızası seriyi tutar ("üst üste 3. kez Mıknatıs") | Plan 8.5 ile 8.6 çelişiyordu |
+| 4 | Eşitlikte unvan verilmez | Tek sahibi olmalı |
+| 5 | Oylamada eşitlik ya da hiç oy → güme | Süre dolma kuralı gibi B'nin lehine |
+| 6 | Kızgın: ilk 3 devir hep soğuk; ≤2 kaldı kızgın, ≤5 sıcak, yoksa ılık | Yanmadan önce hep "kızgın" görünsün, ama kaçıncı devirde yakacağı belli olmasın |
+| 7 | Yanan: 2 kart (büyük ceza) | Plan "büyük ceza" diyor |
+| 8 | Soran Gizli'de B, A'yı da seçebilir | A listeden çıkarsa kim olduğu anlaşılır |
+| 9 | Ters Dünya'da mini oyunu kaybeden yine ceza çeker (soru ifşa olsa da) | Ceza mini oyuna bağlı, sonuca değil |
+| 10 | "Sorun ifşa" cezasında bedel fırsatı yok | Ceza zaten "ifşa olur" diyor |
+| 11 | Görev "B olduğun hiçbir soru ifşa olmasın": en az bir kez B olmak şart | Yoksa hiç oynamayan kazanır |
+| 12 | Ceza Turu kaosu seviye Kapalı'yken: Temiz modda Hafif, değilse Cesur kartlar | Plan "Temiz modda Hafif" diyor, dışarıda tam ceza |
+| 13 | Oylamada çoğunluk yoksa (eşitlik ya da hiç oy) kimse ceza çekmez | AFK oylayıcılar birini cezalandıramasın |
+| 14 | Aynı isim (büyük/küçük harf fark etmez) iki kez kurulamaz | Grup kaydı kişileri isimle eşliyor |
+| 15 | Unvan serisi kişinin oynadığı oyunlar üzerinden: bir oyunu kaçıran seriyi kaybetmez | "Üst üste" o kişinin oyunları için |
+
 ## Sözleşmeye önerilen değişiklikler (oturumda onaylanacak)
 
 | # | Ana Plan 5.1'de | Kodda | Neden |

@@ -1,0 +1,66 @@
+# Paket: Okul
+# Her satır bir soru. Boş satırlar ve # ile başlayanlar okunmaz.
+
+# --- Ders ve sınav ---
+Grupta kim "hiç çalışmadım" deyip en yüksek notu alır?
+Grupta kim sınava bir gece önce çalışmaya başlar?
+Grupta kim derste en çok uyuklar?
+Hoca soru sorunca grupta kim hemen başını önüne eğer?
+Grupta dersi kaynatmanın ustası kim?
+Grupta kim sınav kâğıdını ilk verip çıkar?
+Grupta kim sınav biter bitmez herkesle cevap karşılaştırır?
+Grupta kimin ders notlarını fotokopi çektirmek isterdin?
+Grupta kim ders notlarını rengârenk kalemlerle tutar?
+Grupta kim derste gizlice dizi izler?
+Grupta kim derse hep kalemsiz gelir?
+Grupta kim tahtaya kalkınca heyecandan her şeyi unutur?
+Grupta kim sınav haftasında birden temizlik yapmaya başlar?
+Grupta kim zil çalmadan çantasını toplar?
+Grupta kim hangi dersin olduğunu hep son anda öğrenir?
+
+# --- Hocalar ---
+Grupta hocaların gözdesi kim?
+Grupta hocaya en çok mail atan kim?
+Grupta hocaları en iyi kim taklit eder?
+Grupta kim not için hocaya en güzel dil döker?
+Grupta kim hocayla tartışmaya girmekten hiç çekinmez?
+
+# --- Ödev ve proje ---
+Grup ödevinde hiçbir şey yapmadan adını yazdıran kim?
+Grup ödevinde bütün yükü kim sırtlanır?
+Grupta kim ödevi teslimden bir dakika önce yükler?
+Grupta kim ödevini yapıp herkese atar?
+Grupta kim sunumda slaytı kelimesi kelimesine okur?
+Grupta kim sunumdan önce en çok heyecanlanır?
+Grupta kiminle asla grup ödevi yapmazsın?
+
+# --- Kantin ve yemekhane ---
+Grupta kantinden hiç çıkmayan kim?
+Grupta yemekhane yemeğine en çok kim söylenir?
+Yemekhane sırasında araya kaynak yapan kim?
+Grupta kim teneffüste herkesin yiyeceğinden bir ısırık ister?
+
+# --- Okul hâlleri ---
+Grupta kim müdürün odasının yolunu en iyi bilir?
+Grupta kim okulu en çok asmıştır?
+Grupta kim beden dersinden kaçmak için bahane uydurur?
+Grupta kim sınıf başkanı olmak için kampanya yapar?
+Grupta kim nöbetçi olduğu gün hep kaytarır?
+Grupta kim kampüste herkesi tanır?
+Grupta kim her kulübe üye olur?
+Grupta kim yanlış sınıfa girip derse oturmuştur?
+
+# --- Gezi ve yurt ---
+Okul gezisinde otobüsün arka koltuğunu kim kapar?
+Okul gezisinde otobüste şarkıyı kim başlatır?
+Okul gezisinde müzede en çok kim sıkılır?
+Yurtta gece herkesi uyandıran kim olur?
+Yurtta herkesin şarj aletini ödünç alan kim?
+Grupta kim çamaşırı makineye atıp günlerce unutur?
+Grupta kim kütüphaneye ders çalışmaya gidip uyur?
+Grupta kim kütüphanedeki sessizliği ilk bozar?
+
+# --- Mezuniyet ---
+Grupta kim mezuniyet töreninde en çok ağlar?
+Okul yıllığında grupta kim "en çok konuşan" seçilir?
+Grupta kim yıllar sonra sınıf buluşmasını organize eder?

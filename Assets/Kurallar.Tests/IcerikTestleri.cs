@@ -30,6 +30,21 @@ namespace Cakmak.Kurallar.Tests
         }
 
         [Test]
+        public void Sesli_cezalar_kurallara_uyuyor()
+        {
+            // .csv: Arda'nın paket tarayıcısı ve sunucu sadece .txt'leri soru paketi sayıyor.
+            var cezalar = Paket.Ayristir(File.ReadAllText(Path.Combine(IcerikKlasoru(), "Cezalar.csv")));
+            Assert.That(cezalar.Count, Is.GreaterThanOrEqualTo(20));
+            var gorulen = new HashSet<string>();
+            foreach (var ceza in cezalar)
+            {
+                Assert.That(ceza.Length, Is.LessThanOrEqualTo(120), "çok uzun: " + ceza);
+                Assert.That(ceza, Does.Not.EndWith("?"), "ceza soru değil, görev: " + ceza);
+                Assert.That(gorulen.Add(ceza.ToLowerInvariant()), Is.True, "iki kez var: " + ceza);
+            }
+        }
+
+        [Test]
         public void Her_soru_kurallara_uyuyor()
         {
             foreach (var dosya in Paketler())

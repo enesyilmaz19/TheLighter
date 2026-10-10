@@ -91,8 +91,8 @@ namespace Cakmak.Kurallar
         public int Gosterilme;      // C oldu
         public int SoruAlma;        // B oldu
         public int SoruSorma;       // A oldu ve sordu
-        public int IfsaEttirme;     // C olarak kazandı
-        public int Saklama;         // B olarak kazandı, soru güme gitti
+        public int IfsaEttirme;     // C olduğu turda soru ifşa oldu (mini oyun, Ters Dünya, oylama ya da ceza yoluyla)
+        public int Saklama;         // B olduğu turda soru güme gitti (bedel dahil)
         public int MiniOyunKazanma;
 
         // --- S3 ---

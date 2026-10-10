@@ -5,7 +5,7 @@ Kaynak: `docs/Ana Plan.md` · Branch: `g1/kural-motoru`
 ## 📥 ENES'İN MASASI
 
 - [x] ~~İmza temizliği~~ → **vazgeçildi (2026-10-10).** Contributors listesi zaten temiz (sadece enesyilmaz19 ve ardatelli0). İmza sadece ilk 2 commit'in sayfasında görünüyor. Geçmiş yeniden yazılmayacak.
-- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" listesini birlikte onaylayın. Onaylananlar `docs/Ana Plan.md` 5.1'e işlenir.
+- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" listesini (9 madde) birlikte onaylayın. Onaylananlar `docs/Ana Plan.md` 5.1'e işlenir.
 - [ ] **Kural motorunu gözden geçir, sonra commit + push + PR** (`g1/kural-motoru` → `main`).
 
 ## S1 — Kural motoru (çekirdek döngü)
@@ -78,6 +78,7 @@ Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hi�
 | 6 | — | `Kur` olay yaymaz | Abone olmadan önce oluyor. İlk durum `GorunumAl` ile okunur |
 | 7 | — | `Karisik` = TKM / Tek-Çift / Zar | Reaksiyon online'da adil değil, sadece elle seçilir (elden ele) |
 | 8 | Süre dolunca "rastgele birine" | A'nın süresi dolarsa A hariç · B'nin süresi dolarsa A ve B hariç | Süresi dolan hemen tekrar seçilmesin |
+| 9 | — | `Hamle.Erken` (bool): Reaksiyonda erken basış | Kuralın tek tanımı. İstemci "Erken bastın" yazısı için eşiği kendisi karşılaştırmasın (2026-10-10, istemci de buna geçirildi) |
 
 **Henüz yok (plana göre sonra):** `BedelOde`, `Oy`, `Ozet`, `GrupKaydi.Isle` (S3) · `OyuncuKoptu/Dondu/Cikti` (S5).
 

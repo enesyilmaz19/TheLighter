@@ -119,7 +119,7 @@ mini.reaksiyon_erken,Erken bastın!
 el.erken,erken bastı
 el.ms,{0} ms
 el.zarla_karar,"3. beraberlik, zarla karar: {0} {1}   ·   {2} {3}"
-son.tur,{0} tur oynandı.
+son.tur,{0}. turda bitti.
 son.sayaclar,Kim ne yaptı?
 son.sayac,{0}: {1} kez gösterildi · {2} ifşa · {3} saklama
 hata.Tamam,

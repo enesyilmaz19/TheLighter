@@ -56,15 +56,15 @@ namespace TheLighter.Istemci
 
         /// <summary>
         /// Erken basış -1 ms olarak gider, kural motoru erken sayar.
-        /// <paramref name="erken"/>: ekrandaki yazı için. Eşik kural motorunun kendi sabiti
-        /// (<see cref="Oyun.ReaksiyonEnAzMs"/>); yeşilden hemen sonra (eşikten hızlı) basan da
-        /// sonuçta "erken bastı" sayıldığı için ekran da öyle söyler.
+        /// <paramref name="erken"/>: ekrandaki yazı için. Kuralın tek tanımı <see cref="Hamle.Erken"/>;
+        /// yeşilden hemen sonra (eşikten hızlı) basan da sonuçta "erken bastı" sayıldığı için ekran da öyle söyler.
         /// </summary>
         Sonuc Bas(OyuncuId kim, out bool erken)
         {
             int ms = Yesil ? (int)(saat.ElapsedMilliseconds - yesilAni) : -1;
-            erken = ms < Oyun.ReaksiyonEnAzMs;
-            return akis.Hamle(kim, Hamle.Reaksiyon(ms));
+            var hamle = Hamle.Reaksiyon(ms);
+            erken = hamle.Erken;
+            return akis.Hamle(kim, hamle);
         }
 
         sealed class Yari

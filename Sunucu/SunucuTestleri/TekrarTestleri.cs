@@ -131,17 +131,15 @@ namespace SunucuTestleri
 
         // ------------------------------------------------------------ Yeni komutlar
 
-        [TestCase("oy", "{\"ifsa\":true}")]
-        [TestCase("ikiyeKatla", null)]
-        [TestCase("bedelOde", null)]
-        [TestCase("karariGec", null)]
-        public async Task Yeni_komutlar_yanlis_asamada_YANLIS_ASAMA(string komut, string alanlar)
+        [TestCase("oy")]
+        [TestCase("ikiyeKatla")]
+        [TestCase("bedelOde")]
+        [TestCase("karariGec")]
+        public async Task Yeni_komutlar_yanlis_asamada_YANLIS_ASAMA(string komut)
         {
             var o = await OyunBaslat(4);
             var a = Kim(o, (string)o[0].SonDurum["a"]);
-            var m = new JsonObject { ["t"] = "komut", ["tur"] = 1, ["komut"] = komut };
-            if (alanlar != null) m["ifsa"] = JsonNode.Parse(alanlar)["ifsa"].DeepClone();
-            await a.Gonder(m.ToJsonString());
+            await Komut(a, 1, komut, new { ifsa = true }); // ifsa sadece oy'da okunur
             await a.Hata("YANLIS_ASAMA");
         }
 

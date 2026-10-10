@@ -190,6 +190,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 
 Bir mesaj birden çok kuralı çiğniyorsa ilk tutan döner:
 JSON bozuk ya da `t` yok/bilinmiyor (`GECERSIZ_MESAJ`) → `ODADA_DEGILSIN` → `KURUCU_DEGILSIN` → `OYUN_BASLADI` / `OYUN_YOK` → eksik ya da yanlış tipte alan (`GECERSIZ_MESAJ`) → `ESKI_TUR` → `GECERSIZ_GIRDI` ve kural motoru hataları.
+`komut` mesajında `ESKI_TUR`'dan önce sadece `tur` ve `komut` alanlarına bakılır. Komutun kendi alanları (`hedef`, `metin`, `hamle`, `ifsa`) ve bilinmeyen `komut` adı `ESKI_TUR`'dan sonra denetlenir (`GECERSIZ_MESAJ`).
 
 - `ayarlar`: bilinmeyen `mod`/`miniOyun`/`ceza` adı ya da yanlış tip (`paketler` dizi değil ya da içinde metin olmayan var) `GECERSIZ_MESAJ`. Aralık dışı sayı, Temiz + Cesur, geçersiz paket listesi `GECERSIZ_GIRDI`. Oyun başladıysa `OYUN_BASLADI`.
 - `oy` komutunda `ifsa` yoksa ya da `true`/`false` değilse `GECERSIZ_MESAJ`.

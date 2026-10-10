@@ -224,7 +224,8 @@ namespace Cakmak.Kurallar
                     break;
                 case Asama.MiniOyun:
                     // Hamle yapmayan kaybeder. İkisi de yapmadıysa B kazanır, soru gizli kalır.
-                    bool cKazandi = cHamle.HasValue && !bHamle.HasValue;
+                    // Reaksiyonda erken basmak hamle sayılmaz: kırmızıyken basan, süre dolsa da kaybeder.
+                    bool cKazandi = Erken(bHamle) || (!Erken(cHamle) && cHamle.HasValue && !bHamle.HasValue);
                     Sonuclandir(cKazandi, sureDoldu: true, zarlaKarar: false, 0, 0);
                     break;
                 case Asama.Ifsa:
@@ -368,8 +369,8 @@ namespace Cakmak.Kurallar
                     return;
 
                 case MiniOyunTuru.Reaksiyon:
-                    bool bErken = bh.Sayi < ReaksiyonEnAzMs;
-                    bool cErken = ch.Sayi < ReaksiyonEnAzMs;
+                    bool bErken = Erken(bHamle);
+                    bool cErken = Erken(cHamle);
                     if (bErken == cErken && (bErken || bh.Sayi == ch.Sayi)) { Berabere(); return; }
                     bool cKazandi = bErken || (!cErken && ch.Sayi < bh.Sayi);
                     Sonuclandir(cKazandi, false, false, 0, 0);
@@ -469,6 +470,10 @@ namespace Cakmak.Kurallar
                 cZar = rastgele.Next(1, 7);
             } while (bZar == cZar);
         }
+
+        /// <summary>Reaksiyonda kırmızıyken (ya da insan dışı hızda) basıldı mı?</summary>
+        static bool Erken(Hamle? h) =>
+            h.HasValue && h.Value.Tur == MiniOyunTuru.Reaksiyon && h.Value.Sayi < ReaksiyonEnAzMs;
 
         static bool Yener(TkmSecim x, TkmSecim y) =>
             (x == TkmSecim.Tas && y == TkmSecim.Makas) ||

@@ -4,7 +4,7 @@ Kaynak: `docs/Ana Plan.md` · Branch: `g1/kural-motoru`
 
 ## 📥 ENES'İN MASASI
 
-- [ ] **İmza temizliği (sonra):** `main`'deki ilk 2 commit'te hâlâ imza var. Arda'nın ve bu PR'ın merge'ünden sonra, açık branch yokken bir kez yeniden yazılıp force push edilecek. O an ikiniz de `git fetch && git reset --hard origin/main` yaparsınız.
+- [x] ~~İmza temizliği~~ → **vazgeçildi (2026-10-10).** Contributors listesi zaten temiz (sadece enesyilmaz19 ve ardatelli0). İmza sadece ilk 2 commit'in sayfasında görünüyor. Geçmiş yeniden yazılmayacak.
 - [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" listesini birlikte onaylayın. Onaylananlar `docs/Ana Plan.md` 5.1'e işlenir.
 - [ ] **Kural motorunu gözden geçir, sonra commit + push + PR** (`g1/kural-motoru` → `main`).
 
@@ -41,7 +41,30 @@ Neden şimdi: Arda'yı beklerken yapılabilecek, Playtest 1'in sonucundan etkile
 - [x] Öz inceleme: online "öneri çek" testi yoktu, eklendi (bozup doğrulandı). Sunucu gerçek süreç olarak da çalıştırıldı: Node WebSocket istemcisiyle 4 kişi, oda, öneri, soru, gizlilik → geçti. **Toplam: 82 kural + 57 sunucu testi**
 - [x] Oyunda kurucu koparsa kuruculuk ilk bağlı oyuncuya geçiyor (Ana Plan 6.1). Yoksa sınırsız oyunu kimse bitiremiyordu
 - [ ] S5'e kalanlar: sohbet, atma, kopanı 60 sn bekleme, AFK etiketi, geç gelen, Temiz filtresi, boş odayı bir süre tutma, isimlerde görünmez karakter
-- [ ] Kurulum (VPS, alan adı, Caddy): Enes hazır olunca
+- [x] **Reaksiyon hatası (Arda'nın editör testi, 2026-10-10):** süre dolunca erken basan kazanabiliyordu (iki yönde de). Önce 3 kırmızı test, sonra `Erken()` yardımcısı iki yolda da kullanılıyor, bilerek bozuldu. 88 kural + 57 sunucu, Unity'de 107/107. Kural Ana Plan 6.5'e yazıldı
+
+## S4 — online'a açılmadan önce (güvenlik)
+
+Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hiçbiri gerekmiyor.
+
+- [ ] IP başına sınırlar: `odaKur` ve `katil` hızı (oda kodu deneme yolunu kapatır: 24^5 ≈ 8 milyon kod), IP başına bağlantı sayısı, bağlantı başına saniyede mesaj
+- [ ] Gerçek IP: Caddy arkasında ASP.NET Core forwarded headers (yoksa herkes aynı IP görünür, sınırlar işe yaramaz)
+- [ ] Boşta bekleyen lobiye zaman aşımı (bağlı ama hiç başlatılmayan oda sonsuza kadar kalıyor)
+- [x] Zaten var: 4 KB mesaj sınırı, sınırlı gönderim kuyruğu, 20 sn'de sessiz kopanı fark etme, boş odayı silme, bozuk JSON'da bağlantıyı düşürmeme
+
+## S4 sonu — sunucu kurulumu (Enes'in hesabı ve ödemesi gerekiyor)
+
+- [ ] VPS: Hetzner CX23 (Arda'nın notu: Haziran 2026 zammından sonra ~5,49 €/ay, plandaki "5 $" eski), Ubuntu LTS
+- [ ] SSH sadece anahtarla (şifre kapalı) · güvenlik duvarında sadece 22, 80, 443 · otomatik güvenlik güncellemeleri · fail2ban
+- [ ] Uygulama systemd servisi, root olmayan kullanıcı, sadece localhost'u dinler · önünde Caddy (alan adı + HTTPS kendiliğinden, wss:// ek ayarsız)
+- [ ] Gizli bilgiler (Vivox anahtarı vb.) sunucuda ortam değişkeninde. Repoya ve Unity build'ine asla girmez
+- [ ] Alan adı
+
+## S6 — mağaza ve yasal (mağazadan önce şart)
+
+- [ ] Google Play kullanıcı içeriği: içerik yazmadan önce kullanım şartları kabulü · şartlarda yasak içerik tanımı · uygulama içi rapor + engelleme · sürekli moderasyon (Temiz filtresi + rapor + engelleme planda var)
+- [ ] Play formları: gizlilik politikası linki · Veri Güvenliği formu · içerik derecelendirme anketi (kullanıcı içeriği: evet). 13+ olduğu için Families programına girmiyor
+- [ ] KVKK aydınlatma metni (VERBİS'ten muaf olsa da zorunlu). Toplanan veri az: isim, IP, rapor gelirse son 50 mesaj. Kesin hüküm için bir hukukçuya danışılmalı
 
 ## Sözleşmeye önerilen değişiklikler (oturumda onaylanacak)
 

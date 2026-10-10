@@ -44,6 +44,12 @@ namespace TheLighter.Istemci
 
             kutu = new TextField { maxLength = SoruSiniri, multiline = true };
             kutu.AddToClassList("soru-kutusu");
+            // Uzun soru alt satıra geçsin, yana kaymasın: yazan kişi sorusunun tamamını görmeli.
+            // Unity'nin kendi stili USS'teki white-space'i eziyor, bu yüzden satır içi stil.
+            kutu.verticalScrollerVisibility = ScrollerVisibility.Auto;
+            kutu.style.whiteSpace = WhiteSpace.Normal;
+            var icYazi = kutu.Q(className: TextField.inputUssClassName)?.Q<TextElement>();
+            if (icYazi != null) icYazi.style.whiteSpace = WhiteSpace.Normal;
             kutu.RegisterValueChangedCallback(_ => Durum());
             Kok.Add(kutu);
 

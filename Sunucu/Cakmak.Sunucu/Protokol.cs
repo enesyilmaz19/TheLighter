@@ -90,12 +90,24 @@ namespace Cakmak.Sunucu
             throw new GecersizMesaj();
         }
 
-        static bool Mantik(JsonObject n, string alan)
+        public static bool? Mantik(JsonObject n, string alan, bool zorunlu = true)
         {
             var d = n[alan];
-            if (d == null) return false;
+            if (d == null) return zorunlu ? throw new GecersizMesaj() : (bool?)null;
             if (d is JsonValue v && v.TryGetValue(out bool b)) return b;
             throw new GecersizMesaj();
+        }
+
+        /// <summary>Metin dizisi. Alan yoksa null.</summary>
+        public static List<string> MetinListesi(JsonObject n, string alan)
+        {
+            var d = n[alan];
+            if (d == null) return null;
+            if (!(d is JsonArray dizi)) throw new GecersizMesaj();
+            var liste = new List<string>(dizi.Count);
+            foreach (var x in dizi)
+                liste.Add(x is JsonValue v && v.TryGetValue(out string s) ? s : throw new GecersizMesaj());
+            return liste;
         }
 
         // ------------------------------------------------------------ Hamle
@@ -106,7 +118,7 @@ namespace Cakmak.Sunucu
             switch (Coz<MiniOyunTuru>(Metin(n, "oyun")))
             {
                 case MiniOyunTuru.Tkm: return Hamle.TasKagitMakas(Coz<TkmSecim>(Metin(n, "secim")));
-                case MiniOyunTuru.TekCift: return Hamle.TekCift(Sayi(n, "parmak").Value, Mantik(n, "tek"));
+                case MiniOyunTuru.TekCift: return Hamle.TekCift(Sayi(n, "parmak").Value, Mantik(n, "tek", false) ?? false);
                 case MiniOyunTuru.Zar: return Hamle.ZarAt();
                 case MiniOyunTuru.Reaksiyon: return Hamle.Reaksiyon(Sayi(n, "ms").Value);
                 default: throw new GecersizMesaj();
@@ -143,9 +155,11 @@ namespace Cakmak.Sunucu
             ["c"] = Id(o.C),
             ["kim"] = Id(o.Kim),
             ["soru"] = o.Soru,
+            ["ceza"] = CezaYaz(o.Ceza),
+            ["kaos"] = o.Tur == OlayTuru.KaosBasladi ? Ad(o.Kaos) : null,
         });
 
-        public static JsonObject AyarlarYaz(Ayarlar a) => new JsonObject
+        public static JsonObject AyarlarYaz(Ayarlar a, IEnumerable<string> paketler) => new JsonObject
         {
             ["mod"] = Ad(a.Mod),
             ["miniOyun"] = Ad(a.MiniOyun),
@@ -153,6 +167,38 @@ namespace Cakmak.Sunucu
             ["soruSn"] = a.SoruSuresiSn,
             ["cevapSn"] = a.CevapSuresiSn,
             ["hamleSn"] = a.HamleSuresiSn,
+            ["ceza"] = Ad(a.CezaSeviyesi),
+            ["gorevler"] = a.GizliGorevler,
+            ["kaos"] = a.KaosTurlari,
+            ["paketler"] = Dizi(paketler, p => p),
+        };
+
+        static JsonArray Dizi<T>(IEnumerable<T> liste, Func<T, JsonNode> yaz)
+        {
+            var dizi = new JsonArray();
+            foreach (var x in liste) dizi.Add(yaz(x));
+            return dizi;
+        }
+
+        static JsonObject CezaYaz(Ceza c) =>
+            c == null ? null : new JsonObject { ["tur"] = Ad(c.Tur), ["metin"] = c.Metin, ["kalan"] = c.Kalan };
+
+        static JsonObject GorevYaz(Gorev g) => g == null ? null : new JsonObject
+        {
+            ["tur"] = Ad(g.Tur),
+            ["hedef"] = Id(g.Hedef),
+            ["adet"] = g.Adet,
+            ["zorluk"] = Ad(g.Zorluk),
+        };
+
+        /// <summary>Oyun sonu özeti. Sayaçlar zaten <c>oyuncular</c>'da, burada tekrar edilmez.</summary>
+        static JsonObject OzetYaz(OyunOzeti o) => o == null ? null : new JsonObject
+        {
+            ["oynananTur"] = o.OynananTur,
+            ["unvanlar"] = Dizi(o.Unvanlar, u => new JsonObject { ["tur"] = Ad(u.Tur), ["kim"] = Id(u.Kim), ["deger"] = u.Deger }),
+            ["gorevler"] = Dizi(o.Gorevler, g => new JsonObject { ["kim"] = Id(g.Kim), ["gorev"] = GorevYaz(g.Gorev), ["basarili"] = g.Basarili }),
+            ["ifsaOlanlar"] = Dizi(o.IfsaOlanlar, k => new JsonObject { ["soru"] = k.Soru, ["a"] = Id(k.A), ["b"] = Id(k.B), ["c"] = Id(k.C) }),
+            ["curcunaSorulari"] = Dizi(o.CurcunaSorulari, s => s),
         };
 
         /// <summary>Odadaki oyuncunun kural motorunda olmayan bilgileri.</summary>
@@ -169,7 +215,7 @@ namespace Cakmak.Sunucu
             }
         }
 
-        public static string LobiDurumu(int surum, string oda, OyuncuId kurucu, IEnumerable<OyuncuEki> oyuncular, Ayarlar ayarlar)
+        public static string LobiDurumu(int surum, string oda, OyuncuId kurucu, IEnumerable<OyuncuEki> oyuncular, Ayarlar ayarlar, IEnumerable<string> paketler)
         {
             var liste = new JsonArray();
             foreach (var o in oyuncular)
@@ -183,11 +229,12 @@ namespace Cakmak.Sunucu
                 ["asama"] = "lobi",
                 ["kurucu"] = Id(kurucu),
                 ["oyuncular"] = liste,
-                ["ayarlar"] = AyarlarYaz(ayarlar),
+                ["ayarlar"] = AyarlarYaz(ayarlar, paketler),
             });
         }
 
-        public static string OyunDurumu(int surum, string oda, OyuncuId kurucu, Func<OyuncuId, OyuncuEki> ek, Gorunum g)
+        /// <param name="ozet">Sadece oyunSonu'nda dolu.</param>
+        public static string OyunDurumu(int surum, string oda, OyuncuId kurucu, Func<OyuncuId, OyuncuEki> ek, Gorunum g, OyunOzeti ozet)
         {
             var liste = new JsonArray();
             foreach (var o in g.Oyuncular)
@@ -206,6 +253,13 @@ namespace Cakmak.Sunucu
                     ["ifsaEttirme"] = o.IfsaEttirme,
                     ["saklama"] = o.Saklama,
                     ["miniOyunKazanma"] = o.MiniOyunKazanma,
+                    ["oynadigiMiniOyun"] = o.OynadigiMiniOyun,
+                    ["cezaCekme"] = o.CezaCekme,
+                    ["yanma"] = o.Yanma,
+                    ["bedelOdeme"] = o.BedelOdeme,
+                    ["bedelHakki"] = o.BedelHakki,
+                    ["kaosKazanma"] = o.KaosKazanma,
+                    ["kisitlamalar"] = Dizi(o.Kisitlamalar, CezaYaz),
                 });
             }
 
@@ -226,6 +280,7 @@ namespace Cakmak.Sunucu
                     ["zarlaKarar"] = s.ZarlaKarar,
                     ["sureDoldu"] = s.SureDoldu,
                     ["cKazandi"] = s.CKazandi,
+                    ["katlandi"] = s.Katlandi,
                 };
             }
 
@@ -249,6 +304,14 @@ namespace Cakmak.Sunucu
                 ["cHamleYapti"] = g.CHamleYapti,
                 ["beraberlik"] = g.Beraberlik,
                 ["sonMiniOyun"] = son,
+                ["kaos"] = Ad(g.Kaos),
+                ["isi"] = g.Isi.HasValue ? Ad(g.Isi.Value) : null,
+                ["kararVeren"] = Id(g.KararVeren),
+                ["oylayanlar"] = Dizi(g.Oylayanlar, x => Id(x)),
+                ["oyKullanan"] = g.OyKullanan,
+                ["sonOylama"] = g.SonOylama == null ? null : new JsonObject { ["ifsa"] = g.SonOylama.Ifsa, ["gume"] = g.SonOylama.Gume },
+                ["bedelOdendi"] = g.BedelOdendi,
+                ["turCezalari"] = Dizi(g.TurCezalari, x => new JsonObject { ["kim"] = Id(x.Kim), ["ceza"] = CezaYaz(x.Ceza), ["neden"] = Ad(x.Neden) }),
                 ["sana"] = new JsonObject
                 {
                     ["soru"] = g.Soru,
@@ -257,8 +320,11 @@ namespace Cakmak.Sunucu
                     ["degistirmeHakki"] = g.DegistirmeHakki,
                     ["oneri"] = g.Oneri,
                     ["hamlen"] = HamleYaz(g.Hamlen),
+                    ["gorevin"] = GorevYaz(g.Gorevin),
+                    ["oyVerdin"] = g.OyVerdin,
                 },
                 ["ifsa"] = g.Asama == Asama.Ifsa ? new JsonObject { ["soru"] = g.IfsaSoru, ["fisilti"] = g.IfsaFisilti } : null,
+                ["ozet"] = OzetYaz(ozet),
             });
         }
     }

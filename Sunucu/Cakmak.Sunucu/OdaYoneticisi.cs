@@ -17,17 +17,22 @@ namespace Cakmak.Sunucu
         const int KodUzunlugu = 5;
 
         readonly ConcurrentDictionary<string, Oda> odalar = new ConcurrentDictionary<string, Oda>();
-        readonly IReadOnlyList<string> oneriSorulari;
+        /// <summary>Paket adı (dosya adı, uzantısız: "Genel") → soruları. Ada göre sıralı.</summary>
+        readonly SortedDictionary<string, IReadOnlyList<string>> paketler = new SortedDictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+        readonly IReadOnlyList<string> sesliCezalar = Array.Empty<string>();
 
         public OdaYoneticisi(ILogger<OdaYoneticisi> log)
         {
-            var sorular = new List<string>();
             var klasor = Path.Combine(AppContext.BaseDirectory, "Icerik");
             if (Directory.Exists(klasor))
+            {
                 foreach (var dosya in Directory.GetFiles(klasor, "*.txt"))
-                    sorular.AddRange(Paket.Ayristir(File.ReadAllText(dosya)));
-            oneriSorulari = sorular;
-            log.LogInformation("Öneri havuzu: {Adet} soru ({Klasor})", sorular.Count, klasor);
+                    paketler[Path.GetFileNameWithoutExtension(dosya)] = Paket.Ayristir(File.ReadAllText(dosya));
+                var cezalar = Path.Combine(klasor, "Cezalar.csv");
+                if (File.Exists(cezalar)) sesliCezalar = Paket.Ayristir(File.ReadAllText(cezalar));
+            }
+            foreach (var p in paketler) log.LogInformation("Paket {Ad}: {Adet} soru", p.Key, p.Value.Count);
+            log.LogInformation("Sesli ceza: {Adet} ({Klasor})", sesliCezalar.Count, klasor);
         }
 
         public IEnumerable<Oda> Odalar => odalar.Values;
@@ -95,7 +100,7 @@ namespace Cakmak.Sunucu
             while (true)
             {
                 var kod = RandomNumberGenerator.GetString(KodHarfleri, KodUzunlugu);
-                var oda = new Oda(kod, oneriSorulari);
+                var oda = new Oda(kod, paketler, sesliCezalar);
                 if (odalar.TryAdd(kod, oda)) return oda;
             }
         }

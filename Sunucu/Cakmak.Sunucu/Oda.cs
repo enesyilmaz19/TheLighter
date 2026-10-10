@@ -26,8 +26,11 @@ namespace Cakmak.Sunucu
         public readonly string Kod;
         readonly object kilit = new object();
         readonly List<OdaOyuncusu> oyuncular = new List<OdaOyuncusu>();
-        readonly IReadOnlyList<string> oneriSorulari;
+        readonly IReadOnlyDictionary<string, IReadOnlyList<string>> paketler;
+        readonly IReadOnlyList<string> sesliCezalar;
         readonly Ayarlar ayarlar = new Ayarlar();
+        /// <summary>Kurucunun seçtiği paketler. Başta hepsi.</summary>
+        List<string> seciliPaketler;
         OyuncuId kurucu;
         Oyun oyun;
         int surum;
@@ -36,10 +39,12 @@ namespace Cakmak.Sunucu
         /// <summary>Oda silindi. Bu bayraktan sonra kimse katılamaz.</summary>
         public bool Kapandi { get; private set; }
 
-        public Oda(string kod, IReadOnlyList<string> oneriSorulari)
+        public Oda(string kod, IReadOnlyDictionary<string, IReadOnlyList<string>> paketler, IReadOnlyList<string> sesliCezalar)
         {
             Kod = kod;
-            this.oneriSorulari = oneriSorulari;
+            this.paketler = paketler;
+            this.sesliCezalar = sesliCezalar;
+            seciliPaketler = new List<string>(paketler.Keys);
         }
 
         public static bool IsimGecerli(string isim)
@@ -161,11 +166,19 @@ namespace Cakmak.Sunucu
                 var soruSn = Protokol.Sayi(m, "soruSn", false);
                 var cevapSn = Protokol.Sayi(m, "cevapSn", false);
                 var hamleSn = Protokol.Sayi(m, "hamleSn", false);
+                var ceza = Protokol.Metin(m, "ceza", false);
+                var gorevler = Protokol.Mantik(m, "gorevler", false);
+                var kaos = Protokol.Mantik(m, "kaos", false);
+                var secilen = Protokol.MetinListesi(m, "paketler");
                 var yeniMod = mod == null ? ayarlar.Mod : Protokol.Coz<OyunModu>(mod);
                 var yeniMiniOyun = miniOyun == null ? ayarlar.MiniOyun : Protokol.Coz<MiniOyunTuru>(miniOyun);
+                var yeniCeza = ceza == null ? ayarlar.CezaSeviyesi : Protokol.Coz<CezaSeviyesi>(ceza);
 
                 // Reaksiyon sadece elden ele: online'da süre istemciden gelir ve telefonların dokunma gecikmesi farklıdır.
+                // Temiz modda en fazla Hafif ceza (Ana Plan 8.1).
                 if (yeniMiniOyun == MiniOyunTuru.Reaksiyon
+                    || (yeniMod == OyunModu.Temiz && yeniCeza == CezaSeviyesi.Cesur)
+                    || (secilen != null && !PaketlerGecerli(secilen))
                     || !Aralikta(turSayisi, 0, 100) || !Aralikta(soruSn, 5, 300) || !Aralikta(cevapSn, 5, 300) || !Aralikta(hamleSn, 5, 300))
                 {
                     b.Yolla(Protokol.Hata("GECERSIZ_GIRDI"));
@@ -174,10 +187,14 @@ namespace Cakmak.Sunucu
 
                 ayarlar.Mod = yeniMod;
                 ayarlar.MiniOyun = yeniMiniOyun;
+                ayarlar.CezaSeviyesi = yeniCeza;
                 if (turSayisi.HasValue) ayarlar.TurSayisi = turSayisi.Value;
                 if (soruSn.HasValue) ayarlar.SoruSuresiSn = soruSn.Value;
                 if (cevapSn.HasValue) ayarlar.CevapSuresiSn = cevapSn.Value;
                 if (hamleSn.HasValue) ayarlar.HamleSuresiSn = hamleSn.Value;
+                if (gorevler.HasValue) ayarlar.GizliGorevler = gorevler.Value;
+                if (kaos.HasValue) ayarlar.KaosTurlari = kaos.Value;
+                if (secilen != null) seciliPaketler = secilen;
                 HerkeseDurum();
             }
         }
@@ -192,6 +209,9 @@ namespace Cakmak.Sunucu
                 var liste = new List<Oyuncu>();
                 foreach (var o in oyuncular) liste.Add(new Oyuncu(o.Id, o.Isim));
 
+                var sorular = new List<string>();
+                foreach (var p in seciliPaketler) sorular.AddRange(paketler[p]);
+
                 var kopya = new Ayarlar
                 {
                     Mod = ayarlar.Mod,
@@ -200,7 +220,11 @@ namespace Cakmak.Sunucu
                     SoruSuresiSn = ayarlar.SoruSuresiSn,
                     CevapSuresiSn = ayarlar.CevapSuresiSn,
                     HamleSuresiSn = ayarlar.HamleSuresiSn,
-                    OneriSorulari = oneriSorulari,
+                    OneriSorulari = sorular,
+                    CezaSeviyesi = ayarlar.CezaSeviyesi,
+                    GizliGorevler = ayarlar.GizliGorevler,
+                    KaosTurlari = ayarlar.KaosTurlari,
+                    SesliCezalar = sesliCezalar,
                 };
                 var sonuc = Oyun.Kur(kopya, liste, RandomNumberGenerator.GetInt32(int.MaxValue), out var yeni);
                 if (sonuc != Sonuc.Tamam) { b.Yolla(Protokol.Hata(Protokol.HataKodu(sonuc))); return; }
@@ -259,6 +283,18 @@ namespace Cakmak.Sunucu
                         break;
                     case "hamle":
                         sonuc = oyun.MiniOyunHamlesi(b.Kim, Protokol.HamleCoz(m["hamle"] as JsonObject));
+                        break;
+                    case "oy":
+                        sonuc = oyun.Oy(b.Kim, Protokol.Mantik(m, "ifsa").Value);
+                        break;
+                    case "ikiyeKatla":
+                        sonuc = oyun.IkiyeKatla(b.Kim);
+                        break;
+                    case "bedelOde":
+                        sonuc = oyun.BedelOde(b.Kim);
+                        break;
+                    case "karariGec":
+                        sonuc = oyun.KarariGec(b.Kim);
                         break;
                     default:
                         throw new GecersizMesaj();
@@ -320,17 +356,30 @@ namespace Cakmak.Sunucu
             {
                 var ekler = new List<Protokol.OyuncuEki>();
                 foreach (var o in oyuncular) ekler.Add(Ek(o));
-                var json = Protokol.LobiDurumu(surum, Kod, kurucu, ekler, ayarlar);
+                var json = Protokol.LobiDurumu(surum, Kod, kurucu, ekler, ayarlar, seciliPaketler);
                 foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
                 return;
             }
 
             // Herkes kendi görünümünü alır. Gizlilik kural motorunda: soru sadece B'nin görünümünde.
+            // Özet sadece oyun bitince: ortasında görevleri ve Soran Gizli'nin A'sını verir.
+            OyunOzeti ozet = null;
             foreach (var o in oyuncular)
             {
                 if (o.Baglanti == null) continue;
-                o.Baglanti.Yolla(Protokol.OyunDurumu(surum, Kod, kurucu, EkBul, oyun.GorunumAl(o.Id)));
+                var g = oyun.GorunumAl(o.Id);
+                if (g.Asama == Asama.OyunSonu) ozet ??= oyun.Ozet();
+                o.Baglanti.Yolla(Protokol.OyunDurumu(surum, Kod, kurucu, EkBul, g, ozet));
             }
+        }
+
+        /// <summary>En az bir paket, hepsi sunucuda var, tekrar yok.</summary>
+        bool PaketlerGecerli(List<string> secilen)
+        {
+            var gorulen = new HashSet<string>();
+            foreach (var p in secilen)
+                if (!paketler.ContainsKey(p) || !gorulen.Add(p)) return false;
+            return secilen.Count > 0;
         }
 
         Protokol.OyuncuEki EkBul(OyuncuId id) => Ek(oyuncular.Find(o => o.Id == id));

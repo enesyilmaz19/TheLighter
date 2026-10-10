@@ -2,7 +2,7 @@
 
   <!--
     Online mod sunucusu. Kural kodu kopyalanmıyor: Unity'deki Assets/Kurallar aynen derleniyor.
-    Soru paketleri Assets/Icerik'ten çıktı klasörüne kopyalanıyor.
+    Soru paketleri ve sesli cezalar Assets/Icerik'ten çıktı klasörüne kopyalanıyor.
     Çalıştırmak:  dotnet run (proje klasöründe), adres: ws://localhost:5000/ws (ASPNETCORE_URLS ile değişir)
   -->
   <PropertyGroup>
@@ -16,6 +16,7 @@
   <ItemGroup>
     <Compile Include="..\..\Assets\Kurallar\**\*.cs" Link="Kurallar\%(RecursiveDir)%(Filename)%(Extension)" />
     <None Include="..\..\Assets\Icerik\*.txt" Link="Icerik\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\Assets\Icerik\Cezalar.csv" Link="Icerik\Cezalar.csv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

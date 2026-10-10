@@ -1,12 +1,11 @@
 # G1 (Enes) — İş listesi
 
-Kaynak: `docs/Ana Plan.md` · Branch: `g1/kural-motoru`
+Kaynak: `docs/Ana Plan.md` · Branch'ler: `g1/<iş>` → `main`
 
 ## 📥 ENES'İN MASASI
 
 - [x] ~~İmza temizliği~~ → **vazgeçildi (2026-10-10).** Contributors listesi zaten temiz (sadece enesyilmaz19 ve ardatelli0). İmza sadece ilk 2 commit'in sayfasında görünüyor. Geçmiş yeniden yazılmayacak.
-- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" listesini (9 madde) birlikte onaylayın. Onaylananlar `docs/Ana Plan.md` 5.1'e işlenir.
-- [ ] **Kural motorunu gözden geçir, sonra commit + push + PR** (`g1/kural-motoru` → `main`).
+- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" (9 madde), "S3 kararları" (15 madde) ve `docs/Protokol.md`'nin sonundaki farklar tablosu birlikte onaylanır. Onaylananlar `docs/Ana Plan.md` 5.1/5.2'ye işlenir.
 
 ## S1 — Kural motoru (çekirdek döngü)
 
@@ -82,7 +81,8 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
   - Soran Gizli'de A 5 yoldan anlaşılıyordu (önceki C, sayaç, harcanan kart, süre olayı, özet) → A rastgele, sayaç ve kart tur sonuna erteleniyor
   - Özet oyun ortasında herkesin görevini veriyordu → oyun bitmeden gizli kısımlar boş
   - Ters Dünya + Bedel'de asıl kaybeden cezadan kaçıyordu · "beraberlik rakibin" kartı Zar/Tek-Çift'te hiç kalkmıyordu · İkiye Katla iki el sayıyordu · AFK oylayıcılar C'yi cezalandırabiliyordu
-- [ ] Online (sunucu + protokol) S3 alanları: `ayarlar`'a ceza/görev/kaos, `durum`'a yeni alanlar, `oy`/`ikiyeKatla`/`bedelOde`/`karariGec` komutları
+- [x] **Online S3 (2026-10-11):** `ayarlar`'a `ceza`/`gorevler`/`kaos`/`paketler` (paket seçimi, dosya adıyla), `durum`'a S3 alanları + oyun sonunda `ozet`, olaylara `ceza`/`kaos`, `oy`/`ikiyeKatla`/`bedelOde`/`karariGec` komutları. Sunucu `Cezalar.csv`'yi okuyor. Biçim `docs/Protokol.md`'de. 27 yeni kara kutu testi (toplam 84), 17 bilerek bozma
+- [ ] Online grup paketi: kurucunun cihazındaki "Bizim paket" sunucuya parça parça yüklenmeli (4096 bayt sınırı). Şimdilik online'da yok
 - [ ] "≥20 görev" ve "30 unvan" hedefi: şimdilik 8 görev türü (hedef/adet ile çeşitleniyor) ve 15 unvan
 
 ### S3 sözleşme eklemeleri (Arda'nın ekranları için)
@@ -131,7 +131,7 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
 | 8 | Süre dolunca "rastgele birine" | A'nın süresi dolarsa A hariç · B'nin süresi dolarsa A ve B hariç | Süresi dolan hemen tekrar seçilmesin |
 | 9 | — | `Hamle.Erken` (bool): Reaksiyonda erken basış | Kuralın tek tanımı. İstemci "Erken bastın" yazısı için eşiği kendisi karşılaştırmasın (2026-10-10, istemci de buna geçirildi) |
 
-**Henüz yok (plana göre sonra):** `BedelOde`, `Oy`, `Ozet`, `GrupKaydi.Isle` (S3) · `OyuncuKoptu/Dondu/Cikti` (S5).
+**Henüz yok (plana göre sonra):** `OyuncuKoptu/Dondu/Cikti` (S5). S3'ün eklemeleri yukarıdaki "S3 sözleşme eklemeleri" tablosunda.
 
 ## Arda'nın bilmesi gerekenler
 

@@ -471,9 +471,7 @@ namespace Cakmak.Kurallar
             } while (bZar == cZar);
         }
 
-        /// <summary>Reaksiyonda kırmızıyken (ya da insan dışı hızda) basıldı mı?</summary>
-        static bool Erken(Hamle? h) =>
-            h.HasValue && h.Value.Tur == MiniOyunTuru.Reaksiyon && h.Value.Sayi < ReaksiyonEnAzMs;
+        static bool Erken(Hamle? h) => h.HasValue && h.Value.Erken;
 
         static bool Yener(TkmSecim x, TkmSecim y) =>
             (x == TkmSecim.Tas && y == TkmSecim.Makas) ||

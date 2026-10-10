@@ -78,6 +78,12 @@ namespace Cakmak.Kurallar
             Sayi = sayi;
         }
 
+        /// <summary>
+        /// Reaksiyonda kırmızıyken (ya da insan dışı hızda) basıldı mı? Kuralın tek tanımı burada.
+        /// İstemci "Erken bastın" yazısı için de bunu kullanır, eşiği kendisi karşılaştırmaz.
+        /// </summary>
+        public bool Erken => Tur == MiniOyunTuru.Reaksiyon && Sayi < Oyun.ReaksiyonEnAzMs;
+
         public static Hamle TasKagitMakas(TkmSecim secim) => new Hamle(MiniOyunTuru.Tkm, secim, false, 0);
         public static Hamle TekCift(int parmak, bool tekDiyor = false) => new Hamle(MiniOyunTuru.TekCift, default, tekDiyor, parmak);
         public static Hamle ZarAt() => new Hamle(MiniOyunTuru.Zar, default, false, 0);

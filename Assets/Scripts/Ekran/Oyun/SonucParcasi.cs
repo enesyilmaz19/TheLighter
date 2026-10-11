@@ -20,12 +20,16 @@ namespace TheLighter.Istemci
             var g = e.Gorunum;
             Kok = Kutu("parca", "sonuc");
 
-            if (g.SonMiniOyun != null) Kok.Add(ElKarti(akis, g, g.SonMiniOyun));
-            if (g.SonOylama != null)
-                Kok.Add(Yazi(Metin.Al("sonuc.oylama", g.SonOylama.Ifsa, g.SonOylama.Gume), "banner"));
+            // Bir turda 3-4 ceza çekilebilir: orta kısım kayar, "Tamam" butonu ve alt satır hep ekranda kalır.
+            var orta = new ScrollView(ScrollViewMode.Vertical);
+            orta.AddToClassList("kaydirma");
+            Kok.Add(orta);
 
-            Kok.Add(Esnek());
-            Kok.Add(e.Tur == EkranTuru.Ifsa ? IfsaKarti(akis, g) : GumeKarti(akis, g));
+            if (g.SonMiniOyun != null) orta.Add(ElKarti(akis, g, g.SonMiniOyun));
+            if (g.SonOylama != null)
+                orta.Add(Yazi(Metin.Al("sonuc.oylama", g.SonOylama.Ifsa, g.SonOylama.Gume), "banner"));
+
+            orta.Add(e.Tur == EkranTuru.Ifsa ? IfsaKarti(akis, g) : GumeKarti(akis, g));
 
             // Bu turun cezaları (yanma kartları mini oyun perdesinde gösterildi ama burada da hatırlatılır).
             if (g.TurCezalari.Count > 0)
@@ -34,7 +38,7 @@ namespace TheLighter.Istemci
                 {
                     var tamam = Buton(Metin.Al("ceza.tamam"), akis.CezalariOnayla, "buton-birincil");
                     tamam.AddToClassList("gizli");
-                    Kok.Add(Tekrar.Cark(akis, g.TurCezalari, () =>
+                    orta.Add(Tekrar.Cark(akis, g.TurCezalari, () =>
                     {
                         tamam.RemoveFromClassList("gizli");
                         GecikmeliAc(tamam);
@@ -45,10 +49,9 @@ namespace TheLighter.Istemci
                 {
                     var alan = Kutu("ceza-alani");
                     foreach (var c in g.TurCezalari) alan.Add(Tekrar.CezaKarti(akis, c));
-                    Kok.Add(alan);
+                    orta.Add(alan);
                 }
             }
-            Kok.Add(Esnek());
 
             // Sıra her durumda C'ye geçer (Yön Değişti'de rastgele birine). Son turda "sıra geçiyor" yazılmaz.
             string sonraki = akis.Isim(g.C);

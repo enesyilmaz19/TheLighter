@@ -200,6 +200,9 @@ namespace Cakmak.Kurallar
 
             if (bMi) bHamle = hamle; else cHamle = hamle;
             if (bHamle.HasValue && cHamle.HasValue) MiniOyunuCoz();
+            // Elden elede gizli seçim sırayla yapılır (önce B, sonra C): ikincinin süresi birincinin düşündüğü
+            // süreden yemesin. Online'da ikisi aynı anda seçer, süre ortak.
+            else if (ayar.TekCihaz) kalanMs = ayar.HamleSuresiSn * 1000.0;
             return Sonuc.Tamam;
         }
 

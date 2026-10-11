@@ -241,7 +241,7 @@ namespace Cakmak.Kurallar
 
         /// <summary>
         /// Biten oyunu grubun kaydına işler, <b>yeni</b> bir kayıt döner (eskisi değişmez).
-        /// Kişiler isimle eşleşir: aynı isim (büyük/küçük harf fark etmez) = aynı kişi.
+        /// Kişiler isimle eşleşir: <see cref="Oyuncu.IsimAnahtari"/> aynıysa aynı kişi ("İrem" = "irem").
         /// Güme giden soru <see cref="OyunOzeti"/>'nde olmadığı için buraya da hiç yazılmaz.
         /// </summary>
         public static GrupKaydi Isle(GrupKaydi eski, OyunOzeti ozet)
@@ -262,7 +262,8 @@ namespace Cakmak.Kurallar
 
             foreach (var o in ozet.Oyuncular)
             {
-                var uye = yeni.Uyeler.Find(x => string.Equals(x.Isim, o.Isim, StringComparison.OrdinalIgnoreCase));
+                var anahtar = Oyuncu.IsimAnahtari(o.Isim);
+                var uye = yeni.Uyeler.Find(x => Oyuncu.IsimAnahtari(x.Isim) == anahtar);
                 if (uye == null)
                 {
                     uye = new GrupUyesi { Isim = o.Isim };

@@ -29,7 +29,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `komut` | `tur`, `komut`, + komutun alanları (aşağıda) | Oyunda |
 | `bitir` | — | Kurucu, oyunda. Oyunu hemen bitirir |
 
-**İsim:** baştaki/sondaki boşluk silinir, 1–20 karakter. Aynı odada aynı isim iki kez olamaz (büyük/küçük harf fark etmez; Türkçe İ/ı özel olarak eşlenmez). Yeni girişte `isim` yoksa `ISIM_GECERSIZ`. Anahtarla dönüşte `isim` yok sayılır.
+**İsim:** baştaki/sondaki boşluk silinir, 1–20 karakter. Aynı odada aynı isim iki kez olamaz: büyük/küçük harf ve I/İ/ı/i farkı gözetilmez ("İrem" = "irem", "ILKER" = "ılker"). Tanım tek yerde: `Oyuncu.IsimAnahtari`. Yeni girişte `isim` yoksa `ISIM_GECERSIZ`. Anahtarla dönüşte `isim` yok sayılır.
 
 **Değerler:**
 - `mod`: `"normal"` · `"temiz"` · `"curcuna"`

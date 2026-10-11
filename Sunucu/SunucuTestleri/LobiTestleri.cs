@@ -135,6 +135,19 @@ namespace SunucuTestleri
             await x.Hata("ISIM_GECERSIZ");
         }
 
+        [TestCase("irem")]
+        [TestCase("IREM")]
+        [TestCase("ırem")]
+        public async Task Katil_I_ve_İ_farki_gozetilmez_ISIM_GECERSIZ(string isim)
+        {
+            var kurucu = await Baglan();
+            await kurucu.Gonder(new { t = "odaKur", isim = "İrem" });
+            await kurucu.Bekle("hosgeldin");
+            var x = await Baglan();
+            await x.Gonder(new { t = "katil", oda = kurucu.Oda, isim, anahtar = (string)null });
+            await x.Hata("ISIM_GECERSIZ");
+        }
+
         [Test]
         public async Task OdaKur_bos_isim_ISIM_GECERSIZ()
         {

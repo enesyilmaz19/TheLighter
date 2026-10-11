@@ -77,9 +77,9 @@ namespace Cakmak.Kurallar
             if (oyuncular.Count < EnAzOyuncu || oyuncular.Count > EnFazlaOyuncu) return Sonuc.OyuncuSayisiGecersiz;
 
             var gorulen = new HashSet<OyuncuId>();
-            var isimler = new HashSet<string>(StringComparer.OrdinalIgnoreCase); // grup kaydı kişileri isimle eşliyor
+            var isimler = new HashSet<string>(); // grup kaydı kişileri isimle eşliyor
             foreach (var o in oyuncular)
-                if (o == null || string.IsNullOrWhiteSpace(o.Isim) || !gorulen.Add(o.Id) || !isimler.Add(o.Isim.Trim()))
+                if (o == null || string.IsNullOrWhiteSpace(o.Isim) || !gorulen.Add(o.Id) || !isimler.Add(Oyuncu.IsimAnahtari(o.Isim)))
                     return Sonuc.GecersizGirdi;
 
             if (ayarlar.TurSayisi < 0 || ayarlar.SoruSuresiSn <= 0 || ayarlar.CevapSuresiSn <= 0 || ayarlar.HamleSuresiSn <= 0

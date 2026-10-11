@@ -28,6 +28,14 @@ namespace Cakmak.Kurallar
             Id = id;
             Isim = isim;
         }
+
+        /// <summary>
+        /// İki isim aynı kişi mi: anahtarları eşitse aynı. Kural motoru, sunucu ve istemci hep bunu kullanır.
+        /// Baştaki/sondaki boşluk, büyük/küçük harf ve I/İ/ı/i farkı gözetilmez: "İrem" = "irem", "ILKER" = "ılker".
+        /// Harfler küçültmeden önce değiştirilir: sonuç kültüre ve çalışma ortamına (Mono, .NET) göre değişmesin.
+        /// </summary>
+        public static string IsimAnahtari(string isim) =>
+            (isim ?? "").Trim().Replace('İ', 'i').Replace('I', 'i').Replace('ı', 'i').ToLowerInvariant();
     }
 
     /// <summary>Her komutun cevabı. Kural kodu hata fırlatmaz.</summary>

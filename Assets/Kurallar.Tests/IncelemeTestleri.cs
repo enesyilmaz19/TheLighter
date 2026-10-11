@@ -326,6 +326,29 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(Oyun.Kur(new Ayarlar(), liste, 1, out _), Is.EqualTo(Sonuc.GecersizGirdi));
         }
 
+        [TestCase("İrem", "irem")]
+        [TestCase("İrem", "IREM")]
+        [TestCase("ILKER", "ilker")]
+        [TestCase("ılgaz", "Ilgaz")]
+        [TestCase("IŞIK", "ışık")]
+        [TestCase("  Ayşe ", "AYŞE")]
+        public void Isim_anahtari_buyuk_kucuk_harf_ve_dort_I_harfini_ayirmaz(string x, string y)
+        {
+            Assert.That(Oyuncu.IsimAnahtari(x), Is.EqualTo(Oyuncu.IsimAnahtari(y)));
+            var liste = Oyuncular(3);
+            liste.Add(new Oyuncu(P(8), x));
+            liste.Add(new Oyuncu(P(9), y));
+            Assert.That(Oyun.Kur(new Ayarlar(), liste, 1, out _), Is.EqualTo(Sonuc.GecersizGirdi), "aynı kişi iki kez kurulmaz");
+        }
+
+        [TestCase("Ali", "Veli")]
+        [TestCase("Ayşe", "Ayse")]
+        [TestCase("Can", "Cân")]
+        public void Isim_anahtari_farkli_isimleri_ayni_saymaz(string x, string y)
+        {
+            Assert.That(Oyuncu.IsimAnahtari(x), Is.Not.EqualTo(Oyuncu.IsimAnahtari(y)));
+        }
+
         [Test]
         public void Ani_olum_berabere_bitemeyen_oyunlarda_cikmaz()
         {

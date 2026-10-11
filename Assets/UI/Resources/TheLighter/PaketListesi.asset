@@ -13,4 +13,8 @@ MonoBehaviour:
   m_Name: PaketListesi
   m_EditorClassIdentifier: Assembly-CSharp::TheLighter.Istemci.PaketListesi
   Paketler:
+  - {fileID: 4900000, guid: 01e01363aca385c4bb7f601cf747625c, type: 3}
   - {fileID: 4900000, guid: b81a3abc72a2bf64e9a2e8e7c839bd1d, type: 3}
+  - {fileID: 4900000, guid: 4dfa3274e47cd644db28e1a7ccc3c73f, type: 3}
+  - {fileID: 4900000, guid: 5260eace9ee76cc42ab32f061c98ef45, type: 3}
+  SesliCezalar: {fileID: 4900000, guid: a578ff9d91dd2eb4ab781b5a97961aec, type: 3}

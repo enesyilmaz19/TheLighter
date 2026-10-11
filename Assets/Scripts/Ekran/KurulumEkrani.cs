@@ -257,6 +257,7 @@ namespace TheLighter.Istemci
         {
             var b = Buton(yazi, () =>
             {
+                if (ayarlar.Mod == OyunModu.Temiz) return; // Temiz modda paket kilitli.
                 if (!paketler.Remove(ad)) paketler.Add(ad);
                 Durum();
             }, "secenek");
@@ -270,7 +271,8 @@ namespace TheLighter.Istemci
             {
                 bool secili = temiz ? pb.Key == PaketBilgisi.AileDostu : paketler.Contains(pb.Key);
                 pb.Value.EnableInClassList("secili", secili);
-                pb.Value.SetEnabled(!temiz);
+                // Kilitli ama seçili olan (Aile Dostu) soluklaşmasın, okunabilir kalsın.
+                pb.Value.SetEnabled(!temiz || secili);
             }
             paketNotu.text = temiz ? Metin.Al("kurulum.paket_temiz") : "";
         }

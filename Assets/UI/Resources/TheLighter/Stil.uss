@@ -591,6 +591,7 @@
 
 .kok .ust-cubuk-durum {
     color: var(--alev);
+    margin-right: 24px;
 }
 
 /* Kaos: tur başında büyük duyuru */
@@ -781,6 +782,8 @@
 
 .kart-perdesi {
     padding: 40px 56px;
+    /* Opak: alttaki oyun sonu butonları kartın arkasından görünmesin. */
+    background-color: rgb(10, 8, 14);
 }
 
 .paylasim-karti {

@@ -226,12 +226,14 @@ namespace Cakmak.Kurallar
                     ToplamayiBitir();
                     break;
                 case Asama.SoruSorma:
+                    IzAl(a).SureDoldu++;
                     Yay(new Olay { Tur = OlayTuru.SureDoldu, Kim = GorunenA() });
                     OncekiTuruUnut();
                     TurBaslat(RastgeleOyuncu(a));
                     break;
                 case Asama.CevapSecme:
                     var sureliB = b.Value;
+                    IzAl(sureliB).SureDoldu++;
                     GumeyeGitti();
                     Yay(new Olay { Tur = OlayTuru.SureDoldu, Kim = sureliB });
                     OncekiTuruUnut();
@@ -241,6 +243,8 @@ namespace Cakmak.Kurallar
                     // Hamle yapmayan kaybeder. İkisi de yapmadıysa B kazanır, soru gizli kalır.
                     // Reaksiyonda erken basmak hamle sayılmaz: kırmızıyken basan, süre dolsa da kaybeder.
                     bool cKazandi = Erken(bHamle) || (!Erken(cHamle) && cHamle.HasValue && !bHamle.HasValue);
+                    if (!bHamle.HasValue) IzAl(b.Value).SureDoldu++;
+                    if (!cHamle.HasValue) IzAl(c.Value).SureDoldu++;
                     MiniOyunBitti(cKazandi, sureDoldu: true, zarlaKarar: false, 0, 0);
                     break;
                 case Asama.Oylama:
@@ -409,6 +413,8 @@ namespace Cakmak.Kurallar
         void Berabere()
         {
             beraberlik++;
+            IzAl(b.Value).Beraberlik++;
+            IzAl(c.Value).Beraberlik++;
             Yay(new Olay { Tur = OlayTuru.Berabere, B = b, C = c });
 
             // "Beraberlik rakibinin" cezası ve Ani Ölüm beraberliği hemen bitirir.
@@ -461,6 +467,7 @@ namespace Cakmak.Kurallar
             var kazanan = cKazandi ? co : bo;
             kazanan.MiniOyunKazanma++;
             if (kaos != KaosKurali.Yok) kazanan.KaosKazanma++;
+            MiniOyunIzi(kazanan.Id, cKazandi ? bo.Id : co.Id);
         }
 
         void Bitir()

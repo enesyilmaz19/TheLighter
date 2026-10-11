@@ -22,9 +22,21 @@ namespace Cakmak.Kurallar
             public readonly Dictionary<OyuncuId, int> Sordugu = new Dictionary<OyuncuId, int>();
             public readonly Dictionary<OyuncuId, int> Gosterdigi = new Dictionary<OyuncuId, int>();
             public readonly Dictionary<OyuncuId, int> GosterenKisi = new Dictionary<OyuncuId, int>();
+            public readonly Dictionary<OyuncuId, int> SoranKisi = new Dictionary<OyuncuId, int>();
+            public readonly Dictionary<OyuncuId, int> Yendigi = new Dictionary<OyuncuId, int>();
+            public readonly Dictionary<OyuncuId, int> Yenildigi = new Dictionary<OyuncuId, int>();
+            /// <summary>C iken ifşa ettirdiği sorular, B'ye göre.</summary>
+            public readonly Dictionary<OyuncuId, int> IfsaEttirdigi = new Dictionary<OyuncuId, int>();
             public readonly List<Ceza> Kisitlamalar = new List<Ceza>();
             public int Intikam;
             public int BIkenIfsa;
+            public int CIkenGume;
+            public int Seri;
+            public int EnUzunSeri;
+            public int Beraberlik;
+            public int SureDoldu;
+            public int Katlama;
+            public int KizginVerdi;
             public Gorev Gorev;
         }
 
@@ -94,6 +106,7 @@ namespace Cakmak.Kurallar
 
             katlandi = true;
             ilkKaybeden = kim;
+            IzAl(kim).Katlama++;
             kararVeren = null;
             bHamle = null;
             cHamle = null;
@@ -219,6 +232,7 @@ namespace Cakmak.Kurallar
         {
             var iz = IzAl(a);
             Artir(iz.Sordugu, hedef);
+            Artir(IzAl(hedef).SoranKisi, a);
             if (a == oncekiC && hedef == oncekiB) iz.Intikam++;
 
             if (SoranGizli)
@@ -266,12 +280,26 @@ namespace Cakmak.Kurallar
         static void Artir(Dictionary<OyuncuId, int> sayac, OyuncuId kim) =>
             sayac[kim] = (sayac.TryGetValue(kim, out var n) ? n : 0) + 1;
 
+        /// <summary>Sayılan mini oyunun (İkiye Katla'da tek el) kazananı ve kaybedeni: seri, yendiği, yenildiği.</summary>
+        void MiniOyunIzi(OyuncuId kazanan, OyuncuId kaybeden)
+        {
+            var k = IzAl(kazanan);
+            var y = IzAl(kaybeden);
+            k.Seri++;
+            if (k.Seri > k.EnUzunSeri) k.EnUzunSeri = k.Seri;
+            y.Seri = 0;
+            Artir(k.Yendigi, kaybeden);
+            Artir(y.Yenildigi, kazanan);
+        }
+
         void CakmakDevredildi(OyuncuId veren, OyuncuId alan)
         {
             Artir(IzAl(veren).Gosterdigi, alan);
             Artir(IzAl(alan).GosterenKisi, veren);
 
             if (!KizginCakmak) return;
+            // Soğukkanlı: herkesin gördüğü ısı "kızgın"ken yine de verdi.
+            if (IsiHesapla() == IsiSeviyesi.Kizgin) IzAl(veren).KizginVerdi++;
             devir++;
             if (devir < esik)
             {
@@ -395,6 +423,7 @@ namespace Cakmak.Kurallar
             {
                 co.IfsaEttirme++;
                 IzAl(b.Value).BIkenIfsa++;
+                Artir(IzAl(c.Value).IfsaEttirdigi, b.Value);
                 if (soru != null) ifsaKayitlari.Add(new IfsaKaydi { Soru = soru, A = a, B = b.Value, C = c.Value });
                 AsamayaGec(Asama.Ifsa, ayar.SonucSuresiSn);
                 Yay(new Olay { Tur = OlayTuru.Ifsa, A = GorunenA(), B = b, C = c, Soru = soru });
@@ -402,6 +431,7 @@ namespace Cakmak.Kurallar
             else
             {
                 bo.Saklama++;
+                IzAl(c.Value).CIkenGume++;
                 GumeyeGitti(); // güme giden soru hiçbir yerde kalmaz
                 AsamayaGec(Asama.Gume, ayar.SonucSuresiSn);
                 Yay(new Olay { Tur = OlayTuru.Gume, A = GorunenA(), B = b, C = c });
@@ -534,27 +564,53 @@ namespace Cakmak.Kurallar
 
         // ------------------------------------------------------------ Görevler
 
-        static readonly GorevTuru[] KolayGorevler = { GorevTuru.KisiyiGoster, GorevTuru.FarkliKisiGoster };
-        static readonly GorevTuru[] OrtaGorevler = { GorevTuru.MiniOyunKazan, GorevTuru.HicIfsaOlma, GorevTuru.AyniKisiyeSor };
-        static readonly GorevTuru[] ZorGorevler = { GorevTuru.SeniGostersin, GorevTuru.HicGosterilme, GorevTuru.KaosTurundaKazan };
+        static readonly GorevTuru[] KolayGorevler =
+        {
+            GorevTuru.KisiyiGoster, GorevTuru.FarkliKisiGoster, GorevTuru.KisiyeSor, GorevTuru.SoruSor,
+            GorevTuru.IfsaEttir, GorevTuru.GumeyeGonder,
+        };
+        static readonly GorevTuru[] OrtaGorevler =
+        {
+            GorevTuru.MiniOyunKazan, GorevTuru.HicIfsaOlma, GorevTuru.AyniKisiyeSor, GorevTuru.FarkliKisiyeSor,
+            GorevTuru.IntikamAl, GorevTuru.SirriniAc, GorevTuru.BedelOde,
+        };
+        static readonly GorevTuru[] ZorGorevler =
+        {
+            GorevTuru.SeniGostersin, GorevTuru.HicGosterilme, GorevTuru.KaosTurundaKazan, GorevTuru.UstUsteKazan,
+            GorevTuru.HedefiYen, GorevTuru.HicCezaCekme, GorevTuru.CokGosterilme,
+        };
 
         Gorev GorevUret(OyuncuId sahibi, Zorluk zorluk)
         {
             var turler = new List<GorevTuru>(zorluk == Zorluk.Kolay ? KolayGorevler : zorluk == Zorluk.Orta ? OrtaGorevler : ZorGorevler);
             // Kaos kapalıysa ya da oyun ilk kaos turuna (5. tur) varmadan bitecekse kaos görevi verilmez.
             if (!ayar.KaosTurlari || (ayar.TurSayisi > 0 && ayar.TurSayisi < KaosAraligi)) turler.Remove(GorevTuru.KaosTurundaKazan);
+            // Ceza kapalıyken bedel yok, "hiç ceza çekme" de bedava olur.
+            if (ayar.CezaSeviyesi == CezaSeviyesi.Kapali)
+            {
+                turler.Remove(GorevTuru.BedelOde);
+                turler.Remove(GorevTuru.HicCezaCekme);
+            }
             var tur = turler[rastgele.Next(turler.Count)];
 
-            var gorev = new Gorev { Tur = tur, Zorluk = zorluk };
+            var gorev = new Gorev { Tur = tur, Zorluk = zorluk, Adet = 1 };
             switch (tur)
             {
                 case GorevTuru.KisiyiGoster: gorev.Adet = 2; gorev.Hedef = RastgeleOyuncu(sahibi); break;
                 case GorevTuru.FarkliKisiGoster: gorev.Adet = 3; break;
                 case GorevTuru.MiniOyunKazan: gorev.Adet = 3; break;
-                case GorevTuru.HicIfsaOlma: gorev.Adet = 1; break;
                 case GorevTuru.AyniKisiyeSor: gorev.Adet = 2; break;
-                case GorevTuru.SeniGostersin: gorev.Adet = 1; gorev.Hedef = RastgeleOyuncu(sahibi); break;
-                case GorevTuru.KaosTurundaKazan: gorev.Adet = 1; break;
+                case GorevTuru.SeniGostersin: gorev.Hedef = RastgeleOyuncu(sahibi); break;
+                case GorevTuru.KisiyeSor: gorev.Hedef = RastgeleOyuncu(sahibi); break;
+                case GorevTuru.SoruSor: gorev.Adet = 2; break;
+                case GorevTuru.FarkliKisiyeSor: gorev.Adet = 3; break;
+                case GorevTuru.SirriniAc: gorev.Hedef = RastgeleOyuncu(sahibi); break;
+                case GorevTuru.UstUsteKazan: gorev.Adet = 3; break;
+                case GorevTuru.HedefiYen: gorev.Hedef = RastgeleOyuncu(sahibi); break;
+                case GorevTuru.HicCezaCekme: gorev.Adet = 2; break;
+                case GorevTuru.CokGosterilme: gorev.Adet = 4; break;
+                // HicIfsaOlma, KaosTurundaKazan, IfsaEttir, GumeyeGonder, IntikamAl, BedelOde: 1
+                // HicGosterilme: Adet kullanılmaz
             }
             return gorev;
         }
@@ -572,8 +628,28 @@ namespace Cakmak.Kurallar
                 case GorevTuru.SeniGostersin: return Sayi(iz.GosterenKisi, g.Hedef.Value) >= g.Adet;
                 case GorevTuru.HicGosterilme: return o.Gosterilme == 0;
                 case GorevTuru.KaosTurundaKazan: return o.KaosKazanma >= g.Adet;
+                case GorevTuru.KisiyeSor: return Sayi(iz.Sordugu, g.Hedef.Value) >= g.Adet;
+                case GorevTuru.SoruSor: return o.SoruSorma >= g.Adet;
+                case GorevTuru.IfsaEttir: return o.IfsaEttirme >= g.Adet;
+                case GorevTuru.GumeyeGonder: return o.Saklama >= g.Adet;
+                case GorevTuru.FarkliKisiyeSor: return iz.Sordugu.Count >= g.Adet;
+                case GorevTuru.IntikamAl: return iz.Intikam >= g.Adet;
+                case GorevTuru.SirriniAc: return Sayi(iz.IfsaEttirdigi, g.Hedef.Value) >= g.Adet;
+                case GorevTuru.BedelOde: return o.BedelOdeme >= g.Adet;
+                case GorevTuru.UstUsteKazan: return iz.EnUzunSeri >= g.Adet;
+                case GorevTuru.HedefiYen: return Sayi(iz.Yendigi, g.Hedef.Value) >= g.Adet;
+                case GorevTuru.HicCezaCekme: return o.OynadigiMiniOyun >= g.Adet && o.CezaCekme == 0;
+                case GorevTuru.CokGosterilme: return o.Gosterilme >= g.Adet;
                 default: return false;
             }
+        }
+
+        /// <summary>Karşılıklı gösterme: gösterdiğin kişi seni de gösterdiyse, iki yönden küçüğü kadar.</summary>
+        static int Karsilikli(Iz iz)
+        {
+            int toplam = 0;
+            foreach (var k in iz.Gosterdigi) toplam += Math.Min(k.Value, Sayi(iz.GosterenKisi, k.Key));
+            return toplam;
         }
 
         static int Sayi(Dictionary<OyuncuId, int> d, OyuncuId k) => d.TryGetValue(k, out var n) ? n : 0;
@@ -622,7 +698,11 @@ namespace Cakmak.Kurallar
         {
             var adaylar = new List<KeyValuePair<Unvan, double>>();
 
-            void Aday(UnvanTuru tur, Func<OyuncuDurumu, Iz, int> deger, int enAz)
+            // Puan = değer / ortalama. "Hep" unvanlarında (Kale: n kez B oldu, hiç ifşa olmadı) ortalama işe yaramaz:
+            // koşulu tutmayanların 0'ı ortalamayı düşürür, unvan hep öne çıkar. Orada uçluk n denemenin hepsinin
+            // tutmasıdır (yazı-tura gibi 2^-n): puan n / 2. Bolen bunun için.
+            const double HepBoleni = 2;
+            void Aday(UnvanTuru tur, Func<OyuncuDurumu, Iz, int> deger, int enAz, double? bolen = null)
             {
                 int enBuyuk = -1;
                 OyuncuId? sahibi = null;
@@ -638,7 +718,7 @@ namespace Cakmak.Kurallar
                 if (esit || enBuyuk < enAz) return;
                 double ortalama = toplam / oyuncular.Count;
                 adaylar.Add(new KeyValuePair<Unvan, double>(
-                    new Unvan { Tur = tur, Kim = sahibi.Value, Deger = enBuyuk }, enBuyuk / Math.Max(ortalama, 0.5)));
+                    new Unvan { Tur = tur, Kim = sahibi.Value, Deger = enBuyuk }, enBuyuk / (bolen ?? Math.Max(ortalama, 0.5))));
             }
 
             Aday(UnvanTuru.Miknatis, (o, iz) => o.Gosterilme, 2);
@@ -653,13 +733,36 @@ namespace Cakmak.Kurallar
             Aday(UnvanTuru.Bedelci, (o, iz) => o.BedelOdeme, 1);
             Aday(UnvanTuru.Cezakes, (o, iz) => o.CezaCekme, 2);
             Aday(UnvanTuru.KaosCanavari, (o, iz) => o.KaosKazanma, 1);
-            Aday(UnvanTuru.Kale, (o, iz) => iz.BIkenIfsa == 0 ? o.SoruAlma : 0, 2);
-            Aday(UnvanTuru.Talihsiz, (o, iz) => o.MiniOyunKazanma == 0 ? o.OynadigiMiniOyun : 0, 2);
+            Aday(UnvanTuru.Kale, (o, iz) => iz.BIkenIfsa == 0 ? o.SoruAlma : 0, 2, HepBoleni);
+            Aday(UnvanTuru.Talihsiz, (o, iz) => o.MiniOyunKazanma == 0 ? o.OynadigiMiniOyun : 0, 2, HepBoleni);
+            Aday(UnvanTuru.SosyalKelebek, (o, iz) => iz.Gosterdigi.Count, 3);
+            Aday(UnvanTuru.Sadik, (o, iz) => EnBuyuk(iz.Gosterdigi), 2);
+            Aday(UnvanTuru.Dedikoducu, (o, iz) => iz.Sordugu.Count, 3);
+            Aday(UnvanTuru.Gundem, (o, iz) => iz.SoranKisi.Count, 3);
+            Aday(UnvanTuru.Yenilmez, (o, iz) => iz.EnUzunSeri, 3);
+            Aday(UnvanTuru.Zorba, (o, iz) => EnBuyuk(iz.Yendigi), 2);
+            Aday(UnvanTuru.Av, (o, iz) => EnBuyuk(iz.Yenildigi), 2);
+            Aday(UnvanTuru.Ayna, (o, iz) => iz.Beraberlik, 2);
+            Aday(UnvanTuru.Uykucu, (o, iz) => iz.SureDoldu, 2);
+            // Ceza kapalıyken kimse ceza çekmez: Kaçak anlamsız.
+            if (ayar.CezaSeviyesi != CezaSeviyesi.Kapali)
+                Aday(UnvanTuru.Kacak, (o, iz) => o.CezaCekme == 0 ? o.OynadigiMiniOyun : 0, 3, HepBoleni);
+            Aday(UnvanTuru.AcikKitap, (o, iz) => iz.BIkenIfsa, 2);
+            Aday(UnvanTuru.EliBos, (o, iz) => iz.CIkenGume, 2);
+            Aday(UnvanTuru.Kumarbaz, (o, iz) => iz.Katlama, 1);
+            Aday(UnvanTuru.Bumerang, (o, iz) => Karsilikli(iz), 2);
+            Aday(UnvanTuru.Sogukkanli, (o, iz) => iz.KizginVerdi, 2);
 
             // Görünmez: tek bir kişi hiç gösterilmediyse, ve herkese en az bir sıra gelecek kadar tur oynandıysa.
+            // Puanı diğerlerinin tersi: ortalama / kendi değeri (0 yerine 0,5). Herkes 3 kez gösterildiyse 6.
             var gosterilmeyen = oyuncular.FindAll(o => o.Gosterilme == 0);
             if (gosterilmeyen.Count == 1 && tur >= oyuncular.Count)
-                adaylar.Add(new KeyValuePair<Unvan, double>(new Unvan { Tur = UnvanTuru.Gorunmez, Kim = gosterilmeyen[0].Id }, 1.5));
+            {
+                double ortalama = 0;
+                foreach (var o in oyuncular) ortalama += o.Gosterilme;
+                ortalama /= oyuncular.Count;
+                adaylar.Add(new KeyValuePair<Unvan, double>(new Unvan { Tur = UnvanTuru.Gorunmez, Kim = gosterilmeyen[0].Id }, ortalama / 0.5));
+            }
 
             adaylar.Sort((x, y) => y.Value != x.Value ? y.Value.CompareTo(x.Value) : x.Key.Tur.CompareTo(y.Key.Tur));
             var secilen = new List<Unvan>();

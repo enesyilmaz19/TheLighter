@@ -5,7 +5,7 @@ Kaynak: `docs/Ana Plan.md` · Branch'ler: `g1/<iş>` → `main`
 ## 📥 ENES'İN MASASI
 
 - [x] ~~İmza temizliği~~ → **vazgeçildi (2026-10-10).** Contributors listesi zaten temiz (sadece enesyilmaz19 ve ardatelli0). İmza sadece ilk 2 commit'in sayfasında görünüyor. Geçmiş yeniden yazılmayacak.
-- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" (9 madde), "S3 kararları" (15 madde) ve `docs/Protokol.md`'nin sonundaki farklar tablosu birlikte onaylanır. Onaylananlar `docs/Ana Plan.md` 5.1/5.2'ye işlenir.
+- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" (9 madde), "S3 kararları" (19 madde) ve `docs/Protokol.md`'nin sonundaki farklar tablosu birlikte onaylanır. Onaylananlar `docs/Ana Plan.md` 5.1/5.2'ye işlenir.
 
 ## S1 — Kural motoru (çekirdek döngü)
 
@@ -83,7 +83,11 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
   - Ters Dünya + Bedel'de asıl kaybeden cezadan kaçıyordu · "beraberlik rakibin" kartı Zar/Tek-Çift'te hiç kalkmıyordu · İkiye Katla iki el sayıyordu · AFK oylayıcılar C'yi cezalandırabiliyordu
 - [x] **Online S3 (2026-10-11):** `ayarlar`'a `ceza`/`gorevler`/`kaos`/`paketler` (paket seçimi, dosya adıyla), `durum`'a S3 alanları + oyun sonunda `ozet`, olaylara `ceza`/`kaos`, `oy`/`ikiyeKatla`/`bedelOde`/`karariGec` komutları. Sunucu `Cezalar.csv`'yi okuyor. Biçim `docs/Protokol.md`'de. 27 yeni kara kutu testi (toplam 84), 17 bilerek bozma
 - [ ] Online grup paketi: kurucunun cihazındaki "Bizim paket" sunucuya parça parça yüklenmeli (4096 bayt sınırı). Şimdilik online'da yok
-- [ ] "≥20 görev" ve "30 unvan" hedefi: şimdilik 8 görev türü (hedef/adet ile çeşitleniyor) ve 15 unvan
+- [x] **İçerik hedefi (2026-10-11): 20 görev, 30 unvan** (Ana Plan 8.2 ve 8.9). Liste ve anlamları `Assets/Kurallar/Tekrar.cs`'te (`GorevTuru`, `UnvanTuru`), aşağıdaki kararlar 16–19. Yeni türler enum'ların sonunda: grup kaydı unvanı sayı olarak saklıyor. `GorevUnvanTestleri`: 600 rastgele oyunda görev sonuçları ve unvanlar, testin dışarıdan tuttuğu kayıtla birebir; her görev hem başarıldı hem kaçırıldı, her unvan en az bir kez verildi. 20 bilerek bozma yakalandı
+  - Görev: Kolay (6) Kişiyi göster ×2 · 3 farklı kişiyi göster · Kişiye soru sor · 2 soru sor · C olarak ifşa ettir · B olarak güme gönder. Orta (7) 3 mini oyun kazan · B iken hiç ifşa olma · Aynı kişiye 2 soru · 3 farklı kişiye soru · İntikam al · Kişinin sırrını aç · Bedel öde. Zor (7) Kişi seni göstersin · Hiç gösterilme · Kaos turunda kazan · Üst üste 3 kazan · Kişiyi yen · 2 mini oyun oyna hiç ceza çekme · 4 kez gösteril
+  - Yeni unvanlar: Sosyal Kelebek · Sadık · Dedikoducu · Gündem · Yenilmez · Zorba · Av · Ayna · Uykucu · Kaçak · Açık Kitap · Eli Boş · Kumarbaz · Bumerang · Soğukkanlı
+- [ ] Arda: 12 görev ve 15 unvan için `Metinler.csv` metinleri (türü + hedef + adet geliyor)
+- [ ] Playtest 2'de unvan dağılımına bak: ağırlıklar (değer/ortalama, "hep" unvanlarında n/2) rastgele oyunla ayarlandı, gerçek oyunla değil. Testler değerlerin ve sahiplerin doğruluğunu kanıtlıyor, sıralama ağırlığını değil
 
 ### S3 sözleşme eklemeleri (Arda'nın ekranları için)
 
@@ -116,6 +120,10 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
 | 13 | Oylamada çoğunluk yoksa (eşitlik ya da hiç oy) kimse ceza çekmez | AFK oylayıcılar birini cezalandıramasın |
 | 14 | Aynı isim (büyük/küçük harf fark etmez) iki kez kurulamaz | Grup kaydı kişileri isimle eşliyor |
 | 15 | Unvan serisi kişinin oynadığı oyunlar üzerinden: bir oyunu kaçıran seriyi kaybetmez | "Üst üste" o kişinin oyunları için |
+| 16 | "Bedel öde" ve "hiç ceza çekme" görevleri, "Kaçak" unvanı sadece ceza açıkken | Kapalıyken bedel yok, ceza çekmemek de bedava |
+| 17 | Süre dolması (Uykucu): soru sormayan A, C seçmeyen B, hamle yapmayan B/C. Oylama ve karar süreleri sayılmaz | Karar vermemek "hayır" demek, oy vermemek de çekimser kalmak |
+| 18 | Görünmez'in puanı ortalama gösterilme / 0,5 (eskiden sabit 1,5) | 30 unvan arasında sabit puan hiç ilk 3'e giremiyordu (600 oyunda 0) |
+| 19 | "Hep" unvanları (Kale, Talihsiz, Kaçak) puanı n / 2: n denemenin hepsinde tutmak yazı-tura gibi 2⁻ⁿ | Ortalamayla puanlanınca koşulu tutmayanların 0'ı yüzünden her oyunda bunlar çıkıyordu |
 
 ## Sözleşmeye önerilen değişiklikler (oturumda onaylanacak)
 

@@ -135,7 +135,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 - **Ceza nesnesi:** `{ "tur": "sesli", "metin": "…", "kalan": 0 }`. `tur`: `"sesli"` (metin dolu, hemen yapılır) · `"palyaco"` (`kalan` tur 🤡) · `"havuzdanSor"` · `"beraberlikRakibe"` · `"sorunIfsa"` (bir kez işler, `kalan` 1). Metinler (sesli hariç) istemcide.
 - `oyuncular[].kisitlamalar`: oyuncunun üstündeki ⚙️ cezalar (herkese açık). `bedelHakki`: kalan bedel (başta 2).
 - `sonMiniOyun.katlandi`: İkiye Katla kabul edildi, bu ikinci el.
-- `sana.gorevin`: gizli görev, sadece sahibine, görevler kapalıysa `null`. `{ "tur", "hedef" (oyuncu ya da null), "adet", "zorluk" }`. `tur`: `"kisiyiGoster"` · `"farkliKisiGoster"` · `"miniOyunKazan"` · `"hicIfsaOlma"` · `"ayniKisiyeSor"` · `"seniGostersin"` · `"hicGosterilme"` · `"kaosTurundaKazan"`. `zorluk`: `"kolay"` · `"orta"` · `"zor"`. Metni istemci yazar.
+- `sana.gorevin`: gizli görev, sadece sahibine, görevler kapalıysa `null`. `{ "tur", "hedef" (oyuncu ya da null), "adet", "zorluk" }`. `tur`: `"kisiyiGoster"` · `"farkliKisiGoster"` · `"miniOyunKazan"` · `"hicIfsaOlma"` · `"ayniKisiyeSor"` · `"seniGostersin"` · `"hicGosterilme"` · `"kaosTurundaKazan"` · `"kisiyeSor"` · `"soruSor"` · `"ifsaEttir"` · `"gumeyeGonder"` · `"farkliKisiyeSor"` · `"intikamAl"` · `"sirriniAc"` · `"bedelOde"` · `"ustUsteKazan"` · `"hedefiYen"` · `"hicCezaCekme"` · `"cokGosterilme"` (anlamları ve zorlukları `Assets/Kurallar/Tekrar.cs`, `GorevTuru`). `zorluk`: `"kolay"` · `"orta"` · `"zor"`. Metni istemci yazar.
 - `sana.oyVerdin`: `oylama` aşamasında sen oy verdin mi.
 - `ozet`: sadece `oyunSonu`'nda, yoksa `null`. Oyun ortasında gelmez (görevler ve Soran Gizli'nin A'sı sır):
   ```json
@@ -145,7 +145,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
     "ifsaOlanlar": [ { "soru": "…", "a": "p1", "b": "p2", "c": "p4" } ],
     "curcunaSorulari": [ "…" ] }
   ```
-  Unvan `tur`: `"miknatis"` · `"gammaz"` · `"sirKupu"` · `"hedefTahtasi"` · `"soruMakinesi"` · `"sansli"` · `"takintili"` · `"intikamci"` · `"atesleOynayan"` · `"bedelci"` · `"cezakes"` · `"kaosCanavari"` · `"kale"` · `"gorunmez"` · `"talihsiz"`. En uç 3 unvan, eşitlikte verilmez.
+  Unvan `tur`: `"miknatis"` · `"gammaz"` · `"sirKupu"` · `"hedefTahtasi"` · `"soruMakinesi"` · `"sansli"` · `"takintili"` · `"intikamci"` · `"atesleOynayan"` · `"bedelci"` · `"cezakes"` · `"kaosCanavari"` · `"kale"` · `"gorunmez"` · `"talihsiz"` · `"sosyalKelebek"` · `"sadik"` · `"dedikoducu"` · `"gundem"` · `"yenilmez"` · `"zorba"` · `"av"` · `"ayna"` · `"uykucu"` · `"kacak"` · `"acikKitap"` · `"eliBos"` · `"kumarbaz"` · `"bumerang"` · `"sogukkanli"` (anlamları `UnvanTuru`'nda). En uç 3 unvan, eşitlikte verilmez.
   **Güme giden soru özette yoktur.** Sayaçlar `oyuncular`'da. Grup hafızası (`GrupKaydi.Isle`) cihazda bu bilgilerden yazılır.
 
 ### `olay`

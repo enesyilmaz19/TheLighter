@@ -128,8 +128,7 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
 | 21 | Elden elede saat, telefon dolaşırken (perde, görev, Curcuna yazma, oylama, ceza kartı) **istemcide** durur, kural motoru bilmez | Arda sordu. Motorun saati yok, `Ilerle`'yi kim çağırıyorsa zaman onun. Online'da sunucu hiç durdurmaz |
 | 22 | Grup eşleşmesi: bugünkülerin en az 3'ü ve en az yarısı kayıtlı grupta varsa aynı grup | Arda önerdi (istemcide, `GrupDeposu`) |
 | 23 | Android paylaşma menüsü: NativeShare eklentisi (`Packages/` değişir) | Arda sordu, **Enes karar verecek**. Şimdilik kart dosyaya kaydediliyor |
-
-**Açık:** İsim karşılaştırması 3 yerde 3 farklı: kural motoru ve sunucu `OrdinalIgnoreCase` ("İrem" ≠ "irem", "ILKER" = "ilker"), Arda'nın `GrupDeposu` Türkçe küçültme ("İrem" = "irem", "ILKER" ≠ "ilker"). Sonuç: istemci aynı kişi sayarken `GrupKaydi.Isle` iki ayrı üye açabilir. Öneri: tek tanım Kurallar'da (`Hamle.Erken` gibi), dört I harfi de aynı sayılsın; `Kur`, `GrupKaydi`, sunucu ve `GrupDeposu` onu kullansın.
+| 24 | İsim karşılaştırmasının tek tanımı `Oyuncu.IsimAnahtari`: boşluk, büyük/küçük harf ve I/İ/ı/i farkı gözetilmez ("İrem" = "irem", "ILKER" = "ılker"). `Kur`, `GrupKaydi.Isle`, sunucu ve istemci (`GrupDeposu`, kurulum) hep bunu kullanır. **Yapıldı (2026-10-11, Enes'in isteğiyle)** | 3 yerde 3 farklı karşılaştırma vardı: istemci aynı kişi sayarken grup kaydı iki üye açabiliyordu |
 
 ## Sözleşmeye önerilen değişiklikler (oturumda onaylanacak)
 

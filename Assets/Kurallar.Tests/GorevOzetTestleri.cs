@@ -48,37 +48,7 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(oyun.Ozet().Gorevler, Has.Count.EqualTo(5));
         }
 
-        [Test]
-        public void Gorev_sonuclari_herkese_acik_sayaclarla_tutarli()
-        {
-            for (int tohum = 1; tohum <= 80; tohum++)
-            {
-                var oyun = Yeni(kisi: 5, tohum: tohum, ayarla: x =>
-                {
-                    x.GizliGorevler = true;
-                    x.KaosTurlari = true;
-                    x.OneriSorulari = Havuz;
-                    x.TurSayisi = 12;
-                });
-                for (int i = 0; Durum(oyun).Asama != Asama.OyunSonu; i++) TurOyna(oyun, i % 3 != 0);
-
-                var ozet = oyun.Ozet();
-                foreach (var s in ozet.Gorevler)
-                {
-                    OyuncuDurumu o = null;
-                    foreach (var x in ozet.Oyuncular) if (x.Id == s.Kim) o = x;
-                    switch (s.Gorev.Tur)
-                    {
-                        case GorevTuru.MiniOyunKazan: Assert.That(s.Basarili, Is.EqualTo(o.MiniOyunKazanma >= s.Gorev.Adet)); break;
-                        case GorevTuru.HicGosterilme: Assert.That(s.Basarili, Is.EqualTo(o.Gosterilme == 0)); break;
-                        case GorevTuru.KaosTurundaKazan: Assert.That(s.Basarili, Is.EqualTo(o.KaosKazanma >= 1)); break;
-                        case GorevTuru.HicIfsaOlma:
-                            if (o.SoruAlma == 0) Assert.That(s.Basarili, Is.False, "hiç B olmayan bu görevi geçemez");
-                            break;
-                    }
-                }
-            }
-        }
+        // Görev sonuçlarının doğruluğu (20 türün hepsi): GorevUnvanTestleri.
 
         // ---------------------------------------------------- Özet
 
@@ -108,57 +78,7 @@ namespace Cakmak.Kurallar.Tests
             Saniye(oyun, 6);
         }
 
-        static int? AcikSayac(UnvanTuru tur, OyuncuDurumu o)
-        {
-            switch (tur)
-            {
-                case UnvanTuru.Miknatis: return o.Gosterilme;
-                case UnvanTuru.Gammaz: return o.IfsaEttirme;
-                case UnvanTuru.SirKupu: return o.Saklama;
-                case UnvanTuru.HedefTahtasi: return o.SoruAlma;
-                case UnvanTuru.SoruMakinesi: return o.SoruSorma;
-                case UnvanTuru.Sansli: return o.MiniOyunKazanma;
-                case UnvanTuru.AtesleOynayan: return o.Yanma;
-                case UnvanTuru.Bedelci: return o.BedelOdeme;
-                case UnvanTuru.Cezakes: return o.CezaCekme;
-                case UnvanTuru.KaosCanavari: return o.KaosKazanma;
-                default: return null; // gizli izlerden hesaplananlar
-            }
-        }
-
-        [Test]
-        public void Unvanlar_en_fazla_uc_tane_ve_her_birinin_tek_sahibi_var()
-        {
-            int kontrol = 0;
-            for (int tohum = 1; tohum <= 200; tohum++)
-            {
-                var oyun = Yeni(kisi: 4 + tohum % 4, tohum: tohum, ayarla: x =>
-                {
-                    x.TurSayisi = 15;
-                    x.CezaSeviyesi = CezaSeviyesi.Cesur;
-                    x.KaosTurlari = true;
-                    x.OneriSorulari = Havuz;
-                    x.SesliCezalar = Sesli;
-                });
-                for (int i = 0; Durum(oyun).Asama != Asama.OyunSonu; i++) TurOyna(oyun, (i + tohum) % 3 != 0);
-                var ozet = oyun.Ozet();
-                Assert.That(ozet.Unvanlar.Count, Is.LessThanOrEqualTo(3));
-                var turler = new HashSet<UnvanTuru>();
-                foreach (var u in ozet.Unvanlar)
-                {
-                    Assert.That(turler.Add(u.Tur), Is.True, "aynı unvan iki kez");
-                    foreach (var o in ozet.Oyuncular)
-                    {
-                        var sayac = AcikSayac(u.Tur, o);
-                        if (!sayac.HasValue) continue;
-                        kontrol++;
-                        if (o.Id == u.Kim) Assert.That(sayac.Value, Is.EqualTo(u.Deger), u.Tur + ": değer");
-                        else Assert.That(sayac.Value, Is.LessThan(u.Deger), $"tohum {tohum}, {u.Tur}: eşitlikte unvan verilmez");
-                    }
-                }
-            }
-            Assert.That(kontrol, Is.GreaterThan(100), "test gerçekten unvan kontrol etti");
-        }
+        // Unvanların değeri, tek sahibi ve en fazla 3 olması (30 türün hepsi): GorevUnvanTestleri.
 
         [Test]
         public void Esitlikte_unvan_verilmez()

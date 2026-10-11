@@ -61,8 +61,11 @@ namespace Cakmak.Kurallar.Tests
                     gorevGoruldu[s.Gorev.Tur] = (g.basarili || s.Basarili, g.basarisiz || !s.Basarili);
                 }
 
+                Assert.That(ozet.Unvanlar.Count, Is.LessThanOrEqualTo(3));
+                var buOyundaki = new HashSet<UnvanTuru>();
                 foreach (var u in ozet.Unvanlar)
                 {
+                    Assert.That(buOyundaki.Add(u.Tur), Is.True, $"tohum {tohum}: aynı unvan iki kez");
                     unvanGoruldu.Add(u.Tur);
                     if (u.Tur == UnvanTuru.Kacak) Assert.That(cezaAcik, Is.True, "ceza kapalıyken Kaçak verilmez");
                     if (u.Tur == UnvanTuru.Gorunmez)

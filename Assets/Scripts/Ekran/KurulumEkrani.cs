@@ -340,7 +340,7 @@ namespace TheLighter.Istemci
             {
                 string isim = (kutular[i].value ?? "").Trim();
                 if (isim.Length == 0) return Metin.Al("kurulum.hata_bos", i + 1);
-                if (!gorulen.Add(GrupDeposu.Katla(isim))) return Metin.Al("kurulum.hata_ayni", isim);
+                if (!gorulen.Add(Oyuncu.IsimAnahtari(isim))) return Metin.Al("kurulum.hata_ayni", isim);
                 isimler.Add(isim);
             }
             if (isimler.Count < EnAz) return Metin.Al("kurulum.hata_az", EnAz);

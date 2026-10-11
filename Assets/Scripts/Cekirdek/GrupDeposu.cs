@@ -59,7 +59,7 @@ namespace TheLighter.Istemci
         {
             var bugun = new HashSet<string>();
             foreach (var i in isimler)
-                if (!string.IsNullOrWhiteSpace(i)) bugun.Add(Katla(i));
+                if (!string.IsNullOrWhiteSpace(i)) bugun.Add(Oyuncu.IsimAnahtari(i));
             if (bugun.Count == 0 || gruplar == null) return null;
 
             GrupDosyasi en = null;
@@ -68,7 +68,7 @@ namespace TheLighter.Istemci
             {
                 int ortak = 0;
                 foreach (var u in g.Kayit.Uyeler)
-                    if (bugun.Contains(Katla(u.Isim))) ortak++;
+                    if (bugun.Contains(Oyuncu.IsimAnahtari(u.Isim))) ortak++;
                 if (ortak < EnAzOrtak || ortak * 2 < bugun.Count) continue;
                 if (ortak > enIyi || (ortak == enIyi && en != null && g.Kayit.OyunSayisi > en.Kayit.OyunSayisi))
                 {
@@ -113,12 +113,6 @@ namespace TheLighter.Istemci
                 Debug.LogWarning("[TheLighter] Grup kaydı yazılamadı (" + e.GetType().Name + ")");
                 return false;
             }
-        }
-
-        /// <summary>"Ali" ile "ali" aynı kişi. Türkçe I/İ doğru küçülsün diye kültürden bağımsız katlama.</summary>
-        public static string Katla(string s)
-        {
-            return (s ?? "").Trim().Replace('I', 'ı').Replace('İ', 'i').ToLowerInvariant();
         }
     }
 }

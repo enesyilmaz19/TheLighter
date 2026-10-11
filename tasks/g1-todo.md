@@ -118,7 +118,7 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
 | 11 | Görev "B olduğun hiçbir soru ifşa olmasın": en az bir kez B olmak şart | Yoksa hiç oynamayan kazanır |
 | 12 | Ceza Turu kaosu seviye Kapalı'yken: Temiz modda Hafif, değilse Cesur kartlar | Plan "Temiz modda Hafif" diyor, dışarıda tam ceza |
 | 13 | Oylamada çoğunluk yoksa (eşitlik ya da hiç oy) kimse ceza çekmez | AFK oylayıcılar birini cezalandıramasın |
-| 14 | Aynı isim (büyük/küçük harf fark etmez) iki kez kurulamaz | Grup kaydı kişileri isimle eşliyor |
+| 14 | Aynı isim iki kez kurulamaz ("aynı" = `Oyuncu.IsimAnahtari`, bkz. 24) | Grup kaydı kişileri isimle eşliyor |
 | 15 | Unvan serisi kişinin oynadığı oyunlar üzerinden: bir oyunu kaçıran seriyi kaybetmez | "Üst üste" o kişinin oyunları için |
 | 16 | "Bedel öde" ve "hiç ceza çekme" görevleri, "Kaçak" unvanı sadece ceza açıkken | Kapalıyken bedel yok, ceza çekmemek de bedava |
 | 17 | Süre dolması (Uykucu): soru sormayan A, C seçmeyen B, hamle yapmayan B/C. Oylama ve karar süreleri sayılmaz | Karar vermemek "hayır" demek, oy vermemek de çekimser kalmak |

@@ -586,3 +586,218 @@
 .son-satir {
     margin: 4px 0;
 }
+
+/* ---------- S3: tekrar oynatma ---------- */
+
+.kok .ust-cubuk-durum {
+    color: var(--alev);
+}
+
+/* Kaos: tur başında büyük duyuru */
+
+.kaos-karti {
+    background-color: #2A1240;
+    border-color: #B36BFF;
+    border-width: 4px;
+    border-radius: 40px;
+    padding: 40px 44px;
+    margin: 16px 0;
+}
+
+.kok .kaos-ust {
+    color: #B36BFF;
+    font-size: 38px;
+    letter-spacing: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.kok .kaos-ad {
+    font-size: 80px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin: 12px 0;
+}
+
+.kok .kaos-aciklama {
+    font-size: 42px;
+    color: var(--yazi);
+    -unity-text-align: middle-center;
+}
+
+.kok .banner.kaos-serit {
+    background-color: #2A1240;
+    color: #D9B3FF;
+    font-size: 34px;
+    -unity-font-style: normal;
+}
+
+/* Kızgın Çakmak ısısı */
+
+.kok .isi {
+    font-size: 40px;
+    -unity-font-style: bold;
+    border-radius: 20px;
+    padding: 12px 24px;
+    margin: 12px 0 4px 0;
+    -unity-text-align: middle-center;
+}
+
+.kok .isi-soguk { background-color: #12303A; color: #7FD3FF; }
+.kok .isi-ilik { background-color: #3A3212; color: #FFD166; }
+.kok .isi-sicak { background-color: #3A2212; color: #FF9F1C; }
+.kok .isi-kizgin { background-color: #3A1212; color: #FF5A5F; }
+
+.kok .banner.yanma {
+    background-color: #3A1212;
+    color: #FF5A5F;
+    font-size: 46px;
+}
+
+/* Ceza kartları ve çark */
+
+.ceza-alani {
+    margin: 16px 0;
+}
+
+.kok .ceza-cark {
+    font-size: 64px;
+    -unity-font-style: bold;
+    color: var(--alev);
+    -unity-text-align: middle-center;
+    padding: 40px 0;
+}
+
+.ceza-karti {
+    border-radius: 28px;
+    padding: 24px 32px;
+    margin: 8px 0;
+    border-width: 4px;
+}
+
+.ceza-sesli {
+    background-color: #3A1A2A;
+    border-color: #F15BB5;
+}
+
+.ceza-kisit {
+    background-color: var(--yuzey);
+    border-color: var(--cizgi);
+}
+
+.kok .ceza-kim {
+    font-size: 40px;
+    -unity-font-style: bold;
+}
+
+.kok .ceza-tur {
+    font-size: 36px;
+    color: var(--alev);
+    -unity-font-style: bold;
+    margin-top: 8px;
+}
+
+.kok .ceza-metin {
+    font-size: 46px;
+    margin: 8px 0;
+}
+
+/* Gizli görev */
+
+.gorev-karti {
+    background-color: var(--yuzey);
+    border-color: var(--alev);
+    border-width: 4px;
+    border-radius: 40px;
+    padding: 48px 44px;
+    margin: 24px 0;
+}
+
+.kok .gorev-zorluk {
+    color: var(--alev);
+    font-size: 38px;
+    letter-spacing: 6px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.kok .gorev-metin {
+    font-size: 60px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-top: 16px;
+}
+
+.gorev-basarili {
+    border-left-width: 8px;
+    border-left-color: #06D6A0;
+}
+
+.gorev-basarisiz {
+    border-left-width: 8px;
+    border-left-color: var(--cizgi);
+}
+
+.kok .gorev-durum {
+    font-size: 34px;
+    color: var(--yazi-soluk);
+}
+
+.gorev-basarili .gorev-durum {
+    color: #06D6A0;
+}
+
+/* Unvanlar, grup, paylaşım kartı */
+
+.unvan-karti {
+    background-color: var(--alev-koyu);
+    border-radius: 28px;
+    padding: 24px 32px;
+    margin: 8px 0;
+}
+
+.kok .unvan-ad {
+    font-size: 56px;
+    -unity-font-style: bold;
+    color: var(--alev);
+}
+
+.kok .unvan-kim {
+    font-size: 42px;
+}
+
+.grup-kutusu {
+    margin: 8px 0;
+}
+
+.hafiza-karti {
+    background-color: var(--yuzey);
+    border-left-width: 8px;
+    border-left-color: var(--alev);
+    border-radius: 24px;
+    padding: 24px 32px;
+    margin: 16px 0;
+}
+
+.kart-perdesi {
+    padding: 40px 56px;
+}
+
+.paylasim-karti {
+    flex-grow: 1;
+    background-color: var(--yuzey);
+    border-color: var(--alev);
+    border-width: 4px;
+    border-radius: 48px;
+    padding: 56px 48px;
+}
+
+.kok .kart-grup {
+    font-size: 56px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.kart-butonlari {
+    margin-top: 24px;
+}

@@ -25,6 +25,7 @@ namespace TheLighter.Istemci
         readonly EldenEleAkisi akis;
         readonly VisualElement ustCubuk;
         readonly Label turYazisi;
+        readonly Label durumYazisi;
         readonly VisualElement govde;
         readonly VisualElement menu;
         IOyunParcasi parca;
@@ -43,6 +44,8 @@ namespace TheLighter.Istemci
             turYazisi = Yazi("", "ust-cubuk-yazi");
             ustCubuk.Add(turYazisi);
             ustCubuk.Add(Esnek());
+            durumYazisi = Yazi("", "ust-cubuk-yazi", "ust-cubuk-durum");
+            ustCubuk.Add(durumYazisi);
             ustCubuk.Add(Buton(Metin.Al("oyun.menu"), MenuyuAc, "buton-kucuk"));
             Kok.Add(ustCubuk);
 
@@ -79,9 +82,16 @@ namespace TheLighter.Istemci
             // Mini oyunda ekranın üst yarısı ters döndüğü için üst çubuk gizlenir.
             ustCubuk.EnableInClassList("gizli", e.Tur == EkranTuru.MiniOyun || e.Tur == EkranTuru.OyunSonu);
             var g = e.Gorunum;
-            turYazisi.text = g.ToplamTur > 0
-                ? Metin.Al("oyun.tur_sinirli", g.Tur, g.ToplamTur)
+            // Curcuna soru toplama ve görev turu ilk turdan önce: tur numarası yok.
+            turYazisi.text = g.Tur <= 0 ? ""
+                : g.ToplamTur > 0 ? Metin.Al("oyun.tur_sinirli", g.Tur, g.ToplamTur)
                 : Metin.Al("oyun.tur_sinirsiz", g.Tur);
+
+            // Kaos turu ve Kızgın Çakmak'ın ısısı herkese açık: üst çubukta.
+            var parcalar = new System.Collections.Generic.List<string>();
+            if (g.Kaos != KaosKurali.Yok) parcalar.Add(Metin.Al("oyun.kaos_etiket", Tekrar.KaosAdi(g.Kaos)));
+            if (g.Isi.HasValue) parcalar.Add(Metin.Al("isi.etiket", Tekrar.IsiYazisi(g.Isi.Value)));
+            durumYazisi.text = string.Join("  ·  ", parcalar);
         }
 
         IOyunParcasi ParcaKur(EkranDurumu e)
@@ -97,10 +107,11 @@ namespace TheLighter.Istemci
                     return new MiniOyunParcasi(akis, e);
                 case EkranTuru.Ifsa:
                 case EkranTuru.Gume: return new SonucParcasi(akis, e);
-                case EkranTuru.OyunSonu:
-                    return new OyunSonuParcasi(akis, e,
-                        () => uygulama.OyunuBaslat(uygulama.SonIsimler, uygulama.SonAyarlar),
-                        uygulama.AnaMenu);
+                case EkranTuru.SoruToplama: return new SoruToplamaParcasi(akis, e);
+                case EkranTuru.GorevGoster: return new GorevParcasi(akis, e);
+                case EkranTuru.Oylama: return new OylamaParcasi(akis, e);
+                case EkranTuru.Karar: return new KararParcasi(akis, e);
+                case EkranTuru.OyunSonu: return new OyunSonuParcasi(uygulama, akis, e);
                 default: return new BekleParcasi();
             }
         }

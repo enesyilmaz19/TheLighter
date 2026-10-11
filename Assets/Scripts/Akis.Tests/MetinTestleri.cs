@@ -65,6 +65,41 @@ namespace TheLighter.Tests
                 Assert.IsTrue(t.Var("mini.ad." + m), "Eksik: mini.ad." + m);
                 Assert.IsTrue(t.Var("mini.kural." + m), "Eksik: mini.kural." + m);
             }
+
+            // S3: enum'a yeni tür eklenirse metni de eklensin (Enes ekler, metin G2'de).
+            foreach (OyunModu m in Enum.GetValues(typeof(OyunModu)))
+            {
+                Assert.IsTrue(t.Var("mod.ad." + m), "Eksik: mod.ad." + m);
+                Assert.IsTrue(t.Var("mod.aciklama." + m), "Eksik: mod.aciklama." + m);
+            }
+            foreach (CezaSeviyesi s in Enum.GetValues(typeof(CezaSeviyesi)))
+            {
+                Assert.IsTrue(t.Var("ceza.seviye." + s), "Eksik: ceza.seviye." + s);
+                Assert.IsTrue(t.Var("ceza.seviye_aciklama." + s), "Eksik: ceza.seviye_aciklama." + s);
+            }
+            foreach (CezaTuru c in Enum.GetValues(typeof(CezaTuru)))
+            {
+                Assert.IsTrue(t.Var("ceza.tur." + c), "Eksik: ceza.tur." + c);
+                if (c != CezaTuru.Sesli) Assert.IsTrue(t.Var("ceza.metin." + c), "Eksik: ceza.metin." + c);
+            }
+            foreach (CekimNedeni n in Enum.GetValues(typeof(CekimNedeni)))
+                Assert.IsTrue(t.Var("ceza.neden." + n), "Eksik: ceza.neden." + n);
+            foreach (IsiSeviyesi i in Enum.GetValues(typeof(IsiSeviyesi)))
+                Assert.IsTrue(t.Var("isi." + i), "Eksik: isi." + i);
+            foreach (KaosKurali k in Enum.GetValues(typeof(KaosKurali)))
+            {
+                Assert.IsTrue(t.Var("kaos.ad." + k), "Eksik: kaos.ad." + k);
+                Assert.IsTrue(t.Var("kaos.aciklama." + k), "Eksik: kaos.aciklama." + k);
+            }
+            foreach (Zorluk z in Enum.GetValues(typeof(Zorluk)))
+                Assert.IsTrue(t.Var("zorluk." + z), "Eksik: zorluk." + z);
+            foreach (GorevTuru g in Enum.GetValues(typeof(GorevTuru)))
+                Assert.IsTrue(t.Var("gorev.tur." + g), "Eksik: gorev.tur." + g);
+            foreach (UnvanTuru u in Enum.GetValues(typeof(UnvanTuru)))
+            {
+                Assert.IsTrue(t.Var("unvan.ad." + u), "Eksik: unvan.ad." + u);
+                Assert.IsTrue(t.Var("unvan.aciklama." + u), "Eksik: unvan.aciklama." + u);
+            }
         }
 
         [Test]

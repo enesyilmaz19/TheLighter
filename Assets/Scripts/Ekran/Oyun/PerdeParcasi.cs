@@ -31,17 +31,35 @@ namespace TheLighter.Istemci
             }
 
             Kok.Add(Esnek());
+
+            // Kaos turu: tur başında herkes görsün diye büyük duyuru, telefon A'ya geçmeden önce (Ana Plan 8.3).
+            if (e.PerdeNedeni == PerdeNedeni.SoruSirasi && g.Kaos != KaosKurali.Yok)
+            {
+                Kok.Add(Tekrar.KaosKarti(g.Kaos));
+                Kok.Add(Esnek());
+            }
+
             Kok.Add(RenkNoktasi(akis.Sira(kime), "perde-renk"));
 
-            if (e.PerdeNedeni == PerdeNedeni.SoruSirasi)
+            switch (e.PerdeNedeni)
             {
-                string anahtar = e.SuresiDolan.HasValue ? "perde.sira_rastgele" : "perde.sira";
-                Kok.Add(Yazi(Metin.Al(anahtar, isim, TurkceEk.Bulunma(isim)), "perde-ust"));
-            }
-            else
-            {
-                string a = akis.Isim(g.A);
-                Kok.Add(Yazi(Metin.Al("perde.sordu", a, isim, TurkceEk.Yonelme(isim)), "perde-ust"));
+                case PerdeNedeni.SoruSirasi:
+                    string anahtar = e.SuresiDolan.HasValue ? "perde.sira_rastgele" : "perde.sira";
+                    Kok.Add(Yazi(Metin.Al(anahtar, isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    break;
+                case PerdeNedeni.SoruYazma:
+                    Kok.Add(Yazi(Metin.Al("perde.soru_yazma", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    break;
+                case PerdeNedeni.Gorev:
+                    Kok.Add(Yazi(Metin.Al("perde.gorev", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    break;
+                case PerdeNedeni.Oy:
+                    Kok.Add(Yazi(Metin.Al("perde.oy", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    break;
+                default:
+                    string a = akis.Isim(g.A);
+                    Kok.Add(Yazi(Metin.Al("perde.sordu", a, isim, TurkceEk.Yonelme(isim)), "perde-ust"));
+                    break;
             }
 
             Kok.Add(Yazi(Metin.Al("perde.telefonu_ver", isim, TurkceEk.Yonelme(isim)), "perde-buyuk"));
@@ -69,11 +87,23 @@ namespace TheLighter.Istemci
             var tur = g.MiniOyun;
 
             Kok = Kutu("parca", "perde");
+
+            // Kızgın Çakmak: bu devirde çakmak C'nin elinde yandıysa kartları burada (perde, saat durur).
+            var yanma = Tekrar.Filtrele(g.TurCezalari, true);
+            if (yanma.Count > 0)
+            {
+                Kok.Add(Yazi(Metin.Al("ceza.yandi", TurkceEk.Ilgi(c)), "banner", "yanma"));
+                foreach (var cek in yanma) Kok.Add(Tekrar.CezaKarti(akis, cek));
+            }
+            if (g.Kaos != KaosKurali.Yok) Kok.Add(Tekrar.KaosSeridi(g.Kaos));
+
             Kok.Add(Esnek());
             Kok.Add(Yazi(Metin.Al("mini.perde_verdi", b, c, TurkceEk.Yonelme(c)), "perde-ust"));
             Kok.Add(Yazi(Metin.Al("mini.ad." + tur), "perde-buyuk"));
             Kok.Add(Yazi(Metin.Al("mini.kural." + tur), "aciklama", "orta"));
-            Kok.Add(Yazi(Metin.Al("mini.perde_anlam", b, c), "aciklama", "orta"));
+            // Ters Dünya'da kim kazanırsa ne olacağı tersine döner (kural motorunda; burada sadece yazı).
+            string anlam = g.Kaos == KaosKurali.TersDunya ? "mini.perde_anlam_ters" : "mini.perde_anlam";
+            Kok.Add(Yazi(Metin.Al(anlam, b, c), "aciklama", "orta"));
             Kok.Add(Esnek());
             Kok.Add(Yazi(Metin.Al("mini.perde_yerlesim", b, c), "perde-alt"));
 

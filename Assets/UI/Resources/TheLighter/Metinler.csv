@@ -130,3 +130,214 @@ hata.GecersizGirdi,Olmadı: soru boş ya da çok uzun olabilir.
 hata.HakKalmadi,Bunu zaten yaptın.
 hata.HavuzBos,Henüz soru paketi yok.
 hata.OyuncuSayisiGecersiz,Oyuncu sayısı uygun değil.
+kurulum.hizli,Hızlı başla
+kurulum.hizli_ipucu,Normal · TKM · 15 tur · Genel paket · Cesur cezalar · görevler ve kaos açık
+kurulum.mod,Mod
+mod.ad.Normal,Normal
+mod.ad.Temiz,Temiz
+mod.ad.Curcuna,Curcuna
+mod.aciklama.Normal,Sırası gelen sorusunu kendisi yazar.
+mod.aciklama.Temiz,"Sadece Aile Dostu soruları, en fazla Hafif ceza."
+mod.aciklama.Curcuna,"Önce herkes 2 soru yazar. Sorular karışır, sırası gelene havuzdan biri düşer."
+kurulum.paketler,Soru paketleri
+kurulum.paket_sayi,{0} ({1})
+kurulum.bizim_paket,Bizim paket ({0})
+kurulum.paket_temiz,Temiz modda sadece Aile Dostu paketi.
+kurulum.ceza,Ceza seviyesi
+ceza.seviye.Kapali,Kapalı
+ceza.seviye.Hafif,Hafif
+ceza.seviye.Cesur,Cesur
+ceza.seviye_aciklama.Kapali,Ceza yok.
+ceza.seviye_aciklama.Hafif,Uygulamanın uyguladığı cezalar ve Bedel.
+ceza.seviye_aciklama.Cesur,"Sesli cezalar, Bedel ve Kızgın Çakmak da var."
+kurulum.ceza_temiz,Temiz modda en fazla Hafif.
+kurulum.ekstra,Ekstralar
+kurulum.gorevler,Gizli görevler
+kurulum.kaos,Kaos turları (her 5 turda)
+kurulum.acik,Açık
+kurulum.kapali,Kapalı
+kurulum.hata_paket,En az bir soru paketi seç.
+hafiza.oyun,Bu grupla {0}. oyununuz
+hafiza.rekor,Rekor: {0} bir oyunda {1} kez gösterildi
+hafiza.seri,{0} üst üste {1}. kez {2}
+hafiza.efsaneler,Efsaneler ({0})
+hafiza.efsaneler_baslik,Efsaneler
+hafiza.efsaneler_ipucu,Bu grubun ifşa olan soruları.
+hafiza.kapat,Kapat
+perde.soru_yazma,Soru yazma sırası {1}
+perde.gorev,Gizli görevine bakma sırası {1}
+perde.oy,Grup Kararı: oy verme sırası {1}
+perde.kaos_baslik,KAOS TURU
+kaos.ad.Yok,
+kaos.aciklama.Yok,
+kaos.ad.TersDunya,Ters Dünya
+kaos.aciklama.TersDunya,Bu tur soruyu alan kazanırsa soru ifşa olur.
+kaos.ad.GrupKarari,Grup Kararı
+kaos.aciklama.GrupKarari,"Mini oyun yok. Soran ve soruyu alan dışındakiler oylar: ifşa mı, güme mi?"
+kaos.ad.KorSoru,Kör Soru
+kaos.aciklama.KorSoru,"Soru havuzdan çekilir, soran da göremez. Sadece soruyu alan görür."
+kaos.ad.SoranGizli,Soran Gizli
+kaos.aciklama.SoranGizli,Bu tur soranın kim olduğu gizli.
+kaos.ad.AniOlum,Ani Ölüm
+kaos.aciklama.AniOlum,"Tek el, beraberlik yok. Berabere biterse soruyu alan kaybeder."
+kaos.ad.CezaTuru,Ceza Turu
+kaos.aciklama.CezaTuru,"Kaybeden ceza çeker, ceza kapalı olsa bile."
+kaos.ad.YonDegisti,Yön Değişti
+kaos.aciklama.YonDegisti,"Bu turdan sonra sıra çakmağı alana değil, rastgele birine geçer."
+kaos.ad.IkiyeKatla,İkiye Katla
+kaos.aciklama.IkiyeKatla,Kaybeden bir el daha isteyebilir. Yine kaybederse cezası ikiye katlanır.
+oyun.kaos_etiket,Kaos: {0}
+isi.Soguk,Soğuk
+isi.Ilik,Ilık
+isi.Sicak,Sıcak
+isi.Kizgin,KIZGIN
+isi.etiket,Çakmak: {0}
+isi.ipucu,Çakmak ısınıyor. Kızgınken verirsen alan yanabilir.
+ceza.baslik,{0} ceza çekti
+ceza.neden.Kaybetti,Mini oyunu kaybetti
+ceza.neden.Bedel,Bedel ödedi
+ceza.neden.Yandi,Çakmak elinde yandı
+ceza.tur.Sesli,Sesli ceza
+ceza.tur.Palyaco,Palyaço
+ceza.tur.HavuzdanSor,Havuzdan sor
+ceza.tur.BeraberlikRakibe,Beraberlik rakibin
+ceza.tur.SorunIfsa,Sorun ifşa
+ceza.metin.Palyaco,2 tur boyunca adının yanında palyaço yazar.
+ceza.metin.HavuzdanSor,Bir sonraki sorunu havuzdan çekmek zorundasın.
+ceza.metin.BeraberlikRakibe,Bir sonraki mini oyununda beraberlik rakibinin sayılır.
+ceza.metin.SorunIfsa,"Bir sonraki sorduğun soru, mini oyun ne olursa olsun ifşa olur."
+ceza.sesli_ipucu,Şimdi yap. Şeref sözü!
+ceza.cark,Ceza çekiliyor...
+ceza.tamam,"Tamam, devam"
+ceza.yandi,Çakmak {0} elinde yandı!
+palyaco.etiket,palyaço
+karar.katla_baslik,{0} kaybetti!
+karar.katla_soru,"{0}, bir el daha ister misin? Yine kaybedersen cezan ikiye katlanır."
+karar.katla_evet,Bir el daha!
+karar.katla_hayir,Kabul ediyorum
+karar.bedel_baslik,Soru ifşa olmak üzere!
+karar.bedel_soru,"{0}, bedel ödersen soru gizli kalır ama 2 ceza çekersin. Kalan hakkın: {1}"
+karar.bedel_evet,Bedel öde
+karar.bedel_hayir,İfşa olsun
+oy.baslik,"{0}, Grup Kararı"
+oy.aciklama,"{0} çakmağı {1} verdi. Soruyu sadece {0} biliyor. Sence soru ifşa mı olsun, güme mi gitsin?"
+oy.ifsa,İfşa olsun
+oy.gume,Güme gitsin
+oy.gizli,Oyun gizli. Kimin ne dediği görünmez.
+sonuc.oylama,Grup kararı: {0} ifşa · {1} güme
+sonuc.bedel,{0} bedel ödedi! Soru gizli kaldı.
+mini.perde_anlam_ters,Ters Dünya: {0} kazanırsa soru herkese açılır. {1} kazanırsa soru güme gider.
+mini.rol_b_ters,Ters Dünya: kazanırsan soru herkese açılır.
+mini.rol_c_ters,Ters Dünya: kazanırsan soru güme gider.
+soru.atanan_baslik,Sana düşen soru:
+soru.degistir,Değiştir (1 hak)
+soru.kor,Kör Soru: havuzdan bir soru çekildi ama sen de göremezsin. Sadece kime soracağını seç.
+soru.havuzdan_ceza,Cezan var: bu tur sorun havuzdan geldi.
+toplama.baslik,"{0}, havuza soru yaz"
+toplama.aciklama,"Herkes 2 soru yazar. Sorular karışır, kimin yazdığı bilinmez. ({0}/{1})"
+toplama.ekle,Havuza ekle
+toplama.oneri,Fikir ver
+toplama.kayit,Grup kaydedilirse yazdığın sorular bu cihazda grubun paketine eklenir.
+gorev.baslik,"{0}, gizli görevin"
+gorev.aciklama,Kimseye söyleme. Oyun sonunda herkesin görevi açılır.
+gorev.gordum,"Gördüm, telefonu ver"
+zorluk.Kolay,Kolay
+zorluk.Orta,Orta
+zorluk.Zor,Zor
+gorev.tur.KisiyiGoster,{2} en az {0} kez göster.
+gorev.tur.FarkliKisiGoster,En az {0} farklı kişiyi göster.
+gorev.tur.MiniOyunKazan,En az {0} mini oyun kazan.
+gorev.tur.HicIfsaOlma,En az bir kez soru al ve aldığın hiçbir soru ifşa olmasın.
+gorev.tur.AyniKisiyeSor,Aynı kişiye en az {0} soru sor.
+gorev.tur.SeniGostersin,{1} seni en az {0} kez göstersin.
+gorev.tur.HicGosterilme,Hiç gösterilme.
+gorev.tur.KaosTurundaKazan,Bir kaos turunda mini oyun kazan.
+gorev.tur.KisiyeSor,{3} en az {0} soru sor.
+gorev.tur.SoruSor,En az {0} soru sor.
+gorev.tur.IfsaEttir,Çakmağı alan olarak en az {0} soruyu ifşa ettir.
+gorev.tur.GumeyeGonder,Soruyu alan olarak en az {0} soruyu güme gönder.
+gorev.tur.FarkliKisiyeSor,En az {0} farklı kişiye soru sor.
+gorev.tur.IntikamAl,Seni gösteren kişiye hemen sonraki turda soru sor.
+gorev.tur.SirriniAc,{4} soruyu aldığı bir turda çakmağı sen al ve soruyu ifşa ettir.
+gorev.tur.BedelOde,En az {0} kez bedel öde.
+gorev.tur.UstUsteKazan,Üst üste {0} mini oyun kazan.
+gorev.tur.HedefiYen,Mini oyunda {2} en az {0} kez yen.
+gorev.tur.HicCezaCekme,"En az {0} mini oyun oyna, hiç ceza çekme."
+gorev.tur.CokGosterilme,En az {0} kez gösteril.
+son.unvanlar,Unvanlar
+son.unvan_yok,Bu oyunda unvan çıkmadı.
+son.gorevler,Gizli görevler
+son.gorev_basarili,Başardı
+son.gorev_basarisiz,Başaramadı
+son.grup_kaydet,Bu grubu kaydet
+son.grup_ad,Grup adı (ör. Yurt 3. kat)
+son.grup_ad_bos,Gruba bir ad ver.
+son.grup_kaydedildi,{0} kaydedildi. Bu grupla {1}. oyununuz.
+son.grup_hata,Kaydedilemedi.
+son.paylas,Paylaşım kartı
+kart.alt,TheLighter · gizli sorulu parti oyunu
+kart.gorevi_yapanlar,Görevini yapanlar
+kart.kimse,Kimse
+kart.kaydet,Kaydet
+kart.kaydedildi,Kaydedildi: {0}
+kart.kaydedilemedi,Kaydedilemedi.
+unvan.ad.Miknatis,Mıknatıs
+unvan.aciklama.Miknatis,{0} kez gösterildi
+unvan.ad.Gammaz,Gammaz
+unvan.aciklama.Gammaz,{0} soruyu ifşa ettirdi
+unvan.ad.SirKupu,Sır Küpü
+unvan.aciklama.SirKupu,{0} soruyu güme gönderdi
+unvan.ad.HedefTahtasi,Hedef Tahtası
+unvan.aciklama.HedefTahtasi,{0} soru aldı
+unvan.ad.SoruMakinesi,Soru Makinesi
+unvan.aciklama.SoruMakinesi,{0} soru sordu
+unvan.ad.Sansli,Şanslı
+unvan.aciklama.Sansli,{0} mini oyun kazandı
+unvan.ad.Takintili,Takıntılı
+unvan.aciklama.Takintili,Aynı kişiye {0} soru sordu
+unvan.ad.Intikamci,İntikamcı
+unvan.aciklama.Intikamci,{0} kez kendisini gösterene hemen soru sordu
+unvan.ad.AtesleOynayan,Ateşle Oynayan
+unvan.aciklama.AtesleOynayan,Çakmak elinde {0} kez yandı
+unvan.ad.Bedelci,Bedelci
+unvan.aciklama.Bedelci,{0} kez bedel ödedi
+unvan.ad.Cezakes,Cezakeş
+unvan.aciklama.Cezakes,{0} ceza çekti
+unvan.ad.KaosCanavari,Kaos Canavarı
+unvan.aciklama.KaosCanavari,Kaos turlarında {0} kez kazandı
+unvan.ad.Kale,Kale
+unvan.aciklama.Kale,"{0} soru aldı, hiçbiri ifşa olmadı"
+unvan.ad.Gorunmez,Görünmez
+unvan.aciklama.Gorunmez,Hiç gösterilmedi
+unvan.ad.Talihsiz,Talihsiz
+unvan.aciklama.Talihsiz,"{0} mini oyun oynadı, hiç kazanamadı"
+unvan.ad.SosyalKelebek,Sosyal Kelebek
+unvan.aciklama.SosyalKelebek,{0} farklı kişiyi gösterdi
+unvan.ad.Sadik,Sadık
+unvan.aciklama.Sadik,Aynı kişiyi {0} kez gösterdi
+unvan.ad.Dedikoducu,Dedikoducu
+unvan.aciklama.Dedikoducu,{0} farklı kişiye soru sordu
+unvan.ad.Gundem,Gündem
+unvan.aciklama.Gundem,{0} farklı kişiden soru aldı
+unvan.ad.Yenilmez,Yenilmez
+unvan.aciklama.Yenilmez,Üst üste {0} mini oyun kazandı
+unvan.ad.Zorba,Zorba
+unvan.aciklama.Zorba,Aynı kişiyi {0} kez yendi
+unvan.ad.Av,Av
+unvan.aciklama.Av,Aynı kişiye {0} kez yenildi
+unvan.ad.Ayna,Ayna
+unvan.aciklama.Ayna,{0} kez berabere kaldı
+unvan.ad.Uykucu,Uykucu
+unvan.aciklama.Uykucu,Süresi {0} kez doldu
+unvan.ad.Kacak,Kaçak
+unvan.aciklama.Kacak,"{0} mini oyun oynadı, hiç ceza çekmedi"
+unvan.ad.AcikKitap,Açık Kitap
+unvan.aciklama.AcikKitap,Aldığı {0} soru ifşa oldu
+unvan.ad.EliBos,Eli Boş
+unvan.aciklama.EliBos,Çakmağı aldığı {0} soru güme gitti
+unvan.ad.Kumarbaz,Kumarbaz
+unvan.aciklama.Kumarbaz,{0} kez bir el daha dedi
+unvan.ad.Bumerang,Bumerang
+unvan.aciklama.Bumerang,Gösterdiği kişiler onu {0} kez geri gösterdi
+unvan.ad.Sogukkanli,Soğukkanlı
+unvan.aciklama.Sogukkanli,Çakmak kızgınken {0} kez verdi

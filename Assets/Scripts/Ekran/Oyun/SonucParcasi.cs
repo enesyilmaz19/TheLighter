@@ -1,4 +1,3 @@
-using System;
 using Cakmak.Kurallar;
 using TheLighter.Akis;
 using UnityEngine.UIElements;
@@ -8,6 +7,7 @@ namespace TheLighter.Istemci
 {
     /// <summary>
     /// Herkesin baktığı sonuç ekranı: ifşa ya da güme. Süre bitince kural motoru kendiliğinden yeni tura geçer.
+    /// Bu turda ceza çekildiyse önce çark döner, kartlar açılır; "Tamam" denene kadar saat durur (akış).
     /// </summary>
     sealed class SonucParcasi : IOyunParcasi
     {
@@ -21,15 +21,41 @@ namespace TheLighter.Istemci
             Kok = Kutu("parca", "sonuc");
 
             if (g.SonMiniOyun != null) Kok.Add(ElKarti(akis, g, g.SonMiniOyun));
+            if (g.SonOylama != null)
+                Kok.Add(Yazi(Metin.Al("sonuc.oylama", g.SonOylama.Ifsa, g.SonOylama.Gume), "banner"));
 
             Kok.Add(Esnek());
-            Kok.Add(e.Tur == EkranTuru.Ifsa ? IfsaKarti(akis, g) : GumeKarti());
+            Kok.Add(e.Tur == EkranTuru.Ifsa ? IfsaKarti(akis, g) : GumeKarti(akis, g));
+
+            // Bu turun cezaları (yanma kartları mini oyun perdesinde gösterildi ama burada da hatırlatılır).
+            if (g.TurCezalari.Count > 0)
+            {
+                if (e.CezaOnayBekliyor)
+                {
+                    var tamam = Buton(Metin.Al("ceza.tamam"), akis.CezalariOnayla, "buton-birincil");
+                    tamam.AddToClassList("gizli");
+                    Kok.Add(Tekrar.Cark(akis, g.TurCezalari, () =>
+                    {
+                        tamam.RemoveFromClassList("gizli");
+                        GecikmeliAc(tamam);
+                    }));
+                    Kok.Add(tamam);
+                }
+                else
+                {
+                    var alan = Kutu("ceza-alani");
+                    foreach (var c in g.TurCezalari) alan.Add(Tekrar.CezaKarti(akis, c));
+                    Kok.Add(alan);
+                }
+            }
             Kok.Add(Esnek());
 
-            // Sıra her durumda C'ye geçer. Son turda "sıra geçiyor" yazmamak için tur sayısına bakılıyor (sadece yazı).
+            // Sıra her durumda C'ye geçer (Yön Değişti'de rastgele birine). Son turda "sıra geçiyor" yazılmaz.
             string sonraki = akis.Isim(g.C);
             bool sonTur = g.ToplamTur > 0 && g.Tur >= g.ToplamTur;
-            string sira = sonTur ? Metin.Al("sonuc.son_tur") : Metin.Al("sonuc.sira", sonraki, TurkceEk.Yonelme(sonraki));
+            string sira = sonTur ? Metin.Al("sonuc.son_tur")
+                : g.Kaos == KaosKurali.YonDegisti ? Tekrar.KaosAdi(g.Kaos)
+                : Metin.Al("sonuc.sira", sonraki, TurkceEk.Yonelme(sonraki));
 
             var alt = Kutu("satir");
             alt.Add(Yazi(sira, "aciklama"));
@@ -62,10 +88,12 @@ namespace TheLighter.Istemci
             return kart;
         }
 
-        static VisualElement GumeKarti()
+        static VisualElement GumeKarti(EldenEleAkisi akis, Gorunum g)
         {
             var kart = Kutu("gume-karti");
             kart.Add(Yazi(Metin.Al("sonuc.gume_baslik"), "gume-baslik"));
+            // Bedel: herkes "Ayşe bedel ödedi" diye görür (Ana Plan 8.1). Soru yine gizli.
+            if (g.BedelOdendi) kart.Add(Yazi(Metin.Al("sonuc.bedel", akis.Isim(g.B)), "aciklama", "orta"));
             kart.Add(Yazi(Metin.Al("sonuc.gume_alt"), "aciklama", "orta"));
             return kart;
         }
@@ -74,51 +102,5 @@ namespace TheLighter.Istemci
         {
             SureyiYaz(sure, e.Gorunum.KalanMs, 0);
         }
-    }
-
-    sealed class OyunSonuParcasi : IOyunParcasi
-    {
-        public VisualElement Kok { get; }
-
-        public OyunSonuParcasi(EldenEleAkisi akis, EkranDurumu e, Action tekrar, Action anaMenu)
-        {
-            var g = e.Gorunum;
-            Kok = Kutu("parca", "oyun-sonu");
-
-            Kok.Add(Yazi(Metin.Al("son.baslik"), "logo"));
-            Kok.Add(Yazi(Metin.Al("son.tur", g.Tur), "aciklama", "orta"));
-
-            var kaydirma = new ScrollView(ScrollViewMode.Vertical);
-            kaydirma.AddToClassList("kaydirma");
-
-            kaydirma.Add(Yazi(Metin.Al("son.ifsalar"), "alt-baslik"));
-            if (e.IfsaOlanlar == null || e.IfsaOlanlar.Count == 0) kaydirma.Add(Yazi(Metin.Al("son.ifsa_yok"), "aciklama"));
-            else
-            {
-                foreach (var k in e.IfsaOlanlar)
-                {
-                    var kart = Kutu("son-kart");
-                    kart.Add(Yazi(k.Soru != null ? Metin.Al("sonuc.ifsa_soru", k.Soru) : Metin.Al("son.fisilti"), "son-soru"));
-                    kart.Add(Yazi(Metin.Al("sonuc.soran_cevap", akis.Isim(k.Soran), akis.Isim(k.Cevap)), "ipucu"));
-                    kaydirma.Add(kart);
-                }
-            }
-
-            // Kural motorunun tuttuğu sayaçlar. Unvanlar S3'te kural kodundan gelecek.
-            kaydirma.Add(Yazi(Metin.Al("son.sayaclar"), "alt-baslik"));
-            foreach (var o in g.Oyuncular)
-            {
-                var satir = Kutu("satir", "son-satir");
-                satir.Add(RenkNoktasi(akis.Sira(o.Id)));
-                satir.Add(Yazi(Metin.Al("son.sayac", o.Isim, o.Gosterilme, o.IfsaEttirme, o.Saklama), "aciklama"));
-                kaydirma.Add(satir);
-            }
-            Kok.Add(kaydirma);
-
-            Kok.Add(Buton(Metin.Al("son.tekrar"), tekrar, "buton-birincil", "buton-buyuk"));
-            Kok.Add(Buton(Metin.Al("oyun.ana_menu"), anaMenu, "buton-ikincil"));
-        }
-
-        public void Guncelle(EkranDurumu e) { }
     }
 }

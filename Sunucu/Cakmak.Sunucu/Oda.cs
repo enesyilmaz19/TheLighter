@@ -82,7 +82,8 @@ namespace Cakmak.Sunucu
                 if (oyuncular.Count >= EnFazlaOyuncu) { b.Yolla(Protokol.Hata("ODA_DOLU")); return; }
 
                 var temiz = isim?.Trim();
-                if (!IsimGecerli(temiz) || oyuncular.Exists(o => string.Equals(o.Isim, temiz, StringComparison.OrdinalIgnoreCase)))
+                var isimAnahtari = Oyuncu.IsimAnahtari(temiz);
+                if (!IsimGecerli(temiz) || oyuncular.Exists(o => Oyuncu.IsimAnahtari(o.Isim) == isimAnahtari))
                 {
                     b.Yolla(Protokol.Hata("ISIM_GECERSIZ"));
                     return;

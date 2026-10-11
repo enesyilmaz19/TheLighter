@@ -163,20 +163,20 @@ namespace Cakmak.Kurallar.Tests
         {
             var ozet = new OyunOzeti
             {
-                Oyuncular = new[] { new OyuncuDurumu { Id = P(1), Isim = "Ayşe", Gosterilme = 5 } },
+                Oyuncular = new[] { new OyuncuDurumu { Id = P(1), Isim = "İrem", Gosterilme = 5 } },
                 Unvanlar = new[] { new Unvan { Tur = UnvanTuru.Miknatis, Kim = P(1), Deger = 5 } },
             };
             var k1 = GrupKaydi.Isle(null, ozet);
-            ozet.Oyuncular = new[] { new OyuncuDurumu { Id = P(3), Isim = "AYŞE", Gosterilme = 2 } };
+            ozet.Oyuncular = new[] { new OyuncuDurumu { Id = P(3), Isim = "IREM", Gosterilme = 2 } }; // İ ile I aynı
             ozet.Unvanlar = new[] { new Unvan { Tur = UnvanTuru.Miknatis, Kim = P(3), Deger = 2 } };
             var k2 = GrupKaydi.Isle(k1, ozet);
 
             Assert.That(k2.Uyeler, Has.Count.EqualTo(1));
-            var ayse = k2.Uyeler[0];
-            Assert.That(ayse.RekorGosterilme, Is.EqualTo(5));
-            Assert.That(ayse.ToplamGosterilme, Is.EqualTo(7));
-            Assert.That(ayse.Seriler, Has.Count.EqualTo(1));
-            Assert.That(ayse.Seriler[0].Seri, Is.EqualTo(2), "üst üste 2. kez Mıknatıs");
+            var irem = k2.Uyeler[0];
+            Assert.That(irem.RekorGosterilme, Is.EqualTo(5));
+            Assert.That(irem.ToplamGosterilme, Is.EqualTo(7));
+            Assert.That(irem.Seriler, Has.Count.EqualTo(1));
+            Assert.That(irem.Seriler[0].Seri, Is.EqualTo(2), "üst üste 2. kez Mıknatıs");
         }
 
         [Test]

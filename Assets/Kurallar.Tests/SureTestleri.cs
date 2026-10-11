@@ -126,5 +126,30 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(olaylar, Is.Empty);
             Assert.That(Durum(oyun).KalanMs, Is.EqualTo(0));
         }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void Elden_elede_ikinci_hamleye_tam_sure_online_da_sure_ortak(bool tekCihaz)
+        {
+            var oyun = Yeni(ayarla: x => x.TekCihaz = tekCihaz);
+            SorVeSec(oyun, "Soru?", out _, out var b, out var c);
+            Saniye(oyun, 8);
+            oyun.MiniOyunHamlesi(b, Hamle.TasKagitMakas(TkmSecim.Tas));
+            Saniye(oyun, 5); // online'da toplam 13 sn: C'nin süresi doldu
+
+            var g = Durum(oyun);
+            if (tekCihaz)
+            {
+                Assert.That(g.Asama, Is.EqualTo(Asama.MiniOyun), "C kendi 10 saniyesini alır");
+                Assert.That(g.KalanMs, Is.EqualTo(5000));
+                oyun.MiniOyunHamlesi(c, Hamle.TasKagitMakas(TkmSecim.Kagit));
+                Assert.That(Durum(oyun).SonMiniOyun.CKazandi, Is.True);
+            }
+            else
+            {
+                Assert.That(g.Asama, Is.EqualTo(Asama.Gume), "hamle yapmayan C kaybetti");
+                Assert.That(g.SonMiniOyun.SureDoldu, Is.True);
+            }
+        }
     }
 }

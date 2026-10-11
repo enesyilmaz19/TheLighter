@@ -124,6 +124,12 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
 | 17 | Süre dolması (Uykucu): soru sormayan A, C seçmeyen B, hamle yapmayan B/C. Oylama ve karar süreleri sayılmaz | Karar vermemek "hayır" demek, oy vermemek de çekimser kalmak |
 | 18 | Görünmez'in puanı ortalama gösterilme / 0,5 (eskiden sabit 1,5) | 30 unvan arasında sabit puan hiç ilk 3'e giremiyordu (600 oyunda 0) |
 | 19 | "Hep" unvanları (Kale, Talihsiz, Kaçak) puanı n / 2: n denemenin hepsinde tutmak yazı-tura gibi 2⁻ⁿ | Ortalamayla puanlanınca koşulu tutmayanların 0'ı yüzünden her oyunda bunlar çıkıyordu |
+| 20 | Elden elede (`TekCihaz`) mini oyun hamlesi sırayla: ilk hamleden sonra ikincinin süresi baştan başlar. Online'da süre ortak | Arda'nın bulgusu (PR #7): bölünmüş ekranda önce B seçiyor, B 7 sn düşününce C'ye 3 sn kalıyordu |
+| 21 | Elden elede saat, telefon dolaşırken (perde, görev, Curcuna yazma, oylama, ceza kartı) **istemcide** durur, kural motoru bilmez | Arda sordu. Motorun saati yok, `Ilerle`'yi kim çağırıyorsa zaman onun. Online'da sunucu hiç durdurmaz |
+| 22 | Grup eşleşmesi: bugünkülerin en az 3'ü ve en az yarısı kayıtlı grupta varsa aynı grup | Arda önerdi (istemcide, `GrupDeposu`) |
+| 23 | Android paylaşma menüsü: NativeShare eklentisi (`Packages/` değişir) | Arda sordu, **Enes karar verecek**. Şimdilik kart dosyaya kaydediliyor |
+
+**Açık:** İsim karşılaştırması 3 yerde 3 farklı: kural motoru ve sunucu `OrdinalIgnoreCase` ("İrem" ≠ "irem", "ILKER" = "ilker"), Arda'nın `GrupDeposu` Türkçe küçültme ("İrem" = "irem", "ILKER" ≠ "ilker"). Sonuç: istemci aynı kişi sayarken `GrupKaydi.Isle` iki ayrı üye açabilir. Öneri: tek tanım Kurallar'da (`Hamle.Erken` gibi), dört I harfi de aynı sayılsın; `Kur`, `GrupKaydi`, sunucu ve `GrupDeposu` onu kullansın.
 
 ## Sözleşmeye önerilen değişiklikler (oturumda onaylanacak)
 

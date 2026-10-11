@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TheLighter.Istemci.Duzenleyici
 {
     /// <summary>
-    /// Assets/Icerik altındaki .txt paketlerini <see cref="PaketListesi"/>'ne yazar.
+    /// Assets/Icerik altındaki .txt paketlerini ve sesli ceza dosyasını (Cezalar.csv) <see cref="PaketListesi"/>'ne yazar.
     /// Editör açılınca ve Icerik'e paket eklenince, silinince ya da taşınınca kendiliğinden çalışır.
     /// Enes'in klasörüne dokunmaz, sadece okur. Elle çalıştırmak için: menü → TheLighter → Soru paketlerini güncelle.
     /// </summary>
@@ -36,7 +36,7 @@ namespace TheLighter.Istemci.Duzenleyici
         static bool Ilgili(string[] yollar)
         {
             foreach (var y in yollar)
-                if (y.StartsWith(PaketListesi.IcerikKlasoru + "/") && y.EndsWith(".txt")) return true;
+                if (y.StartsWith(PaketListesi.IcerikKlasoru + "/") && (y.EndsWith(".txt") || y.EndsWith(".csv"))) return true;
             return false;
         }
 
@@ -55,18 +55,22 @@ namespace TheLighter.Istemci.Duzenleyici
                 }
             }
             paketler.Sort((x, y) => string.CompareOrdinal(x.name, y.name));
+            var sesli = AssetDatabase.LoadAssetAtPath<TextAsset>(PaketListesi.SesliCezaYolu);
 
             var liste = AssetDatabase.LoadAssetAtPath<PaketListesi>(PaketListesi.AssetYolu);
             if (liste == null)
             {
                 liste = ScriptableObject.CreateInstance<PaketListesi>();
                 liste.Paketler = paketler;
+                liste.SesliCezalar = sesli;
                 AssetDatabase.CreateAsset(liste, PaketListesi.AssetYolu);
             }
             else
             {
-                if (Ayni(liste.Paketler, paketler)) return; // değişmediyse dosyaya yazma, git'te boşuna değişiklik çıkmasın
+                // Değişmediyse dosyaya yazma, git'te boşuna değişiklik çıkmasın.
+                if (Ayni(liste.Paketler, paketler) && liste.SesliCezalar == sesli) return;
                 liste.Paketler = paketler;
+                liste.SesliCezalar = sesli;
                 EditorUtility.SetDirty(liste);
             }
             AssetDatabase.SaveAssets();

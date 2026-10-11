@@ -81,7 +81,9 @@ namespace TheLighter.Istemci
             sure = Yazi("", "sure");
             bas.Add(sure);
             kap.Add(bas);
-            kap.Add(Yazi(Metin.Al(bMi ? "mini.rol_b" : "mini.rol_c"), "yari-rol"));
+            string rol = bMi ? "mini.rol_b" : "mini.rol_c";
+            if (g.Kaos == KaosKurali.TersDunya) rol += "_ters";
+            kap.Add(Yazi(Metin.Al(rol), "yari-rol"));
             return kap;
         }
 

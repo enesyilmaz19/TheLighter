@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Cakmak.Kurallar;
 using TheLighter.Akis;
 using UnityEngine;
@@ -33,6 +35,14 @@ namespace TheLighter.Istemci
 
         public Ayarlar SonAyarlar { get; private set; } = new Ayarlar();
 
+        /// <summary>Son seçilen paketler (dosya adıyla; grubun paketi <see cref="PaketBilgisi.Bizim"/>).</summary>
+        public List<string> SonPaketler { get; private set; } = new List<string> { PaketBilgisi.Genel };
+
+        /// <summary>Assets/Icerik paketleri (PaketListesi üzerinden). Açılışta bir kez okunur.</summary>
+        public List<PaketBilgisi> Paketler { get; private set; } = new List<PaketBilgisi>();
+
+        List<string> sesliCezalar = new List<string>();
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Baslat()
         {
@@ -49,6 +59,7 @@ namespace TheLighter.Istemci
             if (Application.isMobilePlatform) Screen.orientation = ScreenOrientation.Portrait;
 
             Metin.Yukle();
+            PaketleriYukle();
             ArayuzuKur();
             AnaMenu();
         }
@@ -109,23 +120,46 @@ namespace TheLighter.Istemci
 
         public void Kurulum() => Goster(new KurulumEkrani(this));
 
-        /// <summary>Kural motorunu kurar ve oyun ekranına geçer. Kur hata verirse ekran değişmez, hata döner.</summary>
-        public Sonuc OyunuBaslat(IReadOnlyList<string> isimler, Ayarlar ayarlar)
+        /// <summary>
+        /// Kural motorunu kurar ve oyun ekranına geçer. Kur hata verirse ekran değişmez, hata döner.
+        /// Temiz modda sadece Aile Dostu paketi ve en fazla Hafif ceza (Ana Plan 8.1, 8.4).
+        /// </summary>
+        public Sonuc OyunuBaslat(IReadOnlyList<string> isimler, Ayarlar ayarlar, IReadOnlyList<string> paketler)
         {
             var oyuncular = new List<Oyuncu>();
             for (int i = 0; i < isimler.Count; i++)
                 oyuncular.Add(new Oyuncu(new OyuncuId(i + 1), isimler[i]));
 
+            bool temiz = ayarlar.Mod == OyunModu.Temiz;
+            var secili = temiz ? new List<string> { PaketBilgisi.AileDostu } : new List<string>(paketler ?? new string[0]);
+            var sorular = new List<string>();
+            foreach (var p in Paketler)
+                if (secili.Contains(p.Ad)) sorular.AddRange(p.Sorular);
+            if (!temiz && secili.Contains(PaketBilgisi.Bizim))
+            {
+                var grup = GrupDeposu.Eslesen(isimler);
+                if (grup != null) sorular.AddRange(grup.Kayit.GrupPaketi);
+            }
+
+            var ceza = ayarlar.CezaSeviyesi;
+            if (temiz && ceza == CezaSeviyesi.Cesur) ceza = CezaSeviyesi.Hafif;
+
             var oyunAyari = new Ayarlar
             {
-                Mod = OyunModu.Normal,
+                Mod = ayarlar.Mod,
                 MiniOyun = ayarlar.MiniOyun,
                 TurSayisi = ayarlar.TurSayisi,
                 SoruSuresiSn = ayarlar.SoruSuresiSn,
                 CevapSuresiSn = ayarlar.CevapSuresiSn,
                 HamleSuresiSn = ayarlar.HamleSuresiSn,
                 SonucSuresiSn = ayarlar.SonucSuresiSn,
-                OneriSorulari = OneriSorulariniYukle(),
+                CezaSeviyesi = ceza,
+                GizliGorevler = ayarlar.GizliGorevler,
+                KaosTurlari = ayarlar.KaosTurlari,
+                SesliCezalar = sesliCezalar,
+                // Elden ele: herkes telefonu kimin tuttuğunu görüyor, "Soran Gizli" çıkmasın.
+                TekCihaz = true,
+                OneriSorulari = sorular,
             };
 
             var s = EldenEleAkisi.Kur(oyunAyari, oyuncular, Environment.TickCount, out var akis);
@@ -133,23 +167,85 @@ namespace TheLighter.Istemci
 
             SonIsimler = new List<string>(isimler);
             SonAyarlar = ayarlar;
+            SonPaketler = new List<string>(paketler ?? new string[0]);
             Goster(new OyunEkrani(this, akis));
             return Sonuc.Tamam;
         }
 
+        public Sonuc TekrarOyna() => OyunuBaslat(SonIsimler, SonAyarlar, SonPaketler);
+
         /// <summary>
-        /// "Öneri çek" için soru paketleri: Enes'in Assets/Icerik/*.txt dosyaları, <see cref="PaketListesi"/> üzerinden.
+        /// Enes'in Assets/Icerik dosyaları, <see cref="PaketListesi"/> üzerinden: soru paketleri ve sesli cezalar.
         /// Paket yoksa öneri çek "henüz soru paketi yok" der.
         /// </summary>
-        static List<string> OneriSorulariniYukle()
+        void PaketleriYukle()
         {
-            var sorular = new List<string>();
+            Paketler = new List<PaketBilgisi>();
             var liste = Resources.Load<PaketListesi>(PaketListesi.ResourcesYolu);
             if (liste != null)
+            {
                 foreach (var paket in liste.Paketler)
-                    if (paket != null) sorular.AddRange(Paket.Ayristir(paket.text));
-            if (sorular.Count == 0) Debug.LogWarning("[TheLighter] Soru paketi yok. Menü → TheLighter → Soru paketlerini güncelle.");
-            return sorular;
+                {
+                    if (paket == null) continue;
+                    Paketler.Add(new PaketBilgisi
+                    {
+                        Ad = paket.name,
+                        GorunenAd = PaketBilgisi.BaslikBul(paket.text, paket.name),
+                        Sorular = Paket.Ayristir(paket.text),
+                    });
+                }
+                if (liste.SesliCezalar != null) sesliCezalar = Paket.Ayristir(liste.SesliCezalar.text);
+            }
+            if (Paketler.Count == 0) Debug.LogWarning("[TheLighter] Soru paketi yok. Menü → TheLighter → Soru paketlerini güncelle.");
+            if (Paketler.Find(p => p.Ad == PaketBilgisi.Genel) == null && Paketler.Count > 0)
+                SonPaketler = new List<string> { Paketler[0].Ad };
+        }
+
+        // ---------- Paylaşım kartı ----------
+
+        /// <summary>
+        /// Ekranın görüntüsünü PNG olarak kaydeder (paylaşım kartı). <paramref name="gizlenecek"/> (butonlar)
+        /// görüntü alınırken gizlenir. PC'de Resimler/TheLighter, telefonda uygulamanın klasörü.
+        /// Sonuç: dosya yolu ya da null.
+        /// </summary>
+        public void EkranGoruntusuKaydet(VisualElement gizlenecek, Action<string> bitti)
+        {
+            StartCoroutine(GoruntuAl(gizlenecek, bitti));
+        }
+
+        IEnumerator GoruntuAl(VisualElement gizlenecek, Action<string> bitti)
+        {
+            if (gizlenecek != null) gizlenecek.AddToClassList("gizli");
+            yield return null;
+            yield return new WaitForEndOfFrame();
+
+            string yol = null;
+            Texture2D resim = null;
+            try
+            {
+                resim = ScreenCapture.CaptureScreenshotAsTexture();
+                byte[] png = resim.EncodeToPNG();
+                string klasor = Application.isMobilePlatform
+                    ? Path.Combine(Application.persistentDataPath, "Kartlar")
+                    : Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                if (string.IsNullOrEmpty(klasor)) klasor = Path.Combine(Application.persistentDataPath, "Kartlar");
+                else if (!Application.isMobilePlatform) klasor = Path.Combine(klasor, "TheLighter");
+                Directory.CreateDirectory(klasor);
+                yol = Path.Combine(klasor, "thelighter-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".png");
+                File.WriteAllBytes(yol, png);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("[TheLighter] Kart kaydedilemedi (" + e.GetType().Name + ")");
+                yol = null;
+            }
+            finally
+            {
+                if (resim != null) Destroy(resim);
+            }
+
+            if (gizlenecek != null) gizlenecek.RemoveFromClassList("gizli");
+            if (bitti != null) bitti(yol);
         }
 
         // ---------- Ölçek ve çentik ----------

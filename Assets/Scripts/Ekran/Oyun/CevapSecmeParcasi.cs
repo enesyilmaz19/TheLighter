@@ -36,6 +36,7 @@ namespace TheLighter.Istemci
             sure = Yazi("", "sure");
             bas.Add(sure);
             Kok.Add(bas);
+            if (g.Kaos != KaosKurali.Yok) Kok.Add(Tekrar.KaosSeridi(g.Kaos));
 
             if (g.Fisilti || g.Soru == null)
             {
@@ -52,12 +53,19 @@ namespace TheLighter.Istemci
 
             Kok.Add(Yazi(Metin.Al("cevap.kime"), "alt-baslik"));
             Kok.Add(Yazi(Metin.Al("cevap.kime_ipucu", a), "ipucu"));
+
+            // Kızgın Çakmak: B "buna verirsem yanar mı" diye düşünsün (Ana Plan 8.1). Kesin sayı yok.
+            var isi = Tekrar.IsiEtiketi(g);
+            if (isi != null)
+            {
+                Kok.Add(isi);
+                Kok.Add(Yazi(Metin.Al("isi.ipucu"), "ipucu"));
+            }
             var cipKutusu = Kutu("cipler");
             foreach (var id in g.Secilebilir)
             {
-                var o = akis.OyuncuBul(id);
                 var secim = id;
-                var cip = OyuncuCipi(o.Isim, akis.Sira(id), () => { secili = secim; Durum(); });
+                var cip = OyuncuCipi(Tekrar.IsimEtiketi(akis, g, id), akis.Sira(id), () => { secili = secim; Durum(); });
                 ciptekiler.Add(id);
                 cipler.Add(cip);
                 cipKutusu.Add(cip);

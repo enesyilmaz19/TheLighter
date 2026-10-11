@@ -28,18 +28,23 @@ namespace TheLighter.Akis
     /// olduğu, kimin kazandığı <see cref="Oyun"/>'dan gelir. Bu sınıfın işi telefonun kimin elinde
     /// olduğunu takip etmek, perdeyi göstermek ve hangi ekranın kimin görünümüyle çizileceğine karar vermek.
     /// Perde açıkken ve oyun duraklatıldığında <see cref="Oyun.Ilerle"/> çağrılmaz: telefon el değiştirirken süre akmaz.
+    /// Telefonun sırayla herkese dolaştığı anlarda da (görevler, Curcuna soru yazma, Grup Kararı oyu) saat durur:
+    /// herkes masada, AFK yok; 10 kişinin sırayla oy vermesine motorun süresi yetmez.
     /// </summary>
     public sealed class EldenEleAkisi
     {
         readonly Oyun oyun;
         readonly List<Oyuncu> oyuncular;
-        readonly List<IfsaKaydi> ifsaOlanlar = new List<IfsaKaydi>();
+        readonly List<IfsaSatiri> ifsaOlanlar = new List<IfsaSatiri>();
+        readonly HashSet<OyuncuId> goreviGorenler = new HashSet<OyuncuId>();
         string kaldirilanPerde;
+        string onaylananCeza;
         OyuncuId? suresiDolan;
         bool suresiDolanBydi;
         Hamle? bBuEl;
         Hamle? cBuEl;
         BerabereEl sonBerabere;
+        OyunOzeti ozet;
 
         public EldenEleAkisi(Oyun oyun, IReadOnlyList<Oyuncu> oyuncular, Ayarlar ayarlar)
         {
@@ -84,13 +89,32 @@ namespace TheLighter.Akis
         /// <summary>Perdede "hazırım" denince.</summary>
         public void PerdeyiKaldir()
         {
-            if (!Ekran.SaatDurur) return;
-            kaldirilanPerde = PerdeAnahtari(Acik());
+            if (Ekran.Tur != EkranTuru.Perde && Ekran.Tur != EkranTuru.MiniOyunPerdesi) return;
+            kaldirilanPerde = Ekran.PerdeAnahtari;
             suresiDolan = null;
             suresiDolanBydi = false;
             Yenile();
         }
 
+        /// <summary>Görev ekranında "gördüm": telefon sıradakine geçer.</summary>
+        public void GorevGordum()
+        {
+            if (Ekran.Tur != EkranTuru.GorevGoster || !Ekran.Kime.HasValue) return;
+            goreviGorenler.Add(Ekran.Kime.Value);
+            Yenile();
+        }
+
+        /// <summary>Curcuna: telefonu tutan kişi havuza bir soru ekler (kişi başı 2).</summary>
+        public Sonuc HavuzaSoruEkle(string metin)
+        {
+            if (Ekran.Tur != EkranTuru.SoruToplama) return Sonuc.YanlisAsama;
+            return Sonra(oyun.HavuzaSoruEkle(Ekran.Kime.Value, metin ?? ""));
+        }
+
+        /// <summary>
+        /// A soruyu gönderir. Soru A'ya atandıysa (Curcuna, Kör Soru, "havuzdan sor" cezası) metin
+        /// kural motorunda yok sayılır, atanan soru gider.
+        /// </summary>
         public Sonuc SoruGonder(OyuncuId b, string metin)
         {
             if (Ekran.Tur != EkranTuru.SoruSorma) return Sonuc.YanlisAsama;
@@ -109,6 +133,13 @@ namespace TheLighter.Akis
         {
             if (Ekran.Tur != EkranTuru.SoruSorma) return Sonuc.YanlisAsama;
             return Sonra(oyun.OneriCek(Ekran.Kime.Value));
+        }
+
+        /// <summary>Curcuna: A'ya atanan soruyu bir kez değiştirir. Yenisi <c>Ekran.Gorunum.AtananSoru</c>.</summary>
+        public Sonuc SoruyuDegistir()
+        {
+            if (Ekran.Tur != EkranTuru.SoruSorma) return Sonuc.YanlisAsama;
+            return Sonra(oyun.SoruyuDegistir(Ekran.Kime.Value));
         }
 
         public Sonuc CevapSec(OyuncuId c)
@@ -135,6 +166,42 @@ namespace TheLighter.Akis
                 cBuEl = eskiC;
             }
             return Sonra(s);
+        }
+
+        /// <summary>Grup Kararı: telefonu tutan kişinin oyu.</summary>
+        public Sonuc Oy(bool ifsa)
+        {
+            if (Ekran.Tur != EkranTuru.Oylama) return Sonuc.YanlisAsama;
+            return Sonra(oyun.Oy(Ekran.Kime.Value, ifsa));
+        }
+
+        /// <summary>İkiye Katla: kaybeden "bir el daha" der.</summary>
+        public Sonuc IkiyeKatla()
+        {
+            if (Ekran.Tur != EkranTuru.Karar || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.IkiyeKatla(Ekran.Kime.Value));
+        }
+
+        /// <summary>Bedel: B soruyu kurtarır, iki ceza çeker.</summary>
+        public Sonuc BedelOde()
+        {
+            if (Ekran.Tur != EkranTuru.Karar || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.BedelOde(Ekran.Kime.Value));
+        }
+
+        /// <summary>İkiye Katla ya da Bedel'e "hayır".</summary>
+        public Sonuc KarariGec()
+        {
+            if (Ekran.Tur != EkranTuru.Karar || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.KarariGec(Ekran.Kime.Value));
+        }
+
+        /// <summary>Ceza kartları okundu: saat yeniden işler.</summary>
+        public void CezalariOnayla()
+        {
+            if (!Ekran.CezaOnayBekliyor) return;
+            onaylananCeza = CezaAnahtari(Ekran.Gorunum);
+            Yenile();
         }
 
         public Sonuc OyunuBitir()
@@ -193,7 +260,7 @@ namespace TheLighter.Akis
             switch (o.Tur)
             {
                 case OlayTuru.Ifsa:
-                    ifsaOlanlar.Add(new IfsaKaydi { Soru = o.Soru, Soran = o.A, Cevap = o.C });
+                    ifsaOlanlar.Add(new IfsaSatiri { Soru = o.Soru, Soran = o.A, Cevap = o.C });
                     break;
 
                 case OlayTuru.SureDoldu:
@@ -211,6 +278,7 @@ namespace TheLighter.Akis
 
                 case OlayTuru.CevapSecildi:
                 case OlayTuru.TurBasladi:
+                case OlayTuru.IkiyeKatlandi:
                     bBuEl = null;
                     cBuEl = null;
                     sonBerabere = null;
@@ -227,31 +295,71 @@ namespace TheLighter.Akis
             // Herkese açık alanlar (aşama, A, B, C, tur) için herhangi birinin görünümü yeter.
             var acik = Acik();
             var e = new EkranDurumu();
-            string perde = PerdeAnahtari(acik);
-            bool perdeAcik = perde != null && perde != kaldirilanPerde;
+
+            // Gizli görevler açıksa oyun başında telefon herkese sırayla gider (Ana Plan 8.2).
+            if (Ayarlar.GizliGorevler && acik.Asama != Asama.OyunSonu)
+            {
+                foreach (var o in oyuncular)
+                {
+                    if (goreviGorenler.Contains(o.Id)) continue;
+                    e.Kime = o.Id;
+                    e.PerdeNedeni = PerdeNedeni.Gorev;
+                    string gp = "G|" + o.Id;
+                    if (gp != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, gp);
+                    else Kur(e, EkranTuru.GorevGoster, oyun.GorunumAl(o.Id), "|" + o.Id);
+                    Ekran = e;
+                    return;
+                }
+            }
 
             switch (acik.Asama)
             {
+                case Asama.SoruToplama:
+                {
+                    OyuncuDurumu yazan = null;
+                    foreach (var od in acik.Oyuncular)
+                        if (od.HavuzaEkledigi < Oyun.KisiBasiHavuzSorusu) { yazan = od; break; }
+                    if (yazan == null)
+                    {
+                        Kur(e, EkranTuru.Bekleniyor, Seyirci(acik), "");
+                        break;
+                    }
+                    e.Kime = yazan.Id;
+                    e.PerdeNedeni = PerdeNedeni.SoruYazma;
+                    string tp = "T|" + yazan.Id;
+                    if (tp != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, tp);
+                    else Kur(e, EkranTuru.SoruToplama, oyun.GorunumAl(yazan.Id), "|" + yazan.Id + "|" + yazan.HavuzaEkledigi);
+                    break;
+                }
+
                 case Asama.SoruSorma:
+                {
                     e.Kime = acik.A;
                     e.PerdeNedeni = PerdeNedeni.SoruSirasi;
                     e.SuresiDolan = suresiDolan;
                     e.SuresiDolanBydi = suresiDolanBydi;
-                    if (perdeAcik) PerdeKur(e, EkranTuru.Perde, perde);
+                    string sp = "S|" + acik.Tur + "|" + acik.A;
+                    if (sp != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, sp);
                     else Kur(e, EkranTuru.SoruSorma, oyun.GorunumAl(acik.A.Value), "");
                     break;
+                }
 
                 case Asama.CevapSecme:
+                {
                     e.Kime = acik.B;
                     e.PerdeNedeni = PerdeNedeni.CevapSirasi;
-                    if (perdeAcik) PerdeKur(e, EkranTuru.Perde, perde);
+                    string cp = "C|" + acik.Tur + "|" + acik.B;
+                    if (cp != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, cp);
                     else Kur(e, EkranTuru.CevapSecme, oyun.GorunumAl(acik.B.Value), "");
                     break;
+                }
 
                 case Asama.MiniOyun:
-                    if (perdeAcik)
+                {
+                    string mp = "M|" + acik.Tur + "|" + acik.B + "|" + acik.C;
+                    if (mp != kaldirilanPerde)
                     {
-                        PerdeKur(e, EkranTuru.MiniOyunPerdesi, perde);
+                        PerdeKur(e, EkranTuru.MiniOyunPerdesi, mp);
                     }
                     else
                     {
@@ -265,18 +373,51 @@ namespace TheLighter.Akis
                         if (!acik.BHamleYapti && !acik.CHamleYapti) e.SonBerabere = sonBerabere;
                     }
                     break;
+                }
+
+                case Asama.Oylama:
+                {
+                    // Telefon oy verecekler arasında sırayla dolaşır. Oy gizli: kimse kimin ne dediğini görmez.
+                    OyuncuId? oylayan = null;
+                    foreach (var id in acik.Oylayanlar)
+                        if (!oyun.GorunumAl(id).OyVerdin) { oylayan = id; break; }
+                    if (!oylayan.HasValue)
+                    {
+                        Kur(e, EkranTuru.Bekleniyor, Seyirci(acik), "");
+                        break;
+                    }
+                    e.Kime = oylayan;
+                    e.PerdeNedeni = PerdeNedeni.Oy;
+                    string op = "O|" + acik.Tur + "|" + oylayan.Value;
+                    if (op != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, op);
+                    else Kur(e, EkranTuru.Oylama, GorevsizGorunum(oylayan.Value), "|" + oylayan.Value);
+                    break;
+                }
+
+                case Asama.IkiyeKatla:
+                case Asama.Bedel:
+                {
+                    var g = Seyirci(acik);
+                    Kur(e, EkranTuru.Karar, g, "|" + acik.Asama);
+                    e.Kime = g.KararVeren;
+                    break;
+                }
 
                 case Asama.Ifsa:
-                    Kur(e, EkranTuru.Ifsa, Seyirci(acik), "");
-                    break;
-
                 case Asama.Gume:
-                    Kur(e, EkranTuru.Gume, Seyirci(acik), "");
+                {
+                    var g = Seyirci(acik);
+                    bool bekliyor = g.TurCezalari.Count > 0 && CezaAnahtari(g) != onaylananCeza;
+                    Kur(e, acik.Asama == Asama.Ifsa ? EkranTuru.Ifsa : EkranTuru.Gume, g, bekliyor ? "|ceza" : "");
+                    e.CezaOnayBekliyor = bekliyor;
                     break;
+                }
 
                 case Asama.OyunSonu:
                     Kur(e, EkranTuru.OyunSonu, Seyirci(acik), "");
                     e.IfsaOlanlar = ifsaOlanlar.AsReadOnly();
+                    if (ozet == null) ozet = oyun.Ozet();
+                    e.Ozet = ozet;
                     break;
 
                 default:
@@ -286,6 +427,8 @@ namespace TheLighter.Akis
 
             Ekran = e;
         }
+
+        static string CezaAnahtari(Gorunum g) => "K|" + g.Tur + "|" + g.Asama;
 
         static void Kur(EkranDurumu e, EkranTuru tur, Gorunum g, string ek)
         {
@@ -298,32 +441,29 @@ namespace TheLighter.Akis
         {
             e.Tur = tur;
             e.Gorunum = Seyirci(Acik());
+            e.PerdeAnahtari = perdeAnahtari;
             e.Anahtar = tur + "|" + perdeAnahtari;
-        }
-
-        /// <summary>Telefonun el değiştirmesi gereken anlar. Aynı anahtar için perde bir kez gösterilir.</summary>
-        static string PerdeAnahtari(Gorunum g)
-        {
-            switch (g.Asama)
-            {
-                case Asama.SoruSorma: return "S|" + g.Tur + "|" + g.A;
-                case Asama.CevapSecme: return "C|" + g.Tur + "|" + g.B;
-                case Asama.MiniOyun: return "M|" + g.Tur + "|" + g.B + "|" + g.C;
-                default: return null;
-            }
         }
 
         /// <summary>
         /// Herkesin baktığı ekranlar için gizli bilgisi olmayan birinin görünümü: A, B ve C dışından biri.
-        /// En az 4 oyuncu olduğu için turda her zaman vardır.
+        /// En az 4 oyuncu olduğu için turda her zaman vardır. Görevi de temizlenir: ekranda kimsenin görevi durmasın.
         /// </summary>
         Gorunum Seyirci(Gorunum acik)
         {
             foreach (var o in oyuncular)
-                if (o.Id != acik.A && o.Id != acik.B && o.Id != acik.C) return oyun.GorunumAl(o.Id);
+                if (o.Id != acik.A && o.Id != acik.B && o.Id != acik.C) return GorevsizGorunum(o.Id);
             foreach (var o in oyuncular)
-                if (o.Id != acik.B) return oyun.GorunumAl(o.Id);
+                if (o.Id != acik.B) return GorevsizGorunum(o.Id);
+            acik.Gorevin = null;
             return acik;
+        }
+
+        Gorunum GorevsizGorunum(OyuncuId id)
+        {
+            var g = oyun.GorunumAl(id);
+            g.Gorevin = null;
+            return g;
         }
 
         /// <summary>Telefon ikisinin arasında duruyor: ekranda kullanılmayan gizli alanlar boşaltılır.</summary>
@@ -334,6 +474,7 @@ namespace TheLighter.Akis
             g.Hamlen = null;
             g.Oneri = null;
             g.AtananSoru = null;
+            g.Gorevin = null;
             return g;
         }
     }

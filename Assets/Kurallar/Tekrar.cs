@@ -88,6 +88,33 @@ namespace Cakmak.Kurallar
         HicGosterilme,
         /// <summary>Bir kaos turunda mini oyun kazan.</summary>
         KaosTurundaKazan,
+
+        // Yeni türler hep sona: sayısal değerleri değişmesin.
+
+        /// <summary>Kolay. Hedef'e en az Adet kez soru sor.</summary>
+        KisiyeSor,
+        /// <summary>Kolay. En az Adet soru sor.</summary>
+        SoruSor,
+        /// <summary>Kolay. C olarak en az Adet soruyu ifşa ettir.</summary>
+        IfsaEttir,
+        /// <summary>Kolay. B olarak en az Adet soruyu güme gönder.</summary>
+        GumeyeGonder,
+        /// <summary>Orta. En az Adet farklı kişiye soru sor.</summary>
+        FarkliKisiyeSor,
+        /// <summary>Orta. Seni gösterene hemen sonraki turda soru sor.</summary>
+        IntikamAl,
+        /// <summary>Orta. Hedef'in B olduğu bir turda C ol ve soruyu ifşa ettir.</summary>
+        SirriniAc,
+        /// <summary>Orta. En az Adet kez bedel öde. Sadece ceza açıkken verilir.</summary>
+        BedelOde,
+        /// <summary>Zor. Üst üste Adet mini oyun kazan (kaybettiğin oyun seriyi sıfırlar).</summary>
+        UstUsteKazan,
+        /// <summary>Zor. Mini oyunda Hedef'i en az Adet kez yen.</summary>
+        HedefiYen,
+        /// <summary>Zor. En az Adet mini oyun oyna, hiç ceza çekme. Sadece ceza açıkken verilir.</summary>
+        HicCezaCekme,
+        /// <summary>Zor. En az Adet kez gösteril.</summary>
+        CokGosterilme,
     }
 
     /// <summary>Gizli görev. Metni istemci yazar (Türü + Hedef + Adet). Sadece sahibinin görünümünde.</summary>
@@ -125,6 +152,23 @@ namespace Cakmak.Kurallar
         Kale,           // B iken soruları hiç ifşa olmayan
         Gorunmez,       // hiç gösterilmeyen
         Talihsiz,       // hiç mini oyun kazanamayan
+
+        // Yeni türler hep sona: grup kaydı unvanı sayı olarak saklıyor.
+        SosyalKelebek,  // en çok farklı kişiyi gösteren
+        Sadik,          // aynı kişiyi en çok gösteren
+        Dedikoducu,     // en çok farklı kişiye soru soran
+        Gundem,         // en çok farklı kişiden soru alan
+        Yenilmez,       // üst üste en çok mini oyun kazanan
+        Zorba,          // aynı kişiyi en çok yenen
+        Av,             // aynı kişiye en çok yenilen
+        Ayna,           // en çok berabere kalan
+        Uykucu,         // süresi en çok dolan (soru sormadı, C seçmedi, hamle yapmadı)
+        Kacak,          // ceza açıkken hiç ceza çekmeden en çok mini oyun oynayan
+        AcikKitap,      // B iken en çok sorusu ifşa olan
+        EliBos,         // C iken en çok soru güme giden
+        Kumarbaz,       // İkiye Katla'da en çok "bir el daha" diyen
+        Bumerang,       // gösterdiği kişi tarafından en çok geri gösterilen
+        Sogukkanli,     // çakmak kızgınken en çok başkasına veren
     }
 
     public sealed class Unvan

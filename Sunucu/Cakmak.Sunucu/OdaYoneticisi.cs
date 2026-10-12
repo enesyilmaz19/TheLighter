@@ -20,9 +20,11 @@ namespace Cakmak.Sunucu
         /// <summary>Paket adı (dosya adı, uzantısız: "Genel") → soruları. Ada göre sıralı.</summary>
         readonly SortedDictionary<string, IReadOnlyList<string>> paketler = new SortedDictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
         readonly IReadOnlyList<string> sesliCezalar = Array.Empty<string>();
+        readonly Sinirlar sinirlar;
 
-        public OdaYoneticisi(ILogger<OdaYoneticisi> log)
+        public OdaYoneticisi(ILogger<OdaYoneticisi> log, Sinirlar sinirlar)
         {
+            this.sinirlar = sinirlar;
             var klasor = Path.Combine(AppContext.BaseDirectory, "Icerik");
             if (Directory.Exists(klasor))
             {
@@ -40,11 +42,16 @@ namespace Cakmak.Sunucu
         /// <summary>Gelen tek bir mesajı işler. Bozuk mesaj GECERSIZ_MESAJ döner, bağlantı açık kalır.</summary>
         public void Isle(Baglanti b, string metin)
         {
+            // Sınırı aşan mesaj okunmaz bile. Cevap yine gider: istemci yavaşlaması gerektiğini bilsin. Durmayan
+            // istemcinin cevapları gönderim kuyruğunu doldurur, kuyruk dolunca bağlantı kesilir (Baglanti.Yolla).
+            if (!sinirlar.MesajIzni(b)) { b.Yolla(Protokol.Hata("COK_HIZLI")); return; }
             try
             {
                 var m = Protokol.Nesne(metin);
                 var oda = b.Oda;
-                switch (Protokol.Metin(m, "t"))
+                var t = Protokol.Metin(m, "t");
+                if ((t == "odaKur" || t == "katil") && !sinirlar.GirisIzni(b.Ip)) { b.Yolla(Protokol.Hata("COK_HIZLI")); return; }
+                switch (t)
                 {
                     case "odaKur":
                         if (oda != null) { b.Yolla(Protokol.Hata("ZATEN_ODADASIN")); return; }
@@ -100,7 +107,7 @@ namespace Cakmak.Sunucu
             while (true)
             {
                 var kod = RandomNumberGenerator.GetString(KodHarfleri, KodUzunlugu);
-                var oda = new Oda(kod, paketler, sesliCezalar);
+                var oda = new Oda(kod, paketler, sesliCezalar, sinirlar.LobiSuresi);
                 if (odalar.TryAdd(kod, oda)) return oda;
             }
         }

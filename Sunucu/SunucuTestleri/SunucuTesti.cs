@@ -10,11 +10,21 @@ namespace SunucuTestleri
     {
         public static WebApplicationFactory<Program> Fabrika { get; private set; }
 
+        // Test sunucusunda bütün istemciler aynı IP'den gelir: IP sınırları bütün testlere ortak olur.
+        // Burada kapatılır; sınırların kendisi SinirTestleri'nde küçük değerlerle denenir.
         [OneTimeSetUp]
-        public void Kur() => Fabrika = new WebApplicationFactory<Program>();
+        public void Kur() => Fabrika = Sunucu(("Sinirlar:IpBasinaBaglanti", "100000"), ("Sinirlar:IpBasinaGirisDakikada", "100000"),
+            ("Sinirlar:MesajSaniyede", "100000"), ("Sinirlar:MesajPatlama", "100000"));
 
         [OneTimeTearDown]
         public void Kaldir() => Fabrika?.Dispose();
+
+        /// <summary>Verilen ayarlarla süreç içi sunucu (ayar adları: Protokol.md, "Sınırlar").</summary>
+        public static WebApplicationFactory<Program> Sunucu(params (string ad, string deger)[] ayarlar) =>
+            new WebApplicationFactory<Program>().WithWebHostBuilder(b =>
+            {
+                foreach (var (ad, deger) in ayarlar) b.UseSetting(ad, deger);
+            });
     }
 
     /// <summary>Testlerin ortak yardımcıları: bağlan, oda kur, oyunu başlat, tur oynat.</summary>

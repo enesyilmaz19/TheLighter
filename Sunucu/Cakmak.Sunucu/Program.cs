@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -6,14 +7,21 @@ using System.Threading.Tasks;
 using Cakmak.Sunucu;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 
 // Online mod sunucusu. Protokol: docs/Protokol.md
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<SinirAyarlari>(builder.Configuration.GetSection("Sinirlar"));
+builder.Services.AddSingleton<Sinirlar>();
 builder.Services.AddSingleton<OdaYoneticisi>();
 builder.Services.AddHostedService<Saat>();
+// Caddy aynı makinede, istemcinin gerçek IP'sini X-Forwarded-For ile yollar. Varsayılan olarak sadece
+// localhost'tan gelen başlığa güvenilir: dışarıdan biri başlık yazarak IP'sini değiştiremez.
+builder.Services.Configure<ForwardedHeadersOptions>(o => o.ForwardedHeaders = ForwardedHeaders.XForwardedFor);
 
 var app = builder.Build();
+app.UseForwardedHeaders();
 // Telefon Wi-Fi'dan habersiz düşerse (cebe girdi, tünel) 20 sn içinde cevap gelmez, bağlantı kopmuş sayılır.
 app.UseWebSockets(new WebSocketOptions
 {
@@ -21,7 +29,7 @@ app.UseWebSockets(new WebSocketOptions
     KeepAliveTimeout = TimeSpan.FromSeconds(20),
 });
 app.MapGet("/", () => "TheLighter sunucusu");
-app.Map("/ws", async (HttpContext ctx, OdaYoneticisi odalar) =>
+app.Map("/ws", async (HttpContext ctx, OdaYoneticisi odalar, Sinirlar sinirlar) =>
 {
     if (!ctx.WebSockets.IsWebSocketRequest)
     {
@@ -29,8 +37,16 @@ app.Map("/ws", async (HttpContext ctx, OdaYoneticisi odalar) =>
         return;
     }
 
+    var ip = Sinirlar.IpAnahtari(ctx.Connection.RemoteIpAddress);
+    using var izin = sinirlar.BaglantiIzni(ip);
+    if (!izin.IsAcquired)
+    {
+        ctx.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        return;
+    }
+
     using var soket = await ctx.WebSockets.AcceptWebSocketAsync();
-    var baglanti = new Baglanti(soket);
+    var baglanti = new Baglanti(soket, ip);
     var yazici = baglanti.YaziciDongusu(ctx.RequestAborted);
     try
     {
@@ -84,5 +100,9 @@ static class Okuyucu
         }
         catch (WebSocketException) { }
         catch (OperationCanceledException) { }
+        // Bağlantıyı biz kestiysek (Baglanti.Kes: lobi zaman aşımı, başka cihazdan dönüş) ya da karşı taraf düştüyse
+        // bazı ortamlar bunları atar. Hepsinin anlamı aynı: bağlantı bitti. Temizlik çağıranın finally'sinde.
+        catch (IOException) { }
+        catch (ObjectDisposedException) { }
     }
 }

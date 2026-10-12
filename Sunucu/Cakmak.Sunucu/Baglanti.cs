@@ -18,6 +18,8 @@ namespace Cakmak.Sunucu
         const int KuyrukSiniri = 256;
 
         public readonly WebSocket Soket;
+        /// <summary>Sınırların anahtarı (<see cref="Sinirlar.IpAnahtari"/>).</summary>
+        public readonly string Ip;
         readonly Channel<string> kuyruk = Channel.CreateBounded<string>(
             new BoundedChannelOptions(KuyrukSiniri) { SingleReader = true, FullMode = BoundedChannelFullMode.Wait });
 
@@ -25,7 +27,11 @@ namespace Cakmak.Sunucu
         public Oda Oda;
         public OyuncuId Kim;
 
-        public Baglanti(WebSocket soket) { Soket = soket; }
+        public Baglanti(WebSocket soket, string ip)
+        {
+            Soket = soket;
+            Ip = ip;
+        }
 
         /// <summary>
         /// Kilit altında çağrılabilir: beklemez, sadece kuyruğa koyar. Kuyruk doluysa mesaj atılmaz

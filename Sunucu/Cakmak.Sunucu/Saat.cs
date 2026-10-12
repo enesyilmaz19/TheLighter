@@ -33,7 +33,11 @@ namespace Cakmak.Sunucu
                     {
                         try
                         {
-                            oda.Ilerle(gecen);
+                            if (oda.Ilerle(gecen))
+                            {
+                                log.LogInformation("Oda {Kod} lobide başlatılmadan çok bekledi, kapatıldı", oda.Kod);
+                                odalar.Sil(oda);
+                            }
                         }
                         catch (Exception e)
                         {

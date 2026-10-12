@@ -1,6 +1,6 @@
 # Ağ Protokolü (online mod)
 
-Durum: **taslak (S4 iskeleti + S3 tekrar oynatma).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2 ve 8.
+Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2 ve 8.
 Sunucu: `Sunucu/Cakmak.Sunucu` · İstemci: Unity (G2).
 
 Bu iskelette **yok** (S5): sohbet, atma, kopanın 60 sn beklenmesi, AFK etiketi, geç gelen bekleme odası, Temiz filtresi.
@@ -14,6 +14,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 - Her WebSocket **metin** mesajı tek bir JSON nesnesi. UTF-8. İstemciden gelen mesaj en fazla **4096 bayt**. Daha büyüğü bağlantıyı kapatır (kapanış kodu 1009). Sunucudan gidenin sınırı yok: oyun sonu `durum`'u (özetle) birkaç on KB olabilir.
 - İkili (binary) çerçeve ve aynı alanı iki kez yazan JSON → `GECERSIZ_MESAJ`, bağlantı açık kalır.
 - Sunucu 10 sn'de bir ping atar. 20 sn cevap gelmezse bağlantı kopmuş sayılır.
+- Aynı IP'den aynı anda açık bağlantı sınırlı (aşağıda "Sınırlar"). Aşılırsa WebSocket açılmaz, HTTP **429** döner.
 - Her mesajda `t` alanı tipi söyler.
 - Oyuncu kimliği: `"p1"` … `"p10"`. Odayı kuran `p1`, sonra katılış sırasıyla.
 - Oda kodu: 5 büyük harf, `I` ve `O` yok (`0/O`, `1/I` karışmasın). Örnek: `"KXTPM"`.
@@ -176,6 +177,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `KURUCU_DEGILSIN` | Sadece kurucu yapabilir |
 | `OYUN_YOK` | Oyun başlamadan oyun komutu |
 | `ESKI_TUR` | Komuttaki `tur` güncel değil |
+| `COK_HIZLI` | Mesaj sınırı ya da `odaKur`/`katil` sınırı aşıldı. Mesaj **hiç işlenmedi**, biraz bekleyip tekrar gönder |
 | `SIRA_SENDE_DEGIL` · `SECILEMEZ` · `YANLIS_ASAMA` · `GECERSIZ_GIRDI` · `HAK_KALMADI` · `HAVUZ_BOS` · `OYUNCU_SAYISI_GECERSIZ` | Kural motorunun `Sonuc` değerleri |
 
 ### Alanların anlamı
@@ -189,7 +191,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 ### Hata sırası
 
 Bir mesaj birden çok kuralı çiğniyorsa ilk tutan döner:
-JSON bozuk ya da `t` yok/bilinmiyor (`GECERSIZ_MESAJ`) → `ODADA_DEGILSIN` → `KURUCU_DEGILSIN` → `OYUN_BASLADI` / `OYUN_YOK` → eksik ya da yanlış tipte alan (`GECERSIZ_MESAJ`) → `ESKI_TUR` → `GECERSIZ_GIRDI` ve kural motoru hataları.
+`COK_HIZLI` (mesaj sınırı, mesaj okunmadan) → JSON bozuk ya da `t` yok/bilinmiyor (`GECERSIZ_MESAJ`) → `COK_HIZLI` (`odaKur`/`katil` sınırı) → `ODADA_DEGILSIN` → `KURUCU_DEGILSIN` → `OYUN_BASLADI` / `OYUN_YOK` → eksik ya da yanlış tipte alan (`GECERSIZ_MESAJ`) → `ESKI_TUR` → `GECERSIZ_GIRDI` ve kural motoru hataları.
 `komut` mesajında `ESKI_TUR`'dan önce sadece `tur` ve `komut` alanlarına bakılır. Komutun kendi alanları (`hedef`, `metin`, `hamle`, `ifsa`) ve bilinmeyen `komut` adı `ESKI_TUR`'dan sonra denetlenir (`GECERSIZ_MESAJ`).
 
 - `ayarlar`: bilinmeyen `mod`/`miniOyun`/`ceza` adı ya da yanlış tip (`paketler` dizi değil ya da içinde metin olmayan var) `GECERSIZ_MESAJ`. Aralık dışı sayı, Temiz + Cesur, geçersiz paket listesi `GECERSIZ_GIRDI`. Oyun başladıysa `OYUN_BASLADI`.
@@ -197,11 +199,28 @@ JSON bozuk ya da `t` yok/bilinmiyor (`GECERSIZ_MESAJ`) → `ODADA_DEGILSIN` → 
 - `baslat` oyun başladıktan sonra: `OYUN_BASLADI`.
 - Bilinmeyen `komut` ya da hamle `oyun` adı: `GECERSIZ_MESAJ`.
 
+## Sınırlar
+
+Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
+
+| Sınır | Varsayılan | Aşılınca | Ayar adı |
+|---|---|---|---|
+| IP başına aynı anda açık bağlantı | 32 | HTTP 429, WebSocket açılmaz | `IpBasinaBaglanti` |
+| IP başına `odaKur` + `katil` | dakikada 30 (her 2 sn'de bir hak dolar, en fazla 30 birikir) | `COK_HIZLI` | `IpBasinaGirisDakikada` |
+| Bağlantı başına mesaj | saniyede 10, arka arkaya en fazla 20 | `COK_HIZLI` | `MesajSaniyede`, `MesajPatlama` |
+| Başlatılmayan lobi | 30 dk | Oda kapanır, bağlantılar kesilir. Anahtarla dönüş `ODA_YOK` | `LobiSn` |
+
+- **IP:** sunucunun önündeki Caddy'nin `X-Forwarded-For` başlığından. Bu başlığa sadece aynı makineden (localhost) gelen istekte güvenilir. IPv6'da bir /64 bloğu tek IP sayılır (bir ev ya da telefon bütün bloğu alır).
+- Aynı Wi-Fi'daki herkes aynı IP'dir: 10 kişilik grup ve yeniden bağlananlar sınırlara sığar.
+- `COK_HIZLI` alan istemci durmazsa cevaplar gönderim kuyruğunu doldurur ve bağlantı kesilir.
+- Ayarlar sunucuda: `appsettings.json` içinde `"Sinirlar"` bölümü ya da ortam değişkeni (`Sinirlar__IpBasinaBaglanti=50`).
+
 ## Bağlantı koparsa (iskelette)
 
 - **Lobide:** oyuncu odadan çıkar. Kurucu çıktıysa kuruculuk sıradaki oyuncuya geçer. Oda boşalırsa silinir.
 - **Oyunda:** oyuncu `bagli: false` olur ama oyunda kalır. Süreler işlemeye devam eder (kural motoru beklemez). `anahtar` ile geri dönebilir. Kurucu koptuysa kuruculuk ilk bağlı oyuncuya geçer, geri dönünce geri almaz.
 - **Odada bağlı kimse kalmazsa** oda hemen silinir. Sonra anahtarla dönüş `ODA_YOK` alır. *(S5'te oda bir süre tutulacak.)*
+- **Lobi 30 dk içinde başlatılmazsa** oda kapanır, bağlantılar kesilir. Anahtarla dönüş `ODA_YOK` alır. Başlamış oyunu bu süre etkilemez.
 
 ## Ana Plan 5.2'den farklar (oturumda onaylanacak)
 

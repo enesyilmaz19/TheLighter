@@ -18,7 +18,7 @@ namespace TheLighter.Istemci
 
         enum Bicim { Yazili, Atanan, Kor }
 
-        readonly EldenEleAkisi akis;
+        readonly IOyunAkisi akis;
         readonly Bicim bicim;
         readonly Label sure;
         readonly Label sayac;
@@ -31,14 +31,21 @@ namespace TheLighter.Istemci
         readonly List<OyuncuId> ciptekiler = new List<OyuncuId>();
         readonly List<Button> cipler = new List<Button>();
         OyuncuId? secili;
+        string sonOneri;
+        string sonAtanan;
+        bool gonderildi;
 
         public VisualElement Kok { get; }
 
-        public SoruSormaParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public SoruSormaParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             this.akis = akis;
             var g = e.Gorunum;
             bicim = g.Kaos == KaosKurali.KorSoru ? Bicim.Kor : g.AtananSoru != null ? Bicim.Atanan : Bicim.Yazili;
+            sonOneri = g.Oneri;
+            sonAtanan = g.AtananSoru;
+            // Curcuna'da değiştirme hakkı var; "havuzdan sor" cezasında yok.
+            bool curcuna = akis.Ayarlar.Mod == OyunModu.Curcuna;
 
             Kok = Kutu("parca", "soru-sorma");
 
@@ -57,13 +64,13 @@ namespace TheLighter.Istemci
                     break;
 
                 case Bicim.Atanan:
-                    if (akis.Ayarlar.Mod != OyunModu.Curcuna) Kok.Add(Yazi(Metin.Al("soru.havuzdan_ceza"), "banner"));
+                    if (!curcuna) Kok.Add(Yazi(Metin.Al("soru.havuzdan_ceza"), "banner"));
                     Kok.Add(Yazi(Metin.Al("soru.atanan_baslik"), "aciklama"));
                     var kart = Kutu("okuma-alani");
                     atananYazi = Yazi(g.AtananSoru, "okuma-soru");
                     kart.Add(atananYazi);
                     Kok.Add(kart);
-                    if (akis.Ayarlar.Mod == OyunModu.Curcuna)
+                    if (curcuna)
                     {
                         var satir = Kutu("satir");
                         degistir = Buton(Metin.Al("soru.degistir"), Degistir, "buton-kucuk");
@@ -106,7 +113,8 @@ namespace TheLighter.Istemci
             Kok.Add(hata);
             gonder = Buton(Metin.Al("soru.gonder"), Gonder, "buton-birincil", "buton-buyuk");
             Kok.Add(gonder);
-            if (bicim == Bicim.Yazili)
+            // Online'da fısıltı yok (protokol): soru yazılır.
+            if (bicim == Bicim.Yazili && !akis.Online)
             {
                 fisilda = Buton(Metin.Al("soru.fisildadim"), Fisilda, "buton-ikincil");
                 Kok.Add(fisilda);
@@ -118,7 +126,21 @@ namespace TheLighter.Istemci
 
         public void Guncelle(EkranDurumu e)
         {
-            SureyiYaz(sure, e.Gorunum.KalanMs, 10000);
+            var g = e.Gorunum;
+            SureyiYaz(sure, g.KalanMs, 10000);
+
+            // Online'da öneri ve değişen soru sonraki durum'la gelir.
+            if (kutu != null && g.Oneri != null && g.Oneri != sonOneri)
+            {
+                sonOneri = g.Oneri;
+                kutu.value = g.Oneri;
+            }
+            if (atananYazi != null && g.AtananSoru != null && g.AtananSoru != sonAtanan)
+            {
+                sonAtanan = g.AtananSoru;
+                atananYazi.text = g.AtananSoru;
+            }
+            if (degistir != null) degistir.SetEnabled(g.DegistirmeHakki);
         }
 
         void Durum()
@@ -130,12 +152,12 @@ namespace TheLighter.Istemci
             {
                 string metin = kutu.value ?? "";
                 sayac.text = metin.Length + "/" + SoruSiniri;
-                gonder.SetEnabled(secili.HasValue && metin.Trim().Length > 0);
-                fisilda.SetEnabled(secili.HasValue);
+                gonder.SetEnabled(!gonderildi && secili.HasValue && metin.Trim().Length > 0);
+                if (fisilda != null) fisilda.SetEnabled(secili.HasValue);
             }
             else
             {
-                gonder.SetEnabled(secili.HasValue);
+                gonder.SetEnabled(!gonderildi && secili.HasValue);
             }
             hata.text = "";
         }
@@ -143,17 +165,20 @@ namespace TheLighter.Istemci
         void OneriCek()
         {
             var s = akis.OneriCek();
+            if (s != Sonuc.Tamam) { hata.text = HataMetni.Al(s); return; }
+            if (akis.Online) return; // öneri sonraki durum'la gelir (Guncelle)
             var oneri = akis.Ekran.Gorunum != null ? akis.Ekran.Gorunum.Oneri : null;
-            if (s == Sonuc.Tamam && oneri != null) kutu.value = oneri;
-            else hata.text = HataMetni.Al(s);
+            if (oneri != null) { sonOneri = oneri; kutu.value = oneri; }
+            else hata.text = HataMetni.Al(Sonuc.HavuzBos);
         }
 
         void Degistir()
         {
             var s = akis.SoruyuDegistir();
+            if (s != Sonuc.Tamam) { hata.text = HataMetni.Al(s); return; }
+            if (akis.Online) { degistir.SetEnabled(false); return; } // yenisi sonraki durum'la gelir
             var g = akis.Ekran.Gorunum;
-            if (s == Sonuc.Tamam && g != null && g.AtananSoru != null) atananYazi.text = g.AtananSoru;
-            else hata.text = HataMetni.Al(s);
+            if (g != null && g.AtananSoru != null) { sonAtanan = g.AtananSoru; atananYazi.text = g.AtananSoru; }
             if (g != null) degistir.SetEnabled(g.DegistirmeHakki);
         }
 
@@ -163,6 +188,7 @@ namespace TheLighter.Istemci
             // Atanan ya da kör soruda metin kural motorunda yok sayılır.
             var s = akis.SoruGonder(secili.Value, kutu != null ? kutu.value : "");
             if (s != Sonuc.Tamam) hata.text = HataMetni.Al(s);
+            else if (akis.Online) { gonderildi = true; Durum(); } // cevap gelene kadar ikinci kez gitmesin
         }
 
         void Fisilda()
@@ -177,5 +203,12 @@ namespace TheLighter.Istemci
     static class HataMetni
     {
         public static string Al(Sonuc s) => Metin.Al("hata." + s);
+
+        /// <summary>Sunucudan gelen kod: kural motorununsa onun metni, sunucununsa "hata.ODA_YOK" gibi.</summary>
+        public static string Kod(string kod)
+        {
+            var s = TheLighter.Ag.Cevirici.SonucKodu(kod);
+            return s.HasValue ? Al(s.Value) : Metin.Al("hata." + kod);
+        }
     }
 }

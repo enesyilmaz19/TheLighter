@@ -31,7 +31,7 @@ namespace TheLighter.Akis
     /// Telefonun sırayla herkese dolaştığı anlarda da (görevler, Curcuna soru yazma, Grup Kararı oyu) saat durur:
     /// herkes masada, AFK yok; 10 kişinin sırayla oy vermesine motorun süresi yetmez.
     /// </summary>
-    public sealed class EldenEleAkisi
+    public sealed class EldenEleAkisi : IOyunAkisi
     {
         readonly Oyun oyun;
         readonly List<Oyuncu> oyuncular;
@@ -68,6 +68,11 @@ namespace TheLighter.Akis
         }
 
         public IReadOnlyList<Oyuncu> Oyuncular => oyuncular;
+        public bool Online => false;
+        /// <summary>Elden elede telefon herkesin: tek bir "ben" yok.</summary>
+        public OyuncuId? Ben => null;
+        /// <summary>Elden elede oyunu herkes bitirebilir (menüden).</summary>
+        public bool Kurucuyum => true;
         public Ayarlar Ayarlar { get; }
         public EkranDurumu Ekran { get; private set; }
 

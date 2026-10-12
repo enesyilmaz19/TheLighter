@@ -1,5 +1,6 @@
 using System;
 using Cakmak.Kurallar;
+using TheLighter.Ag;
 using TheLighter.Akis;
 using UnityEngine.UIElements;
 using static TheLighter.Istemci.Arayuz;
@@ -16,13 +17,25 @@ namespace TheLighter.Istemci
     }
 
     /// <summary>
-    /// Elden ele oyunun tek ekranı. Her karede akışı ilerletir. Akışın istediği ekran değişince
+    /// Oyunun tek ekranı (elden ele ve online). Her karede akışı ilerletir. Akışın istediği ekran değişince
     /// (EkranDurumu.Anahtar) ilgili parçayı baştan kurar, değişmediyse sadece süreleri günceller.
+    /// Online'da ayrıca: kısa bildirimler (sıra atlandı, AFK...), "Buradayım" düğmesi, "oyuncular bekleniyor" katmanı.
     /// </summary>
-    public sealed class OyunEkrani : IEkran
+    public sealed class OyunEkrani : IEkran, IOnlineEkran
     {
+        const float BildirimSn = 3.5f;
+
         readonly Uygulama uygulama;
-        readonly EldenEleAkisi akis;
+        readonly IOyunAkisi akis;
+        readonly OnlineAkis onlineAkis;
+        readonly OnlineYonetici online;
+        readonly Label bildirim;
+        readonly VisualElement afkKatmani;
+        readonly VisualElement beklemeKatmani;
+        readonly Label beklemeYazisi;
+        readonly SohbetPaneli sohbet;
+        float bildirimKalan;
+        float buradayimBekle;
         readonly VisualElement ustCubuk;
         readonly Label turYazisi;
         readonly Label durumYazisi;
@@ -33,10 +46,12 @@ namespace TheLighter.Istemci
 
         public VisualElement Kok { get; }
 
-        public OyunEkrani(Uygulama uygulama, EldenEleAkisi akis)
+        public OyunEkrani(Uygulama uygulama, IOyunAkisi akis, OnlineYonetici online = null)
         {
             this.uygulama = uygulama;
             this.akis = akis;
+            this.online = online;
+            onlineAkis = akis as OnlineAkis;
 
             Kok = Kutu("ekran", "oyun-ekrani");
 
@@ -46,14 +61,43 @@ namespace TheLighter.Istemci
             ustCubuk.Add(Esnek());
             durumYazisi = Yazi("", "ust-cubuk-yazi", "ust-cubuk-durum");
             ustCubuk.Add(durumYazisi);
+            if (online != null && OnlineYonetici.SohbetVar)
+            {
+                sohbet = online.SohbetPaneliKur();
+                ustCubuk.Add(Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk"));
+            }
             ustCubuk.Add(Buton(Metin.Al("oyun.menu"), MenuyuAc, "buton-kucuk"));
             Kok.Add(ustCubuk);
+
+            bildirim = Yazi("", "bildirim", "gizli");
+            Kok.Add(bildirim);
 
             govde = Kutu("govde");
             Kok.Add(govde);
 
+            // Online: AFK olduysa büyük "Buradayım". Ekrana dokunmak da yeter.
+            afkKatmani = Kutu("menu-perde", "gizli");
+            var afkKutu = Kutu("menu-kutu");
+            afkKutu.Add(Yazi(Metin.Al("online.afk_baslik"), "baslik"));
+            afkKutu.Add(Yazi(Metin.Al("online.afk_aciklama"), "aciklama"));
+            afkKutu.Add(Buton(Metin.Al("online.buradayim"), Buradayim, "buton-birincil", "buton-buyuk"));
+            afkKatmani.Add(afkKutu);
+            Kok.Add(afkKatmani);
+
+            beklemeKatmani = Kutu("menu-perde", "gizli");
+            var bekKutu = Kutu("menu-kutu");
+            bekKutu.Add(Yazi(Metin.Al("online.bekleme_baslik"), "baslik"));
+            beklemeYazisi = Yazi("", "aciklama");
+            bekKutu.Add(beklemeYazisi);
+            beklemeKatmani.Add(bekKutu);
+            Kok.Add(beklemeKatmani);
+
             menu = MenuKur();
             Kok.Add(menu);
+            if (sohbet != null) Kok.Add(sohbet.Kok);
+
+            if (onlineAkis != null)
+                Kok.RegisterCallback<PointerDownEvent>(_ => { if (onlineAkis.BenAfkyim) Buradayim(); }, TrickleDown.TrickleDown);
 
             Ciz();
         }
@@ -63,11 +107,76 @@ namespace TheLighter.Istemci
             akis.Ilerle(TimeSpan.FromSeconds(gecenSn));
             if (akis.Ekran.Anahtar != anahtar) Ciz();
             else parca.Guncelle(akis.Ekran);
+
+            sohbet?.Guncelle(gecenSn);
+            if (bildirimKalan > 0)
+            {
+                bildirimKalan -= gecenSn;
+                if (bildirimKalan <= 0) bildirim.AddToClassList("gizli");
+            }
+            if (onlineAkis != null)
+            {
+                if (buradayimBekle > 0) buradayimBekle -= gecenSn;
+                afkKatmani.EnableInClassList("gizli", !onlineAkis.BenAfkyim);
+                var bekleme = onlineAkis.BeklemeKalanMs;
+                beklemeKatmani.EnableInClassList("gizli", !bekleme.HasValue || akis.Bitti);
+                if (bekleme.HasValue) beklemeYazisi.text = Metin.Al("online.bekleme_aciklama", DakikaSaniye(bekleme.Value));
+            }
         }
 
+        static string DakikaSaniye(int ms)
+        {
+            int sn = (int)Math.Ceiling(Math.Max(0, ms) / 1000.0);
+            return (sn / 60) + ":" + (sn % 60).ToString("00");
+        }
+
+        /// <summary>Elden elede menüyü açar (süre durur). Online'da saat sunucuda: bir şey yapmaz.</summary>
         public void ArkaPlanaGecti()
         {
-            if (!akis.Bitti) MenuyuAc();
+            if (!akis.Online && !akis.Bitti) MenuyuAc();
+        }
+
+        void Buradayim()
+        {
+            // Dokunuşlar birleşir: saniyede bir kezden fazla gitmez (sunucunun mesaj sınırı).
+            if (onlineAkis == null || buradayimBekle > 0) return;
+            buradayimBekle = 1f;
+            onlineAkis.Buradayim();
+        }
+
+        void Bildir(string metin)
+        {
+            if (string.IsNullOrEmpty(metin)) return;
+            bildirim.text = metin;
+            bildirim.RemoveFromClassList("gizli");
+            bildirimKalan = BildirimSn;
+        }
+
+        public void HataGeldi(HataMesaji h)
+        {
+            // Eski tur: ekran zaten yeni durumu çiziyor, kullanıcıya söylemeye gerek yok.
+            if (h.Kod == "ESKI_TUR") return;
+            Bildir(HataMetni.Kod(h.Kod));
+        }
+
+        public void OlayGeldi(OlayMesaji o)
+        {
+            string kim = akis.Isim(o.Kim);
+            if (o.Atildi)
+            {
+                Bildir(Metin.Al("online.olay.atildi", kim));
+                return;
+            }
+            switch (o.Olay.Tur)
+            {
+                case OlayTuru.SiraAtlandi: Bildir(Metin.Al("online.olay.sira_atlandi", kim, TurkceEk.Ilgi(kim))); break;
+                case OlayTuru.Afk: Bildir(Metin.Al("online.olay.afk", kim)); break;
+                case OlayTuru.AfkBitti: Bildir(Metin.Al("online.olay.afk_bitti", kim)); break;
+                case OlayTuru.OyuncuCikti: Bildir(Metin.Al("online.olay.cikti", kim)); break;
+                case OlayTuru.SureDoldu:
+                    if (o.Kim.HasValue) Bildir(Metin.Al("online.olay.sure_doldu", kim, TurkceEk.Ilgi(kim)));
+                    break;
+            }
         }
 
         void Ciz()
@@ -79,8 +188,8 @@ namespace TheLighter.Istemci
             govde.Add(parca.Kok);
             parca.Guncelle(e);
 
-            // Mini oyunda ekranın üst yarısı ters döndüğü için üst çubuk gizlenir.
-            ustCubuk.EnableInClassList("gizli", e.Tur == EkranTuru.MiniOyun || e.Tur == EkranTuru.OyunSonu);
+            // Elden ele mini oyunda ekranın üst yarısı ters döndüğü için üst çubuk gizlenir.
+            ustCubuk.EnableInClassList("gizli", (!akis.Online && e.Tur == EkranTuru.MiniOyun) || e.Tur == EkranTuru.OyunSonu);
             var g = e.Gorunum;
             // Curcuna soru toplama ve görev turu ilk turdan önce: tur numarası yok.
             turYazisi.text = g.Tur <= 0 ? ""
@@ -103,6 +212,7 @@ namespace TheLighter.Istemci
                 case EkranTuru.CevapSecme: return new CevapSecmeParcasi(akis, e);
                 case EkranTuru.MiniOyunPerdesi: return new MiniOyunPerdeParcasi(akis, e);
                 case EkranTuru.MiniOyun:
+                    if (akis.Online) return new OnlineMiniOyunParcasi(akis, e);
                     if (e.Gorunum.MiniOyun == MiniOyunTuru.Reaksiyon) return new ReaksiyonParcasi(akis, e);
                     return new MiniOyunParcasi(akis, e);
                 case EkranTuru.Ifsa:
@@ -111,8 +221,8 @@ namespace TheLighter.Istemci
                 case EkranTuru.GorevGoster: return new GorevParcasi(akis, e);
                 case EkranTuru.Oylama: return new OylamaParcasi(akis, e);
                 case EkranTuru.Karar: return new KararParcasi(akis, e);
-                case EkranTuru.OyunSonu: return new OyunSonuParcasi(uygulama, akis, e);
-                default: return new BekleParcasi();
+                case EkranTuru.OyunSonu: return new OyunSonuParcasi(uygulama, akis, e, online);
+                default: return akis.Online ? (IOyunParcasi)new OnlineBekleParcasi(akis, e) : new BekleParcasi();
             }
         }
 
@@ -122,17 +232,33 @@ namespace TheLighter.Istemci
         {
             var m = Kutu("menu-perde", "gizli");
             var kutu = Kutu("menu-kutu");
-            kutu.Add(Yazi(Metin.Al("oyun.menu_baslik"), "baslik"));
-            kutu.Add(Buton(Metin.Al("oyun.devam"), MenuyuKapat, "buton-birincil"));
-            kutu.Add(Buton(Metin.Al("oyun.bitir"), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil"));
-            kutu.Add(Buton(Metin.Al("oyun.ana_menu"), uygulama.AnaMenu, "buton-ikincil"));
-            kutu.Add(Yazi(Metin.Al("oyun.menu_ipucu"), "ipucu"));
+            if (!akis.Online)
+            {
+                kutu.Add(Yazi(Metin.Al("oyun.menu_baslik"), "baslik"));
+                kutu.Add(Buton(Metin.Al("oyun.devam"), MenuyuKapat, "buton-birincil"));
+                kutu.Add(Buton(Metin.Al("oyun.bitir"), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil"));
+                kutu.Add(Buton(Metin.Al("oyun.ana_menu"), uygulama.AnaMenu, "buton-ikincil"));
+                kutu.Add(Yazi(Metin.Al("oyun.menu_ipucu"), "ipucu"));
+            }
+            else
+            {
+                // Online'da oyun durmaz: süre sunucuda akar. Oyunu sadece kurucu bitirir.
+                kutu.Add(Yazi(Metin.Al("online.menu_baslik", online?.Istemci.Oda ?? ""), "baslik"));
+                kutu.Add(Buton(Metin.Al("oyun.devam"), MenuyuKapat, "buton-birincil"));
+                var bitir = Buton(Metin.Al("oyun.bitir"), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil");
+                bitir.AddToClassList("menu-bitir");
+                kutu.Add(bitir);
+                kutu.Add(Buton(Metin.Al("online.ayril"), () => online?.Ayril(), "buton-ikincil"));
+                kutu.Add(Yazi(Metin.Al("online.menu_ipucu"), "ipucu"));
+            }
             m.Add(kutu);
             return m;
         }
 
         void MenuyuAc()
         {
+            // Kuruculuk oyun içinde el değiştirebilir (kurucu koptuysa): her açılışta bakılır.
+            menu.Q(className: "menu-bitir")?.EnableInClassList("gizli", !akis.Kurucuyum);
             akis.Duraklatildi = true;
             menu.RemoveFromClassList("gizli");
         }

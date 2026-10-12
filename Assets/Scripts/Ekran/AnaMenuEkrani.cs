@@ -20,10 +20,7 @@ namespace TheLighter.Istemci
 
             Kok.Add(Buton(Metin.Al("menu.elden_ele"), uygulama.Kurulum, "buton-birincil", "buton-buyuk"));
 
-            var online = Buton(Metin.Al("menu.online"), null, "buton-ikincil");
-            online.SetEnabled(false);
-            Kok.Add(online);
-            Kok.Add(Yazi(Metin.Al("menu.online_yakinda"), "ipucu"));
+            Kok.Add(Buton(Metin.Al("menu.online"), () => uygulama.OnlineMenu(null), "buton-ikincil"));
 
             Kok.Add(Buton(Metin.Al("menu.nasil_oynanir"), NasilAcKapa, "buton-ikincil"));
 

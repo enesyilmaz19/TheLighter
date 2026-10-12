@@ -2,7 +2,8 @@
     "name": "TheLighter.Ag",
     "rootNamespace": "TheLighter",
     "references": [
-        "Kurallar"
+        "Kurallar",
+        "TheLighter.Akis"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

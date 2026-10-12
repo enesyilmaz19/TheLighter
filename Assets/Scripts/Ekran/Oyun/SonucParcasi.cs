@@ -15,7 +15,7 @@ namespace TheLighter.Istemci
 
         public VisualElement Kok { get; }
 
-        public SonucParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public SonucParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             var g = e.Gorunum;
             Kok = Kutu("parca", "sonuc");
@@ -68,7 +68,7 @@ namespace TheLighter.Istemci
             Kok.Add(alt);
         }
 
-        static VisualElement ElKarti(EldenEleAkisi akis, Gorunum g, MiniOyunSonucu s)
+        static VisualElement ElKarti(IOyunAkisi akis, Gorunum g, MiniOyunSonucu s)
         {
             var kart = Kutu("el-karti");
             kart.Add(Yazi(ElYazisi.AcilanEl(akis, g, s), "el-hamleler"));
@@ -78,7 +78,7 @@ namespace TheLighter.Istemci
             return kart;
         }
 
-        static VisualElement IfsaKarti(EldenEleAkisi akis, Gorunum g)
+        static VisualElement IfsaKarti(IOyunAkisi akis, Gorunum g)
         {
             string soran = akis.Isim(g.A);
             string cevap = akis.Isim(g.C);
@@ -91,7 +91,7 @@ namespace TheLighter.Istemci
             return kart;
         }
 
-        static VisualElement GumeKarti(EldenEleAkisi akis, Gorunum g)
+        static VisualElement GumeKarti(IOyunAkisi akis, Gorunum g)
         {
             var kart = Kutu("gume-karti");
             kart.Add(Yazi(Metin.Al("sonuc.gume_baslik"), "gume-baslik"));

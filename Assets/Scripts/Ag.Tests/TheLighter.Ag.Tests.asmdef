@@ -5,6 +5,7 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "TheLighter.Ag",
+        "TheLighter.Akis",
         "Kurallar"
     ],
     "includePlatforms": [

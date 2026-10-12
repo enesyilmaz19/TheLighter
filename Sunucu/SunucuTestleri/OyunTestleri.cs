@@ -239,12 +239,14 @@ namespace SunucuTestleri
 
         [TestCase(null)]
         [TestCase("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")] // 32 karakter, yanlış
-        public async Task Oyun_basladiktan_sonra_anahtarsiz_katil_OYUN_BASLADI(string anahtar)
+        public async Task Oyun_basladiktan_sonra_anahtarsiz_katilan_bekleme_odasina_girer(string anahtar)
         {
+            // S5'e kadar OYUN_BASLADI dönüyordu. Ana Plan 1: "Geç gelen bekleme odasına girer, sonraki oyunda oynar".
             var o = await OyunBaslat(4);
             var x = await Baglan();
             await x.Gonder(new { t = "katil", oda = o[0].Oda, isim = "Yabanci", anahtar });
-            await x.Hata("OYUN_BASLADI");
+            await x.Bekle("hosgeldin");
+            Assert.That((string)(await x.Bekle("durum"))["asama"], Is.EqualTo("beklemeOdasi"));
         }
 
         // ------------------------------------------------------------ bitir

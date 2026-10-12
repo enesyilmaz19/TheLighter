@@ -13,7 +13,7 @@ namespace TheLighter.Istemci
     {
         public VisualElement Kok { get; }
 
-        public PerdeParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public PerdeParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             var kime = e.Kime.Value;
             string isim = akis.Isim(kime);
@@ -79,7 +79,7 @@ namespace TheLighter.Istemci
     {
         public VisualElement Kok { get; }
 
-        public MiniOyunPerdeParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public MiniOyunPerdeParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             var g = e.Gorunum;
             string b = akis.Isim(g.B);

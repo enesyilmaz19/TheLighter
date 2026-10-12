@@ -804,3 +804,87 @@
 .kart-butonlari {
     margin-top: 24px;
 }
+
+/* ---------- Online (S4/S5) ---------- */
+
+.kod-kutusu .unity-base-text-field__input {
+    -unity-font-style: bold;
+    letter-spacing: 8px;
+}
+
+.oda-kodu-karti {
+    align-items: center;
+}
+
+.kok .oda-kodu {
+    font-size: 120px;
+    -unity-font-style: bold;
+    color: var(--alev);
+    letter-spacing: 16px;
+    margin: 8px 0 16px 0;
+}
+
+.lobi-oyuncu {
+    background-color: var(--yuzey);
+    border-radius: 20px;
+    padding: 16px 24px;
+    margin: 6px 0;
+    min-height: 88px;
+}
+
+.kok .lobi-isim {
+    font-size: 44px;
+    color: var(--yazi);
+    margin-left: 16px;
+}
+
+.kok .lobi-rozet {
+    font-size: 30px;
+    color: var(--yazi-koyu);
+    background-color: var(--alev);
+    border-radius: 16px;
+    padding: 4px 14px;
+    margin-left: 16px;
+}
+
+.kok .lobi-rozet.soluk {
+    color: var(--yazi);
+    background-color: var(--cizgi);
+}
+
+.soluk {
+    opacity: 0.45;
+}
+
+/* Kısa bildirim: "Ali'nin sırası atlandı." Üstte, birkaç saniye. */
+.kok .bildirim {
+    background-color: var(--yuzey-2);
+    border-color: var(--alev);
+    border-width: 3px;
+    border-radius: 24px;
+    padding: 16px 28px;
+    margin: 8px 0;
+    font-size: 36px;
+    color: var(--yazi);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* Bağlanıyor katmanı her ekranın üstünde. */
+.baglaniyor {
+    background-color: rgba(10, 8, 14, 0.94);
+}
+
+.online-durumlar {
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.cip-salt {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--yuzey);
+    border-radius: 60px;
+    padding: 12px 24px;
+    margin: 6px 10px 6px 0;
+}

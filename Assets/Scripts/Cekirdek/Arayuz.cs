@@ -31,13 +31,15 @@ namespace TheLighter.Istemci
         public static Label Yazi(string metin, params string[] siniflar)
         {
             var l = new Label(metin);
+            // Oyuncunun yazdığı isim ve soru da etiketlere düşer: "<size=500>" herkesin ekranını bozmasın (Guvenlik.md).
+            l.enableRichText = false;
             foreach (var s in siniflar) l.AddToClassList(s);
             return l;
         }
 
         public static Button Buton(string metin, Action tik, params string[] siniflar)
         {
-            var b = new Button(tik) { text = metin };
+            var b = new Button(tik) { text = metin, enableRichText = false };
             b.AddToClassList("buton");
             foreach (var s in siniflar) b.AddToClassList(s);
             return b;

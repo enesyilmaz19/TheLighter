@@ -12,7 +12,7 @@ namespace TheLighter.Istemci
     /// </summary>
     sealed class CevapSecmeParcasi : IOyunParcasi
     {
-        readonly EldenEleAkisi akis;
+        readonly IOyunAkisi akis;
         readonly Label sure;
         readonly Label hata;
         readonly Button ver;
@@ -22,7 +22,7 @@ namespace TheLighter.Istemci
 
         public VisualElement Kok { get; }
 
-        public CevapSecmeParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public CevapSecmeParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             this.akis = akis;
             var g = e.Gorunum;
@@ -131,6 +131,8 @@ namespace TheLighter.Istemci
             if (!secili.HasValue) return;
             var s = akis.CevapSec(secili.Value);
             if (s != Sonuc.Tamam) hata.text = HataMetni.Al(s);
+            else if (akis.Online) Kok.SetEnabled(false); // cevap sonraki durum'la gelir
+
         }
     }
 }

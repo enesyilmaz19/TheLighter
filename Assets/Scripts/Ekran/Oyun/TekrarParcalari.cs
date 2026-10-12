@@ -40,8 +40,10 @@ namespace TheLighter.Istemci
             return l;
         }
 
-        /// <summary>İsim + üstünde palyaço cezası varsa etiketi (herkese açık).</summary>
-        public static string IsimEtiketi(EldenEleAkisi akis, Gorunum g, OyuncuId id)
+        /// <summary>
+        /// İsim + herkese açık etiketleri: palyaço cezası; online'da Bağlanıyor…, AFK, Ayrıldı.
+        /// </summary>
+        public static string IsimEtiketi(IOyunAkisi akis, Gorunum g, OyuncuId id)
         {
             string isim = akis.Isim(id);
             if (g == null) return isim;
@@ -49,7 +51,10 @@ namespace TheLighter.Istemci
             {
                 if (o.Id != id) continue;
                 foreach (var k in o.Kisitlamalar)
-                    if (k.Tur == CezaTuru.Palyaco) return isim + " · " + Metin.Al("palyaco.etiket");
+                    if (k.Tur == CezaTuru.Palyaco) { isim += " · " + Metin.Al("palyaco.etiket"); break; }
+                if (o.Cikti) return isim + " · " + Metin.Al("online.etiket.ayrildi");
+                if (akis is TheLighter.Ag.OnlineAkis online && !online.Bagli(id)) return isim + " · " + Metin.Al("online.etiket.baglaniyor");
+                if (o.Afk) return isim + " · " + Metin.Al("online.etiket.afk");
             }
             return isim;
         }
@@ -63,7 +68,7 @@ namespace TheLighter.Istemci
         }
 
         /// <summary>Görev metni: türü + hedef + adet geliyor, cümle Metinler.csv'de.</summary>
-        public static string GorevMetni(EldenEleAkisi akis, Gorev g)
+        public static string GorevMetni(IOyunAkisi akis, Gorev g)
         {
             if (g == null) return "";
             string hedef = g.Hedef.HasValue ? akis.Isim(g.Hedef) : "";
@@ -78,7 +83,7 @@ namespace TheLighter.Istemci
         }
 
         /// <summary>Tek bir ceza kartı: kim, neden, türü ve metni.</summary>
-        public static VisualElement CezaKarti(EldenEleAkisi akis, CezaCekimi cek)
+        public static VisualElement CezaKarti(IOyunAkisi akis, CezaCekimi cek)
         {
             var kart = Kutu("ceza-karti", cek.Ceza.Tur == CezaTuru.Sesli ? "ceza-sesli" : "ceza-kisit");
             var ust = Kutu("satir");
@@ -104,7 +109,7 @@ namespace TheLighter.Istemci
         /// <summary>
         /// Çark: ceza türleri bir süre döner, sonra kartlar açılır. Sadece görüntü; kartlar kural motorundan geldi.
         /// </summary>
-        public static VisualElement Cark(EldenEleAkisi akis, IReadOnlyList<CezaCekimi> cezalar, System.Action bitti)
+        public static VisualElement Cark(IOyunAkisi akis, IReadOnlyList<CezaCekimi> cezalar, System.Action bitti)
         {
             var kap = Kutu("ceza-alani");
             var donen = Yazi(Metin.Al("ceza.cark"), "ceza-cark");
@@ -132,7 +137,7 @@ namespace TheLighter.Istemci
     {
         static readonly System.Random Fikir = new System.Random();
 
-        readonly EldenEleAkisi akis;
+        readonly IOyunAkisi akis;
         readonly TextField kutu;
         readonly Label sayac;
         readonly Label hata;
@@ -140,7 +145,7 @@ namespace TheLighter.Istemci
 
         public VisualElement Kok { get; }
 
-        public SoruToplamaParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public SoruToplamaParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             this.akis = akis;
             var g = e.Gorunum;
@@ -195,6 +200,7 @@ namespace TheLighter.Istemci
         {
             var s = akis.HavuzaSoruEkle(kutu.value);
             if (s != Sonuc.Tamam) hata.text = HataMetni.Al(s);
+            else if (akis.Online) ekle.SetEnabled(false); // sunucunun cevabı gelene kadar ikinci kez gitmesin
         }
 
         public void Guncelle(EkranDurumu e) { }
@@ -205,7 +211,7 @@ namespace TheLighter.Istemci
     {
         public VisualElement Kok { get; }
 
-        public GorevParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public GorevParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             var g = e.Gorunum;
             Kok = Kutu("parca", "perde");
@@ -235,7 +241,7 @@ namespace TheLighter.Istemci
 
         public VisualElement Kok { get; }
 
-        public OylamaParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public OylamaParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             var g = e.Gorunum;
             string b = akis.Isim(g.B);
@@ -259,10 +265,11 @@ namespace TheLighter.Istemci
             Kok.Add(gume);
         }
 
-        void Ver(EldenEleAkisi akis, bool ifsa)
+        void Ver(IOyunAkisi akis, bool ifsa)
         {
             var s = akis.Oy(ifsa);
             if (s != Sonuc.Tamam) hata.text = HataMetni.Al(s);
+            else if (akis.Online) Kok.SetEnabled(false);
         }
 
         public void Guncelle(EkranDurumu e) { }
@@ -273,14 +280,18 @@ namespace TheLighter.Istemci
     {
         readonly Label sure;
         readonly Label hata;
+        readonly bool online;
 
         public VisualElement Kok { get; }
 
-        public KararParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public KararParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             var g = e.Gorunum;
             string karar = akis.Isim(e.Kime);
             bool bedel = g.Asama == Asama.Bedel;
+            // Online'da sadece karar verenin ekranında düğme var; diğerleri izler.
+            bool benKarar = !akis.Online || (akis.Ben.HasValue && akis.Ben == e.Kime);
+            online = akis.Online;
 
             Kok = Kutu("parca", "perde");
             var bas = Kutu("satir");
@@ -305,6 +316,11 @@ namespace TheLighter.Istemci
 
             hata = Yazi("", "hata");
             Kok.Add(hata);
+            if (!benKarar)
+            {
+                Kok.Add(Yazi(Metin.Al("online.bekle.karar", karar), "aciklama", "orta"));
+                return;
+            }
             var evet = Buton(Metin.Al(bedel ? "karar.bedel_evet" : "karar.katla_evet"),
                 () => Bildir(bedel ? akis.BedelOde() : akis.IkiyeKatla()), "buton-birincil", "buton-buyuk");
             var hayir = Buton(Metin.Al(bedel ? "karar.bedel_hayir" : "karar.katla_hayir"),
@@ -318,6 +334,7 @@ namespace TheLighter.Istemci
         void Bildir(Sonuc s)
         {
             if (s != Sonuc.Tamam) hata.text = HataMetni.Al(s);
+            else if (online) Kok.SetEnabled(false);
         }
 
         public void Guncelle(EkranDurumu e)

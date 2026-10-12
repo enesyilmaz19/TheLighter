@@ -65,6 +65,13 @@ namespace TheLighter.Ag
             return sb.ToString();
         }
 
+        /// <summary>Sunucunun kendi hata kodları (docs/Protokol.md, "hata"). Kural motorununkiler <see cref="Sonuc"/>.</summary>
+        public static readonly string[] SunucuKodlari =
+        {
+            "GECERSIZ_MESAJ", "ODA_YOK", "ODA_DOLU", "OYUN_BASLADI", "ISIM_GECERSIZ", "ODADA_DEGILSIN", "ZATEN_ODADASIN",
+            "KURUCU_DEGILSIN", "OYUN_YOK", "ESKI_TUR", "COK_HIZLI", "SUNUCU_DOLU", "ATILDIN", "OYUNDA_DEGILSIN",
+        };
+
         // ------------------------------------------------------------ Gelen
 
         /// <param name="sen">Bu cihazın oyuncusu (hosgeldin'den). Oyun durumunda <see cref="Gorunum.Sen"/> olur.</param>

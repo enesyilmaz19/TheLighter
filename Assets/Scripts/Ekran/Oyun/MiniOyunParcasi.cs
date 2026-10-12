@@ -20,7 +20,7 @@ namespace TheLighter.Istemci
 
         public VisualElement Kok { get; }
 
-        public MiniOyunParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public MiniOyunParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             Kok = Kutu("parca", "bolunmus");
             ust = new YariEkran(akis, e.CGorunumu, false, e.SonBerabere);
@@ -42,18 +42,21 @@ namespace TheLighter.Istemci
     {
         static readonly Random Karistirici = new Random();
 
-        readonly EldenEleAkisi akis;
+        readonly IOyunAkisi akis;
         readonly OyuncuId ben;
         readonly Label sure;
         readonly Label hata;
         readonly List<Button> tekCiftButonlari = new List<Button>();
+        readonly bool online;
         bool? tekDiyor;
 
         public VisualElement Kok { get; }
 
-        public YariEkran(EldenEleAkisi akis, Gorunum g, bool bMi, BerabereEl sonBerabere)
+        /// <param name="online">Online: her cihaz kendi yarısını çizer, B ile C aynı anda seçer (sıra yok).</param>
+        public YariEkran(IOyunAkisi akis, Gorunum g, bool bMi, BerabereEl sonBerabere, bool online = false)
         {
             this.akis = akis;
+            this.online = online;
             ben = g.Sen;
             string rakip = akis.Isim(bMi ? g.C : g.B);
 
@@ -62,16 +65,18 @@ namespace TheLighter.Istemci
 
             if (sonBerabere != null)
                 Kok.Add(Yazi(Metin.Al("mini.beraberlik", g.Beraberlik, ElYazisi.Berabere(akis, g, sonBerabere)), "banner"));
+            else if (online && g.Beraberlik > 0 && !g.BHamleYapti && !g.CHamleYapti)
+                Kok.Add(Yazi(Metin.Al("mini.beraberlik_online", g.Beraberlik), "banner")); // rakibin eli sunucuda, bize gelmez
 
             Kok.Add(Esnek());
-            Kok.Add(Icerik(g, bMi, rakip));
+            Kok.Add(online ? OnlineIcerik(g, bMi, rakip) : Icerik(g, bMi, rakip));
             hata = Yazi("", "hata");
             Kok.Add(hata);
             Kok.Add(Esnek());
         }
 
         /// <summary>İsim, rol ve kalan süre. Reaksiyon ekranı da kullanır.</summary>
-        public static VisualElement Baslik(EldenEleAkisi akis, Gorunum g, bool bMi, out Label sure)
+        public static VisualElement Baslik(IOyunAkisi akis, Gorunum g, bool bMi, out Label sure)
         {
             var kap = Kutu("yari-baslik");
             var bas = Kutu("satir");
@@ -107,6 +112,21 @@ namespace TheLighter.Istemci
                 default:
                     return Yazi(Metin.Al("mini.bekle"), "yari-durum");
             }
+        }
+
+        /// <summary>Online: kendi hamleni yapmadıysan seçim, yaptıysan rakibi bekle.</summary>
+        VisualElement OnlineIcerik(Gorunum g, bool bMi, string rakip)
+        {
+            bool yaptim = bMi ? g.BHamleYapti : g.CHamleYapti;
+            if (yaptim)
+                return Yazi(Metin.Al(g.MiniOyun == MiniOyunTuru.Zar ? "mini.zar_attin" : "mini.online_bekle", rakip), "yari-durum");
+            if (g.MiniOyun == MiniOyunTuru.Zar)
+            {
+                var zar = Kutu("secimler");
+                zar.Add(Buton(Metin.Al("mini.zar_at"), () => Oyna(Hamle.ZarAt()), "secim"));
+                return zar;
+            }
+            return GizliSecim(g.MiniOyun, bMi);
         }
 
         /// <summary>TKM: üç seçenek. Tek-Çift: B önce tek mi çift mi der, sonra ikisi de 1–5 seçer.</summary>
@@ -192,6 +212,8 @@ namespace TheLighter.Istemci
         {
             var s = akis.Hamle(ben, h);
             if (s != Sonuc.Tamam) hata.text = HataMetni.Al(s);
+            // Online: cevap sonraki durum'la gelir; o zamana kadar ikinci kez basılmasın.
+            else if (online) Kok.SetEnabled(false);
         }
 
         public void Guncelle(Gorunum g)
@@ -203,7 +225,7 @@ namespace TheLighter.Istemci
     /// <summary>Açılan bir elin hamlelerini yazıya döker. Kazananı hesaplamaz, MiniOyunSonucu'ndan okur.</summary>
     static class ElYazisi
     {
-        public static string AcilanEl(EldenEleAkisi akis, Gorunum g, MiniOyunSonucu s)
+        public static string AcilanEl(IOyunAkisi akis, Gorunum g, MiniOyunSonucu s)
         {
             string b = akis.Isim(g.B);
             string c = akis.Isim(g.C);
@@ -219,7 +241,7 @@ namespace TheLighter.Istemci
             return Metin.Al("el.ikili", b, HamleYazisi(s.BHamle), c, HamleYazisi(s.CHamle));
         }
 
-        public static string Berabere(EldenEleAkisi akis, Gorunum g, BerabereEl el)
+        public static string Berabere(IOyunAkisi akis, Gorunum g, BerabereEl el)
         {
             return Metin.Al("el.ikili", akis.Isim(g.B), HamleYazisi(el.BHamle), akis.Isim(g.C), HamleYazisi(el.CHamle));
         }

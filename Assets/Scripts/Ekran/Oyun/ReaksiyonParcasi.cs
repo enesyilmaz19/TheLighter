@@ -17,7 +17,7 @@ namespace TheLighter.Istemci
     {
         static readonly Random Rastgele = new Random();
 
-        readonly EldenEleAkisi akis;
+        readonly IOyunAkisi akis;
         readonly Stopwatch saat = Stopwatch.StartNew();
         readonly long yesilOlacak;
         readonly Yari ust;
@@ -26,7 +26,7 @@ namespace TheLighter.Istemci
 
         public VisualElement Kok { get; }
 
-        public ReaksiyonParcasi(EldenEleAkisi akis, EkranDurumu e)
+        public ReaksiyonParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             this.akis = akis;
             yesilOlacak = Rastgele.Next(1500, 4000);

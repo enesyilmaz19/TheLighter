@@ -341,3 +341,93 @@ unvan.ad.Bumerang,Bumerang
 unvan.aciklama.Bumerang,Gösterdiği kişiler onu {0} kez geri gösterdi
 unvan.ad.Sogukkanli,Soğukkanlı
 unvan.aciklama.Sogukkanli,Çakmak kızgınken {0} kez verdi
+online.baslik,Online oyna
+online.isim,Adın
+online.oda_kur,Oda kur
+online.oda_kur_ipucu,"Oda kodunu arkadaşlarına söyle, onlar da koda katılsın."
+online.koda_katil,Koda katıl
+online.katil,Katıl
+online.geri_don,Kaldığın odaya dön ({0})
+online.sunucu,Sunucu
+online.sunucu_baslik,Sunucu adresi
+online.sunucu_ipucu,ws:// ya da wss:// ile başlar. Yerel deneme için ws://localhost:5000/ws.
+online.sunucu_kaydet,Kaydet
+online.sunucu_gecersiz,Bu adres olmadı: ws:// ya da wss:// ile başlamalı.
+online.baglaniyor,Bağlanıyor…
+online.baglaniyor_ipucu,"Bağlantı koptu, yeniden deniyoruz. Oyundaysan yerin 60 saniye tutuluyor."
+online.baglaniyor_kisa,Bağlanıyor…
+online.vazgec,"Vazgeç, ana menüye dön"
+online.cikis.baglanamadi,Sunucuya bağlanılamadı. İnternetini ve sunucu adresini kontrol et.
+online.cikis.ayrildin,Odadan ayrıldın.
+online.ayril,Odadan ayrıl
+online.menu_baslik,Oda {0}
+online.menu_ipucu,Online'da oyun durmaz: süre işlemeye devam eder.
+online.afk_baslik,Orada mısın?
+online.afk_aciklama,"İki kez süren doldu, sıran atlanıyor. Dönmek için dokun."
+online.buradayim,Buradayım
+online.bekleme_baslik,Oyuncular bekleniyor
+online.bekleme_aciklama,"Bağlı oyuncu 4'ten az, oyun durdu. Kimse dönmezse oyun {0} sonra biter."
+online.olay.atildi,{0} odadan atıldı.
+online.olay.sira_atlandi,{1} sırası atlandı.
+online.olay.afk,{0} AFK.
+online.olay.afk_bitti,{0} geri döndü.
+online.olay.cikti,{0} oyundan çıktı.
+online.olay.sure_doldu,{1} süresi doldu.
+online.bekle.izliyorsun,"Oyundan çıktın, izliyorsun."
+online.bekle.toplama,Herkes havuza soru yazıyor
+online.bekle.toplama_sayisi,{0}/{1} kişi bitirdi
+online.bekle.soru,{0} soru yazıyor…
+online.bekle.soru_gizli,Biri gizlice soru yazıyor…
+online.bekle.cevap,{0} çakmağı kime vereceğini düşünüyor…
+online.bekle.mini,{0} ile {1} {2} oynuyor
+online.bekle.oylama,Grup Kararı: oylar toplanıyor
+online.bekle.oy_sayisi,{0}/{1} oy
+online.bekle.oy_verdin,Oyunu verdin.
+online.bekle.karar,{0} karar veriyor…
+online.etiket.ayrildi,ayrıldı
+online.etiket.baglaniyor,bağlanıyor
+online.etiket.afk,AFK
+online.son.tekrar_bekle,Kurucu yeni oyunu başlatınca lobiye döneceksiniz.
+mini.beraberlik_online,{0}. beraberlik. Bir el daha!
+mini.online_bekle,Seçtin. {0} bekleniyor...
+lobi.ayril,Ayrıl
+lobi.kod_baslik,Oda kodu
+lobi.kopyala,Kodu kopyala
+lobi.oyuncular,Oyuncular
+lobi.sen,(sen)
+lobi.kurucu,kurucu
+lobi.at,At
+lobi.at_soru,{1} odadan atmak istiyor musun?
+lobi.at_ipucu,Atılan bu odaya aynı isimle dönemez.
+lobi.at_evet,"Evet, at"
+lobi.basla,Başlat
+lobi.hizli_ipucu,"Önerilen ayarlar: Normal, TKM, 15 tur, Cesur cezalar, görevler ve kaos. 4 kişi varsa hemen başlar."
+lobi.sureler,Süreler
+lobi.soru_sn,Soru yazma
+lobi.cevap_sn,Çakmağı verme
+lobi.hamle_sn,Mini oyun hamlesi
+lobi.sn,{0} sn
+lobi.kurucu_bekleniyor,{0} oyunu başlatınca başlayacak.
+lobi.en_az,En az {1} kişi gerekiyor ({0}/{1}).
+lobi.ozet,Ayarlar: {0}
+bekleme.baslik,Oyun sürüyor
+bekleme.aciklama_sinirli,Tur {0}/{1}. Bu oyun bitince sen de oynayacaksın.
+bekleme.aciklama_sinirsiz,Tur {0}. Bu oyun bitince sen de oynayacaksın.
+bekleme.bitti_baslik,Oyun bitti
+bekleme.bitti_aciklama,Kurucu yeni oyunu başlatınca sen de katılacaksın.
+bekleme.oyundakiler,Oyundakiler
+bekleme.bekleyenler,Bekleyenler
+hata.GECERSIZ_MESAJ,"Bir şeyler ters gitti, tekrar dene."
+hata.ODA_YOK,Bu kodla bir oda yok ya da oda kapandı.
+hata.ODA_DOLU,Oda dolu (10 kişi).
+hata.OYUN_BASLADI,"Oyun başladı, artık değiştirilemez."
+hata.ISIM_GECERSIZ,"Bu isim olmaz: boş, 20 harften uzun ya da odada aynısı var."
+hata.ODADA_DEGILSIN,Önce bir odaya gir.
+hata.ZATEN_ODADASIN,Zaten bir odadasın.
+hata.KURUCU_DEGILSIN,Bunu sadece kurucu yapabilir.
+hata.OYUN_YOK,Oyun henüz başlamadı.
+hata.ESKI_TUR,"Geç kaldın, tur değişti."
+hata.COK_HIZLI,Çok hızlı! Biraz bekleyip tekrar dene.
+hata.SUNUCU_DOLU,"Sunucu şu an dolu, biraz sonra tekrar dene."
+hata.ATILDIN,Bu odadan atıldın.
+hata.OYUNDA_DEGILSIN,"Bu oyunda değilsin, bitince katılacaksın."

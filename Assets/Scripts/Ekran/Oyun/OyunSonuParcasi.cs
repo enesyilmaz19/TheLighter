@@ -16,11 +16,11 @@ namespace TheLighter.Istemci
     sealed class OyunSonuParcasi : IOyunParcasi
     {
         /// <summary>Aynı oyun grup kaydına iki kez işlenmesin (ekran yeniden kurulsa bile).</summary>
-        static EldenEleAkisi sonIslenen;
+        static IOyunAkisi sonIslenen;
         static GrupDosyasi sonGrup;
 
         readonly Uygulama uygulama;
-        readonly EldenEleAkisi akis;
+        readonly IOyunAkisi akis;
         readonly OyunOzeti ozet;
         readonly VisualElement grupKutusu;
         readonly VisualElement kartPerdesi;
@@ -28,7 +28,8 @@ namespace TheLighter.Istemci
 
         public VisualElement Kok { get; }
 
-        public OyunSonuParcasi(Uygulama uygulama, EldenEleAkisi akis, EkranDurumu e)
+        /// <param name="online">Online'da: "Tekrar oyna" sadece kurucuda (oda lobiye döner), "Ana menü" odadan ayrılır.</param>
+        public OyunSonuParcasi(Uygulama uygulama, IOyunAkisi akis, EkranDurumu e, OnlineYonetici online = null)
         {
             this.uygulama = uygulama;
             this.akis = akis;
@@ -93,8 +94,20 @@ namespace TheLighter.Istemci
             Kok.Add(kaydirma);
 
             Kok.Add(Buton(Metin.Al("son.paylas"), KartiAc, "buton-ikincil"));
-            Kok.Add(Buton(Metin.Al("son.tekrar"), () => uygulama.TekrarOyna(), "buton-birincil", "buton-buyuk"));
-            Kok.Add(Buton(Metin.Al("oyun.ana_menu"), uygulama.AnaMenu, "buton-ikincil"));
+            if (!akis.Online)
+            {
+                Kok.Add(Buton(Metin.Al("son.tekrar"), () => uygulama.TekrarOyna(), "buton-birincil", "buton-buyuk"));
+                Kok.Add(Buton(Metin.Al("oyun.ana_menu"), uygulama.AnaMenu, "buton-ikincil"));
+            }
+            else
+            {
+                var oa = akis as TheLighter.Ag.OnlineAkis;
+                if (akis.Kurucuyum)
+                    Kok.Add(Buton(Metin.Al("son.tekrar"), () => oa?.TekrarOyna(), "buton-birincil", "buton-buyuk"));
+                else
+                    Kok.Add(Yazi(Metin.Al("online.son.tekrar_bekle"), "ipucu", "orta"));
+                Kok.Add(Buton(Metin.Al("online.ayril"), () => online?.Ayril(), "buton-ikincil"));
+            }
 
             kartPerdesi = Kutu("menu-perde", "kart-perdesi", "gizli");
             Kok.Add(kartPerdesi);
@@ -102,7 +115,7 @@ namespace TheLighter.Istemci
 
         public void Guncelle(EkranDurumu e) { }
 
-        static VisualElement UnvanKarti(EldenEleAkisi akis, Unvan u)
+        static VisualElement UnvanKarti(IOyunAkisi akis, Unvan u)
         {
             var kart = Kutu("unvan-karti");
             kart.Add(Yazi(Metin.Al("unvan.ad." + u.Tur), "unvan-ad"));

@@ -26,6 +26,7 @@ namespace TheLighter.Istemci
         VisualElement kok;
         VisualElement sahne;
         IEkran ekran;
+        VisualElement baglaniyor;
         Rect sonGuvenliAlan;
         int sonGenislik;
         int sonYukseklik;
@@ -42,6 +43,12 @@ namespace TheLighter.Istemci
         public List<PaketBilgisi> Paketler { get; private set; } = new List<PaketBilgisi>();
 
         List<string> sesliCezalar = new List<string>();
+
+        /// <summary>Online mod: oturum ve online ekranlar arası geçiş.</summary>
+        public OnlineYonetici Online { get; private set; }
+
+        /// <summary>Şu an gösterilen ekran.</summary>
+        public IEkran Ekran => ekran;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Baslat()
@@ -61,6 +68,7 @@ namespace TheLighter.Istemci
             Metin.Yukle();
             PaketleriYukle();
             ArayuzuKur();
+            Online = new OnlineYonetici(this);
             AnaMenu();
         }
 
@@ -92,6 +100,8 @@ namespace TheLighter.Istemci
             kok = Arayuz.Kutu("kok");
             sahne = Arayuz.Kutu("sahne");
             kok.Add(sahne);
+            baglaniyor = BaglaniyorKatmani();
+            kok.Add(baglaniyor);
             root.Add(kok);
             OlcekVeGuvenliAlan(true);
         }
@@ -99,12 +109,16 @@ namespace TheLighter.Istemci
         void Update()
         {
             OlcekVeGuvenliAlan(false);
+            // Önce ağ: gelen durumlar bu karede ekrana yansısın (ekran değişebilir).
+            Online.Guncelle(Time.unscaledDeltaTime);
             if (ekran != null) ekran.Guncelle(Time.deltaTime);
         }
 
         void OnApplicationPause(bool duraklatildi)
         {
             if (duraklatildi && ekran != null) ekran.ArkaPlanaGecti();
+            // Android: WhatsApp'a bakıp dönen oyuncu. Bağlantı sessizce ölmüş olabilir, hemen yeniden bağlan.
+            if (!duraklatildi && Online != null) Online.UygulamaDondu();
         }
 
         // ---------- Gezinme ----------
@@ -119,6 +133,26 @@ namespace TheLighter.Istemci
         public void AnaMenu() => Goster(new AnaMenuEkrani(this));
 
         public void Kurulum() => Goster(new KurulumEkrani(this));
+
+        /// <param name="neden">Odadan neden çıkıldı (sunucu kodu ya da oturumun nedeni), yoksa null.</param>
+        public void OnlineMenu(string neden) => Goster(new OnlineMenuEkrani(this, Online, neden));
+
+        /// <summary>Bağlantı koptu, kendiliğinden yeniden deneniyor: bütün ekranın üstünde "Bağlanıyor…".</summary>
+        public void BaglaniyorGoster(bool acik)
+        {
+            if (baglaniyor != null) baglaniyor.EnableInClassList("gizli", !acik);
+        }
+
+        VisualElement BaglaniyorKatmani()
+        {
+            var perde = Arayuz.Kutu("menu-perde", "baglaniyor", "gizli");
+            var kutu = Arayuz.Kutu("menu-kutu");
+            kutu.Add(Arayuz.Yazi(Metin.Al("online.baglaniyor"), "baslik"));
+            kutu.Add(Arayuz.Yazi(Metin.Al("online.baglaniyor_ipucu"), "aciklama"));
+            kutu.Add(Arayuz.Buton(Metin.Al("online.vazgec"), () => Online.Ayril(), "buton-ikincil"));
+            perde.Add(kutu);
+            return perde;
+        }
 
         /// <summary>
         /// Kural motorunu kurar ve oyun ekranına geçer. Kur hata verirse ekran değişmez, hata döner.

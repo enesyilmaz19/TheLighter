@@ -40,6 +40,7 @@ namespace Cakmak.Kurallar.Tests
             {
                 Assert.That(ceza.Length, Is.LessThanOrEqualTo(120), "çok uzun: " + ceza);
                 Assert.That(ceza, Does.Not.EndWith("?"), "ceza soru değil, görev: " + ceza);
+                Assert.That(ceza, Is.EqualTo(TemizMetin.Temizle(ceza)), "görünmez karakter ya da fazla boşluk (kopyala-yapıştır?): " + ceza);
                 Assert.That(gorulen.Add(ceza.ToLowerInvariant()), Is.True, "iki kez var: " + ceza);
             }
         }
@@ -56,6 +57,7 @@ namespace Cakmak.Kurallar.Tests
                     Assert.That(soru.Length, Is.LessThanOrEqualTo(Oyun.SoruEnFazlaKarakter), $"{ad}: çok uzun: {soru}");
                     Assert.That(soru, Does.EndWith("?"), $"{ad}: soru işareti yok: {soru}");
                     Assert.That(soru.ToLowerInvariant(), Does.Contain("kim"), $"{ad}: cevabı bir kişi değil: {soru}");
+                    Assert.That(soru, Is.EqualTo(TemizMetin.Temizle(soru)), $"{ad}: görünmez karakter ya da fazla boşluk (kopyala-yapıştır?): {soru}");
                     Assert.That(gorulen.Add(soru.ToLowerInvariant()), Is.True, $"{ad}: iki kez var: {soru}");
                 }
             }

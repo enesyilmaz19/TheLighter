@@ -46,16 +46,17 @@ Neden şimdi: Arda'yı beklerken yapılabilecek, Playtest 1'in sonucundan etkile
 
 Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hiçbiri gerekmiyor.
 
-- [ ] IP başına sınırlar: `odaKur` ve `katil` hızı (oda kodu deneme yolunu kapatır: 24^5 ≈ 8 milyon kod), IP başına bağlantı sayısı, bağlantı başına saniyede mesaj
-- [ ] Gerçek IP: Caddy arkasında ASP.NET Core forwarded headers (yoksa herkes aynı IP görünür, sınırlar işe yaramaz)
-- [ ] Boşta bekleyen lobiye zaman aşımı (bağlı ama hiç başlatılmayan oda sonsuza kadar kalıyor)
+- [x] **(2026-10-12)** IP başına sınırlar: aynı anda 32 bağlantı (aşılınca HTTP 429), dakikada 30 `odaKur`+`katil` (oda kodu denemeyi yavaşlatır), bağlantı başına saniyede 10 mesaj (20'lik patlama); aşılınca `COK_HIZLI`. .NET'in hazır sınırlayıcıları (`System.Threading.RateLimiting`), değerler ayardan (`Sinirlar__...`). IPv6'da /64 bloğu tek IP
+- [x] **(2026-10-12)** Gerçek IP: forwarded headers, sadece localhost'tan gelen `X-Forwarded-For`'a güvenir (Caddy aynı makinede olmalı)
+- [x] **(2026-10-12)** 30 dk'da başlatılmayan lobi kapanır. Biçim `docs/Protokol.md`, "Sınırlar". 6 yeni test (`SinirTestleri`), her biri kendi küçük sınırlı sunucusunda
+- [ ] Sonra (gerekirse): yeni bağlantı açma hızı (şimdi sadece aynı anda açık sayısı sınırlı), oyun sonunda açık kalan odaya zaman aşımı
 - [x] Zaten var: 4 KB mesaj sınırı, sınırlı gönderim kuyruğu, 20 sn'de sessiz kopanı fark etme, boş odayı silme, bozuk JSON'da bağlantıyı düşürmeme
 
 ## S4 sonu — sunucu kurulumu (Enes'in hesabı ve ödemesi gerekiyor)
 
 - [ ] VPS: Hetzner CX23 (Arda'nın notu: Haziran 2026 zammından sonra ~5,49 €/ay, plandaki "5 $" eski), Ubuntu LTS
 - [ ] SSH sadece anahtarla (şifre kapalı) · güvenlik duvarında sadece 22, 80, 443 · otomatik güvenlik güncellemeleri · fail2ban
-- [ ] Uygulama systemd servisi, root olmayan kullanıcı, sadece localhost'u dinler · önünde Caddy (alan adı + HTTPS kendiliğinden, wss:// ek ayarsız)
+- [ ] Uygulama systemd servisi, root olmayan kullanıcı, sadece localhost'u dinler · önünde Caddy (alan adı + HTTPS kendiliğinden, wss:// ek ayarsız). **Caddy aynı makinede olmalı:** sunucu `X-Forwarded-For`'a sadece localhost'tan güveniyor. Önüne Cloudflare gibi bir şey daha konursa `ForwardedHeadersOptions.KnownNetworks` ayarlanmalı, yoksa herkes aynı IP görünür
 - [ ] Gizli bilgiler (Vivox anahtarı vb.) sunucuda ortam değişkeninde. Repoya ve Unity build'ine asla girmez
 - [ ] Alan adı
 

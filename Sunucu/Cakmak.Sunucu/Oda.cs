@@ -35,15 +35,19 @@ namespace Cakmak.Sunucu
         Oyun oyun;
         int surum;
         bool degisti;
+        readonly TimeSpan lobiSuresi;
+        TimeSpan lobideGecen;
 
         /// <summary>Oda silindi. Bu bayraktan sonra kimse katılamaz.</summary>
         public bool Kapandi { get; private set; }
 
-        public Oda(string kod, IReadOnlyDictionary<string, IReadOnlyList<string>> paketler, IReadOnlyList<string> sesliCezalar)
+        public Oda(string kod, IReadOnlyDictionary<string, IReadOnlyList<string>> paketler, IReadOnlyList<string> sesliCezalar,
+            TimeSpan lobiSuresi)
         {
             Kod = kod;
             this.paketler = paketler;
             this.sesliCezalar = sesliCezalar;
+            this.lobiSuresi = lobiSuresi;
             seciliPaketler = new List<string>(paketler.Keys);
         }
 
@@ -307,13 +311,21 @@ namespace Cakmak.Sunucu
         // ------------------------------------------------------------ Saat
 
         /// <summary>Saat her ~100 ms'de çağırır. Bir aşama değiştiyse herkese yeni durum gider.</summary>
-        public void Ilerle(TimeSpan gecen)
+        /// <returns>true: lobi başlatılmadan çok bekledi, oda silinmeli.</returns>
+        public bool Ilerle(TimeSpan gecen)
         {
             lock (kilit)
             {
-                if (oyun == null || Kapandi) return;
+                if (Kapandi) return false;
+                if (oyun == null)
+                {
+                    // Bağlı ama hiç başlatılmayan oda sonsuza kadar yer tutmasın.
+                    lobideGecen += gecen;
+                    return lobideGecen >= lobiSuresi;
+                }
                 oyun.Ilerle(gecen);
                 if (degisti) HerkeseDurum();
+                return false;
             }
         }
 

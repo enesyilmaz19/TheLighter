@@ -34,10 +34,13 @@ namespace SunucuTestleri
             _ = Task.Run(Dinle);
         }
 
-        public static async Task<TestIstemci> Baglan(WebApplicationFactory<Program> fabrika)
+        /// <param name="ip">Verilirse X-Forwarded-For olarak gider (sunucunun önündeki Caddy'nin yaptığı gibi).</param>
+        public static async Task<TestIstemci> Baglan(WebApplicationFactory<Program> fabrika, string ip = null)
         {
             using var cts = new CancellationTokenSource(VarsayilanSure);
-            var ws = await fabrika.Server.CreateWebSocketClient().ConnectAsync(new Uri("ws://localhost/ws"), cts.Token);
+            var istemci = fabrika.Server.CreateWebSocketClient();
+            if (ip != null) istemci.ConfigureRequest = r => r.Headers["X-Forwarded-For"] = ip;
+            var ws = await istemci.ConnectAsync(new Uri("ws://localhost/ws"), cts.Token);
             return new TestIstemci(ws);
         }
 

@@ -15,6 +15,9 @@ namespace Cakmak.Sunucu
     {
         public const int EnFazlaOyuncu = Oyun.EnFazlaOyuncu;
         const int IsimEnFazla = 20;
+        const int SohbetEnFazla = 200;
+        /// <summary>Temiz modda bu kadar ihlalde (soru ya da sohbet) odadan atılır (Ana Plan 6.4).</summary>
+        const int IhlalSiniri = 3;
 
         sealed class OdaOyuncusu
         {
@@ -51,6 +54,9 @@ namespace Cakmak.Sunucu
         /// <summary>Atılanlar bu odaya ne anahtarıyla ne aynı isimle dönebilir (Ana Plan 6.4).</summary>
         readonly HashSet<string> yasakliAnahtar = new HashSet<string>();
         readonly HashSet<string> yasakliIsim = new HashSet<string>();
+        /// <summary>Temiz mod ihlalleri, isim anahtarına göre: lobide çıkıp aynı isimle girince sıfırlanmasın.</summary>
+        readonly Dictionary<string, int> ihlaller = new Dictionary<string, int>();
+        int sohbetSayaci;
 
         /// <summary>Oda silindi. Bu bayraktan sonra kimse katılamaz.</summary>
         public bool Kapandi { get; private set; }
@@ -275,8 +281,7 @@ namespace Cakmak.Sunucu
         }
 
         /// <summary>
-        /// Kurucu birini atar (lobide, oyunda ya da bekleme odasında). Atılan "ATILDIN" alır, bağlantısı kapanır,
-        /// bu odaya ne anahtarıyla ne aynı isimle dönebilir. Oyundaysa oyundan çıkar, sayaçları özette kalır.
+        /// Kurucu birini atar (lobide, oyunda ya da bekleme odasında), kendini atamaz. Sonrası <see cref="Cikar"/>.
         /// ponytail: hesap yok, yeni bir isimle girebilir (Ana Plan 6.4). Rapor + engelleme S6'da.
         /// </summary>
         public void At(Baglanti b, JsonObject m)
@@ -287,26 +292,7 @@ namespace Cakmak.Sunucu
                 var kim = Protokol.IdCoz(Protokol.Metin(m, "kim"));
                 var o = oyuncular.Find(x => x.Id == kim);
                 if (o == null || o.Id == kurucu) { b.Yolla(Protokol.Hata("GECERSIZ_GIRDI")); return; }
-
-                yasakliAnahtar.Add(o.Anahtar);
-                yasakliIsim.Add(Oyuncu.IsimAnahtari(o.Isim));
-                if (o.Baglanti != null)
-                {
-                    o.Baglanti.Yolla(Protokol.Hata("ATILDIN"));
-                    o.Baglanti.Oda = null;
-                    o.Baglanti.Bitir(); // son mesaj gidince bağlantı kapanır
-                    o.Baglanti = null;
-                }
-                var olay = Protokol.AtildiOlayi(o.Id);
-                foreach (var x in oyuncular) x.Baglanti?.Yolla(olay);
-
-                if (oyun == null || o.Bekliyor) oyuncular.Remove(o);
-                else if (!o.Cikti)
-                {
-                    o.Cikti = true;
-                    oyun.OyuncuCikti(o.Id);
-                }
-                HerkeseDurum();
+                Cikar(o, "kurucu");
             }
         }
 
@@ -358,7 +344,8 @@ namespace Cakmak.Sunucu
             {
                 if (!UyeMi(b)) return;
                 if (oyun == null) { b.Yolla(Protokol.Hata("OYUN_YOK")); return; }
-                if (oyuncular.Find(o => o.Baglanti == b).Bekliyor) { b.Yolla(Protokol.Hata("OYUNDA_DEGILSIN")); return; }
+                var yazan = oyuncular.Find(o => o.Baglanti == b);
+                if (yazan.Bekliyor) { b.Yolla(Protokol.Hata("OYUNDA_DEGILSIN")); return; }
                 Buradayim(b.Kim); // komut yollayan başında: AFK ise kalkar
 
                 var tur = Protokol.Sayi(m, "tur").Value;
@@ -406,8 +393,84 @@ namespace Cakmak.Sunucu
                     default:
                         throw new GecersizMesaj();
                 }
-                Uygula(b, sonuc);
+                if (sonuc == Sonuc.Uygunsuz) Ihlal(yazan);
+                else Uygula(b, sonuc);
             }
+        }
+
+        // ------------------------------------------------------------ Sohbet
+
+        /// <summary>
+        /// Sohbet (Ana Plan 6.4): <c>kime</c> null ise odadaki herkese (bekleme odası dahil), doluysa sadece ona ve yazana.
+        /// Sunucu mesaj saklamaz. Temiz modda filtreye takılan gönderilmez, yazan uyarılır.
+        /// </summary>
+        public void Sohbet(Baglanti b, JsonObject m)
+        {
+            lock (kilit)
+            {
+                if (!UyeMi(b)) return;
+                if (!sinirlar.SohbetIzni(b)) { b.Yolla(Protokol.Hata("COK_HIZLI")); return; }
+                var kimeMetni = Protokol.Metin(m, "kime", false);
+                OyuncuId? kime = kimeMetni == null ? (OyuncuId?)null : Protokol.IdCoz(kimeMetni);
+                var metin = TemizMetin.Temizle(Protokol.Metin(m, "metin"));
+                var alan = kime == null ? null : oyuncular.Find(o => o.Id == kime.Value);
+                if (metin.Length == 0 || metin.Length > SohbetEnFazla || (kime != null && (alan == null || alan.Id == b.Kim)))
+                {
+                    b.Yolla(Protokol.Hata("GECERSIZ_GIRDI"));
+                    return;
+                }
+                if (ayarlar.Mod == OyunModu.Temiz && TemizFiltre.Uygunsuz(metin))
+                {
+                    Ihlal(oyuncular.Find(o => o.Baglanti == b));
+                    return;
+                }
+
+                var json = Protokol.Sohbet(++sohbetSayaci, b.Kim, kime, metin);
+                if (alan == null) foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
+                else
+                {
+                    alan.Baglanti?.Yolla(json);
+                    b.Yolla(json);
+                }
+            }
+        }
+
+        /// <summary>Temiz modda filtreye takılan metin (soru ya da sohbet): gönderilmez, yazan uyarılır, son ihlalde atılır.</summary>
+        void Ihlal(OdaOyuncusu o)
+        {
+            var isimAnahtari = Oyuncu.IsimAnahtari(o.Isim);
+            ihlaller.TryGetValue(isimAnahtari, out var n);
+            ihlaller[isimAnahtari] = ++n;
+            if (n >= IhlalSiniri) Cikar(o, "temiz");
+            else o.Baglanti.Yolla(Protokol.Uygunsuz(n, IhlalSiniri));
+        }
+
+        /// <summary>
+        /// Atma (kurucu ya da Temiz): atılan "ATILDIN" alır, bağlantısı kapanır, bu odaya ne anahtarıyla ne aynı isimle
+        /// dönebilir. Oyundaysa oyundan çıkar, sayaçları özette kalır. Kurucu atıldıysa kuruculuk devredilir.
+        /// </summary>
+        void Cikar(OdaOyuncusu o, string neden)
+        {
+            yasakliAnahtar.Add(o.Anahtar);
+            yasakliIsim.Add(Oyuncu.IsimAnahtari(o.Isim));
+            if (o.Baglanti != null)
+            {
+                o.Baglanti.Yolla(Protokol.Atildin(neden));
+                o.Baglanti.Oda = null;
+                o.Baglanti.Bitir(); // son mesaj gidince bağlantı kapanır
+                o.Baglanti = null;
+            }
+            var olay = Protokol.AtildiOlayi(o.Id, neden);
+            foreach (var x in oyuncular) x.Baglanti?.Yolla(olay);
+
+            if (oyun == null || o.Bekliyor) oyuncular.Remove(o);
+            else if (!o.Cikti)
+            {
+                o.Cikti = true;
+                oyun.OyuncuCikti(o.Id);
+            }
+            if (o.Id == kurucu) KurucuyuDevret();
+            HerkeseDurum();
         }
 
         /// <summary>"Buradayım" (ekrana dokundu): AFK etiketi kalkar. Lobide bir şey yapmaz.</summary>

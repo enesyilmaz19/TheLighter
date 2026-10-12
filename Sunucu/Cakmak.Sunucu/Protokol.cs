@@ -143,6 +143,23 @@ namespace Cakmak.Sunucu
 
         public static string Hata(string kod) => Yaz(new JsonObject { ["t"] = "hata", ["kod"] = kod });
 
+        /// <summary>Temiz mod: metin gönderilmedi. <c>ihlal</c>: bu odada kaçıncı, <c>sinir</c>'e varınca atılır.</summary>
+        public static string Uygunsuz(int ihlal, int sinir) =>
+            Yaz(new JsonObject { ["t"] = "hata", ["kod"] = "UYGUNSUZ", ["ihlal"] = ihlal, ["sinir"] = sinir });
+
+        /// <summary>Atılana son mesaj. <c>neden</c>: "kurucu" (kurucu attı) ya da "temiz" (Temiz modda son ihlal).</summary>
+        public static string Atildin(string neden) => Yaz(new JsonObject { ["t"] = "hata", ["kod"] = "ATILDIN", ["neden"] = neden });
+
+        /// <summary>Sohbet mesajı. <c>kime</c> null ise genel, doluysa DM (sadece alana ve yazana gider).</summary>
+        public static string Sohbet(int id, OyuncuId kimden, OyuncuId? kime, string metin) => Yaz(new JsonObject
+        {
+            ["t"] = "sohbet",
+            ["id"] = "m" + id,
+            ["kimden"] = Id(kimden),
+            ["kime"] = Id(kime),
+            ["metin"] = metin,
+        });
+
         public static string Hosgeldin(OyuncuId sen, string anahtar, string oda) =>
             Yaz(new JsonObject { ["t"] = "hosgeldin", ["sen"] = Id(sen), ["anahtar"] = anahtar, ["oda"] = oda });
 
@@ -159,8 +176,8 @@ namespace Cakmak.Sunucu
             ["kaos"] = o.Tur == OlayTuru.KaosBasladi ? Ad(o.Kaos) : null,
         });
 
-        /// <summary>Sunucunun kendi olayı (kural motorunda yok): kurucu birini attı.</summary>
-        public static string AtildiOlayi(OyuncuId kim) => Yaz(new JsonObject
+        /// <summary>Sunucunun kendi olayı (kural motorunda yok): biri atıldı. <c>neden</c>: <see cref="Atildin"/>.</summary>
+        public static string AtildiOlayi(OyuncuId kim, string neden) => Yaz(new JsonObject
         {
             ["t"] = "olay",
             ["olay"] = "atildi",
@@ -171,6 +188,7 @@ namespace Cakmak.Sunucu
             ["soru"] = null,
             ["ceza"] = null,
             ["kaos"] = null,
+            ["neden"] = neden,
         });
 
         public static JsonObject AyarlarYaz(Ayarlar a, IEnumerable<string> paketler) => new JsonObject

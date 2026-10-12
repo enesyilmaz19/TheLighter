@@ -59,6 +59,8 @@ namespace Cakmak.Kurallar.Tests
                     Assert.That(soru.ToLowerInvariant(), Does.Contain("kim"), $"{ad}: cevabı bir kişi değil: {soru}");
                     Assert.That(soru, Is.EqualTo(TemizMetin.Temizle(soru)), $"{ad}: görünmez karakter ya da fazla boşluk (kopyala-yapıştır?): {soru}");
                     Assert.That(gorulen.Add(soru.ToLowerInvariant()), Is.True, $"{ad}: iki kez var: {soru}");
+                    // Temiz modda öneriden seçilen soru da filtreden geçer: kendi içeriğimiz takılmasın.
+                    Assert.That(TemizFiltre.Uygunsuz(soru), Is.False, $"{ad}: Temiz filtresine takılıyor: {soru}");
                 }
             }
         }

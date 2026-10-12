@@ -19,6 +19,11 @@ namespace Cakmak.Sunucu
         public int MesajSaniyede { get; set; } = 10;
         /// <summary>Kısa süreli patlama: arka arkaya bu kadar mesaj beklemeden geçer.</summary>
         public int MesajPatlama { get; set; } = 20;
+        /// <summary>
+        /// Sohbet: saniyede 1 mesaj (Ana Plan 6.4), arka arkaya en fazla bu kadar. 1 değil 2: istemci saniyede bir yollasa da
+        /// ağ gecikmesi iki mesajı yaklaştırabilir.
+        /// </summary>
+        public int SohbetPatlama { get; set; } = 2;
         /// <summary>Bu kadar saniyede başlatılmayan lobi kapanır.</summary>
         public int LobiSn { get; set; } = 30 * 60;
         /// <summary>Bağlanıp bu kadar saniyede odaya girmeyen bağlantı kesilir (boşta yer tutmasın).</summary>
@@ -39,6 +44,7 @@ namespace Cakmak.Sunucu
         readonly PartitionedRateLimiter<string> baglanti;
         readonly PartitionedRateLimiter<string> giris;
         readonly PartitionedRateLimiter<Baglanti> mesaj;
+        readonly PartitionedRateLimiter<Baglanti> sohbet;
         public readonly TimeSpan LobiSuresi;
         public readonly TimeSpan OdasizSure;
         public readonly TimeSpan KopukSuresi;
@@ -72,6 +78,14 @@ namespace Cakmak.Sunucu
                     ReplenishmentPeriod = TimeSpan.FromSeconds(1),
                     QueueLimit = 0,
                 }));
+            sohbet = PartitionedRateLimiter.Create<Baglanti, Baglanti>(b => RateLimitPartition.GetTokenBucketLimiter(b,
+                _ => new TokenBucketRateLimiterOptions
+                {
+                    TokenLimit = a.SohbetPatlama,
+                    TokensPerPeriod = 1,
+                    ReplenishmentPeriod = TimeSpan.FromSeconds(1),
+                    QueueLimit = 0,
+                }));
         }
 
         /// <summary>Yeni WebSocket. Dönen izin bağlantı boyunca tutulur, kapanınca bırakılır.</summary>
@@ -86,6 +100,12 @@ namespace Cakmak.Sunucu
         public bool MesajIzni(Baglanti b)
         {
             using var izin = mesaj.AttemptAcquire(b);
+            return izin.IsAcquired;
+        }
+
+        public bool SohbetIzni(Baglanti b)
+        {
+            using var izin = sohbet.AttemptAcquire(b);
             return izin.IsAcquired;
         }
 
@@ -108,6 +128,7 @@ namespace Cakmak.Sunucu
             baglanti.Dispose();
             giris.Dispose();
             mesaj.Dispose();
+            sohbet.Dispose();
         }
     }
 }

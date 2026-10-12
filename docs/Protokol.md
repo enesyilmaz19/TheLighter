@@ -1,9 +1,8 @@
 # Ağ Protokolü (online mod)
 
-Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2 ve 8.
+Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma, sohbet + DM, Temiz filtresi).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2, 6.4 ve 8.
 Sunucu: `Sunucu/Cakmak.Sunucu` · İstemci: Unity (G2).
 
-Henüz **yok** (S5'te gelecek): sohbet + DM, Temiz filtresi. Kopma, AFK, bekleme odası, tekrar oyna ve atma var.
 Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığmıyor, parça parça yükleme gerekiyor. Grup hafızası cihazda, `ozet`'ten yazılır.
 
 ---
@@ -32,8 +31,9 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `komut` | `tur`, `komut`, + komutun alanları (aşağıda) | Oyunda |
 | `bitir` | — | Kurucu, oyunda. Oyunu hemen bitirir |
 | `buradayim` | — | Oyunda, herkes. Ekrana dokununca gönder: AFK etiketi kalkar. AFK değilse bir şey olmaz. Her `komut` da aynı işi görür |
-| `at` | `kim` | Kurucu; lobide, oyunda ya da bekleme odasında. Kendini atamaz. Atılan `ATILDIN` alır, bağlantısı kapanır; bu odaya ne anahtarıyla ne aynı isimle dönebilir (hesap yok: başka bir isimle girebilir, rapor + engelleme S6). Oyundaysa oyundan çıkar, sayaçları özette kalır. Herkese `olay: "atildi"` |
+| `at` | `kim` | Kurucu; lobide, oyunda ya da bekleme odasında. Kendini atamaz. Atılan `ATILDIN` (`neden: "kurucu"`) alır, bağlantısı kapanır; bu odaya ne anahtarıyla ne aynı isimle dönebilir (hesap yok: başka bir isimle girebilir, rapor + engelleme S6). Oyundaysa oyundan çıkar, sayaçları özette kalır. Herkese `olay: "atildi"` |
 | `tekrarOyna` | — | Kurucu, `oyunSonu`'nda. Oda lobiye döner: bağlı olmayanlar düşer, bekleme odasındakiler oyuncu olur, ayarlar ve atılanların yasağı kalır |
+| `sohbet` | `kime` (`null` ya da yok = genel, `"p3"` = DM), `metin` | Odadaki herkes, her an (lobi, oyun, bekleme odası, oyun sonu). Aşağıda "Sohbet" |
 
 **Metin temizliği** (isim, soru): görünmez ve yön karakterleri atılır, her türlü boşluk tek boşluk olur, baş/son boşluk silinir (`TemizMetin`). Temizlenince boş kalan isim `ISIM_GECERSIZ`, soru `GECERSIZ_GIRDI`. Ekranda hep temizlenmiş hali görünür.
 
@@ -59,7 +59,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `havuzaEkle` | `metin` | `HavuzaSoruEkle` |
 | `oneriCek` | — | `OneriCek` |
 | `soruyuDegistir` | — | `SoruyuDegistir` |
-| `soruSor` | `hedef`, `metin` | `SoruSor`. Curcuna'da `metin` yok sayılır. Diğer modlarda `metin` zorunlu, yoksa `GECERSIZ_GIRDI` (online'da fısıltı yok) |
+| `soruSor` | `hedef`, `metin` | `SoruSor`. Curcuna'da `metin` yok sayılır. Diğer modlarda `metin` zorunlu, yoksa `GECERSIZ_GIRDI` (online'da fısıltı yok). Temiz modda filtreye takılırsa `UYGUNSUZ` (aşağıda "Temiz mod") |
 | `cevapSec` | `hedef` | `CevapSec` |
 | `hamle` | `hamle` nesnesi (aşağıda) | `MiniOyunHamlesi` |
 | `oy` | `ifsa` (`true` = ifşa, `false` = güme; zorunlu) | `Oy`. Sadece `oylama` aşamasında, `oylayanlar` içindekiler, bir kez |
@@ -82,6 +82,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `hosgeldin` | `odaKur` / `katil` başarılı olunca, sadece gönderene |
 | `durum` | Her değişiklikte, **odadaki herkese, herkese kendine özel** |
 | `olay` | Kural motoru bir olay yaydığında, herkese |
+| `sohbet` | Genel mesaj odadaki herkese (yazana da), DM sadece alana ve yazana |
 | `hata` | Bir istek yapılamadığında, sadece gönderene |
 
 ### `hosgeldin`
@@ -188,7 +189,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 
 `olay`: `"turBasladi"` · `"soruSoruldu"` · `"cevapSecildi"` · `"berabere"` · `"ifsa"` · `"gume"` · `"sureDoldu"` · `"oyunBitti"` ·
 `"kaosBasladi"` · `"yandi"` · `"cezaCekildi"` · `"ikiyeKatlandi"` · `"bedelOdendi"` · `"oyVerildi"` ·
-`"siraAtlandi"` · `"afk"` · `"afkBitti"` · `"oyuncuCikti"` · `"atildi"` (sunucunun olayı: kurucu attı).
+`"siraAtlandi"` · `"afk"` · `"afkBitti"` · `"oyuncuCikti"` · `"atildi"` (sunucunun olayı: biri atıldı; sadece bu olayda `neden` alanı var: `"kurucu"` ya da `"temiz"`).
 `soru` sadece `ifsa` olayında dolu. `ceza` sadece `cezaCekildi`'de (ceza nesnesi), `kaos` sadece `kaosBasladi`'da (kuralın adı). Animasyon ve ses için. Ekran her zaman `durum`'a göre çizilir.
 
 ### `hata`
@@ -203,7 +204,8 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 | `ODA_YOK` | Bu kodla oda yok |
 | `ODA_DOLU` | Odada 10 kişi var |
 | `OYUN_BASLADI` | Oyun başlamış: `ayarlar` ve `baslat` yapılamaz (katılan artık bekleme odasına girer) |
-| `ATILDIN` | Kurucu seni attı (bağlantı kapanır) ya da bu odadan atılmıştın (anahtar ya da isim yasaklı) |
+| `ATILDIN` | Atıldın (bağlantı kapanır), `neden`: `"kurucu"` ya da `"temiz"` (Temiz modda son ihlal). Ya da bu odadan atılmıştın (anahtar ya da isim yasaklı, `neden` yok) |
+| `UYGUNSUZ` | Temiz mod: soru ya da sohbet mesajı filtreye takıldı, **kimseye gitmedi**. `ihlal`: bu odada kaçıncı, `sinir`: kaçıncıda atılırsın (3). Örnek: `{ "t": "hata", "kod": "UYGUNSUZ", "ihlal": 1, "sinir": 3 }` |
 | `OYUNDA_DEGILSIN` | Bekleme odasındasın, oyun komutu yollayamazsın |
 | `ISIM_GECERSIZ` | İsim boş, 20 karakterden uzun ya da odada aynısı var |
 | `ODADA_DEGILSIN` | Odaya girmeden oda komutu gönderdin |
@@ -211,9 +213,9 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 | `KURUCU_DEGILSIN` | Sadece kurucu yapabilir |
 | `OYUN_YOK` | Oyun başlamadan oyun komutu |
 | `ESKI_TUR` | Komuttaki `tur` güncel değil |
-| `COK_HIZLI` | Mesaj sınırı ya da `odaKur`/`katil` sınırı aşıldı. Mesaj **hiç işlenmedi**, biraz bekleyip tekrar gönder |
+| `COK_HIZLI` | Mesaj sınırı, `odaKur`/`katil` sınırı ya da sohbet sınırı aşıldı. Mesaj **hiç işlenmedi**, biraz bekleyip tekrar gönder |
 | `SUNUCU_DOLU` | Sunucudaki oda sayısı sınırda, yeni oda açılamadı. Sonra tekrar dene |
-| `SIRA_SENDE_DEGIL` · `SECILEMEZ` · `YANLIS_ASAMA` · `GECERSIZ_GIRDI` · `HAK_KALMADI` · `HAVUZ_BOS` · `OYUNCU_SAYISI_GECERSIZ` | Kural motorunun `Sonuc` değerleri |
+| `SIRA_SENDE_DEGIL` · `SECILEMEZ` · `YANLIS_ASAMA` · `GECERSIZ_GIRDI` · `HAK_KALMADI` · `HAVUZ_BOS` · `OYUNCU_SAYISI_GECERSIZ` | Kural motorunun `Sonuc` değerleri (`UYGUNSUZ` da öyle, yukarıda) |
 
 ### Alanların anlamı
 
@@ -234,6 +236,7 @@ Bir mesaj birden çok kuralı çiğniyorsa ilk tutan döner:
 - `baslat` oyun başladıktan sonra: `OYUN_BASLADI`.
 - `at`: `kim` yoksa ya da `"p…"` değilse `GECERSIZ_MESAJ`. Odada olmayan ya da kurucunun kendisi `GECERSIZ_GIRDI`. Kurucu değilse `KURUCU_DEGILSIN`.
 - `tekrarOyna`: oyun yoksa `OYUN_YOK`, bitmediyse `YANLIS_ASAMA`.
+- `sohbet`: `ODADA_DEGILSIN` → `COK_HIZLI` (sohbet sınırı) → `metin` yok ya da metin değil, `kime` metin değil ya da `"p…"` değil (`GECERSIZ_MESAJ`) → temizlenince boş, 200 karakterden uzun, `kime` odada yok ya da kendin (`GECERSIZ_GIRDI`) → `UYGUNSUZ`.
 - Bilinmeyen `komut` ya da hamle `oyun` adı: `GECERSIZ_MESAJ`.
 
 ## Sınırlar
@@ -245,6 +248,7 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 | IP başına aynı anda açık bağlantı | 32 | HTTP 429, WebSocket açılmaz | `IpBasinaBaglanti` |
 | IP başına `odaKur` + `katil` | dakikada 30 (her 2 sn'de bir hak dolar, en fazla 30 birikir) | `COK_HIZLI` | `IpBasinaGirisDakikada` |
 | Bağlantı başına mesaj | saniyede 10, arka arkaya en fazla 20 | `COK_HIZLI` | `MesajSaniyede`, `MesajPatlama` |
+| Bağlantı başına `sohbet` | saniyede 1 (Ana Plan 6.4), arka arkaya en fazla 2 (ağ gecikmesi iki mesajı yaklaştırabilir) | `COK_HIZLI` | `SohbetPatlama` |
 | Başlatılmayan lobi | 30 dk | Oda kapanır, bağlantılar kesilir. Anahtarla dönüş `ODA_YOK` | `LobiSn` |
 | Odaya girmeyen bağlantı | 120 sn | Bağlantı kesilir | `OdasizSn` |
 | Sunucudaki toplam oda | 2000 | `odaKur` → `SUNUCU_DOLU` | `EnFazlaOda` |
@@ -254,6 +258,31 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 - Aynı Wi-Fi'daki herkes aynı IP'dir: 10 kişilik grup ve yeniden bağlananlar sınırlara sığar.
 - `COK_HIZLI` alan istemci durmazsa cevaplar gönderim kuyruğunu doldurur ve bağlantı kesilir.
 - Ayarlar sunucuda: `appsettings.json` içinde `"Sinirlar"` bölümü ya da ortam değişkeni (`Sinirlar__IpBasinaBaglanti=50`).
+
+## Sohbet (Ana Plan 6.4)
+
+```json
+{ "t": "sohbet", "kime": null, "metin": "selam millet" }                              // istemci → sunucu, genel
+{ "t": "sohbet", "kime": "p3", "metin": "psst" }                                     // DM
+{ "t": "sohbet", "id": "m41", "kimden": "p1", "kime": null, "metin": "selam millet" } // sunucu → istemci
+```
+
+- **Genel** (`kime` `null` ya da yok): odadaki herkese gider, **yazana da** (yazan kendi mesajını bu dönüşle ekler; dönmezse gitmemiştir: `hata`'ya bak). Bekleme odasındakiler de yazar ve görür.
+- **DM** (`kime: "p3"`): sadece alana ve yazana gider. Alan odada olmalı (oyuncu ya da bekleme odasında; bağlı değilse mesaj ona hiç ulaşmaz), kendine DM `GECERSIZ_GIRDI`. İstemcide DM kanalı = karşıdaki kişi: `kimden` sensen `kime`, değilse `kimden`.
+- `metin` isim ve soruyla aynı temizlikten geçer (`TemizMetin`), temizlenince 1–200 karakter. Gelen `metin` hep temizlenmiş haldir.
+- `id`: odanın sohbet sayacı (`"m1"`, `"m2"`…). Sıra ve ileride rapor için.
+- Sunucu mesaj **saklamaz**: kopup dönen ya da sonradan gelen eski mesajları görmez.
+- Saniyede 1 mesaj, arka arkaya en fazla 2 (`COK_HIZLI`).
+
+## Temiz mod (Ana Plan 6.4)
+
+`mod: "temiz"` iken soru (`soruSor` komutunun `metin`'i) ve sohbet (genel + DM) filtreden geçer.
+
+- Yakalanan **gönderilmez**, kimse görmez. Sadece yazana `hata` gider: `{ "kod": "UYGUNSUZ", "ihlal": 1, "sinir": 3 }`. Soru yakalanırsa tur aynen kalır, A başka soru yazabilir.
+- Soru ve sohbet ihlalleri **aynı sayaçta**, odada isme göre sayılır (lobide çıkıp aynı isimle giren sıfırlanmaz). **3. ihlalde atılır:** `ATILDIN` (`neden: "temiz"`), herkese `olay: "atildi"` (`neden: "temiz"`). Kurucuyu atma ile aynı: bu odaya ne anahtarıyla ne aynı isimle dönebilir, oyundaysa oyundan çıkar. Kurucu atıldıysa kuruculuk sıradakine geçer.
+- Filtre kural motorunda, tek tanım: `Assets/Kurallar/TemizFiltre.cs`. Elden ele Temiz modda da `SoruSor` aynı filtreyle `Sonuc.Uygunsuz` döner (sayma ve atma yok). Adımlar Ana Plan 6.4: küçük harf, görünmez karakter, NFKD, rakam → harf (`s1k`, `$ik`), tekrarlar (`sıııık`), tek harfler (`a.m.k`), kara liste kelime başında + izin listesi (`götürmek`, `sikke`, `şikayet`, `sıkıldım`).
+- Paket soruları filtreye takılmaz (`IcerikTestleri` her soruyu dener).
+- İsim filtrelenmez (Ana Plan'da sadece soru ve sohbet).
 
 ## Bağlantı koparsa (Ana Plan 6.1)
 

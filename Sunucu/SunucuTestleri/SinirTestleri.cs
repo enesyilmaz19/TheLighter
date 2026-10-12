@@ -104,6 +104,23 @@ namespace SunucuTestleri
         }
 
         [Test]
+        public async Task Sohbet_saniyede_bir_arka_arkaya_en_fazla_iki()
+        {
+            Kur();
+            var x = await Baglan();
+            await x.Gonder(new { t = "odaKur", isim = "Ali" });
+            await x.Bekle("hosgeldin");
+            for (int i = 0; i < 3; i++) await x.Gonder(new { t = "sohbet", metin = "m" + i });
+            await x.Bekle("sohbet", m => (string)m["metin"] == "m0");
+            await x.Bekle("sohbet", m => (string)m["metin"] == "m1");
+            await x.Hata("COK_HIZLI");
+
+            await Task.Delay(1100);
+            await x.Gonder(new { t = "sohbet", metin = "m3" });
+            await x.Bekle("sohbet", m => (string)m["metin"] == "m3");
+        }
+
+        [Test]
         public async Task Baslatilmayan_lobi_suresi_dolunca_kapanir_anahtarla_donus_ODA_YOK()
         {
             Kur(("Sinirlar:LobiSn", "2"));

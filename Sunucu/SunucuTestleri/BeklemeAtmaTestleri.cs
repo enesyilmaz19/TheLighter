@@ -49,6 +49,22 @@ namespace SunucuTestleri
         }
 
         [Test]
+        public async Task Yerini_kaybeden_anahtar_ve_ayni_isimle_yeniden_girer()
+        {
+            // Protokol.md: yeniden bağlanırken anahtar + aynı isim. Lobide kopanın anahtarı unutulur, isimle girer.
+            var o = await OdaKur(3);
+            var x = o[2];
+            await x.Kapat();
+            await o[0].Bekle("durum", m => m["oyuncular"].AsArray().Count == 2);
+
+            var y = await Baglan();
+            await y.Gonder(new { t = "katil", oda = o[0].Oda, isim = x.Isim, anahtar = x.Anahtar });
+            await y.Bekle("hosgeldin");
+            var d = await y.Bekle("durum");
+            Assert.That(d["oyuncular"].AsArray().Select(p => (string)p["isim"]), Has.Member(x.Isim));
+        }
+
+        [Test]
         public async Task Oda_kapasitesi_bekleyenlerle_birlikte_10()
         {
             var o = await OyunBaslat(4);

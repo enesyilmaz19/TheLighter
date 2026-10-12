@@ -323,7 +323,7 @@ namespace Cakmak.Kurallar
             if (zorlaIfsa) { SonucaGec(true, kaybedenVar: false); return; }
             oylayanlar.Clear();
             foreach (var o in oyuncular)
-                if (o.Id != a && o.Id != b) oylayanlar.Add(o.Id);
+                if (o.Id != a && o.Id != b && !cikan.Contains(o.Id)) oylayanlar.Add(o.Id);
             AsamayaGec(Asama.Oylama, ayar.HamleSuresiSn);
         }
 
@@ -556,6 +556,8 @@ namespace Cakmak.Kurallar
                     BedelOdeme = o.BedelOdeme,
                     BedelHakki = o.BedelHakki,
                     KaosKazanma = o.KaosKazanma,
+                    Afk = afk.Contains(o.Id),
+                    Cikti = cikan.Contains(o.Id),
                     Kisitlamalar = kisitlamalar,
                 });
             }

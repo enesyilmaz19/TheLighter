@@ -5,7 +5,7 @@ Kaynak: `docs/Ana Plan.md` · Branch'ler: `g1/<iş>` → `main`
 ## 📥 ENES'İN MASASI
 
 - [x] ~~İmza temizliği~~ → **vazgeçildi (2026-10-10).** Contributors listesi zaten temiz (sadece enesyilmaz19 ve ardatelli0). İmza sadece ilk 2 commit'in sayfasında görünüyor. Geçmiş yeniden yazılmayacak.
-- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" (9 madde), "S3 kararları" (19 madde) ve `docs/Protokol.md`'nin sonundaki farklar tablosu birlikte onaylanır. Onaylananlar `docs/Ana Plan.md` 5.1/5.2'ye işlenir.
+- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" (13 madde), "S3 kararları" (19 madde) ve `docs/Protokol.md`'nin sonundaki farklar tablosu birlikte onaylanır. Onaylananlar `docs/Ana Plan.md` 5.1/5.2'ye işlenir.
 
 ## S1 — Kural motoru (çekirdek döngü)
 
@@ -39,7 +39,8 @@ Neden şimdi: Arda'yı beklerken yapılabilecek, Playtest 1'in sonucundan etkile
 - [x] Kendi bulduğum: online'da Reaksiyon seçilebiliyordu (planda sadece elden ele). Kapatıldı
 - [x] Öz inceleme: online "öneri çek" testi yoktu, eklendi (bozup doğrulandı). Sunucu gerçek süreç olarak da çalıştırıldı: Node WebSocket istemcisiyle 4 kişi, oda, öneri, soru, gizlilik → geçti. **Toplam: 82 kural + 57 sunucu testi**
 - [x] Oyunda kurucu koparsa kuruculuk ilk bağlı oyuncuya geçiyor (Ana Plan 6.1). Yoksa sınırsız oyunu kimse bitiremiyordu
-- [ ] S5'e kalanlar: sohbet, atma, kopanı 60 sn bekleme, AFK etiketi, geç gelen, Temiz filtresi, boş odayı bir süre tutma, isimlerde görünmez karakter
+- [x] **S5 kopma ve AFK (2026-10-12):** kopanın yeri 60 sn tutulur, dönmezse oyundan çıkar (elindeki iş hemen biter), üst üste 2 süre dolduran AFK (atlanır, seçilemez, bir mesajla kalkar), bağlı oyuncu 4'ün altında oyun durur ve 2 dk bekler, herkes koparsa oda 2 dk tutulur. Kural motoru `Oyun.Baglanti.cs` (sözleşmedeki `OyuncuKoptu/Dondu/Cikti` + `Buradayim`), sunucu `Oda.cs`, protokol "Bağlantı koparsa". 16 kural + 7 sunucu testi, 20 bilerek bozma yakalandı, Unity 221/221. Görünmez karakterli isim: güvenlik adımında yapıldı
+- [ ] S5'e kalanlar: geç gelen bekleme odası, atma (+ oda yasağı), sohbet + DM, Temiz filtresi, online grup paketi
 - [x] **Reaksiyon hatası (Arda'nın editör testi, 2026-10-10):** süre dolunca erken basan kazanabiliyordu (iki yönde de). Önce 3 kırmızı test, sonra `Erken()` yardımcısı iki yolda da kullanılıyor, bilerek bozuldu. 88 kural + 57 sunucu, Unity'de 107/107. Kural Ana Plan 6.5'e yazıldı
 
 ## S4 — online'a açılmadan önce (güvenlik)
@@ -147,7 +148,12 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
 | 8 | Süre dolunca "rastgele birine" | A'nın süresi dolarsa A hariç · B'nin süresi dolarsa A ve B hariç | Süresi dolan hemen tekrar seçilmesin |
 | 9 | — | `Hamle.Erken` (bool): Reaksiyonda erken basış | Kuralın tek tanımı. İstemci "Erken bastın" yazısı için eşiği kendisi karşılaştırmasın (2026-10-10, istemci de buna geçirildi) |
 
-**Henüz yok (plana göre sonra):** `OyuncuKoptu/Dondu/Cikti` (S5). S3'ün eklemeleri yukarıdaki "S3 sözleşme eklemeleri" tablosunda.
+| 10 | `void OyuncuKoptu/Dondu/Cikti(kim)` | `Sonuc` döner (bilinmeyen oyuncu `GecersizGirdi`) + yeni `Sonuc Buradayim(kim)`: AFK'yı kaldırır | Hata fırlatma kuralı; "ekrana dokununca geri gelir" (Ana Plan 6.1) |
+| 11 | — | `OyuncuDurumu.Afk`, `OyuncuDurumu.Cikti`; olaylar `SiraAtlandi`, `Afk`, `AfkBitti`, `OyuncuCikti` | Ekranda "AFK", "çıktı" etiketleri, "sıra atlandı" duyurusu |
+| 12 | — | `SoruSor`/`CevapSec` görünümdeki `Secilebilir` listesine göre denetler: kopuk/AFK/çıkmış seçilemez (aktif kimse yoksa seçilebilir) | Görünüm ile kural tek yerde. Elden elede kimse pasif olmadığı için değişen bir şey yok |
+| 13 | — | `Kur(ayarlar, oyuncular, Random rastgele, out oyun)` | Online'da kriptografik rastgelelik (`docs/Guvenlik.md`). Tohumlu `Kur` aynen duruyor |
+
+**Henüz yok (plana göre sonra):** sohbet, atma, geç gelen (S5). S3'ün eklemeleri yukarıdaki "S3 sözleşme eklemeleri" tablosunda.
 
 ## Arda'nın bilmesi gerekenler
 

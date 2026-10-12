@@ -234,7 +234,9 @@ namespace Cakmak.Sunucu
         }
 
         /// <param name="ozet">Sadece oyunSonu'nda dolu.</param>
-        public static string OyunDurumu(int surum, string oda, OyuncuId kurucu, Func<OyuncuId, OyuncuEki> ek, Gorunum g, OyunOzeti ozet)
+        /// <param name="beklemeKalanMs">Oyun az oyuncu yüzünden duruyorsa bitmesine kalan süre, yoksa null.</param>
+        public static string OyunDurumu(int surum, string oda, OyuncuId kurucu, Func<OyuncuId, OyuncuEki> ek, Gorunum g, OyunOzeti ozet,
+            int? beklemeKalanMs)
         {
             var liste = new JsonArray();
             foreach (var o in g.Oyuncular)
@@ -260,6 +262,8 @@ namespace Cakmak.Sunucu
                     ["bedelHakki"] = o.BedelHakki,
                     ["kaosKazanma"] = o.KaosKazanma,
                     ["kisitlamalar"] = Dizi(o.Kisitlamalar, CezaYaz),
+                    ["afk"] = o.Afk,
+                    ["cikti"] = o.Cikti,
                 });
             }
 
@@ -325,6 +329,7 @@ namespace Cakmak.Sunucu
                 },
                 ["ifsa"] = g.Asama == Asama.Ifsa ? new JsonObject { ["soru"] = g.IfsaSoru, ["fisilti"] = g.IfsaFisilti } : null,
                 ["ozet"] = OzetYaz(ozet),
+                ["bekleme"] = beklemeKalanMs.HasValue ? new JsonObject { ["kalanMs"] = beklemeKalanMs.Value } : null,
             });
         }
     }

@@ -22,6 +22,9 @@ namespace Cakmak.Sunucu
             public string Isim;
             public string Anahtar;
             public Baglanti Baglanti;   // null = bağlı değil
+            /// <summary>Oyunda bağlantısız geçen süre (oyun dururken işlemez). Sınırı geçince oyundan çıkar.</summary>
+            public TimeSpan Kopuk;
+            public bool Cikti;
         }
 
         public readonly string Kod;
@@ -36,19 +39,24 @@ namespace Cakmak.Sunucu
         Oyun oyun;
         int surum;
         bool degisti;
-        readonly TimeSpan lobiSuresi;
+        bool oyunBitti;
+        readonly Sinirlar sinirlar;
         TimeSpan lobideGecen;
+        /// <summary>Bağlı oyuncu 4'ün altında: oyun duruyor, bu kadar süredir.</summary>
+        TimeSpan azOyuncuBekleme;
+        /// <summary>Oyunda bağlı kimse yok, bu kadar süredir.</summary>
+        TimeSpan kimseYok;
 
         /// <summary>Oda silindi. Bu bayraktan sonra kimse katılamaz.</summary>
         public bool Kapandi { get; private set; }
 
         public Oda(string kod, IReadOnlyDictionary<string, IReadOnlyList<string>> paketler, IReadOnlyList<string> sesliCezalar,
-            TimeSpan lobiSuresi)
+            Sinirlar sinirlar)
         {
             Kod = kod;
             this.paketler = paketler;
             this.sesliCezalar = sesliCezalar;
-            this.lobiSuresi = lobiSuresi;
+            this.sinirlar = sinirlar;
             seciliPaketler = new List<string>(paketler.Keys);
         }
 
@@ -83,6 +91,12 @@ namespace Cakmak.Sunucu
                     eski.Baglanti = b;
                     b.Oda = this;
                     b.Kim = eski.Id;
+                    // Oyundan çıkmış oyuncu geri girmez, izler (kural motoru onu bir daha seçmez).
+                    if (oyun != null && !eski.Cikti)
+                    {
+                        eski.Kopuk = TimeSpan.Zero;
+                        oyun.OyuncuDondu(eski.Id);
+                    }
                     b.Yolla(Protokol.Hosgeldin(eski.Id, eski.Anahtar, Kod));
                     HerkeseDurum();
                     return;
@@ -115,7 +129,7 @@ namespace Cakmak.Sunucu
             }
         }
 
-        /// <summary>Bağlantı kapandı. Odada bağlı kimse kalmadıysa true: oda silinmeli.</summary>
+        /// <summary>Bağlantı kapandı. Lobi boşaldıysa true: oda silinmeli. Oyundaki oda Saat'te (Ilerle) silinir.</summary>
         public bool Ayrildi(Baglanti b)
         {
             lock (kilit)
@@ -126,25 +140,25 @@ namespace Cakmak.Sunucu
                 if (oyun == null)
                 {
                     oyuncular.Remove(o);
-                    if (o.Id == kurucu && oyuncular.Count > 0) kurucu = oyuncular[0].Id;
+                    if (oyuncular.Count == 0)
+                    {
+                        Kapandi = true;
+                        return true;
+                    }
+                    if (o.Id == kurucu) kurucu = oyuncular[0].Id;
                 }
                 else
                 {
-                    // ponytail: oyunda kopan oyuncu oyunda kalır, süreler işler. 60 sn bekleme ve AFK kuralları S5'te.
+                    // Ana Plan 6.1: yeri 60 sn tutulur (Ilerle sayar), süreler işler, sırası gelirse atlanır.
                     o.Baglanti = null;
+                    o.Kopuk = TimeSpan.Zero;
+                    oyun.OyuncuKoptu(o.Id);
                     // Kurucu koptuysa kuruculuk ilk bağlı oyuncuya geçer. Yoksa sınırsız oyunu kimse bitiremez.
                     if (o.Id == kurucu)
                     {
                         var yeniKurucu = oyuncular.Find(x => x.Baglanti != null);
                         if (yeniKurucu != null) kurucu = yeniKurucu.Id;
                     }
-                }
-
-                if (!oyuncular.Exists(x => x.Baglanti != null))
-                {
-                    // ponytail: bağlı kimse kalmayınca oda hemen silinir. Herkes aynı anda koparsa geri dönemez. S5'te bir süre tutulacak.
-                    Kapandi = true;
-                    return true;
                 }
                 HerkeseDurum();
                 return false;
@@ -264,6 +278,7 @@ namespace Cakmak.Sunucu
             {
                 if (!UyeMi(b)) return;
                 if (oyun == null) { b.Yolla(Protokol.Hata("OYUN_YOK")); return; }
+                Buradayim(b.Kim); // komut yollayan başında: AFK ise kalkar
 
                 var tur = Protokol.Sayi(m, "tur").Value;
                 var komut = Protokol.Metin(m, "komut");
@@ -314,10 +329,26 @@ namespace Cakmak.Sunucu
             }
         }
 
+        /// <summary>"Buradayım" (ekrana dokundu): AFK etiketi kalkar. Lobide bir şey yapmaz.</summary>
+        public void Buradayim(Baglanti b)
+        {
+            lock (kilit)
+            {
+                if (!UyeMi(b) || oyun == null) return;
+                Buradayim(b.Kim);
+            }
+        }
+
+        void Buradayim(OyuncuId kim)
+        {
+            oyun.Buradayim(kim);
+            if (degisti) HerkeseDurum(); // sadece AFK gerçekten kalktıysa (AfkBitti olayı)
+        }
+
         // ------------------------------------------------------------ Saat
 
         /// <summary>Saat her ~100 ms'de çağırır. Bir aşama değiştiyse herkese yeni durum gider.</summary>
-        /// <returns>true: lobi başlatılmadan çok bekledi, oda silinmeli.</returns>
+        /// <returns>true: oda silinmeli (lobi başlatılmadan çok bekledi ya da oyunda bağlı kimse kalmadı).</returns>
         public bool Ilerle(TimeSpan gecen)
         {
             lock (kilit)
@@ -327,12 +358,53 @@ namespace Cakmak.Sunucu
                 {
                     // Bağlı ama hiç başlatılmayan oda sonsuza kadar yer tutmasın.
                     lobideGecen += gecen;
-                    return lobideGecen >= lobiSuresi;
+                    return lobideGecen >= sinirlar.LobiSuresi;
                 }
-                oyun.Ilerle(gecen);
+
+                // Herkes koptuysa oda hemen silinmez: dönen olursa oyun sürer. Kimse dönmezse silinir.
+                if (oyuncular.Exists(o => o.Baglanti != null)) kimseYok = TimeSpan.Zero;
+                else if ((kimseYok += gecen) >= sinirlar.AzOyuncuSuresi)
+                {
+                    Kapandi = true;
+                    return true;
+                }
+
+                if (!oyunBitti) OyunuIlerlet(gecen);
                 if (degisti) HerkeseDurum();
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Ana Plan 6.1. Bağlı oyuncu 4'ün altındaysa oyun durur (süreler ve kopukların 60 sn'si işlemez), 2 dk bekler,
+        /// kimse dönmezse biter. Yoksa kopuklar sayılır, 60 sn'de dönmeyen oyundan çıkar.
+        /// </summary>
+        void OyunuIlerlet(TimeSpan gecen)
+        {
+            int bagli = 0;
+            foreach (var o in oyuncular) if (o.Baglanti != null && !o.Cikti) bagli++;
+            if (bagli < Oyun.EnAzOyuncu)
+            {
+                if (azOyuncuBekleme == TimeSpan.Zero) degisti = true; // durum'a "bekleme" girsin
+                azOyuncuBekleme += gecen;
+                if (azOyuncuBekleme >= sinirlar.AzOyuncuSuresi) oyun.OyunuBitir();
+                return;
+            }
+            if (azOyuncuBekleme > TimeSpan.Zero)
+            {
+                azOyuncuBekleme = TimeSpan.Zero;
+                degisti = true;
+            }
+
+            foreach (var o in oyuncular)
+            {
+                if (o.Baglanti != null || o.Cikti) continue;
+                o.Kopuk += gecen;
+                if (o.Kopuk < sinirlar.KopukSuresi) continue;
+                o.Cikti = true;
+                oyun.OyuncuCikti(o.Id);
+            }
+            oyun.Ilerle(gecen);
         }
 
         // ------------------------------------------------------------ İç
@@ -347,6 +419,7 @@ namespace Cakmak.Sunucu
         {
             // Kural motoru bir şey değiştirdi. Olay herkese gider, ardından yeni durum.
             degisti = true;
+            if (olay.Tur == OlayTuru.OyunBitti) oyunBitti = true;
             var json = Protokol.OlayYaz(olay);
             foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
         }
@@ -388,9 +461,14 @@ namespace Cakmak.Sunucu
                 if (o.Baglanti == null) continue;
                 var g = oyun.GorunumAl(o.Id);
                 if (g.Asama == Asama.OyunSonu) ozet ??= oyun.Ozet();
-                o.Baglanti.Yolla(Protokol.OyunDurumu(surum, Kod, kurucu, EkBul, g, ozet));
+                o.Baglanti.Yolla(Protokol.OyunDurumu(surum, Kod, kurucu, EkBul, g, ozet, BeklemeKalanMs()));
             }
         }
+
+        /// <summary>Oyun az oyuncu yüzünden duruyorsa bitmesine kalan süre, durmuyorsa null.</summary>
+        int? BeklemeKalanMs() => azOyuncuBekleme > TimeSpan.Zero && !oyunBitti
+            ? (int)Math.Ceiling(Math.Max(0, (sinirlar.AzOyuncuSuresi - azOyuncuBekleme).TotalMilliseconds))
+            : (int?)null;
 
         /// <summary>En az bir paket, hepsi sunucuda var, tekrar yok.</summary>
         bool PaketlerGecerli(List<string> secilen)

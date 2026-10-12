@@ -104,6 +104,12 @@ namespace Cakmak.Kurallar
         public int KaosKazanma;     // kaos turunda kazandığı mini oyun
         /// <summary>Üstündeki ⚙️ kısıtlamalar (🤡, havuzdan sor...). Herkese açık.</summary>
         public IReadOnlyList<Ceza> Kisitlamalar = Array.Empty<Ceza>();
+
+        // --- S5 (online) ---
+        /// <summary>Üst üste süresini doldurdu: sırası gelince atlanır, seçilemez. Bir mesaj yollayınca kalkar.</summary>
+        public bool Afk;
+        /// <summary>Oyundan çıktı (60 sn'de dönmedi). Bir daha seçilmez, sırası gelmez. Bağlıysa izler.</summary>
+        public bool Cikti;
     }
 
     public sealed class MiniOyunSonucu
@@ -139,6 +145,11 @@ namespace Cakmak.Kurallar
         IkiyeKatlandi,  // Kim: bir el daha isteyen
         BedelOdendi,    // Kim: bedel ödeyen B
         OyVerildi,      // Kim: oy veren. Oyun ne olduğu gizli
+        // S5 (online)
+        SiraAtlandi,    // Kim: sırası geldi ama kopuk/AFK/çıkmış, sıra rastgele birine geçti
+        Afk,            // Kim: üst üste süresini doldurdu, AFK oldu
+        OyuncuCikti,    // Kim: oyundan çıktı
+        AfkBitti,       // Kim: AFK'dan döndü (bir mesaj yolladı)
     }
 
     public sealed class Olay

@@ -53,6 +53,26 @@ namespace TheLighter.Istemci
 
         public OnlineIstemci Istemci { get; }
 
+        /// <summary>
+        /// Sohbet ve DM protokolü sunucuda henüz yok (docs/Protokol.md, "Henüz yok"). Gelince true olur,
+        /// gelen mesajlar <see cref="Sohbet"/>'e eklenir. O zamana kadar sohbet düğmesi görünmez.
+        /// </summary>
+        public static bool SohbetVar => false;
+
+        /// <summary>Bu odanın sohbeti. Cihazda saklanmaz, odadan çıkınca silinir.</summary>
+        public SohbetDefteri Sohbet { get; } = new SohbetDefteri();
+
+        /// <summary>Sohbet mesajı gönderir. Protokol gelene kadar false (gönderilmedi).</summary>
+        public bool SohbetGonder(OyuncuId? kanal, string metin)
+        {
+            // Protokol gelince: SohbetVar ve Odada ise Istemci.Gonder(Cevirici.Sohbet(kanal, metin)), sonra Sohbet.Ekle(benim mesajım).
+            return false;
+        }
+
+        /// <summary>Lobi ya da oyun ekranına eklenecek sohbet katmanı.</summary>
+        public SohbetPaneli SohbetPaneliKur() => new SohbetPaneli(Sohbet, SohbetGonder,
+            () => (IReadOnlyList<OdaOyuncusu>)Istemci.SonDurum?.Oyuncular ?? new List<OdaOyuncusu>(), () => Istemci.Sen);
+
         /// <summary>Lobide son görülen ayarlar (oyun ekranı mod ve öneriler için kullanır).</summary>
         public OdaAyarlari SonAyarlar => sonAyarlar;
 
@@ -186,6 +206,7 @@ namespace TheLighter.Istemci
         void Ayrildi(string neden)
         {
             akis = null;
+            Sohbet.Temizle();
             uygulama.BaglaniyorGoster(false);
             uygulama.OnlineMenu(neden == OnlineIstemci.NedenAyrildin ? null : neden);
         }

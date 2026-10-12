@@ -26,8 +26,9 @@ Perde açıkken, menü açıkken, görevlere bakılırken, Curcuna'da soru yazı
 - Sunucu adresi koda yazılmaz: online menüsündeki "Sunucu" alanından girilir, cihazda saklanır. Varsayılan yerel deneme adresi `ws://localhost:5000/ws` (`dotnet run --project Sunucu/Cakmak.Sunucu`).
 - Saat sunucuda: menü açıkken de süre akar, perde yok, ceza kartı onayı yok. Geri sayımı istemci yürütür, yeni `durum`'da sıfırlar.
 - Komutun sonucu sonradan gelir: düğmeler basınca kapanır, ekran yeni durumla değişir. Hatalar kısa bildirim olarak görünür.
+- PC derlemesi: Unity 6.6 derleme profili istiyor, `Assets/Settings/Build Profiles/Windows.asset`. Çıktı `Builds/` (git yok sayar).
 - Oyuncunun yazdığı her şey etikete düşebildiği için `Arayuz.Yazi` ve `Arayuz.Buton` zengin metni kapatır (`enableRichText = false`).
 
 ## Henüz yok
 
-Sohbet ve DM (protokolü bekleniyor), ses, Android'de paylaşma menüsü (kart şimdilik dosyaya kaydediliyor), çakmak skinleri, animasyon ve ses efektleri.
+Sohbet ve DM'in sunucu tarafı (protokolü bekleniyor; istemcide iskelet var: `Ag/SohbetDefteri`, `Ekran/SohbetPaneli`, `OnlineYonetici.SohbetVar` false iken düğme görünmez), ses, Android'de paylaşma menüsü (kart şimdilik dosyaya kaydediliyor), çakmak skinleri, animasyon ve ses efektleri.

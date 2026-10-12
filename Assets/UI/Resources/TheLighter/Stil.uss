@@ -888,3 +888,30 @@
     padding: 12px 24px;
     margin: 6px 10px 6px 0;
 }
+
+/* Sohbet (iskelet: protokol gelince açılır) */
+.sohbet-kutu {
+    flex-grow: 1;
+    max-height: 90%;
+}
+
+.sohbet-liste {
+    min-height: 300px;
+}
+
+.sohbet-satir {
+    align-items: flex-start;
+    margin: 6px 0;
+}
+
+.kok .sohbet-yazi {
+    font-size: 36px;
+    color: var(--yazi);
+    white-space: normal;
+    flex-shrink: 1;
+    margin-left: 12px;
+}
+
+.sohbet-alt {
+    margin-top: 8px;
+}

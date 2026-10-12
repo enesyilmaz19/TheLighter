@@ -33,6 +33,7 @@ namespace TheLighter.Istemci
         readonly VisualElement afkKatmani;
         readonly VisualElement beklemeKatmani;
         readonly Label beklemeYazisi;
+        readonly SohbetPaneli sohbet;
         float bildirimKalan;
         float buradayimBekle;
         readonly VisualElement ustCubuk;
@@ -60,6 +61,11 @@ namespace TheLighter.Istemci
             ustCubuk.Add(Esnek());
             durumYazisi = Yazi("", "ust-cubuk-yazi", "ust-cubuk-durum");
             ustCubuk.Add(durumYazisi);
+            if (online != null && OnlineYonetici.SohbetVar)
+            {
+                sohbet = online.SohbetPaneliKur();
+                ustCubuk.Add(Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk"));
+            }
             ustCubuk.Add(Buton(Metin.Al("oyun.menu"), MenuyuAc, "buton-kucuk"));
             Kok.Add(ustCubuk);
 
@@ -88,6 +94,7 @@ namespace TheLighter.Istemci
 
             menu = MenuKur();
             Kok.Add(menu);
+            if (sohbet != null) Kok.Add(sohbet.Kok);
 
             if (onlineAkis != null)
                 Kok.RegisterCallback<PointerDownEvent>(_ => { if (onlineAkis.BenAfkyim) Buradayim(); }, TrickleDown.TrickleDown);
@@ -101,6 +108,7 @@ namespace TheLighter.Istemci
             if (akis.Ekran.Anahtar != anahtar) Ciz();
             else parca.Guncelle(akis.Ekran);
 
+            sohbet?.Guncelle(gecenSn);
             if (bildirimKalan > 0)
             {
                 bildirimKalan -= gecenSn;

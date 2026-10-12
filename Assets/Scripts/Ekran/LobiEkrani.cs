@@ -36,6 +36,7 @@ namespace TheLighter.Istemci
         readonly VisualElement atPerdesi;
         readonly List<Action<OdaAyarlari>> yenileyiciler = new List<Action<OdaAyarlari>>();
         readonly List<KeyValuePair<string, Button>> paketButonlari = new List<KeyValuePair<string, Button>>();
+        readonly SohbetPaneli sohbet;
         int sonSurum = -1;
 
         public VisualElement Kok { get; }
@@ -53,6 +54,11 @@ namespace TheLighter.Istemci
             var ust = Kutu("satir");
             ust.Add(Buton(Metin.Al("lobi.ayril"), online.Ayril, "buton-kucuk"));
             ust.Add(Esnek());
+            if (OnlineYonetici.SohbetVar)
+            {
+                sohbet = online.SohbetPaneliKur();
+                ust.Add(Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk"));
+            }
             Kok.Add(ust);
 
             var kaydirma = new ScrollView(ScrollViewMode.Vertical);
@@ -87,6 +93,7 @@ namespace TheLighter.Istemci
 
             atPerdesi = Kutu("menu-perde", "gizli");
             Kok.Add(atPerdesi);
+            if (sohbet != null) Kok.Add(sohbet.Kok);
 
             Yenile();
         }
@@ -326,6 +333,7 @@ namespace TheLighter.Istemci
         public void Guncelle(float gecenSn)
         {
             if (D != null && D.Surum != sonSurum) Yenile();
+            sohbet?.Guncelle(gecenSn);
         }
 
         public void ArkaPlanaGecti() { }

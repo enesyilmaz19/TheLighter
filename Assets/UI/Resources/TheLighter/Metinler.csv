@@ -431,3 +431,12 @@ hata.COK_HIZLI,Çok hızlı! Biraz bekleyip tekrar dene.
 hata.SUNUCU_DOLU,"Sunucu şu an dolu, biraz sonra tekrar dene."
 hata.ATILDIN,Bu odadan atıldın.
 hata.OYUNDA_DEGILSIN,"Bu oyunda değilsin, bitince katılacaksın."
+genel.kapat,Kapat
+sohbet.ac,Sohbet
+sohbet.baslik,Sohbet
+sohbet.genel,Genel
+sohbet.dm_ac,+ Özel mesaj
+sohbet.gonder,Gönder
+sohbet.sekme_okunmamis,{0} ({1})
+sohbet.cok_hizli,Biraz yavaş: saniyede bir mesaj.
+sohbet.gonderilemedi,Mesaj gönderilemedi.

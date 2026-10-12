@@ -1,0 +1,16 @@
+{
+    "name": "TheLighter.Ag",
+    "rootNamespace": "TheLighter",
+    "references": [
+        "Kurallar"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

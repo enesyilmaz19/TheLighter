@@ -1,9 +1,9 @@
 # Ağ Protokolü (online mod)
 
-Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2 ve 8.
+Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2 ve 8.
 Sunucu: `Sunucu/Cakmak.Sunucu` · İstemci: Unity (G2).
 
-Bu iskelette **yok** (S5): sohbet, atma, kopanın 60 sn beklenmesi, AFK etiketi, geç gelen bekleme odası, Temiz filtresi.
+Henüz **yok** (S5'te gelecek): sohbet + DM, atma, geç gelen bekleme odası, Temiz filtresi. Kopma ve AFK var (aşağıda "Bağlantı koparsa").
 Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığmıyor, parça parça yükleme gerekiyor. Grup hafızası cihazda, `ozet`'ten yazılır.
 
 ---
@@ -31,6 +31,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `baslat` | — | Kurucu, lobide, en az 4 oyuncu |
 | `komut` | `tur`, `komut`, + komutun alanları (aşağıda) | Oyunda |
 | `bitir` | — | Kurucu, oyunda. Oyunu hemen bitirir |
+| `buradayim` | — | Oyunda, herkes. Ekrana dokununca gönder: AFK etiketi kalkar. AFK değilse bir şey olmaz. Her `komut` da aynı işi görür |
 
 **Metin temizliği** (isim, soru): görünmez ve yön karakterleri atılır, her türlü boşluk tek boşluk olur, baş/son boşluk silinir (`TemizMetin`). Temizlenince boş kalan isim `ISIM_GECERSIZ`, soru `GECERSIZ_GIRDI`. Ekranda hep temizlenmiş hali görünür.
 
@@ -105,7 +106,8 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
                    "havuzaEkledigi": 0, "gosterilme": 1, "soruAlma": 2, "soruSorma": 3,
                    "ifsaEttirme": 0, "saklama": 1, "miniOyunKazanma": 1,
                    "oynadigiMiniOyun": 2, "cezaCekme": 1, "yanma": 0, "bedelOdeme": 0, "bedelHakki": 2, "kaosKazanma": 0,
-                   "kisitlamalar": [ { "tur": "palyaco", "metin": null, "kalan": 2 } ] } ],
+                   "kisitlamalar": [ { "tur": "palyaco", "metin": null, "kalan": 2 } ],
+                   "afk": false, "cikti": false } ],
   "secilebilir": [],
   "miniOyun": "tkm", "bHamleYapti": true, "cHamleYapti": false, "beraberlik": 0,
   "sonMiniOyun": null,
@@ -116,7 +118,8 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
             "hamlen": { "oyun": "tkm", "secim": "tas" },
             "gorevin": { "tur": "kisiyiGoster", "hedef": "p3", "adet": 2, "zorluk": "orta" }, "oyVerdin": false },
   "ifsa": null,
-  "ozet": null }
+  "ozet": null,
+  "bekleme": null }
 ```
 
 - `asama`: `"soruToplama"` · `"soruSorma"` · `"cevapSecme"` · `"miniOyun"` · `"oylama"` · `"ikiyeKatla"` · `"bedel"` · `"ifsa"` · `"gume"` · `"oyunSonu"`.
@@ -127,7 +130,12 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 - `sonMiniOyun`: `ifsa` ve `gume` aşamasında dolu:
   `{ "oyun": "tkm", "bHamle": {…}, "cHamle": {…}, "bZar": 0, "cZar": 0, "zarlaKarar": false, "sureDoldu": false, "cKazandi": true }`
 - `ifsa`: `ifsa` aşamasında `{ "soru": "…", "fisilti": false }`, yoksa `null`.
-- `kalanMs`: geri sayımı istemci kendisi yürütür. Sunucu sadece değişiklikte yeni durum yollar.
+- `kalanMs`: geri sayımı istemci kendisi yürütür. Sunucu sadece değişiklikte yeni durum yollar. `bekleme` doluyken oyun durur, geri sayımı durdur.
+- `oyuncular[].bagli`: bağlantısı açık mı. `false` = "Bağlanıyor…" (yeri 60 sn tutuluyor).
+- `oyuncular[].afk`: üst üste 2 kez süresini doldurdu. Sırası gelince atlanır, seçilemez. Kendisi `buradayim` (ya da herhangi bir komut) yollayınca kalkar. Ekranda kendi AFK'nı görünce "Buradayım" düğmesi göster.
+- `oyuncular[].cikti`: oyundan çıktı (60 sn'de dönmedi). Bir daha seçilmez, sırası gelmez, sayaçları özette kalır. Anahtarla dönerse izler.
+- `bekleme`: bağlı oyuncu 4'ün altına düştü, oyun durdu: `{ "kalanMs": 95000 }` (bu sürede kimse dönmezse oyun biter). Yoksa `null`.
+- `secilebilir`: kopuk, AFK ve çıkmış oyuncular listede yok (aktif kimse kalmadıysa yine de dolu gelir, oyun takılmaz).
 
 **S3 alanları** (kurallar: Ana Plan 8, kararlar: `tasks/g1-todo.md`):
 - `kaos`: bu turun kaos kuralı, yoksa `"yok"`. `"tersDunya"` · `"grupKarari"` · `"korSoru"` · `"soranGizli"` · `"aniOlum"` · `"cezaTuru"` · `"yonDegisti"` · `"ikiyeKatla"`. Kaos açıksa her 5 turda bir.
@@ -160,7 +168,8 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 ```
 
 `olay`: `"turBasladi"` · `"soruSoruldu"` · `"cevapSecildi"` · `"berabere"` · `"ifsa"` · `"gume"` · `"sureDoldu"` · `"oyunBitti"` ·
-`"kaosBasladi"` · `"yandi"` · `"cezaCekildi"` · `"ikiyeKatlandi"` · `"bedelOdendi"` · `"oyVerildi"`.
+`"kaosBasladi"` · `"yandi"` · `"cezaCekildi"` · `"ikiyeKatlandi"` · `"bedelOdendi"` · `"oyVerildi"` ·
+`"siraAtlandi"` · `"afk"` · `"afkBitti"` · `"oyuncuCikti"`.
 `soru` sadece `ifsa` olayında dolu. `ceza` sadece `cezaCekildi`'de (ceza nesnesi), `kaos` sadece `kaosBasladi`'da (kuralın adı). Animasyon ve ses için. Ekran her zaman `durum`'a göre çizilir.
 
 ### `hata`
@@ -189,7 +198,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 
 - `surum`: odanın sayacı, her `durum`'da bir artar. Eski sürümlü mesajı at (Ana Plan 5.2, kural 3). Geri dönen oyuncu da kaldığı sayıdan devam eder.
 - `renk`: 0–9, oyuncu numarasından (`p1` → 0). Arayüz kendi renk listesinde bu sıraya bakar.
-- `olay.kim`: `sureDoldu` (süresi dolan), `yandi` (çakmak elinde yanan), `cezaCekildi` (çeken), `ikiyeKatlandi` (bir el daha isteyen), `bedelOdendi` (ödeyen B), `oyVerildi` (oy veren; oyun ne olduğu yok). Diğerlerinde `null`.
+- `olay.kim`: `sureDoldu` (süresi dolan), `yandi` (çakmak elinde yanan), `cezaCekildi` (çeken), `ikiyeKatlandi` (bir el daha isteyen), `bedelOdendi` (ödeyen B), `oyVerildi` (oy veren; oyun ne olduğu yok), `siraAtlandi` (sırası gelen ama kopuk/AFK/çıkmış olan; sıra rastgele birine geçti), `afk` / `afkBitti` (AFK olan / dönen), `oyuncuCikti` (oyundan çıkan). Diğerlerinde `null`.
 - Paketler ve sesli cezalar: sunucu `Assets/Icerik` altındaki `.txt` paketlerini ve `Cezalar.csv`'yi açılışta okur.
 - Sabit süreler (şimdilik ayarlanamaz): ifşa/güme ekranı 6 sn, Curcuna soru toplama 90 sn, İkiye Katla/Bedel kararı 5 sn. Oylama `hamleSn` kadar sürer.
 
@@ -223,11 +232,16 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 - `COK_HIZLI` alan istemci durmazsa cevaplar gönderim kuyruğunu doldurur ve bağlantı kesilir.
 - Ayarlar sunucuda: `appsettings.json` içinde `"Sinirlar"` bölümü ya da ortam değişkeni (`Sinirlar__IpBasinaBaglanti=50`).
 
-## Bağlantı koparsa (iskelette)
+## Bağlantı koparsa (Ana Plan 6.1)
 
 - **Lobide:** oyuncu odadan çıkar. Kurucu çıktıysa kuruculuk sıradaki oyuncuya geçer. Oda boşalırsa silinir.
-- **Oyunda:** oyuncu `bagli: false` olur ama oyunda kalır. Süreler işlemeye devam eder (kural motoru beklemez). `anahtar` ile geri dönebilir. Kurucu koptuysa kuruculuk ilk bağlı oyuncuya geçer, geri dönünce geri almaz.
-- **Odada bağlı kimse kalmazsa** oda hemen silinir. Sonra anahtarla dönüş `ODA_YOK` alır. *(S5'te oda bir süre tutulacak.)*
+- **Oyunda kopan:** `bagli: false`, yeri **60 sn** tutulur. Süreler işler (kimse beklemez); bu sürede B/C seçilemez, sırası gelirse atlanır (`siraAtlandi`). `anahtar` ile dönünce kaldığı yerden devam eder.
+- **60 sn'de dönmeyen:** oyundan çıkar (`oyuncuCikti`, `cikti: true`). Elindeki iş hemen biter: sormadan çıkan A'nın turu yanar, seçmeden çıkan B'nin sorusu güme gider, mini oyundan kaçan kaybeder, oy vermeden çıkan oylamadan düşer, kararı bekleyen çıkarsa "hayır" sayılır. (Soran Gizli turunda gizli A çıkarsa süresi dolar: hemen bitseydi kim olduğu anlaşılırdı.) Anahtarla dönerse izler, oynamaz.
+- **AFK:** üst üste 2 kez süresini dolduran (soru sormadı, C seçmedi, hamle yapmadı) `afk: true` olur: sırası gelince atlanır, seçilemez. `buradayim` ya da herhangi bir `komut` yollayınca kalkar. (Soran Gizli turunda A'nın süresi sayılmaz: AFK olması gizli A'yı ele verirdi.)
+- **Bağlı oyuncu 4'ün altına düşerse:** oyun durur (süreler ve kopukların 60 sn'si işlemez), `bekleme` dolu gelir. **2 dk** içinde biri dönüp 4'e çıkılırsa sürer, dönen olmazsa oyun biter (`oyunSonu`).
+- **Kurucu koparsa** kuruculuk ilk bağlı oyuncuya geçer, geri dönünce geri almaz.
+- **Herkes koparsa** oda hemen silinmez: 2 dk içinde dönen anahtarla girer. Kimse dönmezse silinir, sonra anahtarla dönüş `ODA_YOK`.
+- Süreler sunucu ayarı: `KopukSn` (60), `AzOyuncuSn` (120).
 - **Lobi 30 dk içinde başlatılmazsa** oda kapanır, bağlantılar kesilir. Anahtarla dönüş `ODA_YOK` alır. Başlamış oyunu bu süre etkilemez.
 
 ## Ana Plan 5.2'den farklar (oturumda onaylanacak)

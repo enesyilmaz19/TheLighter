@@ -73,6 +73,7 @@ namespace Cakmak.Sunucu
                     case "baslat": OdadaysaYap(b, o => o.Baslat(b)); return;
                     case "bitir": OdadaysaYap(b, o => o.Bitir(b)); return;
                     case "komut": OdadaysaYap(b, o => o.Komut(b, m)); return;
+                    case "buradayim": OdadaysaYap(b, o => o.Buradayim(b)); return;
 
                     default: throw new GecersizMesaj();
                 }
@@ -109,7 +110,7 @@ namespace Cakmak.Sunucu
             while (true)
             {
                 var kod = RandomNumberGenerator.GetString(KodHarfleri, KodUzunlugu);
-                var oda = new Oda(kod, paketler, sesliCezalar, sinirlar.LobiSuresi);
+                var oda = new Oda(kod, paketler, sesliCezalar, sinirlar);
                 if (odalar.TryAdd(kod, oda)) return oda;
             }
         }

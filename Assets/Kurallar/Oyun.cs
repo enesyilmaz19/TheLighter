@@ -110,7 +110,7 @@ namespace Cakmak.Kurallar
         {
             if (asama != Asama.SoruToplama) return Sonuc.YanlisAsama;
             var o = Bul(kim);
-            if (o == null) return Sonuc.SiraSendeDegil;
+            if (o == null || cikan.Contains(kim)) return Sonuc.SiraSendeDegil;
             if (o.HavuzaEkledigi >= KisiBasiHavuzSorusu) return Sonuc.HakKalmadi;
             var temiz = SoruTemizle(metin);
             if (temiz == null) return Sonuc.GecersizGirdi;
@@ -118,7 +118,7 @@ namespace Cakmak.Kurallar
             toplanan.Add(temiz);
             curcunaYazilan.Add(temiz);
             o.HavuzaEkledigi++;
-            if (oyuncular.TrueForAll(x => x.HavuzaEkledigi >= KisiBasiHavuzSorusu)) ToplamayiBitir();
+            if (ToplamaTamam()) ToplamayiBitir();
             return Sonuc.Tamam;
         }
 
@@ -152,7 +152,8 @@ namespace Cakmak.Kurallar
         {
             if (asama != Asama.SoruSorma) return Sonuc.YanlisAsama;
             if (kim != a) return Sonuc.SiraSendeDegil;
-            if (hedef == a || Bul(hedef) == null) return Sonuc.Secilemez;
+            // Görünümdeki liste ile aynı kural: kopuk/AFK/çıkmış oyuncu seçilemez (aktif kimse yoksa seçilebilir).
+            if (!Secilebilir(a).Contains(hedef)) return Sonuc.Secilemez;
 
             string gidecek;
             bool fisildandi = false;
@@ -188,7 +189,7 @@ namespace Cakmak.Kurallar
         {
             if (asama != Asama.CevapSecme) return Sonuc.YanlisAsama;
             if (kim != b) return Sonuc.SiraSendeDegil;
-            if (hedef == kim || (hedef == a && !SoranGizli) || Bul(hedef) == null) return Sonuc.Secilemez;
+            if (!CevapAdaylari().Contains(hedef)) return Sonuc.Secilemez;
 
             c = hedef;
             Bul(hedef).Gosterilme++;
@@ -240,14 +241,14 @@ namespace Cakmak.Kurallar
                     ToplamayiBitir();
                     break;
                 case Asama.SoruSorma:
-                    IzAl(a).SureDoldu++;
+                    SuresiDoldu(a);
                     Yay(new Olay { Tur = OlayTuru.SureDoldu, Kim = GorunenA() });
                     OncekiTuruUnut();
                     TurBaslat(RastgeleOyuncu(a));
                     break;
                 case Asama.CevapSecme:
                     var sureliB = b.Value;
-                    IzAl(sureliB).SureDoldu++;
+                    SuresiDoldu(sureliB);
                     GumeyeGitti();
                     Yay(new Olay { Tur = OlayTuru.SureDoldu, Kim = sureliB });
                     OncekiTuruUnut();
@@ -257,8 +258,8 @@ namespace Cakmak.Kurallar
                     // Hamle yapmayan kaybeder. İkisi de yapmadıysa B kazanır, soru gizli kalır.
                     // Reaksiyonda erken basmak hamle sayılmaz: kırmızıyken basan, süre dolsa da kaybeder.
                     bool cKazandi = Erken(bHamle) || (!Erken(cHamle) && cHamle.HasValue && !bHamle.HasValue);
-                    if (!bHamle.HasValue) IzAl(b.Value).SureDoldu++;
-                    if (!cHamle.HasValue) IzAl(c.Value).SureDoldu++;
+                    if (!bHamle.HasValue) SuresiDoldu(b.Value);
+                    if (!cHamle.HasValue) SuresiDoldu(c.Value);
                     MiniOyunBitti(cKazandi, sureDoldu: true, zarlaKarar: false, 0, 0);
                     break;
                 case Asama.Oylama:
@@ -311,8 +312,7 @@ namespace Cakmak.Kurallar
             }
             else if (asama == Asama.CevapSecme && kim == b)
             {
-                // Soran Gizli: A listeden çıkarılırsa kim olduğu anlaşılır, bu turda A da seçilebilir.
-                g.Secilebilir = SoranGizli ? Secilebilir(b.Value) : Secilebilir(a, b.Value);
+                g.Secilebilir = CevapAdaylari();
             }
 
             if ((asama == Asama.CevapSecme || asama == Asama.MiniOyun || asama == Asama.Oylama
@@ -351,6 +351,12 @@ namespace Cakmak.Kurallar
                 return;
             }
 
+            // Kopuk, AFK ya da çıkmış oyuncunun sırası gelince beklenmez (Ana Plan 6.1).
+            if (!Aktif(yeniA))
+            {
+                Yay(new Olay { Tur = OlayTuru.SiraAtlandi, Kim = yeniA });
+                yeniA = RastgeleOyuncu(yeniA);
+            }
             a = yeniA;
             b = null;
             c = null;
@@ -508,13 +514,28 @@ namespace Cakmak.Kurallar
 
         OyuncuDurumu Bul(OyuncuId id) => oyuncular.Find(o => o.Id == id);
 
+        /// <summary>
+        /// Seçilebilecekler: haric dışındaki aktif oyuncular. Aktif kimse yoksa oyun takılmasın diye oyundan çıkmamışlar,
+        /// onlar da yoksa herkes (online'da o noktada sunucu oyunu zaten durdurur).
+        /// </summary>
         List<OyuncuId> Secilebilir(OyuncuId? haric1 = null, OyuncuId? haric2 = null)
         {
-            var liste = new List<OyuncuId>();
+            var aktif = new List<OyuncuId>();
+            var kalan = new List<OyuncuId>();
+            var hepsi = new List<OyuncuId>();
             foreach (var o in oyuncular)
-                if (o.Id != haric1 && o.Id != haric2) liste.Add(o.Id);
-            return liste;
+            {
+                if (o.Id == haric1 || o.Id == haric2) continue;
+                hepsi.Add(o.Id);
+                if (cikan.Contains(o.Id)) continue;
+                kalan.Add(o.Id);
+                if (Aktif(o.Id)) aktif.Add(o.Id);
+            }
+            return aktif.Count > 0 ? aktif : kalan.Count > 0 ? kalan : hepsi;
         }
+
+        /// <summary>B'nin C adayları. Soran Gizli: A listeden çıkarılırsa kim olduğu anlaşılır, bu turda A da seçilebilir.</summary>
+        List<OyuncuId> CevapAdaylari() => SoranGizli ? Secilebilir(b.Value) : Secilebilir(a, b.Value);
 
         OyuncuId RastgeleOyuncu(OyuncuId? haric1 = null, OyuncuId? haric2 = null)
         {

@@ -170,6 +170,8 @@ namespace Cakmak.Kurallar
             {
                 gidecek = SoruTemizle(metin);
                 if (gidecek == null) return Sonuc.GecersizGirdi;
+                // Temiz modda yakalanan soru gönderilmez (Ana Plan 6.4). İhlal sayma ve atma sunucuda.
+                if (ayar.Mod == OyunModu.Temiz && TemizFiltre.Uygunsuz(gidecek)) return Sonuc.Uygunsuz;
             }
 
             b = hedef;

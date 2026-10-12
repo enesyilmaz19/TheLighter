@@ -5,7 +5,9 @@ Kaynak: `docs/Ana Plan.md` · Branch'ler: `g1/<iş>` → `main`
 ## 📥 ENES'İN MASASI
 
 - [x] ~~İmza temizliği~~ → **vazgeçildi (2026-10-10).** Contributors listesi zaten temiz (sadece enesyilmaz19 ve ardatelli0). İmza sadece ilk 2 commit'in sayfasında görünüyor. Geçmiş yeniden yazılmayacak.
-- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" (13 madde), "S3 kararları" (19 madde) ve `docs/Protokol.md`'nin sonundaki farklar tablosu birlikte onaylanır. Onaylananlar `docs/Ana Plan.md` 5.1/5.2'ye işlenir.
+- [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" (14 madde), "Kararlar" (29 madde) ve `docs/Protokol.md`'nin sonundaki farklar tablosu birlikte onaylanır. Onaylananlar `docs/Ana Plan.md` 5.1/5.2'ye işlenir. Arda'nın onay bekleyenleri: kararlar 20–23, `docs/Guvenlik.md`, `.gitignore` eklemeleri, sunucu adresinin build'e konması (karar 29).
+- [ ] **Temiz kara listesi ve izin listesi:** `Assets/Kurallar/TemizFiltre.cs` başındaki üç liste içerik (Ana Plan 4: "Temiz kara listesi ve izin listesi" G1'de). Başlangıç listesini Claude yazdı, gözden geçir, ekle/çıkar. Eklediğin her kelime için `TemizFiltreTestleri`'ne bir satır, paket soruları zaten deneniyor.
+- [ ] **VPS + alan adı** (aşağıda "S4 sonu"): hazır olunca `wss://<alan-adı>/ws` adresini Arda'ya ilet, 4 cihazla farklı ağlardan dene (S4 bitti ölçütünün son maddesi).
 
 ## S1 — Kural motoru (çekirdek döngü)
 
@@ -41,7 +43,8 @@ Neden şimdi: Arda'yı beklerken yapılabilecek, Playtest 1'in sonucundan etkile
 - [x] Oyunda kurucu koparsa kuruculuk ilk bağlı oyuncuya geçiyor (Ana Plan 6.1). Yoksa sınırsız oyunu kimse bitiremiyordu
 - [x] **S5 kopma ve AFK (2026-10-12):** kopanın yeri 60 sn tutulur, dönmezse oyundan çıkar (elindeki iş hemen biter), üst üste 2 süre dolduran AFK (atlanır, seçilemez, bir mesajla kalkar), bağlı oyuncu 4'ün altında oyun durur ve 2 dk bekler, herkes koparsa oda 2 dk tutulur. Kural motoru `Oyun.Baglanti.cs` (sözleşmedeki `OyuncuKoptu/Dondu/Cikti` + `Buradayim`), sunucu `Oda.cs`, protokol "Bağlantı koparsa". 16 kural + 7 sunucu testi, 20 bilerek bozma yakalandı, Unity 221/221. Görünmez karakterli isim: güvenlik adımında yapıldı
 - [x] **S5 bekleme odası, tekrar oyna, atma (2026-10-12):** oyun sürerken katılan bekleme odasına girer (sadece herkese açık bilgi; komutta `OYUNDA_DEGILSIN`), kapasite bekleyenler dahil 10. Kurucu `oyunSonu`'nda `tekrarOyna` ile lobiye döner (kopanlar düşer, bekleyenler oyuncu olur, ayarlar kalır). Kurucu `at`: atılan `ATILDIN` alır, bağlantısı kapanır, odaya anahtarıyla ve aynı isimle dönemez (hesap yok: yeni isimle girebilir, Ana Plan 6.4'te kabul edilmiş). 12 yeni sunucu testi, 14 bilerek bozma yakalandı
-- [ ] S5'e kalanlar: sohbet + DM, Temiz filtresi (3. ihlalde atma `at` ile aynı yolu kullanacak), online grup paketi
+- [x] **S5 sohbet + DM, Temiz filtresi (2026-10-12):** `sohbet` mesajı (genel herkese ve yazana, DM alana ve yazana; bekleme odası da yazar; 200 karakter; saniyede 1, patlama 2; sunucu saklamaz). Temiz filtresi kural motorunda (`TemizFiltre`, Ana Plan 6.4'ün adımları), `SoruSor` Temiz'de `Sonuc.Uygunsuz` döner (elden elede de). Sunucuda soru + sohbet ihlali aynı sayaçta, isme göre; `UYGUNSUZ` (`ihlal`, `sinir`), 3.'de `at` ile aynı yoldan atılır (`neden: "temiz"`), kurucuysa kuruculuk devredilir. 36 kural + 17 sunucu testi, 29 bilerek bozma (28 yakalandı; kaçan, gereksiz bir `Replace`'ti, silindi). Arda'nın uçtan uca bot testi yeni sunucuyla geçti. Arda'nın metin tablosuna `hata.Uygunsuz` yer tutucu eklendi (MetinTestleri enum için istiyor)
+- [ ] S5'e kalan: online grup paketi (4096 bayt sınırı: parça parça yükleme). İstemci tarafını Arda yapacak
 - [x] **Reaksiyon hatası (Arda'nın editör testi, 2026-10-10):** süre dolunca erken basan kazanabiliyordu (iki yönde de). Önce 3 kırmızı test, sonra `Erken()` yardımcısı iki yolda da kullanılıyor, bilerek bozuldu. 88 kural + 57 sunucu, Unity'de 107/107. Kural Ana Plan 6.5'e yazıldı
 
 ## S4 — online'a açılmadan önce (güvenlik)
@@ -54,7 +57,8 @@ Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hi�
 - [ ] Sonra (gerekirse): yeni bağlantı açma hızı (şimdi sadece aynı anda açık sayısı sınırlı), oyun sonunda açık kalan odaya zaman aşımı
 - [x] Zaten var: 4 KB mesaj sınırı, sınırlı gönderim kuyruğu, 20 sn'de sessiz kopanı fark etme, boş odayı silme, bozuk JSON'da bağlantıyı düşürmeme
 - [x] **Güvenlik katmanları (2026-10-12, Enes'in isteğiyle):** hangi katmanın gerekli olduğu ve neden `docs/Guvenlik.md`'de. Bu adımda eklenenler: kriptografik rastgelelik (online'da tohum tahmin edilemez: görevler, eşik, zarlar), `TemizMetin` (isim ve soruda görünmez/yön karakterleri; kılık değiştirme ve ekran bozma), tarayıcı WebSocket'i reddi (403), toplam oda (`SUNUCU_DOLU`) ve bağlantı sınırı, odaya girmeyen bağlantı 120 sn'de kesilir, anahtar sabit sürede karşılaştırılır, `Server` başlığı yok, kurulum dosyaları (`Sunucu/Kurulum/`: systemd kum havuzu, Caddyfile, adımlar). 14 yeni test (7 kural + 7 sunucu), 15 bilerek bozma yakalandı
-- [ ] Arda: `enableRichText = false` (isim, soru, sohbet etiketleri), bağlantıyı oda kur/katıl anında aç, `Origin` yollama, yayında `wss://` (`docs/Guvenlik.md`, "İstemci için")
+- [x] Arda (PR #8/#9, 2026-10-12): `enableRichText = false` (oyuncu metni), bağlantı oda kur/katıl anında açılıyor, `Origin` yollanmıyor (uçtan uca test sunucuya bağlandı: Origin olsaydı 403 alırdı)
+- [ ] Yayında `wss://`: adres VPS + alan adını bekliyor, build'e nasıl konacağı karar 29
 
 ## S4 sonu — sunucu kurulumu (Enes'in hesabı ve ödemesi gerekiyor). Adımlar ve dosyalar: `Sunucu/Kurulum/`
 
@@ -134,6 +138,11 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
 | 22 | Grup eşleşmesi: bugünkülerin en az 3'ü ve en az yarısı kayıtlı grupta varsa aynı grup | Arda önerdi (istemcide, `GrupDeposu`) |
 | 23 | Android paylaşma menüsü: NativeShare eklentisi (`Packages/` değişir) | Arda sordu, **Enes karar verecek**. Şimdilik kart dosyaya kaydediliyor |
 | 24 | İsim karşılaştırmasının tek tanımı `Oyuncu.IsimAnahtari`: boşluk, büyük/küçük harf ve I/İ/ı/i farkı gözetilmez ("İrem" = "irem", "ILKER" = "ılker"). `Kur`, `GrupKaydi.Isle`, sunucu ve istemci (`GrupDeposu`, kurulum) hep bunu kullanır. **Yapıldı (2026-10-11, Enes'in isteğiyle)** | 3 yerde 3 farklı karşılaştırma vardı: istemci aynı kişi sayarken grup kaydı iki üye açabiliyordu |
+| 25 | Temiz filtresi kelimeye başından bakar: kara listedeki kökle başlıyorsa ya da kısaltmanın kendisiyse ("am", "aq", "mk") yakalar, izin listesi kurtarır. İzin listesi ı'yı korur ("sık", "şık" masum; "sik" değil), Türkçe klavyesiz yazılan masumlar da listede ("sikildim") | Plan 6.4'ün adımlarında ı → i sadeleşince "sıkıldım", "şık", "sıkıcı" yakalanıyordu. Kelime ortası ve bitişik yazılan cümle yakalanmaz (plan zaten "hiçbir filtre yakalamaz" diyor) |
+| 26 | Temiz ihlali: soru ve sohbet aynı sayaçta, odada isme göre (lobide çıkıp aynı isimle giren sıfırlanmaz), 3.'de atılır. Kurucu da atılabilir, kuruculuk devredilir. İsim filtrelenmez | Plan "3. ihlalde at" diyor, neyin sayıldığını yazmıyor |
+| 27 | Sohbet saniyede 1, arka arkaya en fazla 2 | İstemci saniyede bir yollasa da ağ gecikmesi iki mesajı yaklaştırabilir |
+| 28 | Sunucu sohbeti saklamaz, kopup dönen eskileri görmez. Rapor gelince son 50 mesaj (S6) ayrı iş | Gizlilik metni "mesaj saklanmıyor" diyor |
+| 29 | **Öneri:** yayın adresi (`wss://<alan-adı>/ws`) istemcide tek bir sabitte (ya da Resources'ta bir ayar dosyasında), "Sunucu" alanı sadece editörde ve geliştirme build'inde görünür | Arda sordu. Oyuncu adres girmesin; geliştirirken yerel sunucu yine denenebilsin. Adres gizli değil, build'de durması sorun değil |
 
 ## Sözleşmeye önerilen değişiklikler (oturumda onaylanacak)
 
@@ -153,8 +162,9 @@ Playtest (Kapı 1) atlandı, Enes'in kararı. Spec: Ana Plan 8. bölüm.
 | 11 | — | `OyuncuDurumu.Afk`, `OyuncuDurumu.Cikti`; olaylar `SiraAtlandi`, `Afk`, `AfkBitti`, `OyuncuCikti` | Ekranda "AFK", "çıktı" etiketleri, "sıra atlandı" duyurusu |
 | 12 | — | `SoruSor`/`CevapSec` görünümdeki `Secilebilir` listesine göre denetler: kopuk/AFK/çıkmış seçilemez (aktif kimse yoksa seçilebilir) | Görünüm ile kural tek yerde. Elden elede kimse pasif olmadığı için değişen bir şey yok |
 | 13 | — | `Kur(ayarlar, oyuncular, Random rastgele, out oyun)` | Online'da kriptografik rastgelelik (`docs/Guvenlik.md`). Tohumlu `Kur` aynen duruyor |
+| 14 | — | `Sonuc.Uygunsuz` (enum sonuna) + `TemizFiltre.Uygunsuz(metin)`: Temiz modda `SoruSor` filtreye takılan soruyu göndermez | Ana Plan 6.4. Filtre tek yerde: elden ele ve sunucu aynısını kullanır |
 
-**Henüz yok (plana göre sonra):** sohbet, atma, geç gelen (S5). S3'ün eklemeleri yukarıdaki "S3 sözleşme eklemeleri" tablosunda.
+Sohbet, atma ve geç gelen (S5) sunucuda, kural motoruna girmedi. S3'ün eklemeleri yukarıdaki "S3 sözleşme eklemeleri" tablosunda.
 
 ## Arda'nın bilmesi gerekenler
 

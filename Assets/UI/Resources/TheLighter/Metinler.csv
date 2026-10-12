@@ -130,6 +130,7 @@ hata.GecersizGirdi,Olmadı: soru boş ya da çok uzun olabilir.
 hata.HakKalmadi,Bunu zaten yaptın.
 hata.HavuzBos,Henüz soru paketi yok.
 hata.OyuncuSayisiGecersiz,Oyuncu sayısı uygun değil.
+hata.Uygunsuz,Temiz modda bu soru sorulamaz. Başka türlü yaz.
 kurulum.hizli,Hızlı başla
 kurulum.hizli_ipucu,Normal · TKM · 15 tur · Genel paket · Cesur cezalar · görevler ve kaos açık
 kurulum.mod,Mod

@@ -14,7 +14,7 @@ namespace SunucuTestleri
         // Burada kapatılır; sınırların kendisi SinirTestleri'nde küçük değerlerle denenir.
         [OneTimeSetUp]
         public void Kur() => Fabrika = Sunucu(("Sinirlar:IpBasinaBaglanti", "100000"), ("Sinirlar:IpBasinaGirisDakikada", "100000"),
-            ("Sinirlar:MesajSaniyede", "100000"), ("Sinirlar:MesajPatlama", "100000"));
+            ("Sinirlar:MesajSaniyede", "100000"), ("Sinirlar:MesajPatlama", "100000"), ("Sinirlar:SohbetPatlama", "100000"));
 
         [OneTimeTearDown]
         public void Kaldir() => Fabrika?.Dispose();

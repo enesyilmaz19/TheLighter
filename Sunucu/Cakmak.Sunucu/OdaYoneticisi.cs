@@ -76,6 +76,7 @@ namespace Cakmak.Sunucu
                     case "buradayim": OdadaysaYap(b, o => o.Buradayim(b)); return;
                     case "at": OdadaysaYap(b, o => o.At(b, m)); return;
                     case "tekrarOyna": OdadaysaYap(b, o => o.TekrarOyna(b)); return;
+                    case "sohbet": OdadaysaYap(b, o => o.Sohbet(b, m)); return;
 
                     default: throw new GecersizMesaj();
                 }

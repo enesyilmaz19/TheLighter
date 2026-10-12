@@ -95,6 +95,8 @@ namespace Cakmak.Kurallar
         HakKalmadi,
         HavuzBos,
         OyuncuSayisiGecersiz,
+        /// <summary>Temiz mod: soru filtreye takıldı, gönderilmedi (<see cref="TemizFiltre"/>).</summary>
+        Uygunsuz,
     }
 
     public enum Asama

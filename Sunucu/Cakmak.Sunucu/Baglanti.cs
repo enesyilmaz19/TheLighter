@@ -47,6 +47,7 @@ namespace Cakmak.Sunucu
             try { Soket.Abort(); } catch (ObjectDisposedException) { }
         }
 
+        /// <summary>Yeni mesaj alınmaz. Kuyruktakiler gider, sonra sunucu bağlantıyı düzgünce kapatır (YaziciDongusu).</summary>
         public void Bitir() => kuyruk.Writer.TryComplete();
 
         /// <summary>Bağlanıp süresi içinde odaya girmeyen bağlantıyı keser: boşta yer tutmasın.</summary>
@@ -68,6 +69,9 @@ namespace Cakmak.Sunucu
                     if (Soket.State != WebSocketState.Open) break;
                     await Soket.SendAsync(Encoding.UTF8.GetBytes(json), WebSocketMessageType.Text, true, iptal);
                 }
+                // Kuyruk Bitir ile kapandı ve boşaldı. Bağlantı hâlâ açıksa (atılan oyuncu) son mesajdan sonra kapat.
+                if (Soket.State == WebSocketState.Open)
+                    await Soket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, iptal);
             }
             catch (OperationCanceledException) { }
             catch (WebSocketException) { }

@@ -159,6 +159,20 @@ namespace Cakmak.Sunucu
             ["kaos"] = o.Tur == OlayTuru.KaosBasladi ? Ad(o.Kaos) : null,
         });
 
+        /// <summary>Sunucunun kendi olayı (kural motorunda yok): kurucu birini attı.</summary>
+        public static string AtildiOlayi(OyuncuId kim) => Yaz(new JsonObject
+        {
+            ["t"] = "olay",
+            ["olay"] = "atildi",
+            ["a"] = null,
+            ["b"] = null,
+            ["c"] = null,
+            ["kim"] = Id(kim),
+            ["soru"] = null,
+            ["ceza"] = null,
+            ["kaos"] = null,
+        });
+
         public static JsonObject AyarlarYaz(Ayarlar a, IEnumerable<string> paketler) => new JsonObject
         {
             ["mod"] = Ad(a.Mod),
@@ -215,11 +229,28 @@ namespace Cakmak.Sunucu
             }
         }
 
+        static JsonArray EkListesi(IEnumerable<OyuncuEki> oyuncular) =>
+            Dizi(oyuncular, o => new JsonObject { ["id"] = Id(o.Id), ["isim"] = o.Isim, ["renk"] = o.Renk, ["bagli"] = o.Bagli });
+
+        /// <summary>Bekleme odasındakine giden durum: oyunda değil, sadece herkese açık bilgi.</summary>
+        public static string BeklemeOdasiDurumu(int surum, string oda, OyuncuId kurucu, IEnumerable<OyuncuEki> oyuncular,
+            IEnumerable<OyuncuEki> bekleyenler, int tur, int toplamTur, bool oyunBitti) => Yaz(new JsonObject
+        {
+            ["t"] = "durum",
+            ["surum"] = surum,
+            ["oda"] = oda,
+            ["asama"] = "beklemeOdasi",
+            ["kurucu"] = Id(kurucu),
+            ["oyuncular"] = EkListesi(oyuncular),
+            ["bekleyenler"] = EkListesi(bekleyenler),
+            ["tur"] = tur,
+            ["toplamTur"] = toplamTur,
+            ["oyunBitti"] = oyunBitti,
+        });
+
         public static string LobiDurumu(int surum, string oda, OyuncuId kurucu, IEnumerable<OyuncuEki> oyuncular, Ayarlar ayarlar, IEnumerable<string> paketler)
         {
-            var liste = new JsonArray();
-            foreach (var o in oyuncular)
-                liste.Add(new JsonObject { ["id"] = Id(o.Id), ["isim"] = o.Isim, ["renk"] = o.Renk, ["bagli"] = o.Bagli });
+            var liste = EkListesi(oyuncular);
 
             return Yaz(new JsonObject
             {
@@ -235,8 +266,9 @@ namespace Cakmak.Sunucu
 
         /// <param name="ozet">Sadece oyunSonu'nda dolu.</param>
         /// <param name="beklemeKalanMs">Oyun az oyuncu yüzünden duruyorsa bitmesine kalan süre, yoksa null.</param>
+        /// <param name="bekleyenler">Bekleme odasındakiler (sonraki oyunda oynayacak).</param>
         public static string OyunDurumu(int surum, string oda, OyuncuId kurucu, Func<OyuncuId, OyuncuEki> ek, Gorunum g, OyunOzeti ozet,
-            int? beklemeKalanMs)
+            int? beklemeKalanMs, IEnumerable<OyuncuEki> bekleyenler)
         {
             var liste = new JsonArray();
             foreach (var o in g.Oyuncular)
@@ -330,6 +362,7 @@ namespace Cakmak.Sunucu
                 ["ifsa"] = g.Asama == Asama.Ifsa ? new JsonObject { ["soru"] = g.IfsaSoru, ["fisilti"] = g.IfsaFisilti } : null,
                 ["ozet"] = OzetYaz(ozet),
                 ["bekleme"] = beklemeKalanMs.HasValue ? new JsonObject { ["kalanMs"] = beklemeKalanMs.Value } : null,
+                ["bekleyenler"] = EkListesi(bekleyenler),
             });
         }
     }

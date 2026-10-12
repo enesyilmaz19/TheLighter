@@ -49,6 +49,16 @@ namespace Cakmak.Sunucu
 
         public void Bitir() => kuyruk.Writer.TryComplete();
 
+        /// <summary>Bağlanıp süresi içinde odaya girmeyen bağlantıyı keser: boşta yer tutmasın.</summary>
+        public async Task OdasizseKes(TimeSpan sure, CancellationToken iptal)
+        {
+            try { await Task.Delay(sure, iptal); }
+            catch (OperationCanceledException) { return; } // bağlantı zaten bitti
+            // Oda oda kilidi altında yazılır, burada kilitsiz okunur. En kötüsü tam o anda giren biri kesilir,
+            // anahtarla geri döner.
+            if (Volatile.Read(ref Oda) == null) Kes();
+        }
+
         public async Task YaziciDongusu(CancellationToken iptal)
         {
             try

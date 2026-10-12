@@ -15,6 +15,8 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 - İkili (binary) çerçeve ve aynı alanı iki kez yazan JSON → `GECERSIZ_MESAJ`, bağlantı açık kalır.
 - Sunucu 10 sn'de bir ping atar. 20 sn cevap gelmezse bağlantı kopmuş sayılır.
 - Aynı IP'den aynı anda açık bağlantı sınırlı (aşağıda "Sınırlar"). Aşılırsa WebSocket açılmaz, HTTP **429** döner.
+- `Origin` başlığı olan istek (tarayıcı) reddedilir, HTTP **403**. Uygulama bu başlığı yollamamalı.
+- Bağlantıyı oda kurarken/katılırken aç: bağlanıp 120 sn içinde odaya girmeyen bağlantı kesilir.
 - Her mesajda `t` alanı tipi söyler.
 - Oyuncu kimliği: `"p1"` … `"p10"`. Odayı kuran `p1`, sonra katılış sırasıyla.
 - Oda kodu: 5 büyük harf, `I` ve `O` yok (`0/O`, `1/I` karışmasın). Örnek: `"KXTPM"`.
@@ -30,7 +32,9 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `komut` | `tur`, `komut`, + komutun alanları (aşağıda) | Oyunda |
 | `bitir` | — | Kurucu, oyunda. Oyunu hemen bitirir |
 
-**İsim:** baştaki/sondaki boşluk silinir, 1–20 karakter. Aynı odada aynı isim iki kez olamaz: büyük/küçük harf ve I/İ/ı/i farkı gözetilmez ("İrem" = "irem", "ILKER" = "ılker"). Tanım tek yerde: `Oyuncu.IsimAnahtari`. Yeni girişte `isim` yoksa `ISIM_GECERSIZ`. Anahtarla dönüşte `isim` yok sayılır.
+**Metin temizliği** (isim, soru): görünmez ve yön karakterleri atılır, her türlü boşluk tek boşluk olur, baş/son boşluk silinir (`TemizMetin`). Temizlenince boş kalan isim `ISIM_GECERSIZ`, soru `GECERSIZ_GIRDI`. Ekranda hep temizlenmiş hali görünür.
+
+**İsim:** temizlendikten sonra 1–20 karakter. Aynı odada aynı isim iki kez olamaz: büyük/küçük harf ve I/İ/ı/i farkı gözetilmez ("İrem" = "irem", "ILKER" = "ılker"). Tanım tek yerde: `Oyuncu.IsimAnahtari`. Yeni girişte `isim` yoksa `ISIM_GECERSIZ`. Anahtarla dönüşte `isim` yok sayılır.
 
 **Değerler:**
 - `mod`: `"normal"` · `"temiz"` · `"curcuna"`
@@ -178,6 +182,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `OYUN_YOK` | Oyun başlamadan oyun komutu |
 | `ESKI_TUR` | Komuttaki `tur` güncel değil |
 | `COK_HIZLI` | Mesaj sınırı ya da `odaKur`/`katil` sınırı aşıldı. Mesaj **hiç işlenmedi**, biraz bekleyip tekrar gönder |
+| `SUNUCU_DOLU` | Sunucudaki oda sayısı sınırda, yeni oda açılamadı. Sonra tekrar dene |
 | `SIRA_SENDE_DEGIL` · `SECILEMEZ` · `YANLIS_ASAMA` · `GECERSIZ_GIRDI` · `HAK_KALMADI` · `HAVUZ_BOS` · `OYUNCU_SAYISI_GECERSIZ` | Kural motorunun `Sonuc` değerleri |
 
 ### Alanların anlamı
@@ -209,6 +214,9 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 | IP başına `odaKur` + `katil` | dakikada 30 (her 2 sn'de bir hak dolar, en fazla 30 birikir) | `COK_HIZLI` | `IpBasinaGirisDakikada` |
 | Bağlantı başına mesaj | saniyede 10, arka arkaya en fazla 20 | `COK_HIZLI` | `MesajSaniyede`, `MesajPatlama` |
 | Başlatılmayan lobi | 30 dk | Oda kapanır, bağlantılar kesilir. Anahtarla dönüş `ODA_YOK` | `LobiSn` |
+| Odaya girmeyen bağlantı | 120 sn | Bağlantı kesilir | `OdasizSn` |
+| Sunucudaki toplam oda | 2000 | `odaKur` → `SUNUCU_DOLU` | `EnFazlaOda` |
+| Sunucudaki toplam WebSocket | 5000 | Yeni bağlantı açılmaz | `EnFazlaBaglanti` |
 
 - **IP:** sunucunun önündeki Caddy'nin `X-Forwarded-For` başlığından. Bu başlığa sadece aynı makineden (localhost) gelen istekte güvenilir. IPv6'da bir /64 bloğu tek IP sayılır (bir ev ya da telefon bütün bloğu alır).
 - Aynı Wi-Fi'daki herkes aynı IP'dir: 10 kişilik grup ve yeniden bağlananlar sınırlara sığar.

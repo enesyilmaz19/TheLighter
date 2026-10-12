@@ -1,0 +1,46 @@
+# /etc/systemd/system/cakmak.service — Çakmak oyun sunucusu (adımlar: BENIOKU.md)
+[Unit]
+Description=Cakmak oyun sunucusu
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=cakmak
+Group=cakmak
+WorkingDirectory=/opt/cakmak
+ExecStart=/opt/cakmak/Cakmak.Sunucu
+# Sadece localhost: dışarıdan doğrudan erişilmez, önünde Caddy var (X-Forwarded-For'a da bu yüzden güveniliyor).
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5000
+# Production: hata sayfası yığın izi göstermez.
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
+# Gizli bilgiler (ileride Vivox anahtarı vb.) burada, repoda değil. Dosya: root:cakmak, 0640.
+EnvironmentFile=-/etc/cakmak/ortam
+Restart=always
+RestartSec=5
+
+# Kum havuzu: sunucu ele geçirilse bile sistemi değiştiremesin.
+NoNewPrivileges=true
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
+# .NET JIT yazılabilir-çalıştırılabilir bellek ister: MemoryDenyWriteExecute açılmaz.
+MemoryMax=1500M
+TasksMax=512
+
+[Install]
+WantedBy=multi-user.target

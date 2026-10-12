@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 
 namespace Cakmak.Kurallar
 {
@@ -31,11 +33,55 @@ namespace Cakmak.Kurallar
 
         /// <summary>
         /// İki isim aynı kişi mi: anahtarları eşitse aynı. Kural motoru, sunucu ve istemci hep bunu kullanır.
-        /// Baştaki/sondaki boşluk, büyük/küçük harf ve I/İ/ı/i farkı gözetilmez: "İrem" = "irem", "ILKER" = "ılker".
+        /// Önce <see cref="TemizMetin.Temizle"/> (görünmez karakterler, boşluklar), sonra büyük/küçük harf ve
+        /// I/İ/ı/i farkı gözetilmez: "İrem" = "irem", "ILKER" = "ılker", "Ali" = sıfır genişlikli boşluklu "Ali".
         /// Harfler küçültmeden önce değiştirilir: sonuç kültüre ve çalışma ortamına (Mono, .NET) göre değişmesin.
+        /// Boş anahtar = geçersiz isim.
         /// </summary>
         public static string IsimAnahtari(string isim) =>
-            (isim ?? "").Trim().Replace('İ', 'i').Replace('I', 'i').Replace('ı', 'i').ToLowerInvariant();
+            TemizMetin.Temizle(isim).Replace('İ', 'i').Replace('I', 'i').Replace('ı', 'i').ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Oyuncunun yazdığı her metin (isim, soru) için tek temizlik. Kontrol ve görünmez biçim karakterleri
+    /// (sıfır genişlikli boşluk, yazı yönünü çeviren karakterler, Unicode etiketleri) atılır; her türlü boşluk
+    /// tek boşluk olur; baş/son boşluk silinir. Böylece görünmez karakterle başkasının kılığına girilemez,
+    /// başkalarının ekranı yön karakterleriyle bozulamaz, boş görünen isim/soru yazılamaz.
+    /// </summary>
+    public static class TemizMetin
+    {
+        public static string Temizle(string metin)
+        {
+            if (string.IsNullOrEmpty(metin)) return "";
+            var sb = new StringBuilder(metin.Length);
+            bool boslukBekliyor = false;
+            for (int i = 0; i < metin.Length; i++)
+            {
+                // Kategori kod noktasına göre: BMP dışındaki etiket karakterleri de (U+E0000...) yakalansın.
+                int uzunluk = char.IsSurrogatePair(metin, i) ? 2 : 1;
+                var tur = CharUnicodeInfo.GetUnicodeCategory(metin, i);
+                if (uzunluk == 1 && (char.IsWhiteSpace(metin[i]) || BosGorunur(metin[i])))
+                {
+                    boslukBekliyor = sb.Length > 0;
+                    continue;
+                }
+                // Tek başına kalmış vekil (bozuk UTF-16) de atılır. Tanımsız karakter atılmaz: Unity'nin Unicode
+                // tablosu eski olabilir, yeni bir emojiyi sunucu tutup istemci atarsa isim anahtarları ayrışır.
+                if (tur == UnicodeCategory.Control || tur == UnicodeCategory.Format || tur == UnicodeCategory.Surrogate)
+                {
+                    i += uzunluk - 1;
+                    continue;
+                }
+                if (boslukBekliyor) { sb.Append(' '); boslukBekliyor = false; }
+                sb.Append(metin, i, uzunluk);
+                i += uzunluk - 1;
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>Harf ya da simge sayılan ama ekranda boş görünen karakterler ("görünmez isim" hilesi).</summary>
+        static bool BosGorunur(char c) =>
+            c == '\u115F' || c == '\u1160' || c == '\u3164' || c == '\uFFA0' || c == '\u2800'; // Hangul dolgu ve boş Braille
     }
 
     /// <summary>Her komutun cevabı. Kural kodu hata fırlatmaz.</summary>

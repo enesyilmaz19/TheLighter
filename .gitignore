@@ -58,6 +58,11 @@ Sunucu/**/obj/
 .env.*
 *.local.json
 appsettings.Development.json
+appsettings.Production.json
+# Sunucudaki gizli ortam dosyası (Sunucu/Kurulum/BENIOKU.md)
+/ortam
+# dotnet publish çıktısı
+/yayin/
 *.keystore
 *.jks
 *.pfx

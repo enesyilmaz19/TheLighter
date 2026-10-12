@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json.Nodes;
 using Cakmak.Kurallar;
 
@@ -51,11 +52,16 @@ namespace Cakmak.Sunucu
             seciliPaketler = new List<string>(paketler.Keys);
         }
 
+        /// <summary>Temizlendikten sonra (görünmez karakterler, boşluklar: <see cref="TemizMetin"/>) 1–20 karakter.</summary>
         public static bool IsimGecerli(string isim)
         {
-            var t = isim?.Trim();
-            return !string.IsNullOrEmpty(t) && t.Length <= IsimEnFazla;
+            var t = TemizMetin.Temizle(isim);
+            return t.Length > 0 && t.Length <= IsimEnFazla;
         }
+
+        /// <summary>Yeniden bağlanma anahtarı, harf harf erken çıkmadan karşılaştırılır: süre farkından tahmin edilemesin.</summary>
+        static bool AnahtarAyni(string kayitli, string gelen) =>
+            CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(kayitli), Encoding.UTF8.GetBytes(gelen));
 
         // ------------------------------------------------------------ Katılma ve ayrılma
 
@@ -65,7 +71,7 @@ namespace Cakmak.Sunucu
             {
                 if (Kapandi) { b.Yolla(Protokol.Hata("ODA_YOK")); return; }
 
-                var eski = anahtar == null ? null : oyuncular.Find(o => o.Anahtar == anahtar);
+                var eski = anahtar == null ? null : oyuncular.Find(o => AnahtarAyni(o.Anahtar, anahtar));
                 if (eski != null)
                 {
                     // Aynı kimlikle geri dönüş. Eski bağlantı hâlâ açıksa kesilir: bir kimlik iki cihazda açık kalmaz.
@@ -85,7 +91,7 @@ namespace Cakmak.Sunucu
                 if (oyun != null) { b.Yolla(Protokol.Hata("OYUN_BASLADI")); return; }
                 if (oyuncular.Count >= EnFazlaOyuncu) { b.Yolla(Protokol.Hata("ODA_DOLU")); return; }
 
-                var temiz = isim?.Trim();
+                var temiz = TemizMetin.Temizle(isim);
                 var isimAnahtari = Oyuncu.IsimAnahtari(temiz);
                 if (!IsimGecerli(temiz) || oyuncular.Exists(o => Oyuncu.IsimAnahtari(o.Isim) == isimAnahtari))
                 {
@@ -231,7 +237,7 @@ namespace Cakmak.Sunucu
                     KaosTurlari = ayarlar.KaosTurlari,
                     SesliCezalar = sesliCezalar,
                 };
-                var sonuc = Oyun.Kur(kopya, liste, RandomNumberGenerator.GetInt32(int.MaxValue), out var yeni);
+                var sonuc = Oyun.Kur(kopya, liste, new GuvenliRastgele(), out var yeni);
                 if (sonuc != Sonuc.Tamam) { b.Yolla(Protokol.Hata(Protokol.HataKodu(sonuc))); return; }
 
                 oyun = yeni;

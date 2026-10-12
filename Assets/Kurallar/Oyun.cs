@@ -50,12 +50,12 @@ namespace Cakmak.Kurallar
         int beraberlik;
         MiniOyunSonucu sonMiniOyun;
 
-        Oyun(Ayarlar ayar, IReadOnlyList<Oyuncu> liste, int tohum)
+        Oyun(Ayarlar ayar, IReadOnlyList<Oyuncu> liste, Random rastgele)
         {
             this.ayar = ayar;
-            rastgele = new Random(tohum);
+            this.rastgele = rastgele;
             foreach (var o in liste)
-                oyuncular.Add(new OyuncuDurumu { Id = o.Id, Isim = o.Isim.Trim() });
+                oyuncular.Add(new OyuncuDurumu { Id = o.Id, Isim = TemizMetin.Temizle(o.Isim) });
             oneriDestesi = new Deste(ayar.OneriSorulari ?? Array.Empty<string>());
             TekrarKur();
 
@@ -70,17 +70,28 @@ namespace Cakmak.Kurallar
             }
         }
 
-        public static Sonuc Kur(Ayarlar ayarlar, IReadOnlyList<Oyuncu> oyuncular, int tohum, out Oyun oyun)
+        /// <summary>Tohumlu kurulum: aynı tohum aynı oyun (testler, elden ele).</summary>
+        public static Sonuc Kur(Ayarlar ayarlar, IReadOnlyList<Oyuncu> oyuncular, int tohum, out Oyun oyun) =>
+            Kur(ayarlar, oyuncular, new Random(tohum), out oyun);
+
+        /// <summary>
+        /// Rastgele kaynağı dışarıdan. Online'da sunucu kriptografik bir kaynak verir: <see cref="Random"/>'ın
+        /// tohumu oyunda görülen sonuçlardan (zarlar, ilk A) geri bulunabilir, bulan herkesin gizli görevini,
+        /// Kızgın Çakmak eşiğini ve gelecek zarları bilir.
+        /// </summary>
+        public static Sonuc Kur(Ayarlar ayarlar, IReadOnlyList<Oyuncu> oyuncular, Random rastgele, out Oyun oyun)
         {
             oyun = null;
-            if (ayarlar == null || oyuncular == null) return Sonuc.GecersizGirdi;
+            if (ayarlar == null || oyuncular == null || rastgele == null) return Sonuc.GecersizGirdi;
             if (oyuncular.Count < EnAzOyuncu || oyuncular.Count > EnFazlaOyuncu) return Sonuc.OyuncuSayisiGecersiz;
 
             var gorulen = new HashSet<OyuncuId>();
             var isimler = new HashSet<string>(); // grup kaydı kişileri isimle eşliyor
             foreach (var o in oyuncular)
-                if (o == null || string.IsNullOrWhiteSpace(o.Isim) || !gorulen.Add(o.Id) || !isimler.Add(Oyuncu.IsimAnahtari(o.Isim)))
-                    return Sonuc.GecersizGirdi;
+            {
+                var anahtar = o == null ? "" : Oyuncu.IsimAnahtari(o.Isim);
+                if (anahtar.Length == 0 || !gorulen.Add(o.Id) || !isimler.Add(anahtar)) return Sonuc.GecersizGirdi;
+            }
 
             if (ayarlar.TurSayisi < 0 || ayarlar.SoruSuresiSn <= 0 || ayarlar.CevapSuresiSn <= 0 || ayarlar.HamleSuresiSn <= 0
                 || ayarlar.ToplamaSuresiSn <= 0 || ayarlar.SonucSuresiSn <= 0 || ayarlar.KararSuresiSn <= 0)
@@ -89,7 +100,7 @@ namespace Cakmak.Kurallar
             // Temiz modda en fazla Hafif ceza (Ana Plan 8.1).
             if (ayarlar.Mod == OyunModu.Temiz && ayarlar.CezaSeviyesi == CezaSeviyesi.Cesur) return Sonuc.GecersizGirdi;
 
-            oyun = new Oyun(ayarlar, oyuncular, tohum);
+            oyun = new Oyun(ayarlar, oyuncular, rastgele);
             return Sonuc.Tamam;
         }
 
@@ -530,7 +541,7 @@ namespace Cakmak.Kurallar
         static string SoruTemizle(string metin)
         {
             if (metin == null) return null;
-            var t = metin.Trim();
+            var t = TemizMetin.Temizle(metin);
             if (t.Length == 0 || t.Length > SoruEnFazlaKarakter) return null;
             return t;
         }

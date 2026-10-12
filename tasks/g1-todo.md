@@ -51,8 +51,10 @@ Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hi�
 - [x] **(2026-10-12)** 30 dk'da başlatılmayan lobi kapanır. Biçim `docs/Protokol.md`, "Sınırlar". 6 yeni test (`SinirTestleri`), her biri kendi küçük sınırlı sunucusunda
 - [ ] Sonra (gerekirse): yeni bağlantı açma hızı (şimdi sadece aynı anda açık sayısı sınırlı), oyun sonunda açık kalan odaya zaman aşımı
 - [x] Zaten var: 4 KB mesaj sınırı, sınırlı gönderim kuyruğu, 20 sn'de sessiz kopanı fark etme, boş odayı silme, bozuk JSON'da bağlantıyı düşürmeme
+- [x] **Güvenlik katmanları (2026-10-12, Enes'in isteğiyle):** hangi katmanın gerekli olduğu ve neden `docs/Guvenlik.md`'de. Bu adımda eklenenler: kriptografik rastgelelik (online'da tohum tahmin edilemez: görevler, eşik, zarlar), `TemizMetin` (isim ve soruda görünmez/yön karakterleri; kılık değiştirme ve ekran bozma), tarayıcı WebSocket'i reddi (403), toplam oda (`SUNUCU_DOLU`) ve bağlantı sınırı, odaya girmeyen bağlantı 120 sn'de kesilir, anahtar sabit sürede karşılaştırılır, `Server` başlığı yok, kurulum dosyaları (`Sunucu/Kurulum/`: systemd kum havuzu, Caddyfile, adımlar). 14 yeni test (7 kural + 7 sunucu), 15 bilerek bozma yakalandı
+- [ ] Arda: `enableRichText = false` (isim, soru, sohbet etiketleri), bağlantıyı oda kur/katıl anında aç, `Origin` yollama, yayında `wss://` (`docs/Guvenlik.md`, "İstemci için")
 
-## S4 sonu — sunucu kurulumu (Enes'in hesabı ve ödemesi gerekiyor)
+## S4 sonu — sunucu kurulumu (Enes'in hesabı ve ödemesi gerekiyor). Adımlar ve dosyalar: `Sunucu/Kurulum/`
 
 - [ ] VPS: Hetzner CX23 (Arda'nın notu: Haziran 2026 zammından sonra ~5,49 €/ay, plandaki "5 $" eski), Ubuntu LTS
 - [ ] SSH sadece anahtarla (şifre kapalı) · güvenlik duvarında sadece 22, 80, 443 · otomatik güvenlik güncellemeleri · fail2ban

@@ -106,7 +106,7 @@ namespace Cakmak.Sunucu
 
         Oda YeniOda()
         {
-            // ponytail: oda sayısına sınır yok. 24^5 ≈ 8 milyon kod, çakışırsa yeniden çekilir.
+            // 24^5 ≈ 8 milyon kod, çakışırsa yeniden çekilir. Toplam oda sınırı odaKur'da (EnFazlaOda).
             while (true)
             {
                 var kod = RandomNumberGenerator.GetString(KodHarfleri, KodUzunlugu);

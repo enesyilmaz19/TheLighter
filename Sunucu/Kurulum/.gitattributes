@@ -1,0 +1,2 @@
+# Linux sunucuya kopyalanacak dosyalar: Windows'ta da LF kalsın (systemd ve Caddy CRLF'yi bozuk okur).
+* text eol=lf

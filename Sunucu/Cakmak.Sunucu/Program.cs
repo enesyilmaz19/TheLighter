@@ -6,8 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Cakmak.Sunucu;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 // Online mod sunucusu. Protokol: docs/Protokol.md
@@ -19,6 +21,12 @@ builder.Services.AddHostedService<Saat>();
 // Caddy aynı makinede, istemcinin gerçek IP'sini X-Forwarded-For ile yollar. Varsayılan olarak sadece
 // localhost'tan gelen başlığa güvenilir: dışarıdan biri başlık yazarak IP'sini değiştiremez.
 builder.Services.Configure<ForwardedHeadersOptions>(o => o.ForwardedHeaders = ForwardedHeaders.XForwardedFor);
+builder.WebHost.ConfigureKestrel(o =>
+{
+    o.AddServerHeader = false; // yazılımın adını ve sürümünü söylemesin
+    o.Limits.MaxConcurrentUpgradedConnections =
+        (builder.Configuration.GetSection("Sinirlar").Get<SinirAyarlari>() ?? new SinirAyarlari()).EnFazlaBaglanti;
+});
 
 var app = builder.Build();
 app.UseForwardedHeaders();
@@ -36,6 +44,13 @@ app.Map("/ws", async (HttpContext ctx, OdaYoneticisi odalar, Sinirlar sinirlar) 
         ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
         return;
     }
+    // Uygulama (Unity) Origin başlığı yollamaz, tarayıcı her zaman yollar. Bir web sayfası ziyaretçilerin
+    // tarayıcısını sunucuya karşı kullanamasın. ponytail: WebGL sürümü çıkarsa izinli adres listesi olur.
+    if (ctx.Request.Headers.Origin.Count > 0)
+    {
+        ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return;
+    }
 
     var ip = Sinirlar.IpAnahtari(ctx.Connection.RemoteIpAddress);
     using var izin = sinirlar.BaglantiIzni(ip);
@@ -48,6 +63,7 @@ app.Map("/ws", async (HttpContext ctx, OdaYoneticisi odalar, Sinirlar sinirlar) 
     using var soket = await ctx.WebSockets.AcceptWebSocketAsync();
     var baglanti = new Baglanti(soket, ip);
     var yazici = baglanti.YaziciDongusu(ctx.RequestAborted);
+    _ = baglanti.OdasizseKes(sinirlar.OdasizSure, ctx.RequestAborted);
     try
     {
         await Okuyucu.Dongu(soket, metin => odalar.Isle(baglanti, metin), ctx.RequestAborted);

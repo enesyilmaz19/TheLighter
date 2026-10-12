@@ -1,0 +1,7 @@
+# /etc/caddy/Caddyfile — alan adını değiştir. Caddy HTTPS sertifikasını kendisi alır ve yeniler,
+# wss:// ek ayar istemez. İstemcinin gerçek IP'sini X-Forwarded-For ile yollar; istemcinin kendi yazdığı
+# X-Forwarded-For'u yok sayar (trusted_proxies ayarlanmadıkça).
+oyun.ornek.com {
+	reverse_proxy 127.0.0.1:5000
+	header -Server
+}

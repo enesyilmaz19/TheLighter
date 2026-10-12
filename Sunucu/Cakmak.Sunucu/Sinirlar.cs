@@ -21,6 +21,12 @@ namespace Cakmak.Sunucu
         public int MesajPatlama { get; set; } = 20;
         /// <summary>Bu kadar saniyede başlatılmayan lobi kapanır.</summary>
         public int LobiSn { get; set; } = 30 * 60;
+        /// <summary>Bağlanıp bu kadar saniyede odaya girmeyen bağlantı kesilir (boşta yer tutmasın).</summary>
+        public int OdasizSn { get; set; } = 120;
+        /// <summary>Sunucudaki toplam oda. Çok IP'den oda açılarak bellek doldurulamasın. Aşılınca SUNUCU_DOLU.</summary>
+        public int EnFazlaOda { get; set; } = 2000;
+        /// <summary>Sunucudaki toplam WebSocket (Kestrel sınırı, test sunucusunda yok).</summary>
+        public int EnFazlaBaglanti { get; set; } = 5000;
     }
 
     /// <summary>IP ve bağlantı başına sınırlar. .NET'in hazır sınırlayıcıları; boşta kalan bölümleri kendisi siler.</summary>
@@ -30,11 +36,15 @@ namespace Cakmak.Sunucu
         readonly PartitionedRateLimiter<string> giris;
         readonly PartitionedRateLimiter<Baglanti> mesaj;
         public readonly TimeSpan LobiSuresi;
+        public readonly TimeSpan OdasizSure;
+        public readonly int EnFazlaOda;
 
         public Sinirlar(IOptions<SinirAyarlari> secenek)
         {
             var a = secenek.Value;
             LobiSuresi = TimeSpan.FromSeconds(a.LobiSn);
+            OdasizSure = TimeSpan.FromSeconds(a.OdasizSn);
+            EnFazlaOda = a.EnFazlaOda;
             baglanti = PartitionedRateLimiter.Create<string, string>(ip => RateLimitPartition.GetConcurrencyLimiter(ip,
                 _ => new ConcurrencyLimiterOptions { PermitLimit = a.IpBasinaBaglanti, QueueLimit = 0 }));
             // Dakikada N hak, tek tek dolar (her 60/N saniyede bir): dakika başında N deneme birden açılmasın.

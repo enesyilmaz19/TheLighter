@@ -57,6 +57,8 @@ namespace Cakmak.Sunucu
                         if (oda != null) { b.Yolla(Protokol.Hata("ZATEN_ODADASIN")); return; }
                         var isim = Protokol.Metin(m, "isim");
                         if (!Oda.IsimGecerli(isim)) { b.Yolla(Protokol.Hata("ISIM_GECERSIZ")); return; }
+                        // ponytail: sayım ile ekleme arasında birkaç oda fazla açılabilir; sınırın amacı belleği korumak.
+                        if (odalar.Count >= sinirlar.EnFazlaOda) { b.Yolla(Protokol.Hata("SUNUCU_DOLU")); return; }
                         YeniOda().Katil(b, isim, null);
                         return;
 

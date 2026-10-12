@@ -35,7 +35,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `tekrarOyna` | — | Kurucu, `oyunSonu`'nda. Oda lobiye döner: bağlı olmayanlar düşer, bekleme odasındakiler oyuncu olur, ayarlar ve atılanların yasağı kalır |
 | `sohbet` | `kime` (`null` ya da yok = genel, `"p3"` = DM), `metin` | Odadaki herkes, her an (lobi, oyun, bekleme odası, oyun sonu). Aşağıda "Sohbet" |
 
-**Metin temizliği** (isim, soru): görünmez ve yön karakterleri atılır, her türlü boşluk tek boşluk olur, baş/son boşluk silinir (`TemizMetin`). Temizlenince boş kalan isim `ISIM_GECERSIZ`, soru `GECERSIZ_GIRDI`. Ekranda hep temizlenmiş hali görünür.
+**Metin temizliği** (isim, soru, sohbet): görünmez ve yön karakterleri atılır, her türlü boşluk tek boşluk olur, baş/son boşluk silinir (`TemizMetin`). Temizlenince boş kalan isim `ISIM_GECERSIZ`, soru ve sohbet `GECERSIZ_GIRDI`. Ekranda hep temizlenmiş hali görünür.
 
 **İsim:** temizlendikten sonra 1–20 karakter. Aynı odada aynı isim iki kez olamaz: büyük/küçük harf ve I/İ/ı/i farkı gözetilmez ("İrem" = "irem", "ILKER" = "ılker"). Tanım tek yerde: `Oyuncu.IsimAnahtari`. Yeni girişte `isim` yoksa `ISIM_GECERSIZ`. Anahtar tanınırsa `isim` yok sayılır.
 

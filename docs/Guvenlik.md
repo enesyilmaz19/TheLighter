@@ -31,6 +31,7 @@
 | 12 | **Bağımlılık taraması** | Gerekli | `dotnet list package --vulnerable --include-transitive`: temiz (2026-10-12). Her sürümden önce tekrar |
 | 13 | **Günlük kaydı** | Gerekli | Var: oyuncu metni, soru ve IP günlüğe yazılmaz (AGENTS.md), hatada sadece hata tipi |
 | 14 | **Kişisel veri (KVKK)** | Gerekli | Sunucuda kalıcı veri yok; grup kaydı oyuncunun cihazında. Aydınlatma metni S6 |
+| 15 | **Sohbet ve moderasyon** | Gerekli: herkese açık oda yok ama oyuncular birbirine yazıyor | Var (S5): sohbet `TemizMetin`'den geçer, 200 karakter, saniyede 1; DM sadece iki kişiye; sunucu mesaj saklamaz. Temiz modda filtre (`TemizFiltre`), 3. ihlalde atma; her modda kurucu atabilir, atılan o odaya dönemez. Rapor + engelleme S6 |
 
 ## Gerekmeyenler (şimdilik)
 
@@ -45,7 +46,6 @@
 
 ## Sonra gelecekler
 
-- **Sohbet ve DM (S5):** mesaj sınırı zaten var; metin `TemizMetin`'den geçecek; Temiz filtresi; DM sadece iki kişiye.
 - **Rapor ve engelleme (S6):** Google Play şartı.
 - **Vivox ses (S6):** erişim anahtarı sunucuda imzalanır; gizli anahtar istemciye ve repoya girmez.
 - Yeni bağlantı açma hızı sınırı; oyun sonunda açık kalan odaya zaman aşımı.

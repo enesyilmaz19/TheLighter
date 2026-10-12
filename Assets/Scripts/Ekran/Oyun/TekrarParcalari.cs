@@ -226,7 +226,8 @@ namespace TheLighter.Istemci
             Kok.Add(kart);
             Kok.Add(Yazi(Metin.Al("gorev.aciklama"), "aciklama", "orta"));
             Kok.Add(Esnek());
-            var tamam = Buton(Metin.Al("gorev.gordum"), akis.GorevGordum, "buton-birincil", "buton-buyuk");
+            // Online'da telefon elden ele dolaşmıyor: "telefonu ver" demez.
+            var tamam = Buton(Metin.Al(akis.Online ? "gorev.gordum_online" : "gorev.gordum"), akis.GorevGordum, "buton-birincil", "buton-buyuk");
             GecikmeliAc(tamam);
             Kok.Add(tamam);
         }

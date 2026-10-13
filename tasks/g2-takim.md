@@ -27,6 +27,8 @@ Yazan: G1 (Enes), 2026-10-13.
 - Aynı takımdan B ile C: puan yok, ama çakmak takımda kalır.
 - Önce 7 puana ulaşan takım kazanır.
 
+**Senin testinde ara sıra kırmızı:** `SunucuIleOyunTesti.DortBot_CezaGorevKaosAcik_OyunBaştanSonaBiter`, 71. satır ("ayarlar herkese gider"). Test kurucunun ayarları aldığını bekleyip hemen 4. botun `SonDurum`'una bakıyor. O bot aynı durumu henüz işlememiş olabiliyor. Enes'te 4 koşudan 1'inde kırmızı, sunucuyla ilgisi yok. Düzeltme: beklerken bütün botların ayarları almasını koşula ekle.
+
 ## 1. Kural motoru (elden ele)
 
 **`Ayarlar.Oyun = OyunTuru.Takim`:**

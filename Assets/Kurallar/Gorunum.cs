@@ -198,7 +198,7 @@ namespace Cakmak.Kurallar
         Afk,            // Kim: üst üste süresini doldurdu, AFK oldu
         OyuncuCikti,    // Kim: oyundan çıktı
         AfkBitti,       // Kim: AFK'dan döndü (bir mesaj yolladı)
-        // Köstebek (docs/Oyunlar.md)
+        // Köstebek ve Casus: "kim?" oylaması (docs/Oyunlar.md)
         SuclamaBasladi, // Kim: erken suçlama hakkını kullanan, ya da null (aralıkla: Köstebek 5, Casus 4 turda bir; son oylama)
         SuclamaBitti,   // Kim: en çok oyu alan (suçlanan), eşitlik ya da hiç oy yoksa null
         // Rus Ruleti (docs/Oyunlar.md)

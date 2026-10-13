@@ -26,7 +26,14 @@ namespace Cakmak.Kurallar.Tests
         public void Uc_yuz_rastgele_kostebek_oyununda_hicbir_degismez_bozulmaz()
         {
             for (int tohum = 1; tohum <= 300; tohum++)
-                Oyna(tohum, kostebek: true);
+                Oyna(tohum, OyunTuru.Kostebek);
+        }
+
+        [Test]
+        public void Uc_yuz_rastgele_rus_ruleti_oyununda_hicbir_degismez_bozulmaz()
+        {
+            for (int tohum = 1; tohum <= 300; tohum++)
+                Oyna(tohum, OyunTuru.RusRuleti);
         }
 
         [Test]
@@ -43,8 +50,10 @@ namespace Cakmak.Kurallar.Tests
         }
 
         /// <summary>Bir oyunu baştan sona oynar, olay kaydını döner. Köstebek dalı Çakmak oyunlarının rastgeleliğini değiştirmez.</summary>
-        static string Oyna(int tohum, bool kostebek = false)
+        static string Oyna(int tohum, OyunTuru tur = OyunTuru.Cakmak)
         {
+            bool kostebek = tur == OyunTuru.Kostebek;
+            bool rusRuleti = tur == OyunTuru.RusRuleti;
             var robot = new Random(tohum * 7919);
             int kisi = 4 + robot.Next(7);
             var mod = (OyunModu)robot.Next(3);
@@ -62,9 +71,21 @@ namespace Cakmak.Kurallar.Tests
                 x.KaosTurlari = robot.Next(3) != 0;
                 x.TekCihaz = robot.Next(2) == 0;
                 x.SesliCezalar = new[] { "Sesli ceza 1", "Sesli ceza 2" };
-            }, kostebek);
+            }, tur, robot);
 
             var kayit = new StringBuilder();
+            int olaySayisi = 0;
+            oyun.OlayOldu += o => olaySayisi++;
+            // Zaman ilerleyince aşama değiştiyse en az bir olay yayılmalı: sunucu yeni durumu olaydan sonra yollar,
+            // olaysız değişen aşama online'da kimsenin ekranına gitmez.
+            void Bekle(int sn)
+            {
+                var once = Durum(oyun).Asama;
+                int olayOnce = olaySayisi;
+                Saniye(oyun, sn);
+                if (Durum(oyun).Asama != once)
+                    Assert.That(olaySayisi, Is.GreaterThan(olayOnce), $"tohum {tohum}: {once} → {Durum(oyun).Asama} olaysız");
+            }
             oyun.OlayOldu += o => kayit.Append(o.Tur).Append(o.A).Append(o.B).Append(o.C).Append(o.Kim).Append(o.Soru)
                 .Append(o.Ceza?.Tur).Append(o.Ceza?.Metin).Append(o.Kaos).Append(';');
 
@@ -80,13 +101,15 @@ namespace Cakmak.Kurallar.Tests
                     foreach (var gs in ozet.Gorevler) kayit.Append(gs.Kim).Append(gs.Gorev.Tur).Append(gs.Gorev.Hedef).Append(gs.Basarili).Append(',');
                     foreach (var k in ozet.IfsaOlanlar) kayit.Append(k.Soru).Append(',');
                     if (kostebek) KostebekSonu(oyun, ozet, tohum);
+                    if (rusRuleti) RusRuletiSonu(ozet, g, tohum);
                     return kayit.ToString();
                 }
                 Degismezler(oyun, g, gizli, tohum);
                 if (kostebek) KostebekDegismezleri(oyun, g, tohum);
+                if (rusRuleti) RusRuletiDegismezleri(g, tohum);
 
                 int zar = robot.Next(10);
-                if (zar == 0) { Saniye(oyun, robot.Next(1, 30)); continue; }       // bekle (AFK)
+                if (zar == 0) { Bekle(robot.Next(1, 30)); continue; }               // bekle (AFK)
                 if (zar == 1) { YanlisKomut(oyun, g, robot); continue; }            // yanlış komut
                 if (kostebek && zar == 2 && g.Asama == Asama.SoruSorma)            // erken suçlama
                 {
@@ -137,12 +160,18 @@ namespace Cakmak.Kurallar.Tests
 
                     case Asama.Ifsa:
                     case Asama.Gume:
-                        Saniye(oyun, 6);
+                        Bekle(6);
                         break;
 
                     case Asama.Suclama:
                         var suclayan = g.Oylayanlar[robot.Next(g.Oylayanlar.Count)];
                         oyun.SuclamaOyu(suclayan, g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id); // geçersiz de olabilir
+                        break;
+
+                    case Asama.Tetik:
+                        var ceken = g.TetikCeken.Value;
+                        if (robot.Next(3) == 0) oyun.TetikDevret(ceken, g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id); // geçersiz de olabilir
+                        else oyun.TetikCek(ceken);
                         break;
                 }
             }
@@ -150,15 +179,44 @@ namespace Cakmak.Kurallar.Tests
             return null;
         }
 
-        /// <summary>Kurulum: S3 ayarları rastgele; Köstebek'te kaos kapalı (kurulamaz).</summary>
-        static Oyun Kur(int kisi, int tohum, Action<Ayarlar> ayarla, bool kostebek) =>
+        /// <summary>Kurulum: S3 ayarları rastgele, oyunun kapattıkları kapalı (Oyun.AyarlarUyumlu).</summary>
+        static Oyun Kur(int kisi, int tohum, Action<Ayarlar> ayarla, OyunTuru tur, Random robot) =>
             Yeni(kisi, tohum, x =>
             {
                 ayarla(x);
-                if (!kostebek) return;
-                x.Oyun = OyunTuru.Kostebek;
+                x.Oyun = tur;
+                if (tur == OyunTuru.Kostebek) x.KaosTurlari = false;
+                if (tur != OyunTuru.RusRuleti) return;
+                x.CezaSeviyesi = CezaSeviyesi.Kapali;
+                x.GizliGorevler = false;
                 x.KaosTurlari = false;
+                x.Can = 1 + robot.Next(Oyun.EnFazlaCan);
             });
+
+        /// <summary>Elenen oynamaz; final sadece 3 kişi kalınca; tetik elenmemiş birinde.</summary>
+        static void RusRuletiDegismezleri(Gorunum g, int tohum)
+        {
+            string t = "tohum " + tohum + ", aşama " + g.Asama;
+            int kalan = 0;
+            foreach (var o in g.Oyuncular)
+            {
+                if (!o.Elendi && !o.Cikti) kalan++;
+                if (!o.Elendi) continue;
+                Assert.That(o.Can, Is.EqualTo(0), t);
+                Assert.That(g.B == o.Id || g.C == o.Id || g.TetikCeken == o.Id, Is.False, t + ": elenen oynuyor");
+            }
+            Assert.That(kalan, Is.GreaterThanOrEqualTo(2), t + ": oyun bitmeliydi");
+            if (g.Final) Assert.That(kalan, Is.LessThanOrEqualTo(Oyun.FinalSiniri), t + ": erken final");
+            else Assert.That(kalan, Is.GreaterThan(Oyun.FinalSiniri), t + ": final başlamadı");
+        }
+
+        static void RusRuletiSonu(OyunOzeti ozet, Gorunum g, int tohum)
+        {
+            Assert.That(ozet.RusRuleti, Is.Not.Null, "tohum " + tohum);
+            Assert.That(ozet.RusRuleti.Kazanan, Is.Not.Null, "tohum " + tohum + ": son kalan yok");
+            foreach (var o in g.Oyuncular)
+                if (o.Id == ozet.RusRuleti.Kazanan) Assert.That(o.Elendi, Is.False, "tohum " + tohum + ": kazanan elenmiş");
+        }
 
         /// <summary>Köstebek sadece kendi görünümünde, hiç şüpheli olmaz (köstebek suçlanırsa oyun biter).</summary>
         static void KostebekDegismezleri(Oyun oyun, Gorunum g, int tohum)

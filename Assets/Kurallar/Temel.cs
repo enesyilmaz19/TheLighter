@@ -113,12 +113,13 @@ namespace Cakmak.Kurallar
         OyunSonu,
         // Yeni aşamalar hep sona.
         Suclama,       // Köstebek: "Köstebek kim?" oylaması (docs/Oyunlar.md)
+        Tetik,         // Rus Ruleti: düelloyu kaybeden tetiği çeker ya da devreder
     }
 
     public enum OyunModu { Normal, Temiz, Curcuna }
 
     /// <summary>Hangi oyun (docs/Oyunlar.md). Mod (soruların nereden geldiği, Temiz filtresi) her oyunda ayrı seçilir. Yeni oyunlar sona.</summary>
-    public enum OyunTuru { Cakmak, Kostebek }
+    public enum OyunTuru { Cakmak, Kostebek, RusRuleti }
 
     public enum MiniOyunTuru { Tkm, TekCift, Zar, Reaksiyon, Karisik }
 
@@ -183,5 +184,7 @@ namespace Cakmak.Kurallar
 
         /// <summary>Köstebek: "Köstebek kim?" oylamasının süresi (tartışma dahil).</summary>
         public int SuclamaSuresiSn = 60;
+        /// <summary>Rus Ruleti: herkesin canı, 1–3 (1 = Rus Ruleti, 3 = Son Çakmak).</summary>
+        public int Can = 1;
     }
 }

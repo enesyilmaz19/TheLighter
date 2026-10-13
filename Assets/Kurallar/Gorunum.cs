@@ -86,6 +86,13 @@ namespace Cakmak.Kurallar
         public IReadOnlyList<OyuncuId> Supheliler = Array.Empty<OyuncuId>();
         /// <summary>Suclama aşamasında: bu oyunun son oylaması (tur sayısı bitti ya da kurucu bitirdi).</summary>
         public bool SonSuclama;
+
+        // --- Rus Ruleti (docs/Oyunlar.md) --- Tabancanın ısısı Isi'de (Kızgın Çakmak bu oyunda kapalı).
+
+        /// <summary>Tetik aşamasında tetiği çekecek (ya da devredecek) kişi.</summary>
+        public OyuncuId? TetikCeken;
+        /// <summary>Final: 3 kişi kaldı, sorusuz ikili düellolar.</summary>
+        public bool Final;
     }
 
     public sealed class OylamaSonucu
@@ -123,6 +130,14 @@ namespace Cakmak.Kurallar
         public bool Afk;
         /// <summary>Oyundan çıktı (60 sn'de dönmedi). Bir daha seçilmez, sırası gelmez. Bağlıysa izler.</summary>
         public bool Cikti;
+
+        // --- Rus Ruleti ---
+        /// <summary>Kalan can (diğer oyunlarda 0).</summary>
+        public int Can;
+        /// <summary>Canı bitti: izleyici, seçilmez, sırası gelmez.</summary>
+        public bool Elendi;
+        /// <summary>Oyun boyu 1 "tetik devret" hakkı duruyor mu.</summary>
+        public bool DevretmeHakki;
     }
 
     public sealed class MiniOyunSonucu
@@ -166,6 +181,14 @@ namespace Cakmak.Kurallar
         // Köstebek (docs/Oyunlar.md)
         SuclamaBasladi, // Kim: erken suçlama hakkını kullanan, ya da null (her 5 turda bir, son oylama)
         SuclamaBitti,   // Kim: en çok oyu alan (suçlanan), eşitlik ya da hiç oy yoksa null
+        // Rus Ruleti (docs/Oyunlar.md)
+        TetikBos,       // Kim: tetiği çekti, boş
+        TetikPatladi,   // Kim: tetiği çekti, patladı (bir can gitti; tabanca yeniden dolar)
+        Elendi,         // Kim: canı bitti
+        TetikDevredildi,// Kim: devreden, Hedef: devralan
+        FinalBasladi,   // 3 kişi kaldı: sorusuz ikili düellolar
+        TetikBasladi,   // Kim: tetiği çekecek (düelloyu kaybeden)
+        KararBekleniyor,// Kim: İkiye Katla ya da Bedel kararını verecek (süre dolunca da bu aşamaya geçilir)
     }
 
     public sealed class Olay
@@ -179,5 +202,7 @@ namespace Cakmak.Kurallar
         public string Soru;
         public Ceza Ceza;
         public KaosKurali Kaos;
+        /// <summary>Sadece TetikDevredildi: devralan.</summary>
+        public OyuncuId? Hedef;
     }
 }

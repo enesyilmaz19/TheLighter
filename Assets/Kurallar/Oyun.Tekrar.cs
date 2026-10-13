@@ -153,6 +153,7 @@ namespace Cakmak.Kurallar
                 foreach (var o in oyuncular) IzAl(o.Id).Gorev = GorevUret(o.Id, zorluk);
             }
             KostebekKur();
+            RusRuletiKur();
         }
 
         void TekrarTurBasi()
@@ -271,6 +272,16 @@ namespace Cakmak.Kurallar
             soru = null;
         }
 
+        /// <summary>
+        /// Tur bitti, sıradaki aşama soruyla ilgisiz (Köstebek oylaması, Rus Ruleti tetiği): ifşa olmadıysa güme sayılır,
+        /// metin bırakılır. İfşa olan soru kayıtlarda kalır; sonradan Bitir'deki güme temizliği ona dokunmaz.
+        /// </summary>
+        void SoruyuKapat()
+        {
+            if (asama != Asama.Ifsa) GumeyeGitti();
+            soru = null;
+        }
+
         /// <summary>Süre dolup tur yarıda kaldıysa "kendisini gösterene hemen soru" (İntikamcı) zinciri kopar.</summary>
         void OncekiTuruUnut()
         {
@@ -354,11 +365,14 @@ namespace Cakmak.Kurallar
 
         void MiniOyunSonrasi(bool cKazandi)
         {
+            if (FinalDuellosuBitti(cKazandi)) return;
             if (kaos == KaosKurali.IkiyeKatla && !katlandi)
             {
                 bekleyenCKazandi = cKazandi;
                 kararVeren = cKazandi ? b : c;
                 AsamayaGec(Asama.IkiyeKatla, ayar.KararSuresiSn);
+                // Süre dolup da gelinebilir: olaysız aşama değişikliği online'da ekrana gitmez.
+                Yay(new Olay { Tur = OlayTuru.KararBekleniyor, Kim = kararVeren });
                 return;
             }
             SonucaGec(cKazandi);
@@ -388,6 +402,7 @@ namespace Cakmak.Kurallar
                 bekleyenKaybeden = kaybeden;
                 kararVeren = b;
                 AsamayaGec(Asama.Bedel, ayar.KararSuresiSn);
+                Yay(new Olay { Tur = OlayTuru.KararBekleniyor, Kim = kararVeren });
                 return;
             }
             TuruBitir(ifsa, kaybeden, bedel: false);
@@ -396,6 +411,7 @@ namespace Cakmak.Kurallar
         void TuruBitir(bool ifsa, OyuncuId? kaybeden, bool bedel)
         {
             kararVeren = null;
+            RusRuletiTurSonu(kaybeden);
             var bo = Bul(b.Value);
             var co = Bul(c.Value);
 
@@ -560,6 +576,9 @@ namespace Cakmak.Kurallar
                     Afk = afk.Contains(o.Id),
                     Cikti = cikan.Contains(o.Id),
                     Kisitlamalar = kisitlamalar,
+                    Can = o.Can,
+                    Elendi = o.Elendi,
+                    DevretmeHakki = o.DevretmeHakki,
                 });
             }
             return liste;
@@ -694,6 +713,7 @@ namespace Cakmak.Kurallar
                 IfsaOlanlar = ifsalar,
                 CurcunaSorulari = new List<string>(curcunaYazilan),
                 Kostebek = bitti ? kostebekSonucu?.Kopya() : null,
+                RusRuleti = bitti ? rusRuletiSonucu?.Kopya() : null,
             };
         }
 

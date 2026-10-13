@@ -174,6 +174,7 @@ namespace Cakmak.Sunucu
             ["soru"] = o.Soru,
             ["ceza"] = CezaYaz(o.Ceza),
             ["kaos"] = o.Tur == OlayTuru.KaosBasladi ? Ad(o.Kaos) : null,
+            ["hedef"] = Id(o.Hedef),
         });
 
         /// <summary>Sunucunun kendi olayı (kural motorunda yok): biri atıldı. <c>neden</c>: <see cref="Atildin"/>.</summary>
@@ -194,6 +195,7 @@ namespace Cakmak.Sunucu
         public static JsonObject AyarlarYaz(Ayarlar a, IEnumerable<string> paketler) => new JsonObject
         {
             ["oyun"] = Ad(a.Oyun),
+            ["can"] = a.Can,
             ["mod"] = Ad(a.Mod),
             ["miniOyun"] = Ad(a.MiniOyun),
             ["turSayisi"] = a.TurSayisi,
@@ -237,6 +239,11 @@ namespace Cakmak.Sunucu
                 ["kim"] = Id(o.Kostebek.Kostebek),
                 ["kazanan"] = Ad(o.Kostebek.Kazanan),
                 ["neden"] = Ad(o.Kostebek.Neden),
+            },
+            ["rusRuleti"] = o.RusRuleti == null ? null : new JsonObject
+            {
+                ["kazanan"] = Id(o.RusRuleti.Kazanan),
+                ["elenmeSirasi"] = Dizi(o.RusRuleti.ElenmeSirasi, x => Id(x)),
             },
         };
 
@@ -324,6 +331,9 @@ namespace Cakmak.Sunucu
                     ["kisitlamalar"] = Dizi(o.Kisitlamalar, CezaYaz),
                     ["afk"] = o.Afk,
                     ["cikti"] = o.Cikti,
+                    ["can"] = o.Can,
+                    ["elendi"] = o.Elendi,
+                    ["devretmeHakki"] = o.DevretmeHakki,
                 });
             }
 
@@ -379,6 +389,8 @@ namespace Cakmak.Sunucu
                 ["turCezalari"] = Dizi(g.TurCezalari, x => new JsonObject { ["kim"] = Id(x.Kim), ["ceza"] = CezaYaz(x.Ceza), ["neden"] = Ad(x.Neden) }),
                 ["supheliler"] = Dizi(g.Supheliler, x => Id(x)),
                 ["sonSuclama"] = g.SonSuclama,
+                ["tetikCeken"] = Id(g.TetikCeken),
+                ["final"] = g.Final,
                 ["sana"] = new JsonObject
                 {
                     ["soru"] = g.Soru,

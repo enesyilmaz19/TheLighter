@@ -14,8 +14,8 @@ namespace Cakmak.Kurallar
         readonly HashSet<OyuncuId> cikan = new HashSet<OyuncuId>();
         readonly Dictionary<OyuncuId, int> ardArdaSure = new Dictionary<OyuncuId, int>();
 
-        /// <summary>Seçilebilir ve sırası gelince oynar. Kopuk, AFK ya da çıkmış oyuncu atlanır.</summary>
-        bool Aktif(OyuncuId id) => !kopuk.Contains(id) && !afk.Contains(id) && !cikan.Contains(id);
+        /// <summary>Seçilebilir ve sırası gelince oynar. Kopuk, AFK, çıkmış ya da (Rus Ruleti'nde) elenmiş oyuncu atlanır.</summary>
+        bool Aktif(OyuncuId id) => !kopuk.Contains(id) && !afk.Contains(id) && !cikan.Contains(id) && !Bul(id).Elendi;
 
         /// <summary>Bağlantısı koptu. Yeri tutulur ve süreler işler, ama B/C seçilemez, sırası gelirse atlanır.</summary>
         public Sonuc OyuncuKoptu(OyuncuId kim)
@@ -92,6 +92,10 @@ namespace Cakmak.Kurallar
                 case Asama.IkiyeKatla when kim == kararVeren:
                 case Asama.Bedel when kim == kararVeren:
                     KarardanVazgecildi();
+                    break;
+                // Tetiği çekmeden çıkan çekmez: oyundan zaten çıktı.
+                case Asama.Tetik when kim == tetikCeken:
+                    TetikSonrasi();
                     break;
             }
         }

@@ -202,6 +202,8 @@ namespace Cakmak.Kurallar
         public IReadOnlyList<string> CurcunaSorulari = Array.Empty<string>();
         /// <summary>Köstebek oyununda kim olduğu ve kimin kazandığı, diğer oyunlarda null.</summary>
         public KostebekSonucu Kostebek;
+        /// <summary>Rus Ruleti'nde kazanan ve elenme sırası, diğer oyunlarda null.</summary>
+        public RusRuletiSonucu RusRuleti;
     }
 
     // ------------------------------------------------------------ Grup kaydı (cihazda saklanır)

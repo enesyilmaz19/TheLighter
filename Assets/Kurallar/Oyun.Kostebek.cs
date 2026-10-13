@@ -153,8 +153,7 @@ namespace Cakmak.Kurallar
         {
             if (!Kostebekli || sonSuclama) return false;
             if (KostebekGoreviBitti()) return true;
-            if (asama != Asama.Ifsa) GumeyeGitti(); // tur ortasında biten soru güme sayılır (Bitir gibi)
-            soru = null;                             // ifşa olan soru kayıtlarda; Bitir'deki temizlik ona dokunmasın
+            SoruyuKapat();
             sonSuclama = true;
             SuclamayiBaslat(null);
             return true;

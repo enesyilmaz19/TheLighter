@@ -97,14 +97,30 @@ namespace Cakmak.Kurallar
                 || ayarlar.ToplamaSuresiSn <= 0 || ayarlar.SonucSuresiSn <= 0 || ayarlar.KararSuresiSn <= 0)
                 return Sonuc.GecersizGirdi;
 
-            // Temiz modda en fazla Hafif ceza (Ana Plan 8.1).
-            if (ayarlar.Mod == OyunModu.Temiz && ayarlar.CezaSeviyesi == CezaSeviyesi.Cesur) return Sonuc.GecersizGirdi;
-            // Köstebek'te kaos yok (docs/Oyunlar.md, 0).
-            if (ayarlar.Oyun == OyunTuru.Kostebek && ayarlar.KaosTurlari) return Sonuc.GecersizGirdi;
-            if (ayarlar.SuclamaSuresiSn <= 0) return Sonuc.GecersizGirdi;
+            if (!AyarlarUyumlu(ayarlar) || ayarlar.SuclamaSuresiSn <= 0) return Sonuc.GecersizGirdi;
 
             oyun = new Oyun(ayarlar, oyuncular, rastgele);
             return Sonuc.Tamam;
+        }
+
+        /// <summary>
+        /// Ayarlar birbirine uyuyor mu (sayı aralıkları ayrı): Temiz'de en fazla Hafif ceza, oyunlara göre kapalı olanlar.
+        /// Kur ve sunucunun lobisi aynı kuralı kullanır.
+        /// </summary>
+        public static bool AyarlarUyumlu(Ayarlar a)
+        {
+            if (a.Mod == OyunModu.Temiz && a.CezaSeviyesi == CezaSeviyesi.Cesur) return false; // Ana Plan 8.1
+            switch (a.Oyun)
+            {
+                case OyunTuru.Kostebek:
+                    return !a.KaosTurlari;
+                case OyunTuru.RusRuleti:
+                    // Can sistemi zaten ceza; görev ve kaos turlara ve elemeye karışır (docs/Oyunlar.md, 0).
+                    return a.CezaSeviyesi == CezaSeviyesi.Kapali && !a.GizliGorevler && !a.KaosTurlari
+                        && a.Can >= 1 && a.Can <= EnFazlaCan;
+                default:
+                    return true;
+            }
         }
 
         // ------------------------------------------------------------ Komutlar
@@ -289,7 +305,11 @@ namespace Cakmak.Kurallar
                     break;
                 case Asama.Ifsa:
                 case Asama.Gume:
-                    TurBaslat(kaos == KaosKurali.YonDegisti ? RastgeleOyuncu(c.Value) : c.Value);
+                    var sonraki = kaos == KaosKurali.YonDegisti ? RastgeleOyuncu(c.Value) : c.Value;
+                    if (!TetikBekliyor(sonraki)) TurBaslat(sonraki);
+                    break;
+                case Asama.Tetik:
+                    TetigiCek(); // karar vermedi: kendisi çeker
                     break;
             }
         }
@@ -318,7 +338,8 @@ namespace Cakmak.Kurallar
                 BHamleYapti = bHamle.HasValue,
                 CHamleYapti = cHamle.HasValue,
                 Beraberlik = beraberlik,
-                SonMiniOyun = (asama == Asama.Ifsa || asama == Asama.Gume) && sonMiniOyun != null ? sonMiniOyun.Kopya() : null,
+                SonMiniOyun = (asama == Asama.Ifsa || asama == Asama.Gume || asama == Asama.Tetik) && sonMiniOyun != null
+                    ? sonMiniOyun.Kopya() : null,
             };
 
             if (asama == Asama.SoruSorma && kim == a)
@@ -355,6 +376,7 @@ namespace Cakmak.Kurallar
 
             TekrarGorunumu(g, kim);
             KostebekGorunumu(g, kim);
+            RusRuletiGorunumu(g);
             return g;
         }
 
@@ -363,9 +385,9 @@ namespace Cakmak.Kurallar
         void TurBaslat(OyuncuId yeniA)
         {
             TurSonuIsleri();
-            if (KostebekGoreviBitti()) return;
+            if (KostebekGoreviBitti() || RusRuletiAraKontrol()) return;
             tur++;
-            if (ayar.TurSayisi > 0 && tur > ayar.TurSayisi)
+            if (ayar.TurSayisi > 0 && tur > ayar.TurSayisi && !RusRuletli) // Rus Ruleti son kalana kadar sürer
             {
                 tur = ayar.TurSayisi;
                 if (!SonSuclamayiBaslat()) Bitir();
@@ -379,22 +401,7 @@ namespace Cakmak.Kurallar
                 yeniA = RastgeleOyuncu(yeniA);
             }
             a = yeniA;
-            b = null;
-            c = null;
-            soru = null;
-            fisilti = false;
-            oneri = null;
-            bHamle = null;
-            cHamle = null;
-            beraberlik = 0;
-            sonMiniOyun = null;
-            buTurMiniOyun = ayar.MiniOyun == MiniOyunTuru.Karisik
-                ? KarisikHavuzu[rastgele.Next(KarisikHavuzu.Length)]
-                : ayar.MiniOyun;
-
-            atananSoru = null;
-            atananZorunlu = false;
-            degistirmeHakki = false;
+            TurDurumunuSifirla();
             if (ayar.Mod == OyunModu.Curcuna && havuz != null && !havuz.Bos)
             {
                 atananSoru = havuz.Cek(rastgele);
@@ -407,6 +414,26 @@ namespace Cakmak.Kurallar
             Yay(new Olay { Tur = OlayTuru.TurBasladi, A = GorunenA() });
             if (kaos != KaosKurali.Yok) Yay(new Olay { Tur = OlayTuru.KaosBasladi, Kaos = kaos });
             PeriyodikSuclama();
+        }
+
+        /// <summary>Yeni tur (ya da Rus Ruleti final düellosu): turun bütün durumu boşalır, mini oyun seçilir.</summary>
+        void TurDurumunuSifirla()
+        {
+            b = null;
+            c = null;
+            soru = null;
+            fisilti = false;
+            oneri = null;
+            bHamle = null;
+            cHamle = null;
+            beraberlik = 0;
+            sonMiniOyun = null;
+            buTurMiniOyun = ayar.MiniOyun == MiniOyunTuru.Karisik
+                ? KarisikHavuzu[rastgele.Next(KarisikHavuzu.Length)]
+                : ayar.MiniOyun;
+            atananSoru = null;
+            atananZorunlu = false;
+            degistirmeHakki = false;
         }
 
         void ToplamayiBitir()
@@ -522,6 +549,7 @@ namespace Cakmak.Kurallar
             asama = Asama.OyunSonu;
             kalanMs = 0;
             KostebekSonucunuYaz();
+            RusRuletiSonucunuYaz();
             Yay(new Olay { Tur = OlayTuru.OyunBitti });
         }
 
@@ -550,7 +578,7 @@ namespace Cakmak.Kurallar
             {
                 if (o.Id == haric1 || o.Id == haric2) continue;
                 hepsi.Add(o.Id);
-                if (cikan.Contains(o.Id)) continue;
+                if (cikan.Contains(o.Id) || o.Elendi) continue;
                 kalan.Add(o.Id);
                 if (Aktif(o.Id)) aktif.Add(o.Id);
             }

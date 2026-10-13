@@ -96,6 +96,16 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **İçerik:** yok.
 - **Kararlar (2026-10-13):** hazneler gizli, ısı ipucuyla. Herkese oyun boyu 1 "tetik devret" hakkı.
 
+**Kodlandı (2026-10-13, kural motoru + sunucu; ekranlar Arda'da).** Kodlarken netleşenler:
+
+- **Tetik, sonuç ekranından sonra:** önce sorunun sonucu (ifşa/güme, 6 sn), sonra kaybeden tetik ekranında. Karar süresi `hamleSn`; dolarsa tetik kendiliğinden çekilir. Devredilince devralanın süresi baştan.
+- **Devret hedefi:** oyunda olan, elenmemiş, kopuk ya da AFK olmayan biri; kendine olmaz.
+- **Isı:** sonraki tetik patlayacaksa her zaman "kızgın"; ama "kızgın" her zaman patlar demek değil (gürültü). Patlayınca tabanca yeniden dolar.
+- **Tur sayısı yok:** oyun son kalana kadar sürer. Kurucu erken bitirirse en çok canı olan kazanır, eşitlikte kazanan yok.
+- **Final:** 3 kişi kalınca her turda kalanlardan **rastgele iki** kişi sorusuz düello yapar; kaybeden doğrudan tetiğe (sonuç ekranı yok).
+- **Oyundan çıkan** (online) elenmiş gibi sayılır; tetiği çekecekken çıkarsa tetik çekilmez.
+- **Ayar uyumu tek yerde:** Rus Ruleti'nde ceza, görev ve kaos kapalı olmalı (aksi `GECERSIZ_GIRDI`); bu ve diğer "birlikte olamaz" kuralları `Oyun.AyarlarUyumlu`'da, sunucunun lobisi de onu kullanıyor.
+
 ## 3. Takım Düellosu
 
 **Fikir:** iki takım. Düellolar takım puanına dönüşür.

@@ -1,6 +1,6 @@
 # Ağ Protokolü (online mod)
 
-Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma, sohbet + DM, Temiz filtresi, grup paketi; yeni oyunlardan Köstebek).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2, 6.4 ve 8.
+Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma, sohbet + DM, Temiz filtresi, grup paketi; yeni oyunlardan Köstebek, Rus Ruleti).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2, 6.4 ve 8.
 Sunucu: `Sunucu/Cakmak.Sunucu` · İstemci: Unity (G2).
 
 Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobide parça parça yükler (aşağıda "Grup paketi").
@@ -26,7 +26,7 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 |---|---|---|
 | `odaKur` | `isim` | Herkes. Yeni oda açar, gönderen `p1` ve kurucu olur |
 | `katil` | `oda`, `isim`, `anahtar` (ilk girişte `null`) | Oda lobideyse yeni oyuncu olarak girer. Oyun sürüyorsa **bekleme odasına** girer, sonraki oyunda oynar. `anahtar` doğruysa oyun başlamış olsa da **aynı kimlikle geri döner**. Oda kapasitesi (10) bekleyenler dahil |
-| `ayarlar` | `oyun`, `mod`, `miniOyun`, `turSayisi`, `soruSn`, `cevapSn`, `hamleSn`, `ceza`, `gorevler`, `kaos`, `paketler` (hepsi isteğe bağlı) | Kurucu, lobide. Sadece gönderilen alanlar değişir |
+| `ayarlar` | `oyun`, `can`, `mod`, `miniOyun`, `turSayisi`, `soruSn`, `cevapSn`, `hamleSn`, `ceza`, `gorevler`, `kaos`, `paketler` (hepsi isteğe bağlı) | Kurucu, lobide. Sadece gönderilen alanlar değişir |
 | `baslat` | — | Kurucu, lobide, en az 4 oyuncu |
 | `komut` | `tur`, `komut`, + komutun alanları (aşağıda) | Oyunda |
 | `bitir` | — | Kurucu, oyunda. Oyunu hemen bitirir. **Köstebek'te** önce son oylama başlar (kurucu köstebekse oyunu bitirip kazanamasın), oylama sürerken ikinci `bitir` `YANLIS_ASAMA` |
@@ -43,7 +43,10 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 **Yeniden bağlanırken `anahtar` ile birlikte aynı `isim`'i de yolla.** Oyunda yerin tutulur, anahtar tanınır. Lobide ya da bekleme odasında kopan yerini kaybeder ve anahtarı unutulur: o zaman aynı isimle yeni giriş olur (isim yoksa `ISIM_GECERSIZ` alırdın). Atıldıysan iki durumda da `ATILDIN`.
 
 **Değerler:**
-- `oyun`: `"cakmak"` (varsayılan, bugünkü oyun) · `"kostebek"`. Yeni oyunlar geldikçe eklenir (`docs/Oyunlar.md`). Köstebek'te kaos olamaz: sonuç Köstebek + kaos olacaksa `GECERSIZ_GIRDI`. Köstebek'te gizli görevler `gorevler` ayarı ne olursa olsun herkeste vardır
+- `oyun`: `"cakmak"` (varsayılan, bugünkü oyun) · `"kostebek"` · `"rusRuleti"`. Yeni oyunlar geldikçe eklenir (`docs/Oyunlar.md`). Ayarlar birbirine uymalı, sonuç uymayacaksa (hangi sırayla gönderilirse gönderilsin) `GECERSIZ_GIRDI`; kural tek yerde, `Oyun.AyarlarUyumlu`:
+  - Köstebek'te kaos olamaz. Gizli görevler `gorevler` ayarı ne olursa olsun herkeste vardır.
+  - Rus Ruleti'nde ceza `"kapali"`, `gorevler` ve `kaos` `false` olmalı (can sistemi zaten ceza). `turSayisi` yok sayılır: son kalana kadar sürer.
+- `can`: Rus Ruleti'nde herkesin canı, `1`–`3` (varsayılan `1`; `3` = Son Çakmak). Diğer oyunlarda yok sayılır
 - `mod`: `"normal"` · `"temiz"` · `"curcuna"`
 - `miniOyun`: `"tkm"` · `"tekCift"` · `"zar"` · `"karisik"`. **`"reaksiyon"` online'da yok** (`GECERSIZ_GIRDI`): süre istemciden geliyor ve telefonların dokunma gecikmesi farklı. Sadece elden ele.
 - `turSayisi`: `0` = sınırsız, `1–100`
@@ -70,6 +73,8 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 | `karariGec` | — | `KarariGec`: "hayır". `ikiyeKatla` ya da `bedel` aşamasında, `kararVeren`. Süre dolması da aynı sonucu verir |
 | `sucla` | — | `Sucla`. Köstebek, erken suçlama: herkesin oyun boyu 1 hakkı, sadece `soruSorma` aşamasında (düello ortası kesilmez). Başka aşamada ya da Çakmak'ta `YANLIS_ASAMA`, hak bittiyse `HAK_KALMADI` |
 | `suclamaOyu` | `hedef` | `SuclamaOyu`. Sadece `suclama` aşamasında, `oylayanlar` içindekiler, bir kez. Kendin ya da oyundan çıkan `SECILEMEZ` |
+| `tetikCek` | — | `TetikCek`. Rus Ruleti, `tetik` aşamasında, sadece `tetikCeken` (başkası `SIRA_SENDE_DEGIL`) |
+| `tetikDevret` | `hedef` | `TetikDevret`. `tetikCeken`, oyun boyu 1 kez (`HAK_KALMADI`); tetik hedefe geçer, onun karar süresi baştan. Kendin, elenen, kopuk ya da AFK `SECILEMEZ` |
 
 **Hamle nesnesi:**
 
@@ -130,13 +135,13 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
                    "ifsaEttirme": 0, "saklama": 1, "miniOyunKazanma": 1,
                    "oynadigiMiniOyun": 2, "cezaCekme": 1, "yanma": 0, "bedelOdeme": 0, "bedelHakki": 2, "kaosKazanma": 0,
                    "kisitlamalar": [ { "tur": "palyaco", "metin": null, "kalan": 2 } ],
-                   "afk": false, "cikti": false } ],
+                   "afk": false, "cikti": false, "can": 0, "elendi": false, "devretmeHakki": false } ],
   "secilebilir": [],
   "miniOyun": "tkm", "bHamleYapti": true, "cHamleYapti": false, "beraberlik": 0,
   "sonMiniOyun": null,
   "oyun": "cakmak", "kaos": "yok", "isi": "ilik", "kararVeren": null,
   "oylayanlar": [], "oyKullanan": 0, "sonOylama": null, "bedelOdendi": false, "turCezalari": [],
-  "supheliler": [], "sonSuclama": false,
+  "supheliler": [], "sonSuclama": false, "tetikCeken": null, "final": false,
   "sana": { "soru": "Grupta sırrını en kolay kim açık eder?", "fisilti": false,
             "atananSoru": null, "degistirmeHakki": false, "oneri": null,
             "hamlen": { "oyun": "tkm", "secim": "tas" },
@@ -148,7 +153,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
   "bekleyenler": [] }
 ```
 
-- `asama`: `"soruToplama"` · `"soruSorma"` · `"cevapSecme"` · `"miniOyun"` · `"oylama"` · `"ikiyeKatla"` · `"bedel"` · `"ifsa"` · `"gume"` · `"oyunSonu"` · `"suclama"` (Köstebek, aşağıda).
+- `asama`: `"soruToplama"` · `"soruSorma"` · `"cevapSecme"` · `"miniOyun"` · `"oylama"` · `"ikiyeKatla"` · `"bedel"` · `"ifsa"` · `"gume"` · `"oyunSonu"` · `"suclama"` (Köstebek) · `"tetik"` (Rus Ruleti), aşağıda.
   Sıra: mini oyun (Grup Kararı'nda onun yerine oylama) → İkiye Katla? → Bedel? → ifşa/güme.
 - `a`, `b`, `c`: o an boşsa `null`. **Soran Gizli** kaos turunda `a` sadece A'nın kendi mesajında dolu, olaylarda da `null`.
 - `secilebilir`: sadece seçim yapacak kişiye dolu (soru sormada A'ya, cevap seçmede B'ye). Diğerlerine `[]`.
@@ -166,7 +171,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 
 **S3 alanları** (kurallar: Ana Plan 8, kararlar: `tasks/g1-todo.md`):
 - `kaos`: bu turun kaos kuralı, yoksa `"yok"`. `"tersDunya"` · `"grupKarari"` · `"korSoru"` · `"soranGizli"` · `"aniOlum"` · `"cezaTuru"` · `"yonDegisti"` · `"ikiyeKatla"`. Kaos açıksa her 5 turda bir.
-- `isi`: Kızgın Çakmak (sadece `ceza: "cesur"`), yoksa `null`. `"soguk"` · `"ilik"` · `"sicak"` · `"kizgin"`. Eşik hiçbir mesajda yok.
+- `isi`: Kızgın Çakmak (sadece `ceza: "cesur"`), yoksa `null`. `"soguk"` · `"ilik"` · `"sicak"` · `"kizgin"`. Eşik hiçbir mesajda yok. Rus Ruleti'nde tabancanın ısısı (aşağıda).
 - `kararVeren`: `ikiyeKatla` ve `bedel` aşamasında karar verecek oyuncu, yoksa `null`.
 - `oylayanlar`, `oyKullanan`: `oylama` aşamasında oy verebilenler (A ve B hariç herkes) ve kaçının verdiği. Kimin ne oy verdiği hiçbir mesajda yok.
 - `sonOylama`: oylamalı turun `ifsa`/`gume` aşamasında `{ "ifsa": 2, "gume": 1 }`, yoksa `null`. Eşitlik ya da hiç oy → güme.
@@ -184,7 +189,8 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
     "gorevler": [ { "kim": "p1", "gorev": { "tur": "kisiyiGoster", "hedef": "p3", "adet": 2, "zorluk": "orta" }, "basarili": true } ],
     "ifsaOlanlar": [ { "soru": "…", "a": "p1", "b": "p2", "c": "p4" } ],
     "curcunaSorulari": [ "…" ],
-    "kostebek": null }
+    "kostebek": null,
+    "rusRuleti": null }
   ```
   `kostebek`: sadece Köstebek oyununda dolu (aşağıda "Köstebek"), diğer oyunlarda `null`.
   Unvan `tur`: `"miknatis"` · `"gammaz"` · `"sirKupu"` · `"hedefTahtasi"` · `"soruMakinesi"` · `"sansli"` · `"takintili"` · `"intikamci"` · `"atesleOynayan"` · `"bedelci"` · `"cezakes"` · `"kaosCanavari"` · `"kale"` · `"gorunmez"` · `"talihsiz"` · `"sosyalKelebek"` · `"sadik"` · `"dedikoducu"` · `"gundem"` · `"yenilmez"` · `"zorba"` · `"av"` · `"ayna"` · `"uykucu"` · `"kacak"` · `"acikKitap"` · `"eliBos"` · `"kumarbaz"` · `"bumerang"` · `"sogukkanli"` (anlamları `UnvanTuru`'nda). En uç 3 unvan, eşitlikte verilmez.
@@ -193,12 +199,13 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 ### `olay`
 
 ```json
-{ "t": "olay", "olay": "ifsa", "a": "p1", "b": "p2", "c": "p4", "kim": null, "soru": "…", "ceza": null, "kaos": null }
+{ "t": "olay", "olay": "ifsa", "a": "p1", "b": "p2", "c": "p4", "kim": null, "soru": "…", "ceza": null, "kaos": null, "hedef": null }
 ```
 
 `olay`: `"turBasladi"` · `"soruSoruldu"` · `"cevapSecildi"` · `"berabere"` · `"ifsa"` · `"gume"` · `"sureDoldu"` · `"oyunBitti"` ·
 `"kaosBasladi"` · `"yandi"` · `"cezaCekildi"` · `"ikiyeKatlandi"` · `"bedelOdendi"` · `"oyVerildi"` ·
-`"siraAtlandi"` · `"afk"` · `"afkBitti"` · `"oyuncuCikti"` · `"suclamaBasladi"` · `"suclamaBitti"` · `"atildi"` (sunucunun olayı: biri atıldı; sadece bu olayda `neden` alanı var: `"kurucu"` ya da `"temiz"`).
+`"siraAtlandi"` · `"afk"` · `"afkBitti"` · `"oyuncuCikti"` · `"kararBekleniyor"` · `"suclamaBasladi"` · `"suclamaBitti"` ·
+`"tetikBasladi"` · `"tetikBos"` · `"tetikPatladi"` · `"elendi"` · `"tetikDevredildi"` · `"finalBasladi"` · `"atildi"` (sunucunun olayı: biri atıldı; sadece bu olayda `neden` alanı var: `"kurucu"` ya da `"temiz"`).
 `soru` sadece `ifsa` olayında dolu. `ceza` sadece `cezaCekildi`'de (ceza nesnesi), `kaos` sadece `kaosBasladi`'da (kuralın adı). Animasyon ve ses için. Ekran her zaman `durum`'a göre çizilir.
 
 ### `hata`
@@ -230,7 +237,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 
 - `surum`: odanın sayacı, her `durum`'da bir artar. Eski sürümlü mesajı at (Ana Plan 5.2, kural 3). Geri dönen oyuncu da kaldığı sayıdan devam eder.
 - `renk`: 0–9, oyuncu numarasından (`p1` → 0). Arayüz kendi renk listesinde bu sıraya bakar.
-- `olay.kim`: `sureDoldu` (süresi dolan), `yandi` (çakmak elinde yanan), `cezaCekildi` (çeken), `ikiyeKatlandi` (bir el daha isteyen), `bedelOdendi` (ödeyen B), `oyVerildi` (oy veren; oyun ne olduğu yok), `siraAtlandi` (sırası gelen ama kopuk/AFK/çıkmış olan; sıra rastgele birine geçti), `afk` / `afkBitti` (AFK olan / dönen), `oyuncuCikti` (oyundan çıkan), `atildi` (atılan), `suclamaBasladi` (erken suçlama hakkını kullanan; her 5 turda bir ve son oylamada `null`), `suclamaBitti` (en çok oyu alan; eşitlik ya da hiç oy yoksa `null`). Diğerlerinde `null`.
+- `olay.kim`: `sureDoldu` (süresi dolan), `yandi` (çakmak elinde yanan), `cezaCekildi` (çeken), `ikiyeKatlandi` (bir el daha isteyen), `bedelOdendi` (ödeyen B), `oyVerildi` (oy veren; oyun ne olduğu yok), `siraAtlandi` (sırası gelen ama kopuk/AFK/çıkmış olan; sıra rastgele birine geçti), `afk` / `afkBitti` (AFK olan / dönen), `oyuncuCikti` (oyundan çıkan), `atildi` (atılan), `suclamaBasladi` (erken suçlama hakkını kullanan; her 5 turda bir ve son oylamada `null`), `suclamaBitti` (en çok oyu alan; eşitlik ya da hiç oy yoksa `null`), `kararBekleniyor` (İkiye Katla ya da Bedel kararını verecek; mini oyunun ya da oylamanın süresi dolunca da gelir), `tetikBasladi` / `tetikBos` / `tetikPatladi` / `elendi` (tetiği çekecek / çeken / canı biten), `tetikDevredildi` (devreden; devralan `hedef`'te, `hedef` sadece bu olayda dolu). Diğerlerinde `null`.
 - Paketler ve sesli cezalar: sunucu `Assets/Icerik` altındaki `.txt` paketlerini ve `Cezalar.csv`'yi açılışta okur.
 - Sabit süreler (şimdilik ayarlanamaz): ifşa/güme ekranı 6 sn, Curcuna soru toplama 90 sn, İkiye Katla/Bedel kararı 5 sn. Oylama `hamleSn` kadar sürer.
 
@@ -283,6 +290,18 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 - **Köstebek oyundan çıkarsa** grup kazanır. Bağlı oyuncu 4'ün altında kalıp oyun biterse (2 dk) oylama yapılmaz, köstebek yakalanmamış sayılır (görevini bitirdiyse `neden: "gorevBitti"`).
 - `sana.suclamaHakki`: erken suçlama hakkın duruyor mu.
 - **Oyun sonunda** `ozet.kostebek`: `{ "kim": "p3", "kazanan": "grup" | "kostebek", "neden": "yakalandi" | "gorevBitti" | "yakalanmadi" | "kacti" }`. Herkesin görevi (köstebeğinki dahil) `ozet.gorevler`'de. Oyun bitmeden köstebeğin kim olduğu hiçbir mesajda yok.
+
+## Rus Ruleti (docs/Oyunlar.md, 2)
+
+`ayarlar` → `oyun: "rusRuleti"`, `can: 1`–`3`. Çakmak bir tabanca; düelloyu kaybeden tetiği çeker.
+
+- **Tur:** normal çakmak. Sonuç ekranından (`ifsa` / `gume`) sonra `asama: "tetik"`, `tetikCeken`: düelloyu kaybeden (`olay: "tetikBasladi"`). O `tetikCek` der ya da (oyun boyu bir kez) `tetikDevret` ile başkasına verir. Karar süresi `hamleSn`; dolarsa tetik kendiliğinden çekilir.
+- **Tabanca:** 6 hazne, 1 mermi, yeri ve kaç haznenin boşaldığı hiçbir mesajda yok. `isi`: tabancanın ısısı, gürültülü. Sonraki tetik patlayacaksa her zaman `"kizgin"` görünür, ama `"kizgin"` her zaman patlar demek değil.
+- **Patlarsa** (`tetikPatladi`) bir can gider, tabanca yeniden dolar. Can biterse `elendi`: izler, seçilmez, sırası gelmez.
+- **Final:** 3 kişi kalınca çakmak turu biter (`finalBasladi`, `final: true`). Her turda kalanlardan rastgele ikisi sorusuz düello yapar (`b`, `c`; `a` = `b`), kaybeden doğrudan `tetik`'e geçer (sonuç ekranı yok).
+- **Kazanma:** son kalan. Kurucu `bitir` derse en çok canı olan kazanır, eşitlikte kimse. Tetiği çekecek kişi oyundan çıkarsa çekilmez.
+- `toplamTur` bu oyunda `0` (son kalana kadar sürer). Oyuncu nesnesinde `can`, `elendi`, `devretmeHakki` (herkese açık; diğer oyunlarda `0` / `false`).
+- **Oyun sonunda** `ozet.rusRuleti`: `{ "kazanan": "p3" | null, "elenmeSirasi": ["p2", "p4"] }`.
 
 ## Grup paketi (Ana Plan 8.5)
 

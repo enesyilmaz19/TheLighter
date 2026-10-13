@@ -13,21 +13,44 @@ namespace TheLighter.Istemci
         void OlayGeldi(OlayMesaji o);
     }
 
-    /// <summary>Cihazda kalıcı küçük ayarlar: PlayerPrefs.</summary>
+    /// <summary>
+    /// Cihazda kalıcı küçük ayarlar: PlayerPrefs. PC'de aynı bilgisayarda birden çok pencereyle denerken
+    /// <c>-profil 2</c> komut satırı argümanı her pencereye ayrı kayıt verir (anahtarlar "profil2." önekiyle).
+    /// </summary>
     sealed class PlayerPrefsKalici : IKalici
     {
-        public string Oku(string ad) => PlayerPrefs.HasKey(ad) ? PlayerPrefs.GetString(ad) : null;
+        readonly string onek;
+
+        public PlayerPrefsKalici(string onek = null) { this.onek = onek ?? ""; }
+
+        public string Oku(string ad) => PlayerPrefs.HasKey(onek + ad) ? PlayerPrefs.GetString(onek + ad) : null;
 
         public void Yaz(string ad, string deger)
         {
-            PlayerPrefs.SetString(ad, deger ?? "");
+            PlayerPrefs.SetString(onek + ad, deger ?? "");
             PlayerPrefs.Save();
         }
 
         public void Sil(string ad)
         {
-            PlayerPrefs.DeleteKey(ad);
+            PlayerPrefs.DeleteKey(onek + ad);
             PlayerPrefs.Save();
+        }
+
+        /// <summary>"-profil N" (N: harf/rakam, en fazla 16) varsa "profilN.", yoksa boş önek.</summary>
+        public static string KomutSatirindanOnek(string[] argumanlar)
+        {
+            if (argumanlar == null) return "";
+            for (int i = 0; i + 1 < argumanlar.Length; i++)
+            {
+                if (argumanlar[i] != "-profil") continue;
+                string ad = argumanlar[i + 1];
+                if (string.IsNullOrEmpty(ad) || ad.Length > 16) return "";
+                foreach (char c in ad)
+                    if (!(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9')) return "";
+                return "profil" + ad + ".";
+            }
+            return "";
         }
     }
 
@@ -47,7 +70,7 @@ namespace TheLighter.Istemci
         const string KayitSonIsim = "online.son_isim";
 
         readonly Uygulama uygulama;
-        readonly IKalici kalici = new PlayerPrefsKalici();
+        readonly IKalici kalici = new PlayerPrefsKalici(PlayerPrefsKalici.KomutSatirindanOnek(Environment.GetCommandLineArgs()));
         OdaAyarlari sonAyarlar;
         OnlineAkis akis;
 

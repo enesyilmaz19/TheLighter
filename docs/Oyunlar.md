@@ -1,6 +1,6 @@
 # Oyunlar: çakmak kuralları entegre edilmiş beş yeni oyun
 
-Durum: **taslak, Enes'in kararlarını bekliyor** (2026-10-13). Onaylananlar `docs/Ana Plan.md`'ye işlenir, ekranlar için Arda'yla konuşulur.
+Durum: **Enes'in kararları verildi (2026-10-13), Arda'yla sözleşme oturumunda konuşulacak** (ekranlar ve protokol). Ana Plan 7. bölüm buraya bakar.
 Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazananı olan ayrı oyunlar**. Çıkıştan önce gelecekler, online ve elden elede oynanacaklar. Imposter ile Casus tek oyunda, Son Çakmak ile Rus Ruleti tek oyunda birleşti.
 
 ---
@@ -54,35 +54,36 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **Kişi:** 4–10. 8 ve üstünde istenirse 2 köstebek (birbirini bilmez).
 - **Kurulum:** köstebek gizli bir **köstebek görevi** çeker ("3 soruyu güme gönder", "X'i 2 kez ifşa ettir", "çakmağı 3 kez aynı kişiye ver"). Diğer herkes normal gizli görev çeker. Herkesin bir amacı olunca köstebeğin garip hamleleri göze batmaz.
 - **Tur:** normal çakmak.
-- **Suçlama:** her 5 turda bir "Köstebek kim?" oylaması (A ve B dahil herkes oy verir).
+- **Suçlama:** iki yoldan "Köstebek kim?" oylaması açılır (A ve B dahil herkes oy verir):
+  - Her 5 turda bir, kendiliğinden.
+  - Ayrıca herkesin oyun boyunca **1 erken suçlama hakkı** var: istediği an kullanır, oylama hemen başlar.
+
+  Sonuçlar:
   - Çoğunluk köstebeği gösterirse grup kazanır, oyun biter.
   - Yanlış kişi gösterilirse oyun sürer, o kişi "şüpheli" etiketi taşır.
   - Eşitlikte bir şey olmaz.
 - **Kazanma:**
-  - Köstebek görevini bitirirse hemen kazanır: ekranda "Köstebek kazandı", kim olduğu açılır.
+  - Köstebek görevini bitirdiği an kazanır: ekranda "Köstebek kazandı", kim olduğu açılır.
   - Tur sayısı biter ve yakalanmamışsa son bir oylama yapılır, yakalanmazsa köstebek kazanır.
 - **Elden ele:** köstebek kartı görev perdesiyle gösterilir. Herkes perdeye bakar, kimse ayrı tutulmaz. Oylama Grup Kararı gibi dolaşır.
 - **Az kişi kuralı:** eleme yok, sorun yok.
 - **İçerik:** 12–15 köstebek görevi (G1). Mevcut gizli görev türlerinin bir kısmı uyarlanır.
-- **Açık sorular:**
-  1. Suçlama her 5 turda bir mi, yoksa herkesin oyun boyunca 1 kez kullanabileceği bir "suçla" düğmesi mi?
-  2. Köstebek görevi tamamlanınca hemen mi kazansın, oyun sonunda mı?
+- **Kararlar (2026-10-13):** suçlama her 5 turda bir + herkese 1 erken suçlama hakkı. Görevini bitiren köstebek hemen kazanır.
 
 ## 2. Rus Ruleti (can ayarıyla Son Çakmak da bu)
 
 **Fikir:** çakmak bir tabanca. Düelloyu kaybeden tetiği çeker.
 
 - **Kişi:** 4–10. Can: 1 (Rus Ruleti) ya da 3 (Son Çakmak).
-- **Tabanca:** 6 hazne, 1 mermi, yeri gizli. Her tetik bir hazneyi boşaltır. Kaç haznenin boşaldığı herkese açık: risk her tetikte artar, herkes görür. Mermi patlayınca tabanca yeniden doldurulur (yeni gizli yer).
+- **Tabanca:** 6 hazne, 1 mermi, yeri gizli. Her tetik bir hazneyi boşaltır. Kaç haznenin boşaldığı **gizli**; sadece Kızgın Çakmak'taki gibi bir ısı ipucu görünür (soğuk, ılık, sıcak, kızgın; gürültülü, sayı hesaplanamaz). Mermi patlayınca tabanca yeniden doldurulur (yeni gizli yer).
 - **Tur:** normal çakmak. Mini oyunu kaybeden tetiği çeker. Patlarsa bir can gider, can biterse elenir ve izleyici olur. Soru ifşa ya da güme kuralı aynen işler; eğlencesi orada kalır.
+- **Tetik devret:** her oyuncunun oyun boyunca **1 devretme hakkı** var. Kendi çekeceği tetiği istediği aktif birine verir, o kişi çeker. Devralanın kendi hakkı duruyorsa o da devredebilir; herkesin tek hakkı olduğu için zincir sonsuza gitmez.
 - **Gerilim:** B çakmağı sorunun dürüst cevabına mı versin, yoksa düelloda yenebileceğini düşündüğü kişiye mi? Bir de tabanca neredeyse dolmuşken kime verdiği önemli.
 - **Az kişi kuralı:** 3 kişi kalınca çakmak turu biter, **final** başlar. Kalanlar sırayla ikili düello yapar, kaybeden tetiği çeker. Tek kişi kalınca o kazanır.
 - **Kazanma:** son kalan.
 - **Elden ele:** sorunsuz; tetik ekranı herkesin önünde (zaten açık bilgi).
 - **İçerik:** yok.
-- **Açık sorular:**
-  1. Kalan hazne sayısı açık mı olsun (bilinen risk), gizli mi (Kızgın Çakmak gibi ısı ipucu)?
-  2. Düelloyu kazanan tetiği rakibine "devredebilsin" mi (bir kez kullanılabilen bir hak)?
+- **Kararlar (2026-10-13):** hazneler gizli, ısı ipucuyla. Herkese oyun boyu 1 "tetik devret" hakkı.
 
 ## 3. Takım Düellosu
 
@@ -92,21 +93,21 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **Tur:** normal çakmak.
   - B ile C **farklı takımdansa**: düelloyu kazananın takımı 1 puan alır.
   - **Aynı takımdansa**: puan yok, ama çakmak takımda kalır, yani sıradaki soruyu yine o takım sorar.
+  - **İfşa bonusu:** A rakip takımdan birine sorduysa ve soru ifşa olursa A'nın takımı ayrıca 1 puan alır.
 - **Gerilim:** dürüst cevap rakip takımdan biri mi? Yoksa çakmağı takımda tutmak için arkadaşını mı göstereceksin?
 - **Kazanma:** önce 7 puana ulaşan takım ya da tur sayısı bitince önde olan.
 - **Elden ele:** sorunsuz. Takım renkleri ekranda.
-- **Online:** istenirse takım sohbet kanalı (DM altyapısıyla).
+- **Online:** takım sohbet kanalı ("Takım" sekmesi, DM altyapısıyla).
 - **İçerik:** yok.
-- **Açık sorular:**
-  1. İfşa takıma ayrıca puan versin mi?
-  2. Takım içi sohbet çıkışta olsun mu?
+- **Kararlar (2026-10-13):** düello puanı + ifşa bonusu. Online'da takım sohbeti var.
 
 ## 4. Casus (mekân ya da kelime: Imposter da bu)
 
 **Fikir:** herkes gizli bir mekânı bilir, casus bilmez. Casus, sorulara bilmeden cevap vermek zorunda.
 
 - **Kişi:** 4–10, 1 casus. Ayar: **Mekân** (Uçak, Hastane, Düğün…) ya da **Kelime** (Imposter: tek bir kelime).
-- **Kurulum:** herkes perdede mekânı görür, casus "Casussun" görür.
+- **Kurulum:** herkes perdede mekânı ve o mekândaki **rolünü** görür ("Uçak: hostes"), casus "Casussun" görür. Kelime ayarında rol yok.
+- **Mekân listesi:** bu oyundaki bütün mekânlar herkesin ekranında, oyun boyunca. Herkes gördüğü için liste casusu ele vermez; casus ipuçlarını listeyle eşleştirir.
 - **Tur:** normal çakmak. A, B'ye mekânla ilgili bir soru yazar ("Burada en çok kim terler?").
   - B mekânı biliyorsa mantıklı birini gösterir. Casus bilmeden gösterir, seçimi onu ele verebilir.
   - Soru ifşa olursa herkes görür, **casus da**: soru mekânı fazla belli ederse casusa ipucu olur. A'nın da dikkatli sorması lazım.
@@ -117,10 +118,8 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
   - Casus kazanır: mekânı doğru tahmin eder ya da tur sayısı biter ve yakalanmaz.
 - **Mod:** Normal ve Temiz. **Curcuna yok** (sorular mekâna göre yazılmalı, havuzdaki genel sorular işe yaramaz).
 - **Elden ele:** mekân perdeyle gösterilir. Casusun "biliyorum" düğmesi her perdede herkeste görünür (sadece casusunkinde çalışır); kimse düğmeye bakarak casusu anlamasın.
-- **İçerik (G1):** 30 mekân, 100 kelime.
-- **Açık sorular:**
-  1. Mekânda herkese bir de rol verilsin mi ("Uçak: pilot, hostes, yolcu")? Spyfall'da var; soruları zenginleştiriyor ama içerik yükü 3 kat.
-  2. Casus mekân listesini oyun boyunca görsün mü?
+- **İçerik (G1):** 30 mekân, her birinde 8–10 rol (~270 rol metni), 100 kelime. En büyük içerik işi bu.
+- **Kararlar (2026-10-13):** mekânda roller var. Mekân listesi oyun boyunca herkeste görünür.
 
 ## 5. Vampir Köylü
 
@@ -131,10 +130,11 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
   - **Köylü.**
   - **Doktor:** her gece birini korur, kendini oyunda 1 kez.
   - **Gözcü:** her gece bir kişinin vampir olup olmadığını öğrenir.
-- **Gündüz:** canlı oyuncu sayısının yarısı kadar çakmak turu.
+- **Gündüz:** canlı oyuncu sayısının yarısı kadar çakmak turu (aşağı yuvarlanır, en az 1).
   - Sorular suçlama aracı ("Sence vampir kim?", "Bu gece kim korunmalı?"). Paketten ya da serbest.
   - B çakmağı şüphelendiğine verir. İfşa olursa suçlama herkese açılır, güme giderse gizli kalır.
-- **Linç:** gündüz sonunda bütün canlılar oy verir. Çoğunluğu alan elenir ve rolü açılır. Eşitlikte kimse elenmez.
+- **Linç:** gündüz sonunda bütün canlılar oy verir. Çoğunluğu alan elenir. Eşitlikte kimse elenmez.
+- **Rol açılması (ayar, kurucu seçer):** elenenin rolü açılır (klasik, kolay) ya da oyun sonuna kadar gizli kalır (zor, daha çok tartışma). Gece ölenler için de aynı.
 - **Gece:**
   - Vampirler bir kurban seçer (2 vampirde ortak karar ya da çoğunluk).
   - Doktor birini korur, gözcü birine bakar.
@@ -142,12 +142,9 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **Kazanma:** bütün vampirler elenirse köylüler kazanır. Vampirler sayıca köylülere eşit ya da fazla olursa vampirler kazanır.
 - **Az kişi kuralı:** canlılar 4'ün altına düşünce çakmak turları atlanır, sadece linç ve gece kalır.
 - **Elden ele (en zor kısım):** gece telefon herkese tek tek gider ve **herkes bir seçim yapar.** Köylüye "birini düşün" ekranı gelir, seçimi bir işe yaramaz. Böylece kimin uzun düşündüğünden rol anlaşılmaz. Linç, Grup Kararı gibi dolaşır.
-- **Online:** gece herkes kendi telefonunda seçer. Genel sohbet gece kapalı; vampirlere gece özel kanal.
+- **Online:** gece herkes kendi telefonunda seçer. Genel sohbet gece kapalı; vampirlere gece özel kanal. **Ölüler** genel sohbete yazamaz (canlılara ipucu veremez) ama okur; kendi aralarında "Ölüler" kanalında yazar.
 - **İçerik (G1):** "Vampir" soru paketi (~40 soru), rol metinleri (G2).
-- **Açık sorular:**
-  1. Elenen kişinin rolü açılsın mı (klasik, kolay) yoksa gizli kalsın mı (zor, daha çok tartışma)?
-  2. Gündüz turu sayısı sabit mi, canlı sayısına göre mi?
-  3. Ölüler sohbette yazabilsin mi? Klasikte yazamaz; online'da "ölüler kanalı" olabilir.
+- **Kararlar (2026-10-13):** rolün açılması kurucunun ayarı. Gündüz tur sayısı canlıların yarısı. Ölüler kanalı var.
 
 ---
 

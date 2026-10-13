@@ -386,6 +386,8 @@ Mikrofon izni olduğu için Play Store gizlilik metni istiyor.
 
 ## 7. Yeni mod fikirleri
 
+> **2026-10-13:** Enes'in kararıyla çıkıştan önce **5 ayrı oyun** geliyor, çakmak kuralları içlerine entegre: Köstebek, Rus Ruleti (Son Çakmak dahil), Takım Düellosu, Casus (Imposter dahil), Vampir Köylü. Online ve elden ele. Kurallar ve kararlar: `docs/Oyunlar.md`. Aşağıdakiler bugünkü oyunun varyant fikirleri, ayrı iş.
+
 ### Zincir
 Soru tur sonunda ölmüyor. C de aynı soruyu okuyor ve kendi cevabına (D) veriyor. C ile D mini oyun oynuyor. Biri ifşa edene kadar devam ediyor.
 İfşa olunca **bütün zincir görünüyor:** "Grupta sırrını en kolay kim açık eder?" → Ali → Ayşe → Ali → Mehmet.

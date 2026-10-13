@@ -150,6 +150,17 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **İçerik (G1):** 30 mekân, her birinde 8–10 rol (~270 rol metni), 100 kelime. En büyük içerik işi bu.
 - **Kararlar (2026-10-13):** mekânda roller var. Mekân listesi oyun boyunca herkeste görünür.
 
+**Kodlandı (2026-10-14, kural motoru + sunucu; ekranlar Arda'da).** Kodlarken netleşenler:
+
+- **Oylama Köstebek'inkiyle ortak** (`Oyun.Suclama.cs`): en çok oyu alan suçlanır, eşitlikte kimse; yanlış suçlanan şüpheli olur. Erken suçlama yok, sadece her 4 turda bir.
+- **Son oylama** (G1 kararı): tur sayısı bitince ya da kurucu bitirince Köstebek'teki gibi bir oylama daha. Spyfall'da da tur sonunda oylanır; kurucu casussa oyunu kendisi bitirip kazanamaz. Burada da yakalanan casusun son şansı var.
+- **Tahmin:** "Mekânı biliyorum" de son şans da aynı komut. Oyunun her aşamasında (düellonun ortasında da) yapılabilir, oyun hemen biter. Son şans 30 sn; süre dolarsa grup kazanır.
+- **Mekân listesi** bütün mekânlar (30). **Kelimede** oyun bir kategori seçer, kategori herkese açık, liste o kategorinin kelimeleri (20).
+- **Roller herkese ayrı:** her mekânda en az 9 rol (10 kişide casus dışında 9 kişi).
+- **Casus oyundan çıkarsa** grup kazanır; oyun zorla biterse (az kişi) casus yakalanmamış sayılır.
+- **Ceza açılabilir;** görev, kaos ve Curcuna kapalı. Temiz'de oynanır: bütün içerik Temiz filtresinden geçiyor (test var).
+- **İçerik taslağı** `Assets/Kurallar/CasusIcerik.cs`: 30 mekân × 9 rol, 5 kategori × 20 kelime. **Enes gözden geçirecek.**
+
 ## 5. Vampir Köylü
 
 **Fikir:** gizli roller, gece ve gündüz. Gündüzleri çakmak, suçlamanın ta kendisi.
@@ -179,10 +190,10 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 
 ## 6. Kural motoru ve iş bölümü
 
-- **Yeni ayar:** `Ayarlar.Oyun` (enum, sona eklenir). `Mod` aynen kalır. "Birlikte olamaz" kuralları tek yerde, `Oyun.AyarlarUyumlu`: `Kur` ve sunucunun lobisi onu kullanır (yapıldı: Temiz + Cesur, Köstebek + kaos, Rus Ruleti + ceza/görev/kaos; gelecek: Casus + Curcuna). Kişi sayısı sınırı (Vampir 6+) `Kur`'da.
-- **Yeni aşamalar** (enum sonuna): `Suclama` (Köstebek, yapıldı), `Tetik` (Rus Ruleti, yapıldı); gelecek: `Gece`, `Linc`, `CasusTahmini`. Rus Ruleti'nin finali ayrı aşama değil, `Gorunum.Final` bayrağı (final düellosu normal `MiniOyun` aşaması).
+- **Yeni ayar:** `Ayarlar.Oyun` (enum, sona eklenir). `Mod` aynen kalır. "Birlikte olamaz" kuralları tek yerde, `Oyun.AyarlarUyumlu`: `Kur` ve sunucunun lobisi onu kullanır (yapıldı: Temiz + Cesur, Köstebek + kaos, Rus Ruleti + ceza/görev/kaos, Takım + görev, Casus + Curcuna/görev/kaos). Kişi sayısı sınırı (Vampir 6+) `Kur`'da.
+- **Yeni aşamalar** (enum sonuna): `Suclama` (Köstebek ve Casus, yapıldı), `Tetik` (Rus Ruleti, yapıldı), `CasusTahmini` (yapıldı); gelecek: `Gece`, `Linc`. Rus Ruleti'nin finali ayrı aşama değil, `Gorunum.Final` bayrağı (final düellosu normal `MiniOyun` aşaması).
 - **Olay kuralı:** motor her aşama değişikliğinde bir olay yayar. Sunucu yeni durumu olaydan sonra yollar; olaysız değişen aşama online'da ekrana gitmez. Rastgele oyun testi bunu her oyunda denetler.
-- **Her oyun ayrı dosya:** `Oyun.Kostebek.cs`, `Oyun.RusRuleti.cs`, `Oyun.Takim.cs` (yapıldı), `Oyun.Casus.cs`, `Oyun.Vampir.cs`. Çekirdek döngü oyunlara tek bir yerden, `Oyun.Kancalar.cs` üzerinden bağlanır:
+- **Her oyun ayrı dosya:** `Oyun.Kostebek.cs`, `Oyun.RusRuleti.cs`, `Oyun.Takim.cs`, `Oyun.Casus.cs` (yapıldı), `Oyun.Vampir.cs`. Gizli kişili oyunların (Köstebek, Casus) "kim?" oylaması ortak: `Oyun.Suclama.cs`; sonucu (yakalandı, yakalanmadı, kaçtı) yine kancalarla oyuna döner. Çekirdek döngü oyunlara tek bir yerden, `Oyun.Kancalar.cs` üzerinden bağlanır:
   - kurulum (`OyunlariKur`),
   - yeni tur başlamadan oyunun kararı: bitti mi, başka akışa mı geçiyor (`TurBasindaOyunKarari`),
   - turun sonucu: ifşa mı, düelloyu kim kaybetti (`OyunTurSonucu`),

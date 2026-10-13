@@ -220,6 +220,7 @@ namespace Cakmak.Sunucu
             ["oyun"] = Ad(a.Oyun),
             ["can"] = a.Can,
             ["takimlar"] = TakimlarYaz(a.TakimDagilimi),
+            ["casus"] = Ad(a.Casus),
             ["mod"] = Ad(a.Mod),
             ["miniOyun"] = Ad(a.MiniOyun),
             ["turSayisi"] = a.TurSayisi,
@@ -280,6 +281,14 @@ namespace Cakmak.Sunucu
             {
                 ["kazanan"] = o.Takim.Kazanan,
                 ["puanlar"] = Dizi(o.Takim.Puanlar, x => x),
+            },
+            ["casus"] = o.Casus == null ? null : new JsonObject
+            {
+                ["kim"] = Id(o.Casus.Casus),
+                ["kazanan"] = Ad(o.Casus.Kazanan),
+                ["neden"] = Ad(o.Casus.Neden),
+                ["sir"] = o.Casus.Sir,
+                ["tahmin"] = o.Casus.Tahmin,
             },
         };
 
@@ -429,6 +438,9 @@ namespace Cakmak.Sunucu
                 ["tetikCeken"] = Id(g.TetikCeken),
                 ["final"] = g.Final,
                 ["takimPuanlari"] = Dizi(g.TakimPuanlari, x => x),
+                ["casusListesi"] = Dizi(g.CasusListesi, x => x),
+                ["casusKategori"] = g.CasusKategori,
+                ["yakalanan"] = Id(g.Yakalanan),
                 ["sana"] = new JsonObject
                 {
                     ["soru"] = g.Soru,
@@ -441,6 +453,8 @@ namespace Cakmak.Sunucu
                     ["oyVerdin"] = g.OyVerdin,
                     ["rol"] = g.Rolun == Rol.Yok ? null : Ad(g.Rolun),
                     ["suclamaHakki"] = g.SuclamaHakkin,
+                    ["sir"] = g.Sirrin,
+                    ["mekanRolu"] = g.MekanRolun,
                 },
                 ["ifsa"] = g.Asama == Asama.Ifsa ? new JsonObject { ["soru"] = g.IfsaSoru, ["fisilti"] = g.IfsaFisilti } : null,
                 ["ozet"] = OzetYaz(ozet),

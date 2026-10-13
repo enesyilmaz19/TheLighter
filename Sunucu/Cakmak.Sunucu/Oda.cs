@@ -224,6 +224,7 @@ namespace Cakmak.Sunucu
                 var gorevler = Protokol.Mantik(m, "gorevler", false);
                 var kaos = Protokol.Mantik(m, "kaos", false);
                 var can = Protokol.Sayi(m, "can", false);
+                var casus = Protokol.Metin(m, "casus", false);
                 var yeniTakimlar = Protokol.TakimlarCoz(m, out var takimlarVerildi);
                 var secilen = Protokol.MetinListesi(m, "paketler");
                 // Birbirine uyma kuralları (Temiz + Cesur, oyuna göre kapalı olanlar) kural motorunda tek yerde.
@@ -236,6 +237,7 @@ namespace Cakmak.Sunucu
                     GizliGorevler = gorevler ?? ayarlar.GizliGorevler,
                     KaosTurlari = kaos ?? ayarlar.KaosTurlari,
                     Can = can ?? ayarlar.Can,
+                    Casus = casus == null ? ayarlar.Casus : Protokol.Coz<CasusTuru>(casus),
                 };
 
                 // Reaksiyon sadece elden ele: online'da süre istemciden gelir ve telefonların dokunma gecikmesi farklıdır.
@@ -256,6 +258,7 @@ namespace Cakmak.Sunucu
                 ayarlar.GizliGorevler = yeni.GizliGorevler;
                 ayarlar.KaosTurlari = yeni.KaosTurlari;
                 ayarlar.Can = yeni.Can;
+                ayarlar.Casus = yeni.Casus;
                 if (takimlarVerildi) ayarlar.TakimDagilimi = takimlar = yeniTakimlar;
                 if (turSayisi.HasValue) ayarlar.TurSayisi = turSayisi.Value;
                 if (soruSn.HasValue) ayarlar.SoruSuresiSn = soruSn.Value;
@@ -288,6 +291,7 @@ namespace Cakmak.Sunucu
                 {
                     Oyun = ayarlar.Oyun,
                     Can = ayarlar.Can,
+                    Casus = ayarlar.Casus,
                     TakimDagilimi = takimlar == null ? null : new Dictionary<OyuncuId, int>(takimlar),
                     Mod = ayarlar.Mod,
                     MiniOyun = ayarlar.MiniOyun,
@@ -457,6 +461,9 @@ namespace Cakmak.Sunucu
                         break;
                     case "tetikCek":
                         sonuc = oyun.TetikCek(b.Kim);
+                        break;
+                    case "casusTahmini":
+                        sonuc = oyun.CasusTahmini(b.Kim, Protokol.Metin(m, "tahmin"));
                         break;
                     case "tetikDevret":
                         sonuc = oyun.TetikDevret(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")));

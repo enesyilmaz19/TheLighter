@@ -76,13 +76,13 @@ namespace Cakmak.Kurallar
         /// <summary>Bu turda çekilen cezalar (yanma, kaybetme, bedel). Tur başında boşalır.</summary>
         public IReadOnlyList<CezaCekimi> TurCezalari = Array.Empty<CezaCekimi>();
 
-        // --- Köstebek (docs/Oyunlar.md) ---
+        // --- Köstebek ve Casus (docs/Oyunlar.md) ---
 
-        /// <summary>Sadece sana: gizli rolün. Köstebek oyununda köstebeğe Kostebek, diğer herkese ve diğer oyunlarda Yok.</summary>
+        /// <summary>Sadece sana: gizli rolün. Köstebek'te köstebeğe Kostebek, Casus'ta casusa Casus; diğer herkese ve diğer oyunlarda Yok.</summary>
         public Rol Rolun;
         /// <summary>Sadece sana: erken suçlama hakkın duruyor mu (Köstebek, oyun boyu 1 kez).</summary>
         public bool SuclamaHakkin;
-        /// <summary>Herkese: yanlış suçlanıp "şüpheli" etiketi alanlar.</summary>
+        /// <summary>Herkese (Köstebek, Casus): yanlış suçlanıp "şüpheli" etiketi alanlar.</summary>
         public IReadOnlyList<OyuncuId> Supheliler = Array.Empty<OyuncuId>();
         /// <summary>Suclama aşamasında: bu oyunun son oylaması (tur sayısı bitti ya da kurucu bitirdi).</summary>
         public bool SonSuclama;
@@ -96,6 +96,19 @@ namespace Cakmak.Kurallar
 
         /// <summary>Takım Düellosu: iki takımın puanı (diğer oyunlarda boş).</summary>
         public IReadOnlyList<int> TakimPuanlari = Array.Empty<int>();
+
+        // --- Casus (docs/Oyunlar.md) ---
+
+        /// <summary>Sadece sana: mekân (ya da kelime). Casusa ve diğer oyunlarda null.</summary>
+        public string Sirrin;
+        /// <summary>Sadece sana: mekândaki rolün ("Hostes"). Casusa, kelime oyununda ve diğer oyunlarda null.</summary>
+        public string MekanRolun;
+        /// <summary>Herkese, oyun boyunca: bu oyunun mekânları (ya da kategorinin kelimeleri). Casus bunlardan birini tahmin eder.</summary>
+        public IReadOnlyList<string> CasusListesi = Array.Empty<string>();
+        /// <summary>Herkese: kelime oyununda kategori ("Hayvanlar"), mekânda null.</summary>
+        public string CasusKategori;
+        /// <summary>CasusTahmini aşamasında: yakalanan casus (son şansını kullanıyor).</summary>
+        public OyuncuId? Yakalanan;
     }
 
     public sealed class OylamaSonucu
@@ -186,7 +199,7 @@ namespace Cakmak.Kurallar
         OyuncuCikti,    // Kim: oyundan çıktı
         AfkBitti,       // Kim: AFK'dan döndü (bir mesaj yolladı)
         // Köstebek (docs/Oyunlar.md)
-        SuclamaBasladi, // Kim: erken suçlama hakkını kullanan, ya da null (her 5 turda bir, son oylama)
+        SuclamaBasladi, // Kim: erken suçlama hakkını kullanan, ya da null (aralıkla: Köstebek 5, Casus 4 turda bir; son oylama)
         SuclamaBitti,   // Kim: en çok oyu alan (suçlanan), eşitlik ya da hiç oy yoksa null
         // Rus Ruleti (docs/Oyunlar.md)
         TetikBos,       // Kim: tetiği çekti, boş
@@ -199,6 +212,9 @@ namespace Cakmak.Kurallar
         // Takım Düellosu (docs/Oyunlar.md)
         DuelloPuani,    // Kim: düelloyu kazanan, Takim: puan alan takım
         IfsaBonusu,     // Kim: A (rakip takımdan birine sordu, ifşa oldu), Takim: puan alan takım
+        // Casus (docs/Oyunlar.md)
+        CasusYakalandi, // Kim: casus. Oylamada yakalandı, son şansı başladı (CasusTahmini aşaması)
+        CasusTahminEtti,// Kim: casus. Tahmin etti, oyun bitiyor (doğru mu: özette)
     }
 
     public sealed class Olay

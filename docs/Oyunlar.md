@@ -186,10 +186,10 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
   - kurulum (`OyunlariKur`),
   - yeni tur başlamadan oyunun kararı: bitti mi, başka akışa mı geçiyor (`TurBasindaOyunKarari`),
   - turun sonucu: ifşa mı, düelloyu kim kaybetti (`OyunTurSonucu`),
-  - oyun biterken sonucun yazılması (`OyunSonuclariniYaz`),
+  - oyun biterken sonucun yazılması (`OyunSonuclariniYaz`) ve özete konması (`OyunOzetine`),
   - görünüm (`OyunGorunumu`).
 
-  Her oyunun metodu "bu oyun değilse hiçbir şey yapma" diye başlar; yeni oyun bu beş kancaya eklenir. Oyuna özgü aşamalar (Köstebek'in oylaması, Rus Ruleti'nin tetiği) kendi dosyasında. Bugünkü Çakmak bunların hiçbirinden etkilenmez, testleri ve rastgeleliği aynen kalır.
+  Her oyunun metodu "bu oyun değilse hiçbir şey yapma" diye başlar; yeni oyun bu altı kancaya eklenir. Oyuna özgü aşamalar (Köstebek'in oylaması, Rus Ruleti'nin tetiği) kendi dosyasında. Bugünkü Çakmak bunların hiçbirinden etkilenmez, testleri ve rastgeleliği aynen kalır.
 - **Gizlilik testleri her oyunda:** rol, mekân, vampir arkadaşları, gözcünün öğrendiği sadece sahibinin görünümünde. Bugünkü soru gizliliği testleri gibi.
 - **Protokol:**
   - `ayarlar.oyun`;

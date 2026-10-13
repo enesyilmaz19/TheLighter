@@ -32,6 +32,14 @@ namespace Cakmak.Kurallar
             TakimSonucunuYaz();
         }
 
+        /// <summary>Oyun bitti: özete oyunların sonuçları. Oyun bitmeden çağrılmaz (köstebeğin kim olduğu sır).</summary>
+        void OyunOzetine(OyunOzeti o)
+        {
+            o.Kostebek = kostebekSonucu?.Kopya();
+            o.RusRuleti = rusRuletiSonucu?.Kopya();
+            o.Takim = takimSonucu?.Kopya();
+        }
+
         void OyunGorunumu(Gorunum g, OyuncuId kim)
         {
             KostebekGorunumu(g, kim);

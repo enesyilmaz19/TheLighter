@@ -256,7 +256,7 @@ Bir mesaj birden çok kuralı çiğniyorsa ilk tutan döner:
 - `at`: `kim` yoksa ya da `"p…"` değilse `GECERSIZ_MESAJ`. Odada olmayan ya da kurucunun kendisi `GECERSIZ_GIRDI`. Kurucu değilse `KURUCU_DEGILSIN`.
 - `tekrarOyna`: oyun yoksa `OYUN_YOK`, bitmediyse `YANLIS_ASAMA`.
 - `grupPaketi`: `KURUCU_DEGILSIN` → `OYUN_BASLADI` → `sorular` yok ya da metin dizisi değil, `ilk` `true`/`false` değil (`GECERSIZ_MESAJ`) → boş dizi, temizlenince boş ya da 140 karakterden uzun soru, toplam 500'ü aşıyor (`GECERSIZ_GIRDI`; parçanın hiçbiri eklenmez, `ilk` olsa da eski paket silinmez).
-- `sohbet`: `ODADA_DEGILSIN` → `COK_HIZLI` (sohbet sınırı) → `metin` yok ya da metin değil, `kime` metin değil ya da `"p…"` değil (`GECERSIZ_MESAJ`) → temizlenince boş, 200 karakterden uzun, `kime` odada yok ya da kendin (`GECERSIZ_GIRDI`) → `UYGUNSUZ`.
+- `sohbet`: `ODADA_DEGILSIN` → `COK_HIZLI` (sohbet sınırı) → `metin` yok ya da metin değil, `kime` metin değil ya da `"p…"` / `"takim"` değil (`GECERSIZ_MESAJ`) → temizlenince boş, 200 karakterden uzun, `kime` odada yok ya da kendin, takım kanalı ama Takım Düellosu sürmüyor (`GECERSIZ_GIRDI`) → `UYGUNSUZ`.
 - Bilinmeyen `komut` ya da hamle `oyun` adı: `GECERSIZ_MESAJ`.
 
 ## Sınırlar

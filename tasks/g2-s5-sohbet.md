@@ -3,6 +3,8 @@
 Bu dosya Arda'nın yapay zekâsı için bir görev tanımı. Kullanım: "`tasks/g2-s5-sohbet.md`'yi oku ve 1'den başla."
 Yazan: G1 (Enes), 2026-10-12. `tasks/g2-s4-s5.md`'nin devamı; oradaki ilkeler ve çalışma şekli aynen geçerli.
 
+**Sıra ve öncelik için önce `tasks/g2-pc.md`'yi oku** (2026-10-13: önce PC, Android sonra). Bu dosya orada adı geçen maddelerin ayrıntısı.
+
 ---
 
 ## 0. Durum

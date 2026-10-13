@@ -119,7 +119,7 @@ namespace Cakmak.Kurallar
     public enum OyunModu { Normal, Temiz, Curcuna }
 
     /// <summary>Hangi oyun (docs/Oyunlar.md). Mod (soruların nereden geldiği, Temiz filtresi) her oyunda ayrı seçilir. Yeni oyunlar sona.</summary>
-    public enum OyunTuru { Cakmak, Kostebek, RusRuleti }
+    public enum OyunTuru { Cakmak, Kostebek, RusRuleti, Takim }
 
     public enum MiniOyunTuru { Tkm, TekCift, Zar, Reaksiyon, Karisik }
 
@@ -186,5 +186,7 @@ namespace Cakmak.Kurallar
         public int SuclamaSuresiSn = 60;
         /// <summary>Rus Ruleti: herkesin canı, 1–3 (1 = Rus Ruleti, 3 = Son Çakmak).</summary>
         public int Can = 1;
+        /// <summary>Takım Düellosu: kurucunun dağılımı (oyuncu → 0 ya da 1). null = rastgele, dengeli.</summary>
+        public IReadOnlyDictionary<OyuncuId, int> TakimDagilimi;
     }
 }

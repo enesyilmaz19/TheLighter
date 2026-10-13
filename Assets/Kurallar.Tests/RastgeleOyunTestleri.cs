@@ -30,6 +30,13 @@ namespace Cakmak.Kurallar.Tests
         }
 
         [Test]
+        public void Uc_yuz_rastgele_takim_oyununda_hicbir_degismez_bozulmaz()
+        {
+            for (int tohum = 1; tohum <= 300; tohum++)
+                Oyna(tohum, OyunTuru.Takim);
+        }
+
+        [Test]
         public void Uc_yuz_rastgele_rus_ruleti_oyununda_hicbir_degismez_bozulmaz()
         {
             for (int tohum = 1; tohum <= 300; tohum++)
@@ -54,6 +61,7 @@ namespace Cakmak.Kurallar.Tests
         {
             bool kostebek = tur == OyunTuru.Kostebek;
             bool rusRuleti = tur == OyunTuru.RusRuleti;
+            bool takim = tur == OyunTuru.Takim;
             var robot = new Random(tohum * 7919);
             int kisi = 4 + robot.Next(7);
             var mod = (OyunModu)robot.Next(3);
@@ -76,6 +84,10 @@ namespace Cakmak.Kurallar.Tests
             var kayit = new StringBuilder();
             int olaySayisi = 0;
             oyun.OlayOldu += o => olaySayisi++;
+            // Takım: puan olaylarının toplamı (başlangıç puanı hariç), takıma göre.
+            var olayPuani = new int[Oyun.TakimSayisi];
+            var baslangic = takim ? new List<int>(Durum(oyun).TakimPuanlari) : null;
+            oyun.OlayOldu += o => { if (o.Tur == OlayTuru.DuelloPuani || o.Tur == OlayTuru.IfsaBonusu) olayPuani[o.Takim.Value]++; };
             // Zaman ilerleyince aşama değiştiyse en az bir olay yayılmalı: sunucu yeni durumu olaydan sonra yollar,
             // olaysız değişen aşama online'da kimsenin ekranına gitmez.
             void Bekle(int sn)
@@ -102,11 +114,13 @@ namespace Cakmak.Kurallar.Tests
                     foreach (var k in ozet.IfsaOlanlar) kayit.Append(k.Soru).Append(',');
                     if (kostebek) KostebekSonu(oyun, ozet, tohum);
                     if (rusRuleti) RusRuletiSonu(ozet, g, tohum);
+                    if (takim) TakimSonu(ozet, tohum);
                     return kayit.ToString();
                 }
                 Degismezler(oyun, g, gizli, tohum);
                 if (kostebek) KostebekDegismezleri(oyun, g, tohum);
                 if (rusRuleti) RusRuletiDegismezleri(g, tohum);
+                if (takim) TakimDegismezleri(g, baslangic, olayPuani, tohum);
 
                 int zar = robot.Next(10);
                 if (zar == 0) { Bekle(robot.Next(1, 30)); continue; }               // bekle (AFK)
@@ -186,6 +200,7 @@ namespace Cakmak.Kurallar.Tests
                 ayarla(x);
                 x.Oyun = tur;
                 if (tur == OyunTuru.Kostebek) x.KaosTurlari = false;
+                if (tur == OyunTuru.Takim) x.GizliGorevler = false;
                 if (tur != OyunTuru.RusRuleti) return;
                 x.CezaSeviyesi = CezaSeviyesi.Kapali;
                 x.GizliGorevler = false;
@@ -208,6 +223,22 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(kalan, Is.GreaterThanOrEqualTo(2), t + ": oyun bitmeliydi");
             if (g.Final) Assert.That(kalan, Is.LessThanOrEqualTo(Oyun.FinalSiniri), t + ": erken final");
             else Assert.That(kalan, Is.GreaterThan(Oyun.FinalSiniri), t + ": final başlamadı");
+        }
+
+        /// <summary>Herkesin takımı var; puan = başlangıç + puan olayları.</summary>
+        static void TakimDegismezleri(Gorunum g, List<int> baslangic, int[] olayPuani, int tohum)
+        {
+            string t = "tohum " + tohum + ", aşama " + g.Asama;
+            foreach (var o in g.Oyuncular) Assert.That(o.Takim == 0 || o.Takim == 1, Is.True, t);
+            for (int i = 0; i < Oyun.TakimSayisi; i++)
+                Assert.That(g.TakimPuanlari[i], Is.EqualTo(baslangic[i] + olayPuani[i]), t + ": puan olaysız değişti");
+        }
+
+        static void TakimSonu(OyunOzeti ozet, int tohum)
+        {
+            var p = ozet.Takim.Puanlar;
+            int? beklenen = p[0] > p[1] ? 0 : p[1] > p[0] ? 1 : (int?)null;
+            Assert.That(ozet.Takim.Kazanan, Is.EqualTo(beklenen), "tohum " + tohum);
         }
 
         static void RusRuletiSonu(OyunOzeti ozet, Gorunum g, int tohum)

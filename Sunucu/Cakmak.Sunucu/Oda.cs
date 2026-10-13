@@ -42,6 +42,8 @@ namespace Cakmak.Sunucu
         readonly Ayarlar ayarlar = new Ayarlar();
         /// <summary>Kurucunun seçtiği paketler. Başta sunucudakilerin hepsi.</summary>
         List<string> seciliPaketler;
+        /// <summary>Takım Düellosu: kurucunun dağılımı (null = rastgele). Lobiden çıkan düşer, tekrar oynayınca sıfırlanır.</summary>
+        Dictionary<OyuncuId, int> takimlar;
         /// <summary>
         /// Grubun kendi paketi ("bizim paket"): kurucu cihazındaki grup kaydından yükler. Sadece bellekte, oda kapanınca gider.
         /// </summary>
@@ -161,7 +163,7 @@ namespace Cakmak.Sunucu
                 if (oyun == null || o.Bekliyor)
                 {
                     // Lobide ya da bekleme odasında kopan yerini kaybeder.
-                    oyuncular.Remove(o);
+                    OdadanCikar(o);
                     if (oyun == null && oyuncular.Count == 0)
                     {
                         Kapandi = true;
@@ -222,6 +224,7 @@ namespace Cakmak.Sunucu
                 var gorevler = Protokol.Mantik(m, "gorevler", false);
                 var kaos = Protokol.Mantik(m, "kaos", false);
                 var can = Protokol.Sayi(m, "can", false);
+                var yeniTakimlar = Protokol.TakimlarCoz(m, out var takimlarVerildi);
                 var secilen = Protokol.MetinListesi(m, "paketler");
                 // Birbirine uyma kuralları (Temiz + Cesur, oyuna göre kapalı olanlar) kural motorunda tek yerde.
                 var yeni = new Ayarlar
@@ -238,6 +241,7 @@ namespace Cakmak.Sunucu
                 // Reaksiyon sadece elden ele: online'da süre istemciden gelir ve telefonların dokunma gecikmesi farklıdır.
                 if (yeni.MiniOyun == MiniOyunTuru.Reaksiyon
                     || !Oyun.AyarlarUyumlu(yeni)
+                    || !TakimlarGecerli(yeniTakimlar)
                     || (secilen != null && !PaketlerGecerli(secilen))
                     || !Aralikta(turSayisi, 0, 100) || !Aralikta(soruSn, 5, 300) || !Aralikta(cevapSn, 5, 300) || !Aralikta(hamleSn, 5, 300))
                 {
@@ -252,6 +256,7 @@ namespace Cakmak.Sunucu
                 ayarlar.GizliGorevler = yeni.GizliGorevler;
                 ayarlar.KaosTurlari = yeni.KaosTurlari;
                 ayarlar.Can = yeni.Can;
+                if (takimlarVerildi) ayarlar.TakimDagilimi = takimlar = yeniTakimlar;
                 if (turSayisi.HasValue) ayarlar.TurSayisi = turSayisi.Value;
                 if (soruSn.HasValue) ayarlar.SoruSuresiSn = soruSn.Value;
                 if (cevapSn.HasValue) ayarlar.CevapSuresiSn = cevapSn.Value;
@@ -283,6 +288,7 @@ namespace Cakmak.Sunucu
                 {
                     Oyun = ayarlar.Oyun,
                     Can = ayarlar.Can,
+                    TakimDagilimi = takimlar == null ? null : new Dictionary<OyuncuId, int>(takimlar),
                     Mod = ayarlar.Mod,
                     MiniOyun = ayarlar.MiniOyun,
                     TurSayisi = ayarlar.TurSayisi,
@@ -361,6 +367,7 @@ namespace Cakmak.Sunucu
                 if (!oyunBitti) { b.Yolla(Protokol.Hata("YANLIS_ASAMA")); return; }
 
                 oyuncular.RemoveAll(o => o.Baglanti == null);
+                ayarlar.TakimDagilimi = takimlar = null; // oyuncular değişti: takımlar yeniden (rastgele ya da kurucu)
                 foreach (var o in oyuncular)
                 {
                     o.Bekliyor = false;
@@ -475,10 +482,13 @@ namespace Cakmak.Sunucu
                 if (!UyeMi(b)) return;
                 if (!sinirlar.SohbetIzni(b)) { b.Yolla(Protokol.Hata("COK_HIZLI")); return; }
                 var kimeMetni = Protokol.Metin(m, "kime", false);
-                OyuncuId? kime = kimeMetni == null ? (OyuncuId?)null : Protokol.IdCoz(kimeMetni);
+                bool takimKanali = kimeMetni == Protokol.TakimKanali;
+                OyuncuId? kime = kimeMetni == null || takimKanali ? (OyuncuId?)null : Protokol.IdCoz(kimeMetni);
                 var metin = TemizMetin.Temizle(Protokol.Metin(m, "metin"));
                 var alan = kime == null ? null : oyuncular.Find(o => o.Id == kime.Value);
-                if (metin.Length == 0 || metin.Length > SohbetEnFazla || (kime != null && (alan == null || alan.Id == b.Kim)))
+                var takimArkadaslari = takimKanali ? TakimArkadaslari(b.Kim) : null;
+                if (metin.Length == 0 || metin.Length > SohbetEnFazla || (kime != null && (alan == null || alan.Id == b.Kim))
+                    || (takimKanali && takimArkadaslari == null))
                 {
                     b.Yolla(Protokol.Hata("GECERSIZ_GIRDI"));
                     return;
@@ -489,14 +499,46 @@ namespace Cakmak.Sunucu
                     return;
                 }
 
-                var json = Protokol.Sohbet(++sohbetSayaci, b.Kim, kime, metin);
-                if (alan == null) foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
+                var json = Protokol.Sohbet(++sohbetSayaci, b.Kim, kime, metin, takimKanali);
+                if (takimKanali) foreach (var o in oyuncular) { if (takimArkadaslari.Contains(o.Id)) o.Baglanti?.Yolla(json); }
+                else if (alan == null) foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
                 else
                 {
                     alan.Baglanti?.Yolla(json);
                     b.Yolla(json);
                 }
             }
+        }
+
+        /// <summary>
+        /// Takım Düellosu sürerken yazanın takımındakiler (kendisi dahil). Takım oyunu yoksa, oyun başlamadıysa ya da yazan
+        /// oyunda değilse (bekleme odası) null.
+        /// </summary>
+        HashSet<OyuncuId> TakimArkadaslari(OyuncuId kim)
+        {
+            var g = oyun?.GorunumAl(kim);
+            if (g == null || g.Oyun != OyunTuru.Takim) return null;
+            int? takim = null;
+            foreach (var o in g.Oyuncular) if (o.Id == kim) takim = o.Takim;
+            var sonuc = new HashSet<OyuncuId>();
+            foreach (var o in g.Oyuncular) if (o.Takim == takim) sonuc.Add(o.Id);
+            return sonuc;
+        }
+
+        /// <summary>Kurucunun takım dağılımı: sayılar 0 ya da 1, hepsi odada. Herkesin olup olmadığı ve denge başlatırken (Kur).</summary>
+        bool TakimlarGecerli(Dictionary<OyuncuId, int> dagilim)
+        {
+            if (dagilim == null) return true;
+            foreach (var x in dagilim)
+                if (x.Value < 0 || x.Value >= Oyun.TakimSayisi || !oyuncular.Exists(o => o.Id == x.Key)) return false;
+            return true;
+        }
+
+        /// <summary>Lobide ya da bekleme odasında çıkan yerini kaybeder; lobideyse takım dağılımından da düşer.</summary>
+        void OdadanCikar(OdaOyuncusu o)
+        {
+            oyuncular.Remove(o);
+            if (oyun == null) takimlar?.Remove(o.Id);
         }
 
         /// <summary>Temiz modda filtreye takılan metin (soru ya da sohbet): gönderilmez, yazan uyarılır, son ihlalde atılır.</summary>
@@ -527,7 +569,7 @@ namespace Cakmak.Sunucu
             var olay = Protokol.AtildiOlayi(o.Id, neden);
             foreach (var x in oyuncular) x.Baglanti?.Yolla(olay);
 
-            if (oyun == null || o.Bekliyor) oyuncular.Remove(o);
+            if (oyun == null || o.Bekliyor) OdadanCikar(o);
             else if (!o.Cikti)
             {
                 o.Cikti = true;

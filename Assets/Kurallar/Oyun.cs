@@ -98,6 +98,7 @@ namespace Cakmak.Kurallar
                 return Sonuc.GecersizGirdi;
 
             if (!AyarlarUyumlu(ayarlar) || ayarlar.SuclamaSuresiSn <= 0) return Sonuc.GecersizGirdi;
+            if (ayarlar.Oyun == OyunTuru.Takim && !TakimDagilimiGecerli(ayarlar.TakimDagilimi, oyuncular)) return Sonuc.GecersizGirdi;
 
             oyun = new Oyun(ayarlar, oyuncular, rastgele);
             return Sonuc.Tamam;
@@ -118,6 +119,8 @@ namespace Cakmak.Kurallar
                     // Can sistemi zaten ceza; görev ve kaos turlara ve elemeye karışır (docs/Oyunlar.md, 0).
                     return a.CezaSeviyesi == CezaSeviyesi.Kapali && !a.GizliGorevler && !a.KaosTurlari
                         && a.Can >= 1 && a.Can <= EnFazlaCan;
+                case OyunTuru.Takim:
+                    return !a.GizliGorevler; // kişisel görev takım oyununa karışır
                 default:
                     return true;
             }
@@ -375,8 +378,7 @@ namespace Cakmak.Kurallar
             }
 
             TekrarGorunumu(g, kim);
-            KostebekGorunumu(g, kim);
-            RusRuletiGorunumu(g);
+            OyunGorunumu(g, kim);
             return g;
         }
 
@@ -385,7 +387,7 @@ namespace Cakmak.Kurallar
         void TurBaslat(OyuncuId yeniA)
         {
             TurSonuIsleri();
-            if (KostebekGoreviBitti() || RusRuletiAraKontrol()) return;
+            if (TurBasindaOyunKarari()) return;
             tur++;
             if (ayar.TurSayisi > 0 && tur > ayar.TurSayisi && !RusRuletli) // Rus Ruleti son kalana kadar sürer
             {
@@ -548,8 +550,7 @@ namespace Cakmak.Kurallar
             oneri = null;
             asama = Asama.OyunSonu;
             kalanMs = 0;
-            KostebekSonucunuYaz();
-            RusRuletiSonucunuYaz();
+            OyunSonuclariniYaz();
             Yay(new Olay { Tur = OlayTuru.OyunBitti });
         }
 

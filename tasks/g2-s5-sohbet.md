@@ -74,15 +74,22 @@ Unity.exe -batchmode -projectPath ../deneme -runTests -testPlatform EditMode -te
 - **Öneri** (`tasks/g1-todo.md`, karar 29): yayın adresi (`wss://<alan-adı>/ws`) istemcide tek bir yerde dursun (sabit ya da Resources'ta bir ayar dosyası). "Sunucu" alanı sadece editörde ve Development build'de görünsün. Oyuncu adres girmez, sen yine yerel sunucuyla deneyebilirsin. Adres gizli değil, build'de durması sorun değil.
 - Sözleşme oturumunda konuşulacak. Adres Enes VPS'i kurunca gelecek; o zaman 4 cihaz, farklı ağlar (S4 bitti ölçütünün son maddesi).
 
-## 5. Grup paketi online
+## 5. Grup paketi online (protokol geldi, 2026-10-13)
 
-Henüz yok. Parça parça yükleme protokolü G1'den gelecek, gelince bu dosyaya eklenir. Şimdilik bir şey yapma.
+Kaynak: `docs/Protokol.md`, "Grup paketi". Kısaca: kurucu lobide `{ "t": "grupPaketi", "ilk": true, "sorular": [...] }` ile ilk parçayı, sonra `ilk`'siz parçaları yollar; lobi `durum`'unda `grupPaketi` (yüklenen soru sayısı) gelir; `ayarlar` → `paketler`'e `"@bizim"` (`PaketBilgisi.Bizim`, senin adın) eklenince oyunda kullanılır. Temiz modda sunucu kullanmaz.
+
+- **Ne zaman:** kurucu lobide "Bizim paket" seçeneğini açınca (elden ele kurulumdaki `PaketButonu(PaketBilgisi.Bizim, ...)` gibi). O an lobideki isimlerle `GrupDeposu.Eslesen` (karar 22). Eşleşen yoksa ya da paketi boşsa seçenek görünmesin. Temiz'de görünmesin.
+- **Parçalara bölme:** her mesaj UTF-8 olarak 4096 baytın altında kalsın (JSON kaçışlarıyla birlikte; payı bırak, ör. 3800). Türkçe karakter 2 bayt. Soruların hepsi sırayla gitsin, ilk parçada `ilk: true`.
+- **Hız:** sonraki parçayı, `durum`'da `grupPaketi` arttıktan sonra yolla (saniyede 10 mesaj sınırı; 500 soru ~15–25 parça). `GECERSIZ_GIRDI` gelirse yüklemeyi durdur, uyarı göster (normalde gelmez: kayıttaki sorular zaten temiz ve ≤140 karakter).
+- **Seçim:** yükleme bitince `ayarlar` ile `paketler`'e `"@bizim"` ekle. Lobideki herkes `grupPaketi` sayısını görebilir ("Bizim paket: 87 soru").
+- **Tekrar oyna:** paket ve seçim sunucuda kalır. Oyun sonunda kurucunun kaydı `GrupKaydi.Isle` ile büyüdüyse istersen `ilk: true` ile yeniden yükle.
+- **Test:** parçalara bölen fonksiyon (her parça < sınır, hepsi sırayla, ilk parçada `ilk`), `Cevirici`'de lobi `grupPaketi`. İstersen `SunucuIleOyunTesti`'ne bir yükleme adımı.
 
 ## 6. Sözleşme oturumu gündemi (seninle ilgili)
 
 Hepsi `tasks/g1-todo.md`'de:
 - Kararlar 20–23 (PR #7'deki 3 madde + NativeShare).
-- Kararlar 25–29 (filtre, ihlal sayımı, sohbet hızı, saklamama, sunucu adresi).
+- Kararlar 25–30 (filtre, ihlal sayımı, sohbet hızı, saklamama, sunucu adresi, grup paketi).
 - Sözleşme önerisi 14 (`Sonuc.Uygunsuz`).
 - `docs/Guvenlik.md` ve `.gitignore` onayı.
 
@@ -90,5 +97,6 @@ Hepsi `tasks/g1-todo.md`'de:
 
 - EditMode'un hepsi yeşil (353 + yenilerin). `SunucuIleOyunTesti` yerel sunucuyla geçiyor.
 - **Sohbet:** iki pencerede genel ve DM. DM üçüncü pencereye düşmüyor.
+- **Grup paketi:** bir grup kaydı olan kurucu "Bizim paket"i açıyor, lobide sayı görünüyor, oyunda "Öneri çek" ondan da geliyor.
 - **Temiz:** Temiz modda bir oyuncu (bot ya da sen) 3 kez küfürlü mesaj yazınca atılıyor. Diğerleri "atıldı (Temiz mod)" görüyor, o isimle geri giremiyor.
 - **PR:** sadece senin klasörlerin, `.meta`'lar tam, `Assets/Kurallar`, `Sunucu/`, `docs/` değişmemiş.

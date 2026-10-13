@@ -150,12 +150,10 @@ namespace Cakmak.Kurallar
             TurBaslat(Oynayanlar().Contains(sonrakiA) ? sonrakiA : RastgeleOyuncu(sonrakiA));
         }
 
-        /// <summary>Yeni tur başlamadan: son kalan kazanır, 3 kişi kaldıysa final. true: tur başlamadı.</summary>
+        /// <summary>Yeni tur başlamadan: 3 kişi (ya da daha az) kaldıysa final (son kalan varsa oyun biter). true: tur başlamadı.</summary>
         bool RusRuletiAraKontrol()
         {
-            if (!RusRuletli) return false;
-            if (RusRuletiBitti()) return true;
-            if (Oynayanlar().Count > FinalSiniri) return false;
+            if (!RusRuletli || Oynayanlar().Count > FinalSiniri) return false;
             FinalTuru();
             return true;
         }

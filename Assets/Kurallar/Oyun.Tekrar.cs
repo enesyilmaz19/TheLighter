@@ -152,8 +152,7 @@ namespace Cakmak.Kurallar
                 var zorluk = (Zorluk)rastgele.Next(3);
                 foreach (var o in oyuncular) IzAl(o.Id).Gorev = GorevUret(o.Id, zorluk);
             }
-            KostebekKur();
-            RusRuletiKur();
+            OyunlariKur();
         }
 
         void TekrarTurBasi()
@@ -411,7 +410,7 @@ namespace Cakmak.Kurallar
         void TuruBitir(bool ifsa, OyuncuId? kaybeden, bool bedel)
         {
             kararVeren = null;
-            RusRuletiTurSonu(kaybeden);
+            OyunTurSonucu(ifsa, kaybeden);
             var bo = Bul(b.Value);
             var co = Bul(c.Value);
 
@@ -579,6 +578,7 @@ namespace Cakmak.Kurallar
                     Can = o.Can,
                     Elendi = o.Elendi,
                     DevretmeHakki = o.DevretmeHakki,
+                    Takim = o.Takim,
                 });
             }
             return liste;
@@ -714,6 +714,7 @@ namespace Cakmak.Kurallar
                 CurcunaSorulari = new List<string>(curcunaYazilan),
                 Kostebek = bitti ? kostebekSonucu?.Kopya() : null,
                 RusRuleti = bitti ? rusRuletiSonucu?.Kopya() : null,
+                Takim = bitti ? takimSonucu?.Kopya() : null,
             };
         }
 

@@ -204,6 +204,8 @@ namespace Cakmak.Kurallar
         public KostebekSonucu Kostebek;
         /// <summary>Rus Ruleti'nde kazanan ve elenme sırası, diğer oyunlarda null.</summary>
         public RusRuletiSonucu RusRuleti;
+        /// <summary>Takım Düellosu'nda kazanan takım ve puanlar, diğer oyunlarda null.</summary>
+        public TakimSonucu Takim;
     }
 
     // ------------------------------------------------------------ Grup kaydı (cihazda saklanır)

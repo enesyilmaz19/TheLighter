@@ -93,6 +93,9 @@ namespace Cakmak.Kurallar
         public OyuncuId? TetikCeken;
         /// <summary>Final: 3 kişi kaldı, sorusuz ikili düellolar.</summary>
         public bool Final;
+
+        /// <summary>Takım Düellosu: iki takımın puanı (diğer oyunlarda boş).</summary>
+        public IReadOnlyList<int> TakimPuanlari = Array.Empty<int>();
     }
 
     public sealed class OylamaSonucu
@@ -138,6 +141,10 @@ namespace Cakmak.Kurallar
         public bool Elendi;
         /// <summary>Oyun boyu 1 "tetik devret" hakkı duruyor mu.</summary>
         public bool DevretmeHakki;
+
+        // --- Takım Düellosu ---
+        /// <summary>Takımı (0 ya da 1); diğer oyunlarda null. Herkese açık.</summary>
+        public int? Takim;
     }
 
     public sealed class MiniOyunSonucu
@@ -189,6 +196,9 @@ namespace Cakmak.Kurallar
         FinalBasladi,   // 3 kişi kaldı: sorusuz ikili düellolar
         TetikBasladi,   // Kim: tetiği çekecek (düelloyu kaybeden)
         KararBekleniyor,// Kim: İkiye Katla ya da Bedel kararını verecek (süre dolunca da bu aşamaya geçilir)
+        // Takım Düellosu (docs/Oyunlar.md)
+        DuelloPuani,    // Kim: düelloyu kazanan, Takim: puan alan takım
+        IfsaBonusu,     // Kim: A (rakip takımdan birine sordu, ifşa oldu), Takim: puan alan takım
     }
 
     public sealed class Olay
@@ -204,5 +214,7 @@ namespace Cakmak.Kurallar
         public KaosKurali Kaos;
         /// <summary>Sadece TetikDevredildi: devralan.</summary>
         public OyuncuId? Hedef;
+        /// <summary>Sadece DuelloPuani ve IfsaBonusu: puan alan takım.</summary>
+        public int? Takim;
     }
 }

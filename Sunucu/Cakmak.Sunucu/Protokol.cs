@@ -110,6 +110,22 @@ namespace Cakmak.Sunucu
             return liste;
         }
 
+        /// <summary>
+        /// <c>"takimlar": {"p1": 0, "p2": 1, ...}</c>. Alan yoksa <paramref name="verildi"/> false. Boş nesne = rastgele (null).
+        /// Takım numarası sayı değilse ya da anahtar "p…" değilse GECERSIZ_MESAJ; değer aralığı ve dağılım odada denetlenir.
+        /// </summary>
+        public static Dictionary<OyuncuId, int> TakimlarCoz(JsonObject n, out bool verildi)
+        {
+            var d = n["takimlar"];
+            verildi = d != null;
+            if (d == null) return null;
+            if (!(d is JsonObject nesne)) throw new GecersizMesaj();
+            var sonuc = new Dictionary<OyuncuId, int>();
+            foreach (var alan in nesne)
+                sonuc[IdCoz(alan.Key)] = alan.Value is JsonValue v && v.TryGetValue(out int t) ? t : throw new GecersizMesaj();
+            return sonuc.Count == 0 ? null : sonuc;
+        }
+
         // ------------------------------------------------------------ Hamle
 
         public static Hamle HamleCoz(JsonObject n)
@@ -150,15 +166,21 @@ namespace Cakmak.Sunucu
         /// <summary>Atılana son mesaj. <c>neden</c>: "kurucu" (kurucu attı) ya da "temiz" (Temiz modda son ihlal).</summary>
         public static string Atildin(string neden) => Yaz(new JsonObject { ["t"] = "hata", ["kod"] = "ATILDIN", ["neden"] = neden });
 
-        /// <summary>Sohbet mesajı. <c>kime</c> null ise genel, doluysa DM (sadece alana ve yazana gider).</summary>
-        public static string Sohbet(int id, OyuncuId kimden, OyuncuId? kime, string metin) => Yaz(new JsonObject
+        /// <summary>
+        /// Sohbet mesajı. <c>kime</c> null ise genel, doluysa DM (sadece alana ve yazana gider),
+        /// <paramref name="takim"/> ise <c>"takim"</c> (Takım Düellosu: sadece yazanın takımına).
+        /// </summary>
+        public static string Sohbet(int id, OyuncuId kimden, OyuncuId? kime, string metin, bool takim = false) => Yaz(new JsonObject
         {
             ["t"] = "sohbet",
             ["id"] = "m" + id,
             ["kimden"] = Id(kimden),
-            ["kime"] = Id(kime),
+            ["kime"] = takim ? TakimKanali : Id(kime),
             ["metin"] = metin,
         });
+
+        /// <summary>Sohbette <c>kime</c>'nin takım kanalı değeri.</summary>
+        public const string TakimKanali = "takim";
 
         public static string Hosgeldin(OyuncuId sen, string anahtar, string oda) =>
             Yaz(new JsonObject { ["t"] = "hosgeldin", ["sen"] = Id(sen), ["anahtar"] = anahtar, ["oda"] = oda });
@@ -175,6 +197,7 @@ namespace Cakmak.Sunucu
             ["ceza"] = CezaYaz(o.Ceza),
             ["kaos"] = o.Tur == OlayTuru.KaosBasladi ? Ad(o.Kaos) : null,
             ["hedef"] = Id(o.Hedef),
+            ["takim"] = o.Takim,
         });
 
         /// <summary>Sunucunun kendi olayı (kural motorunda yok): biri atıldı. <c>neden</c>: <see cref="Atildin"/>.</summary>
@@ -196,6 +219,7 @@ namespace Cakmak.Sunucu
         {
             ["oyun"] = Ad(a.Oyun),
             ["can"] = a.Can,
+            ["takimlar"] = TakimlarYaz(a.TakimDagilimi),
             ["mod"] = Ad(a.Mod),
             ["miniOyun"] = Ad(a.MiniOyun),
             ["turSayisi"] = a.TurSayisi,
@@ -207,6 +231,13 @@ namespace Cakmak.Sunucu
             ["kaos"] = a.KaosTurlari,
             ["paketler"] = Dizi(paketler, p => p),
         };
+
+        static JsonObject TakimlarYaz(IReadOnlyDictionary<OyuncuId, int> dagilim)
+        {
+            var o = new JsonObject();
+            if (dagilim != null) foreach (var x in dagilim) o[Id(x.Key)] = x.Value;
+            return o;
+        }
 
         static JsonArray Dizi<T>(IEnumerable<T> liste, Func<T, JsonNode> yaz)
         {
@@ -244,6 +275,11 @@ namespace Cakmak.Sunucu
             {
                 ["kazanan"] = Id(o.RusRuleti.Kazanan),
                 ["elenmeSirasi"] = Dizi(o.RusRuleti.ElenmeSirasi, x => Id(x)),
+            },
+            ["takim"] = o.Takim == null ? null : new JsonObject
+            {
+                ["kazanan"] = o.Takim.Kazanan,
+                ["puanlar"] = Dizi(o.Takim.Puanlar, x => x),
             },
         };
 
@@ -334,6 +370,7 @@ namespace Cakmak.Sunucu
                     ["can"] = o.Can,
                     ["elendi"] = o.Elendi,
                     ["devretmeHakki"] = o.DevretmeHakki,
+                    ["takim"] = o.Takim,
                 });
             }
 
@@ -391,6 +428,7 @@ namespace Cakmak.Sunucu
                 ["sonSuclama"] = g.SonSuclama,
                 ["tetikCeken"] = Id(g.TetikCeken),
                 ["final"] = g.Final,
+                ["takimPuanlari"] = Dizi(g.TakimPuanlari, x => x),
                 ["sana"] = new JsonObject
                 {
                     ["soru"] = g.Soru,

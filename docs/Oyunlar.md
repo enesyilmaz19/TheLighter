@@ -122,6 +122,14 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **İçerik:** yok.
 - **Kararlar (2026-10-13):** düello puanı + ifşa bonusu. Online'da takım sohbeti var.
 
+**Kodlandı (2026-10-13, kural motoru + sunucu; ekranlar Arda'da).** Kodlarken netleşenler:
+
+- **Kurucunun dağılımı:** herkes tam bir kez, takımlar arasında en fazla 1 kişi fark (4+ kişide her takımda en az 2). Dağıtmazsa rastgele ve dengeli. Online'da lobiden çıkan dağılımdan düşer, tekrar oynayınca dağılım sıfırlanır.
+- **Kazanma anı:** 7 puana ulaşan takım, o turun sonucu gösterildikten sonra kazanır. Aynı turda iki takım da 7'yi geçerse yüksek olan; tur sayısı ya da kurucu bitirirse önde olan, eşitlikte berabere.
+- **Kaos turları:** Grup Kararı'nda düello yok, oylamanın kazananı sayılır (oylama berabereyse puan yok). Soran Gizli turunda ifşa bonusu yok: puan A'nın takımını ele verirdi.
+- **Görevler kapalı;** ceza ve kaos açılabilir.
+- **Takım sohbeti:** `kime: "takim"`, sadece oyun sürerken (lobide ve bekleme odasında takım yok).
+
 ## 4. Casus (mekân ya da kelime: Imposter da bu)
 
 **Fikir:** herkes gizli bir mekânı bilir, casus bilmez. Casus, sorulara bilmeden cevap vermek zorunda.
@@ -174,13 +182,14 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **Yeni ayar:** `Ayarlar.Oyun` (enum, sona eklenir). `Mod` aynen kalır. "Birlikte olamaz" kuralları tek yerde, `Oyun.AyarlarUyumlu`: `Kur` ve sunucunun lobisi onu kullanır (yapıldı: Temiz + Cesur, Köstebek + kaos, Rus Ruleti + ceza/görev/kaos; gelecek: Casus + Curcuna). Kişi sayısı sınırı (Vampir 6+) `Kur`'da.
 - **Yeni aşamalar** (enum sonuna): `Suclama` (Köstebek, yapıldı), `Tetik` (Rus Ruleti, yapıldı); gelecek: `Gece`, `Linc`, `CasusTahmini`. Rus Ruleti'nin finali ayrı aşama değil, `Gorunum.Final` bayrağı (final düellosu normal `MiniOyun` aşaması).
 - **Olay kuralı:** motor her aşama değişikliğinde bir olay yayar. Sunucu yeni durumu olaydan sonra yollar; olaysız değişen aşama online'da ekrana gitmez. Rastgele oyun testi bunu her oyunda denetler.
-- **Her oyun ayrı dosya:** `Oyun.Kostebek.cs`, `Oyun.RusRuleti.cs`, `Oyun.Takim.cs`, `Oyun.Casus.cs`, `Oyun.Vampir.cs`. Oyuna bağlandıkları yerler:
-  - tur sonu,
-  - düello sonucu,
-  - ifşa ve güme,
-  - kazanma kontrolü.
+- **Her oyun ayrı dosya:** `Oyun.Kostebek.cs`, `Oyun.RusRuleti.cs`, `Oyun.Takim.cs` (yapıldı), `Oyun.Casus.cs`, `Oyun.Vampir.cs`. Çekirdek döngü oyunlara tek bir yerden, `Oyun.Kancalar.cs` üzerinden bağlanır:
+  - kurulum (`OyunlariKur`),
+  - yeni tur başlamadan oyunun kararı: bitti mi, başka akışa mı geçiyor (`TurBasindaOyunKarari`),
+  - turun sonucu: ifşa mı, düelloyu kim kaybetti (`OyunTurSonucu`),
+  - oyun biterken sonucun yazılması (`OyunSonuclariniYaz`),
+  - görünüm (`OyunGorunumu`).
 
-  Bugünkü Çakmak bunların hiçbirinden etkilenmez, testleri aynen kalır.
+  Her oyunun metodu "bu oyun değilse hiçbir şey yapma" diye başlar; yeni oyun bu beş kancaya eklenir. Oyuna özgü aşamalar (Köstebek'in oylaması, Rus Ruleti'nin tetiği) kendi dosyasında. Bugünkü Çakmak bunların hiçbirinden etkilenmez, testleri ve rastgeleliği aynen kalır.
 - **Gizlilik testleri her oyunda:** rol, mekân, vampir arkadaşları, gözcünün öğrendiği sadece sahibinin görünümünde. Bugünkü soru gizliliği testleri gibi.
 - **Protokol:**
   - `ayarlar.oyun`;

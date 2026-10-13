@@ -116,13 +116,25 @@ namespace TheLighter.Ag
             bekleyenIlkMesaj = Cevirici.OdaKur(isim);
         }
 
-        /// <summary>Koda katılır. Bu oda için saklı anahtar varsa onunla (aynı kimlikle geri dönüş).</summary>
+        /// <summary>
+        /// Koda katılır. Saklı anahtar sadece aynı oda ve aynı isimle gider (aynı kimlikle geri dönüş).
+        /// Aynı bilgisayarda ikinci pencere başka isimle girerse başkasının anahtarını yollamaz: yeni oyuncu olarak girer.
+        /// </summary>
         public void Katil(Uri sunucu, string oda, string isim)
         {
             oda = (oda ?? "").Trim().ToUpperInvariant();
-            string eskiAnahtar = kalici != null && kalici.Oku(KayitOda) == oda ? kalici.Oku(KayitAnahtar) : null;
+            string eskiAnahtar = SakliAnahtar(oda, isim);
             Basla(sunucu, isim, oda, eskiAnahtar);
             bekleyenIlkMesaj = Cevirici.Katil(oda, isim, eskiAnahtar);
+        }
+
+        /// <summary>Bu oda ve bu isim için saklı anahtar; isim büyük/küçük harf farkıyla aynı sayılır ("İrem" = "irem").</summary>
+        string SakliAnahtar(string oda, string isim)
+        {
+            if (kalici == null || kalici.Oku(KayitOda) != oda) return null;
+            string sakliIsim = kalici.Oku(KayitIsim);
+            if (sakliIsim == null || Oyuncu.IsimAnahtari(sakliIsim) != Oyuncu.IsimAnahtari(isim ?? "")) return null;
+            return kalici.Oku(KayitAnahtar);
         }
 
         void Basla(Uri sunucu, string isim, string oda, string eskiAnahtar)

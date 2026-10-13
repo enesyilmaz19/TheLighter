@@ -157,6 +157,7 @@ namespace TheLighter.Testler
         public void Katil_AyniOdanınSakliAnahtariylaGeriDoner_BaskaOdadaAnahtarYollamaz()
         {
             kalici.Yaz(OnlineIstemci.KayitOda, "KXTPM");
+            kalici.Yaz(OnlineIstemci.KayitIsim, "Ayşe");
             kalici.Yaz(OnlineIstemci.KayitAnahtar, "ESKI");
 
             istemci.Katil(Adres, "KXTPM", "Ayşe");
@@ -165,6 +166,39 @@ namespace TheLighter.Testler
             Assert.That(T.Son["anahtar"].Metin, Is.EqualTo("ESKI"));
 
             istemci.Katil(Adres, "ABCDE", "Ayşe");
+            T.Acil();
+            Kare();
+            Assert.That(T.Son["anahtar"].Var, Is.False);
+        }
+
+        /// <summary>
+        /// PC'de aynı bilgisayarda iki pencere (aynı PlayerPrefs): ikincisi başka isimle girerken birincinin
+        /// anahtarını yollarsa birincinin yerine geçer. Anahtar sadece aynı isimle gider.
+        /// </summary>
+        [Test]
+        public void Katil_BaskaIsimleSakliAnahtarYollamaz_AyniIsimYollar()
+        {
+            kalici.Yaz(OnlineIstemci.KayitOda, "KXTPM");
+            kalici.Yaz(OnlineIstemci.KayitIsim, "İrem");
+            kalici.Yaz(OnlineIstemci.KayitAnahtar, "ESKI");
+
+            istemci.Katil(Adres, "KXTPM", "Ali");
+            T.Acil();
+            Kare();
+            Assert.That(T.Son["anahtar"].Var, Is.False, "başka isim: başkasının anahtarı gitmez");
+
+            istemci.Katil(Adres, "KXTPM", "irem");
+            T.Acil();
+            Kare();
+            Assert.That(T.Son["anahtar"].Metin, Is.EqualTo("ESKI"), "aynı isim (büyük/küçük harf farkıyla): geri dönüş");
+        }
+
+        [Test]
+        public void Katil_SakliIsimYoksaAnahtarYollamaz()
+        {
+            kalici.Yaz(OnlineIstemci.KayitOda, "KXTPM");
+            kalici.Yaz(OnlineIstemci.KayitAnahtar, "ESKI");
+            istemci.Katil(Adres, "KXTPM", "Ali");
             T.Acil();
             Kare();
             Assert.That(T.Son["anahtar"].Var, Is.False);

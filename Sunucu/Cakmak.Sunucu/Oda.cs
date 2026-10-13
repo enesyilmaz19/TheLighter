@@ -211,6 +211,7 @@ namespace Cakmak.Sunucu
                 if (oyun != null) { b.Yolla(Protokol.Hata("OYUN_BASLADI")); return; }
 
                 // Önce hepsini oku ve kontrol et, sonra uygula: yarım değişiklik olmasın.
+                var oyunAdi = Protokol.Metin(m, "oyun", false);
                 var mod = Protokol.Metin(m, "mod", false);
                 var miniOyun = Protokol.Metin(m, "miniOyun", false);
                 var turSayisi = Protokol.Sayi(m, "turSayisi", false);
@@ -221,6 +222,8 @@ namespace Cakmak.Sunucu
                 var gorevler = Protokol.Mantik(m, "gorevler", false);
                 var kaos = Protokol.Mantik(m, "kaos", false);
                 var secilen = Protokol.MetinListesi(m, "paketler");
+                var yeniOyun = oyunAdi == null ? ayarlar.Oyun : Protokol.Coz<OyunTuru>(oyunAdi);
+                var yeniKaos = kaos ?? ayarlar.KaosTurlari;
                 var yeniMod = mod == null ? ayarlar.Mod : Protokol.Coz<OyunModu>(mod);
                 var yeniMiniOyun = miniOyun == null ? ayarlar.MiniOyun : Protokol.Coz<MiniOyunTuru>(miniOyun);
                 var yeniCeza = ceza == null ? ayarlar.CezaSeviyesi : Protokol.Coz<CezaSeviyesi>(ceza);
@@ -229,6 +232,7 @@ namespace Cakmak.Sunucu
                 // Temiz modda en fazla Hafif ceza (Ana Plan 8.1).
                 if (yeniMiniOyun == MiniOyunTuru.Reaksiyon
                     || (yeniMod == OyunModu.Temiz && yeniCeza == CezaSeviyesi.Cesur)
+                    || (yeniOyun == OyunTuru.Kostebek && yeniKaos) // Köstebek'te kaos yok (docs/Oyunlar.md)
                     || (secilen != null && !PaketlerGecerli(secilen))
                     || !Aralikta(turSayisi, 0, 100) || !Aralikta(soruSn, 5, 300) || !Aralikta(cevapSn, 5, 300) || !Aralikta(hamleSn, 5, 300))
                 {
@@ -236,6 +240,7 @@ namespace Cakmak.Sunucu
                     return;
                 }
 
+                ayarlar.Oyun = yeniOyun;
                 ayarlar.Mod = yeniMod;
                 ayarlar.MiniOyun = yeniMiniOyun;
                 ayarlar.CezaSeviyesi = yeniCeza;
@@ -244,7 +249,7 @@ namespace Cakmak.Sunucu
                 if (cevapSn.HasValue) ayarlar.CevapSuresiSn = cevapSn.Value;
                 if (hamleSn.HasValue) ayarlar.HamleSuresiSn = hamleSn.Value;
                 if (gorevler.HasValue) ayarlar.GizliGorevler = gorevler.Value;
-                if (kaos.HasValue) ayarlar.KaosTurlari = kaos.Value;
+                ayarlar.KaosTurlari = yeniKaos;
                 if (secilen != null) seciliPaketler = secilen;
                 HerkeseDurum();
             }
@@ -270,6 +275,7 @@ namespace Cakmak.Sunucu
 
                 var kopya = new Ayarlar
                 {
+                    Oyun = ayarlar.Oyun,
                     Mod = ayarlar.Mod,
                     MiniOyun = ayarlar.MiniOyun,
                     TurSayisi = ayarlar.TurSayisi,
@@ -429,6 +435,12 @@ namespace Cakmak.Sunucu
                     case "karariGec":
                         sonuc = oyun.KarariGec(b.Kim);
                         break;
+                    case "sucla":
+                        sonuc = oyun.Sucla(b.Kim);
+                        break;
+                    case "suclamaOyu":
+                        sonuc = oyun.SuclamaOyu(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")));
+                        break;
                     default:
                         throw new GecersizMesaj();
                 }
@@ -570,7 +582,8 @@ namespace Cakmak.Sunucu
             {
                 if (azOyuncuBekleme == TimeSpan.Zero) degisti = true; // durum'a "bekleme" girsin
                 azOyuncuBekleme += gecen;
-                if (azOyuncuBekleme >= sinirlar.AzOyuncuSuresi) oyun.OyunuBitir();
+                // Oylamasız biter: kimse dönmedi, Köstebek'in son oylaması da yapılamaz.
+                if (azOyuncuBekleme >= sinirlar.AzOyuncuSuresi) oyun.OyunuBitir(zorla: true);
                 return;
             }
             if (azOyuncuBekleme > TimeSpan.Zero)

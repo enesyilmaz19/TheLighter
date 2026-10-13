@@ -57,6 +57,7 @@ namespace Cakmak.Kurallar
             kopuk.Remove(kim);
             afk.Remove(kim);
             Yay(new Olay { Tur = OlayTuru.OyuncuCikti, Kim = kim });
+            if (KostebekKacti(kim)) return Sonuc.Tamam;
             EldekiIsiBitir(kim);
             return Sonuc.Tamam;
         }
@@ -83,6 +84,10 @@ namespace Cakmak.Kurallar
                     break;
                 case Asama.Oylama when !oylar.ContainsKey(kim) && oylayanlar.Remove(kim):
                     if (oylar.Count == oylayanlar.Count) OylamayiBitir();
+                    break;
+                // Köstebek oylaması: oy vermeden çıkan düşer, verdiyse oyu sayılır.
+                case Asama.Suclama when !suclamaOylari.ContainsKey(kim) && oylayanlar.Remove(kim):
+                    if (suclamaOylari.Count == oylayanlar.Count) SuclamayiBitir();
                     break;
                 case Asama.IkiyeKatla when kim == kararVeren:
                 case Asama.Bedel when kim == kararVeren:

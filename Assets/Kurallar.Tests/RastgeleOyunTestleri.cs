@@ -23,6 +23,13 @@ namespace Cakmak.Kurallar.Tests
         }
 
         [Test]
+        public void Uc_yuz_rastgele_kostebek_oyununda_hicbir_degismez_bozulmaz()
+        {
+            for (int tohum = 1; tohum <= 300; tohum++)
+                Oyna(tohum, kostebek: true);
+        }
+
+        [Test]
         public void Ayni_tohum_ayni_oyunu_uretir()
         {
             for (int tohum = 1; tohum <= 50; tohum++)
@@ -35,14 +42,14 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(Oyna(1), Is.Not.EqualTo(Oyna(2)));
         }
 
-        /// <summary>Bir oyunu baştan sona oynar, olay kaydını döner.</summary>
-        static string Oyna(int tohum)
+        /// <summary>Bir oyunu baştan sona oynar, olay kaydını döner. Köstebek dalı Çakmak oyunlarının rastgeleliğini değiştirmez.</summary>
+        static string Oyna(int tohum, bool kostebek = false)
         {
             var robot = new Random(tohum * 7919);
             int kisi = 4 + robot.Next(7);
             var mod = (OyunModu)robot.Next(3);
             bool s3 = robot.Next(2) == 0;
-            var oyun = Yeni(kisi, tohum, x =>
+            var oyun = Kur(kisi, tohum, x =>
             {
                 x.Mod = mod;
                 x.MiniOyun = MiniOyunlar[robot.Next(MiniOyunlar.Length)];
@@ -55,7 +62,7 @@ namespace Cakmak.Kurallar.Tests
                 x.KaosTurlari = robot.Next(3) != 0;
                 x.TekCihaz = robot.Next(2) == 0;
                 x.SesliCezalar = new[] { "Sesli ceza 1", "Sesli ceza 2" };
-            });
+            }, kostebek);
 
             var kayit = new StringBuilder();
             oyun.OlayOldu += o => kayit.Append(o.Tur).Append(o.A).Append(o.B).Append(o.C).Append(o.Kim).Append(o.Soru)
@@ -72,13 +79,20 @@ namespace Cakmak.Kurallar.Tests
                     foreach (var u in ozet.Unvanlar) kayit.Append(u.Tur).Append(u.Kim).Append(u.Deger).Append(',');
                     foreach (var gs in ozet.Gorevler) kayit.Append(gs.Kim).Append(gs.Gorev.Tur).Append(gs.Gorev.Hedef).Append(gs.Basarili).Append(',');
                     foreach (var k in ozet.IfsaOlanlar) kayit.Append(k.Soru).Append(',');
+                    if (kostebek) KostebekSonu(oyun, ozet, tohum);
                     return kayit.ToString();
                 }
                 Degismezler(oyun, g, gizli, tohum);
+                if (kostebek) KostebekDegismezleri(oyun, g, tohum);
 
                 int zar = robot.Next(10);
                 if (zar == 0) { Saniye(oyun, robot.Next(1, 30)); continue; }       // bekle (AFK)
                 if (zar == 1) { YanlisKomut(oyun, g, robot); continue; }            // yanlış komut
+                if (kostebek && zar == 2 && g.Asama == Asama.SoruSorma)            // erken suçlama
+                {
+                    oyun.Sucla(g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id);
+                    continue;
+                }
 
                 switch (g.Asama)
                 {
@@ -125,10 +139,47 @@ namespace Cakmak.Kurallar.Tests
                     case Asama.Gume:
                         Saniye(oyun, 6);
                         break;
+
+                    case Asama.Suclama:
+                        var suclayan = g.Oylayanlar[robot.Next(g.Oylayanlar.Count)];
+                        oyun.SuclamaOyu(suclayan, g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id); // geçersiz de olabilir
+                        break;
                 }
             }
             Assert.Fail($"tohum {tohum}: oyun 5000 adımda bitmedi, takıldı");
             return null;
+        }
+
+        /// <summary>Kurulum: S3 ayarları rastgele; Köstebek'te kaos kapalı (kurulamaz).</summary>
+        static Oyun Kur(int kisi, int tohum, Action<Ayarlar> ayarla, bool kostebek) =>
+            Yeni(kisi, tohum, x =>
+            {
+                ayarla(x);
+                if (!kostebek) return;
+                x.Oyun = OyunTuru.Kostebek;
+                x.KaosTurlari = false;
+            });
+
+        /// <summary>Köstebek sadece kendi görünümünde, hiç şüpheli olmaz (köstebek suçlanırsa oyun biter).</summary>
+        static void KostebekDegismezleri(Oyun oyun, Gorunum g, int tohum)
+        {
+            string t = "tohum " + tohum + ", aşama " + g.Asama;
+            int sayi = 0;
+            OyuncuId k = default;
+            foreach (var o in g.Oyuncular)
+                if (oyun.GorunumAl(o.Id).Rolun == Rol.Kostebek) { sayi++; k = o.Id; }
+            Assert.That(sayi, Is.EqualTo(1), t + ": tam bir köstebek");
+            Assert.That(g.Supheliler, Has.No.Member(k), t + ": köstebek şüpheli listesinde ama oyun sürüyor");
+            Assert.That(oyun.Ozet().Kostebek, Is.Null, t + ": oyun bitmeden köstebek açıldı");
+        }
+
+        static void KostebekSonu(Oyun oyun, OyunOzeti ozet, int tohum)
+        {
+            Assert.That(ozet.Kostebek, Is.Not.Null, "tohum " + tohum);
+            Assert.That(oyun.GorunumAl(ozet.Kostebek.Kostebek).Rolun, Is.EqualTo(Rol.Kostebek), "tohum " + tohum);
+            if (ozet.Kostebek.Neden != KostebekNedeni.GorevBitti) return;
+            foreach (var gs in ozet.Gorevler)
+                if (gs.Kim == ozet.Kostebek.Kostebek) Assert.That(gs.Basarili, Is.True, "tohum " + tohum + ": görevi bitmeden kazandı");
         }
 
         static void Degismezler(Oyun oyun, Gorunum g, string gizli, int tohum)

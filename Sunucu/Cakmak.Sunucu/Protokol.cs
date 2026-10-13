@@ -193,6 +193,7 @@ namespace Cakmak.Sunucu
 
         public static JsonObject AyarlarYaz(Ayarlar a, IEnumerable<string> paketler) => new JsonObject
         {
+            ["oyun"] = Ad(a.Oyun),
             ["mod"] = Ad(a.Mod),
             ["miniOyun"] = Ad(a.MiniOyun),
             ["turSayisi"] = a.TurSayisi,
@@ -231,6 +232,12 @@ namespace Cakmak.Sunucu
             ["gorevler"] = Dizi(o.Gorevler, g => new JsonObject { ["kim"] = Id(g.Kim), ["gorev"] = GorevYaz(g.Gorev), ["basarili"] = g.Basarili }),
             ["ifsaOlanlar"] = Dizi(o.IfsaOlanlar, k => new JsonObject { ["soru"] = k.Soru, ["a"] = Id(k.A), ["b"] = Id(k.B), ["c"] = Id(k.C) }),
             ["curcunaSorulari"] = Dizi(o.CurcunaSorulari, s => s),
+            ["kostebek"] = o.Kostebek == null ? null : new JsonObject
+            {
+                ["kim"] = Id(o.Kostebek.Kostebek),
+                ["kazanan"] = Ad(o.Kostebek.Kazanan),
+                ["neden"] = Ad(o.Kostebek.Neden),
+            },
         };
 
         /// <summary>Odadaki oyuncunun kural motorunda olmayan bilgileri.</summary>
@@ -346,6 +353,7 @@ namespace Cakmak.Sunucu
                 ["t"] = "durum",
                 ["surum"] = surum,
                 ["oda"] = oda,
+                ["oyun"] = Ad(g.Oyun),
                 ["asama"] = Ad(g.Asama),
                 ["tur"] = g.Tur,
                 ["toplamTur"] = g.ToplamTur,
@@ -369,6 +377,8 @@ namespace Cakmak.Sunucu
                 ["sonOylama"] = g.SonOylama == null ? null : new JsonObject { ["ifsa"] = g.SonOylama.Ifsa, ["gume"] = g.SonOylama.Gume },
                 ["bedelOdendi"] = g.BedelOdendi,
                 ["turCezalari"] = Dizi(g.TurCezalari, x => new JsonObject { ["kim"] = Id(x.Kim), ["ceza"] = CezaYaz(x.Ceza), ["neden"] = Ad(x.Neden) }),
+                ["supheliler"] = Dizi(g.Supheliler, x => Id(x)),
+                ["sonSuclama"] = g.SonSuclama,
                 ["sana"] = new JsonObject
                 {
                     ["soru"] = g.Soru,
@@ -379,6 +389,8 @@ namespace Cakmak.Sunucu
                     ["hamlen"] = HamleYaz(g.Hamlen),
                     ["gorevin"] = GorevYaz(g.Gorevin),
                     ["oyVerdin"] = g.OyVerdin,
+                    ["rol"] = g.Rolun == Rol.Yok ? null : Ad(g.Rolun),
+                    ["suclamaHakki"] = g.SuclamaHakkin,
                 },
                 ["ifsa"] = g.Asama == Asama.Ifsa ? new JsonObject { ["soru"] = g.IfsaSoru, ["fisilti"] = g.IfsaFisilti } : null,
                 ["ozet"] = OzetYaz(ozet),

@@ -111,9 +111,14 @@ namespace Cakmak.Kurallar
         Ifsa,          // soru herkese açık
         Gume,          // soru gizli kaldı
         OyunSonu,
+        // Yeni aşamalar hep sona.
+        Suclama,       // Köstebek: "Köstebek kim?" oylaması (docs/Oyunlar.md)
     }
 
     public enum OyunModu { Normal, Temiz, Curcuna }
+
+    /// <summary>Hangi oyun (docs/Oyunlar.md). Mod (soruların nereden geldiği, Temiz filtresi) her oyunda ayrı seçilir. Yeni oyunlar sona.</summary>
+    public enum OyunTuru { Cakmak, Kostebek }
 
     public enum MiniOyunTuru { Tkm, TekCift, Zar, Reaksiyon, Karisik }
 
@@ -151,6 +156,7 @@ namespace Cakmak.Kurallar
 
     public sealed class Ayarlar
     {
+        public OyunTuru Oyun = OyunTuru.Cakmak;
         public OyunModu Mod = OyunModu.Normal;
         public MiniOyunTuru MiniOyun = MiniOyunTuru.Tkm;
         /// <summary>0 = sınırsız, kurucu bitirir.</summary>
@@ -174,5 +180,8 @@ namespace Cakmak.Kurallar
         public int KararSuresiSn = 5;
         /// <summary>Elden ele (tek cihaz). Açıkken kaos turlarında "Soran Gizli" çıkmaz: herkes telefonu kimin tuttuğunu görüyor.</summary>
         public bool TekCihaz;
+
+        /// <summary>Köstebek: "Köstebek kim?" oylamasının süresi (tartışma dahil).</summary>
+        public int SuclamaSuresiSn = 60;
     }
 }

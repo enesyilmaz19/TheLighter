@@ -10,6 +10,8 @@ namespace Cakmak.Kurallar
     public sealed class Gorunum
     {
         public OyuncuId Sen;
+        /// <summary>Hangi oyun (herkese açık).</summary>
+        public OyunTuru Oyun;
         public Asama Asama;
         public int Tur;
         /// <summary>0 = sınırsız.</summary>
@@ -73,6 +75,17 @@ namespace Cakmak.Kurallar
         public bool BedelOdendi;
         /// <summary>Bu turda çekilen cezalar (yanma, kaybetme, bedel). Tur başında boşalır.</summary>
         public IReadOnlyList<CezaCekimi> TurCezalari = Array.Empty<CezaCekimi>();
+
+        // --- Köstebek (docs/Oyunlar.md) ---
+
+        /// <summary>Sadece sana: gizli rolün. Köstebek oyununda köstebeğe Kostebek, diğer herkese ve diğer oyunlarda Yok.</summary>
+        public Rol Rolun;
+        /// <summary>Sadece sana: erken suçlama hakkın duruyor mu (Köstebek, oyun boyu 1 kez).</summary>
+        public bool SuclamaHakkin;
+        /// <summary>Herkese: yanlış suçlanıp "şüpheli" etiketi alanlar.</summary>
+        public IReadOnlyList<OyuncuId> Supheliler = Array.Empty<OyuncuId>();
+        /// <summary>Suclama aşamasında: bu oyunun son oylaması (tur sayısı bitti ya da kurucu bitirdi).</summary>
+        public bool SonSuclama;
     }
 
     public sealed class OylamaSonucu
@@ -150,6 +163,9 @@ namespace Cakmak.Kurallar
         Afk,            // Kim: üst üste süresini doldurdu, AFK oldu
         OyuncuCikti,    // Kim: oyundan çıktı
         AfkBitti,       // Kim: AFK'dan döndü (bir mesaj yolladı)
+        // Köstebek (docs/Oyunlar.md)
+        SuclamaBasladi, // Kim: erken suçlama hakkını kullanan, ya da null (her 5 turda bir, son oylama)
+        SuclamaBitti,   // Kim: en çok oyu alan (suçlanan), eşitlik ya da hiç oy yoksa null
     }
 
     public sealed class Olay

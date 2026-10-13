@@ -70,6 +70,17 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **İçerik:** 12–15 köstebek görevi (G1). Mevcut gizli görev türlerinin bir kısmı uyarlanır.
 - **Kararlar (2026-10-13):** suçlama her 5 turda bir + herkese 1 erken suçlama hakkı. Görevini bitiren köstebek hemen kazanır.
 
+**Kodlandı (2026-10-13, kural motoru + sunucu; ekranlar Arda'da).** Kodlarken netleşenler:
+
+- **İlk sürümde 1 köstebek.** "8+ kişide 2 köstebek" sonraya: ikisinin ayrı ayrı yakalanması ve son oylama kuralı ayrıca düşünülmeli.
+- **Erken suçlama sadece A soru sormadan önce** (`soruSorma` aşaması). Düellonun ortası kesilmez. Oylama bitince A'nın turu tam süreyle baştan.
+- **Her 5 turda bir:** 6., 11., 16. turun başında, A sormadan önce.
+- **Oylama:** oyundan çıkmamış herkes (A, B ve köstebek dahil), kendisi dışında birine, 60 sn. **En çok oyu alan** suçlanır, eşitlikte kimse. Kimin kime oy verdiği gizli.
+- **"Görevini bitirdiği an"** = o turun sonucu (ifşa/güme) gösterildikten sonra: turun ortası kesilmesin.
+- **Kurucu "bitir" derse** önce son oylama yapılır, oylama sürerken ikinci "bitir" reddedilir. Kurucu köstebekse oyunu kendisi bitirip kazanamasın.
+- **Köstebek oyundan çıkarsa** grup kazanır. Online'da bağlı oyuncu 4'ün altında kalıp oyun biterse oylama yapılamaz, köstebek yakalanmamış sayılır.
+- **Köstebek görevleri (12):** 2 soruyu güme gönder · X'i 2 kez göster · aynı kişiye 2 kez sor · 3 farklı kişiyi göster · 3 farklı kişiye sor · 3 mini oyun kazan · üst üste 2 kazan · 2 kez ifşa ettir · X'i mini oyunda yen · X'e 2 kez sor · 3 soru sor · 3 kez gösteril. Mevcut görev türleri, köstebeğe göre adetle; çoğu başkalarının seçimine bağlı (grup şüphelendiği kişiyi göstermezse görevi zorlaşır). **Adetler tahmin, Playtest'te ayarlanacak.**
+
 ## 2. Rus Ruleti (can ayarıyla Son Çakmak da bu)
 
 **Fikir:** çakmak bir tabanca. Düelloyu kaybeden tetiği çeker.

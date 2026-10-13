@@ -99,6 +99,9 @@ namespace Cakmak.Kurallar
 
             // Temiz modda en fazla Hafif ceza (Ana Plan 8.1).
             if (ayarlar.Mod == OyunModu.Temiz && ayarlar.CezaSeviyesi == CezaSeviyesi.Cesur) return Sonuc.GecersizGirdi;
+            // Köstebek'te kaos yok (docs/Oyunlar.md, 0).
+            if (ayarlar.Oyun == OyunTuru.Kostebek && ayarlar.KaosTurlari) return Sonuc.GecersizGirdi;
+            if (ayarlar.SuclamaSuresiSn <= 0) return Sonuc.GecersizGirdi;
 
             oyun = new Oyun(ayarlar, oyuncular, rastgele);
             return Sonuc.Tamam;
@@ -220,10 +223,20 @@ namespace Cakmak.Kurallar
             return Sonuc.Tamam;
         }
 
-        /// <summary>Oyunu hemen bitirir. Online'da kimin çağırabileceğine sunucu karar verir.</summary>
-        public Sonuc OyunuBitir()
+        /// <summary>
+        /// Oyunu bitirir. Online'da kimin çağırabileceğine sunucu karar verir. Köstebek'te önce son oylama yapılır
+        /// (kurucu köstebekse oyunu bitirip kazanamasın); <paramref name="zorla"/> oylamasız hemen bitirir
+        /// (sunucu: oyuncu kalmadı), köstebek yakalanmamış sayılır.
+        /// </summary>
+        public Sonuc OyunuBitir(bool zorla = false)
         {
             if (asama == Asama.OyunSonu) return Sonuc.YanlisAsama;
+            if (!zorla && Kostebekli)
+            {
+                if (sonSuclama) return Sonuc.YanlisAsama;
+                SonSuclamayiBaslat();
+                return Sonuc.Tamam;
+            }
             Bitir();
             return Sonuc.Tamam;
         }
@@ -267,6 +280,9 @@ namespace Cakmak.Kurallar
                 case Asama.Oylama:
                     OylamayiBitir();
                     break;
+                case Asama.Suclama:
+                    SuclamayiBitir();
+                    break;
                 case Asama.IkiyeKatla:
                 case Asama.Bedel:
                     KarardanVazgecildi();
@@ -289,6 +305,7 @@ namespace Cakmak.Kurallar
             var g = new Gorunum
             {
                 Sen = kim,
+                Oyun = ayar.Oyun,
                 Asama = asama,
                 Tur = tur,
                 ToplamTur = ayar.TurSayisi,
@@ -337,6 +354,7 @@ namespace Cakmak.Kurallar
             }
 
             TekrarGorunumu(g, kim);
+            KostebekGorunumu(g, kim);
             return g;
         }
 
@@ -345,11 +363,12 @@ namespace Cakmak.Kurallar
         void TurBaslat(OyuncuId yeniA)
         {
             TurSonuIsleri();
+            if (KostebekGoreviBitti()) return;
             tur++;
             if (ayar.TurSayisi > 0 && tur > ayar.TurSayisi)
             {
                 tur = ayar.TurSayisi;
-                Bitir();
+                if (!SonSuclamayiBaslat()) Bitir();
                 return;
             }
 
@@ -387,6 +406,7 @@ namespace Cakmak.Kurallar
             AsamayaGec(Asama.SoruSorma, ayar.SoruSuresiSn);
             Yay(new Olay { Tur = OlayTuru.TurBasladi, A = GorunenA() });
             if (kaos != KaosKurali.Yok) Yay(new Olay { Tur = OlayTuru.KaosBasladi, Kaos = kaos });
+            PeriyodikSuclama();
         }
 
         void ToplamayiBitir()
@@ -501,6 +521,9 @@ namespace Cakmak.Kurallar
             oneri = null;
             asama = Asama.OyunSonu;
             kalanMs = 0;
+            // Köstebek: yakalanmadan biten oyunu köstebek kazanır (kural sonucu KostebekBitir'de önceden yazılır).
+            if (Kostebekli && kostebekSonucu == null)
+                kostebekSonucu = new KostebekSonucu { Kostebek = kostebek, Kazanan = KostebekKazanan.Kostebek, Neden = KostebekNedeni.Yakalanmadi };
             Yay(new Olay { Tur = OlayTuru.OyunBitti });
         }
 

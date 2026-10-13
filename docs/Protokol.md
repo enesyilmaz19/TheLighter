@@ -1,6 +1,6 @@
 # Ağ Protokolü (online mod)
 
-Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma, sohbet + DM, Temiz filtresi, grup paketi).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2, 6.4 ve 8.
+Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma, sohbet + DM, Temiz filtresi, grup paketi; yeni oyunlardan Köstebek).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2, 6.4 ve 8.
 Sunucu: `Sunucu/Cakmak.Sunucu` · İstemci: Unity (G2).
 
 Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobide parça parça yükler (aşağıda "Grup paketi").
@@ -26,10 +26,10 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 |---|---|---|
 | `odaKur` | `isim` | Herkes. Yeni oda açar, gönderen `p1` ve kurucu olur |
 | `katil` | `oda`, `isim`, `anahtar` (ilk girişte `null`) | Oda lobideyse yeni oyuncu olarak girer. Oyun sürüyorsa **bekleme odasına** girer, sonraki oyunda oynar. `anahtar` doğruysa oyun başlamış olsa da **aynı kimlikle geri döner**. Oda kapasitesi (10) bekleyenler dahil |
-| `ayarlar` | `mod`, `miniOyun`, `turSayisi`, `soruSn`, `cevapSn`, `hamleSn`, `ceza`, `gorevler`, `kaos`, `paketler` (hepsi isteğe bağlı) | Kurucu, lobide. Sadece gönderilen alanlar değişir |
+| `ayarlar` | `oyun`, `mod`, `miniOyun`, `turSayisi`, `soruSn`, `cevapSn`, `hamleSn`, `ceza`, `gorevler`, `kaos`, `paketler` (hepsi isteğe bağlı) | Kurucu, lobide. Sadece gönderilen alanlar değişir |
 | `baslat` | — | Kurucu, lobide, en az 4 oyuncu |
 | `komut` | `tur`, `komut`, + komutun alanları (aşağıda) | Oyunda |
-| `bitir` | — | Kurucu, oyunda. Oyunu hemen bitirir |
+| `bitir` | — | Kurucu, oyunda. Oyunu hemen bitirir. **Köstebek'te** önce son oylama başlar (kurucu köstebekse oyunu bitirip kazanamasın), oylama sürerken ikinci `bitir` `YANLIS_ASAMA` |
 | `buradayim` | — | Oyunda, herkes. Ekrana dokununca gönder: AFK etiketi kalkar. AFK değilse bir şey olmaz. Her `komut` da aynı işi görür |
 | `at` | `kim` | Kurucu; lobide, oyunda ya da bekleme odasında. Kendini atamaz. Atılan `ATILDIN` (`neden: "kurucu"`) alır, bağlantısı kapanır; bu odaya ne anahtarıyla ne aynı isimle dönebilir (hesap yok: başka bir isimle girebilir, rapor + engelleme S6). Oyundaysa oyundan çıkar, sayaçları özette kalır. Herkese `olay: "atildi"` |
 | `tekrarOyna` | — | Kurucu, `oyunSonu`'nda. Oda lobiye döner: bağlı olmayanlar düşer, bekleme odasındakiler oyuncu olur, ayarlar ve atılanların yasağı kalır |
@@ -43,6 +43,7 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 **Yeniden bağlanırken `anahtar` ile birlikte aynı `isim`'i de yolla.** Oyunda yerin tutulur, anahtar tanınır. Lobide ya da bekleme odasında kopan yerini kaybeder ve anahtarı unutulur: o zaman aynı isimle yeni giriş olur (isim yoksa `ISIM_GECERSIZ` alırdın). Atıldıysan iki durumda da `ATILDIN`.
 
 **Değerler:**
+- `oyun`: `"cakmak"` (varsayılan, bugünkü oyun) · `"kostebek"`. Yeni oyunlar geldikçe eklenir (`docs/Oyunlar.md`). Köstebek'te kaos olamaz: sonuç Köstebek + kaos olacaksa `GECERSIZ_GIRDI`. Köstebek'te gizli görevler `gorevler` ayarı ne olursa olsun herkeste vardır
 - `mod`: `"normal"` · `"temiz"` · `"curcuna"`
 - `miniOyun`: `"tkm"` · `"tekCift"` · `"zar"` · `"karisik"`. **`"reaksiyon"` online'da yok** (`GECERSIZ_GIRDI`): süre istemciden geliyor ve telefonların dokunma gecikmesi farklı. Sadece elden ele.
 - `turSayisi`: `0` = sınırsız, `1–100`
@@ -67,6 +68,8 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 | `ikiyeKatla` | — | `IkiyeKatla`. Sadece `ikiyeKatla` aşamasında, `kararVeren` |
 | `bedelOde` | — | `BedelOde`. Sadece `bedel` aşamasında, `kararVeren` (B) |
 | `karariGec` | — | `KarariGec`: "hayır". `ikiyeKatla` ya da `bedel` aşamasında, `kararVeren`. Süre dolması da aynı sonucu verir |
+| `sucla` | — | `Sucla`. Köstebek, erken suçlama: herkesin oyun boyu 1 hakkı, sadece `soruSorma` aşamasında (düello ortası kesilmez). Başka aşamada ya da Çakmak'ta `YANLIS_ASAMA`, hak bittiyse `HAK_KALMADI` |
+| `suclamaOyu` | `hedef` | `SuclamaOyu`. Sadece `suclama` aşamasında, `oylayanlar` içindekiler, bir kez. Kendin ya da oyundan çıkan `SECILEMEZ` |
 
 **Hamle nesnesi:**
 
@@ -131,19 +134,21 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
   "secilebilir": [],
   "miniOyun": "tkm", "bHamleYapti": true, "cHamleYapti": false, "beraberlik": 0,
   "sonMiniOyun": null,
-  "kaos": "yok", "isi": "ilik", "kararVeren": null,
+  "oyun": "cakmak", "kaos": "yok", "isi": "ilik", "kararVeren": null,
   "oylayanlar": [], "oyKullanan": 0, "sonOylama": null, "bedelOdendi": false, "turCezalari": [],
+  "supheliler": [], "sonSuclama": false,
   "sana": { "soru": "Grupta sırrını en kolay kim açık eder?", "fisilti": false,
             "atananSoru": null, "degistirmeHakki": false, "oneri": null,
             "hamlen": { "oyun": "tkm", "secim": "tas" },
-            "gorevin": { "tur": "kisiyiGoster", "hedef": "p3", "adet": 2, "zorluk": "orta" }, "oyVerdin": false },
+            "gorevin": { "tur": "kisiyiGoster", "hedef": "p3", "adet": 2, "zorluk": "orta" }, "oyVerdin": false,
+            "rol": null, "suclamaHakki": false },
   "ifsa": null,
   "ozet": null,
   "bekleme": null,
   "bekleyenler": [] }
 ```
 
-- `asama`: `"soruToplama"` · `"soruSorma"` · `"cevapSecme"` · `"miniOyun"` · `"oylama"` · `"ikiyeKatla"` · `"bedel"` · `"ifsa"` · `"gume"` · `"oyunSonu"`.
+- `asama`: `"soruToplama"` · `"soruSorma"` · `"cevapSecme"` · `"miniOyun"` · `"oylama"` · `"ikiyeKatla"` · `"bedel"` · `"ifsa"` · `"gume"` · `"oyunSonu"` · `"suclama"` (Köstebek, aşağıda).
   Sıra: mini oyun (Grup Kararı'nda onun yerine oylama) → İkiye Katla? → Bedel? → ifşa/güme.
 - `a`, `b`, `c`: o an boşsa `null`. **Soran Gizli** kaos turunda `a` sadece A'nın kendi mesajında dolu, olaylarda da `null`.
 - `secilebilir`: sadece seçim yapacak kişiye dolu (soru sormada A'ya, cevap seçmede B'ye). Diğerlerine `[]`.
@@ -178,8 +183,10 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
     "unvanlar": [ { "tur": "miknatis", "kim": "p3", "deger": 6 } ],
     "gorevler": [ { "kim": "p1", "gorev": { "tur": "kisiyiGoster", "hedef": "p3", "adet": 2, "zorluk": "orta" }, "basarili": true } ],
     "ifsaOlanlar": [ { "soru": "…", "a": "p1", "b": "p2", "c": "p4" } ],
-    "curcunaSorulari": [ "…" ] }
+    "curcunaSorulari": [ "…" ],
+    "kostebek": null }
   ```
+  `kostebek`: sadece Köstebek oyununda dolu (aşağıda "Köstebek"), diğer oyunlarda `null`.
   Unvan `tur`: `"miknatis"` · `"gammaz"` · `"sirKupu"` · `"hedefTahtasi"` · `"soruMakinesi"` · `"sansli"` · `"takintili"` · `"intikamci"` · `"atesleOynayan"` · `"bedelci"` · `"cezakes"` · `"kaosCanavari"` · `"kale"` · `"gorunmez"` · `"talihsiz"` · `"sosyalKelebek"` · `"sadik"` · `"dedikoducu"` · `"gundem"` · `"yenilmez"` · `"zorba"` · `"av"` · `"ayna"` · `"uykucu"` · `"kacak"` · `"acikKitap"` · `"eliBos"` · `"kumarbaz"` · `"bumerang"` · `"sogukkanli"` (anlamları `UnvanTuru`'nda). En uç 3 unvan, eşitlikte verilmez.
   **Güme giden soru özette yoktur.** Sayaçlar `oyuncular`'da. Grup hafızası (`GrupKaydi.Isle`) cihazda bu bilgilerden yazılır.
 
@@ -191,7 +198,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 
 `olay`: `"turBasladi"` · `"soruSoruldu"` · `"cevapSecildi"` · `"berabere"` · `"ifsa"` · `"gume"` · `"sureDoldu"` · `"oyunBitti"` ·
 `"kaosBasladi"` · `"yandi"` · `"cezaCekildi"` · `"ikiyeKatlandi"` · `"bedelOdendi"` · `"oyVerildi"` ·
-`"siraAtlandi"` · `"afk"` · `"afkBitti"` · `"oyuncuCikti"` · `"atildi"` (sunucunun olayı: biri atıldı; sadece bu olayda `neden` alanı var: `"kurucu"` ya da `"temiz"`).
+`"siraAtlandi"` · `"afk"` · `"afkBitti"` · `"oyuncuCikti"` · `"suclamaBasladi"` · `"suclamaBitti"` · `"atildi"` (sunucunun olayı: biri atıldı; sadece bu olayda `neden` alanı var: `"kurucu"` ya da `"temiz"`).
 `soru` sadece `ifsa` olayında dolu. `ceza` sadece `cezaCekildi`'de (ceza nesnesi), `kaos` sadece `kaosBasladi`'da (kuralın adı). Animasyon ve ses için. Ekran her zaman `durum`'a göre çizilir.
 
 ### `hata`
@@ -223,7 +230,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 
 - `surum`: odanın sayacı, her `durum`'da bir artar. Eski sürümlü mesajı at (Ana Plan 5.2, kural 3). Geri dönen oyuncu da kaldığı sayıdan devam eder.
 - `renk`: 0–9, oyuncu numarasından (`p1` → 0). Arayüz kendi renk listesinde bu sıraya bakar.
-- `olay.kim`: `sureDoldu` (süresi dolan), `yandi` (çakmak elinde yanan), `cezaCekildi` (çeken), `ikiyeKatlandi` (bir el daha isteyen), `bedelOdendi` (ödeyen B), `oyVerildi` (oy veren; oyun ne olduğu yok), `siraAtlandi` (sırası gelen ama kopuk/AFK/çıkmış olan; sıra rastgele birine geçti), `afk` / `afkBitti` (AFK olan / dönen), `oyuncuCikti` (oyundan çıkan), `atildi` (atılan). Diğerlerinde `null`.
+- `olay.kim`: `sureDoldu` (süresi dolan), `yandi` (çakmak elinde yanan), `cezaCekildi` (çeken), `ikiyeKatlandi` (bir el daha isteyen), `bedelOdendi` (ödeyen B), `oyVerildi` (oy veren; oyun ne olduğu yok), `siraAtlandi` (sırası gelen ama kopuk/AFK/çıkmış olan; sıra rastgele birine geçti), `afk` / `afkBitti` (AFK olan / dönen), `oyuncuCikti` (oyundan çıkan), `atildi` (atılan), `suclamaBasladi` (erken suçlama hakkını kullanan; her 5 turda bir ve son oylamada `null`), `suclamaBitti` (en çok oyu alan; eşitlik ya da hiç oy yoksa `null`). Diğerlerinde `null`.
 - Paketler ve sesli cezalar: sunucu `Assets/Icerik` altındaki `.txt` paketlerini ve `Cezalar.csv`'yi açılışta okur.
 - Sabit süreler (şimdilik ayarlanamaz): ifşa/güme ekranı 6 sn, Curcuna soru toplama 90 sn, İkiye Katla/Bedel kararı 5 sn. Oylama `hamleSn` kadar sürer.
 
@@ -261,6 +268,21 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 - Aynı Wi-Fi'daki herkes aynı IP'dir: 10 kişilik grup ve yeniden bağlananlar sınırlara sığar.
 - `COK_HIZLI` alan istemci durmazsa cevaplar gönderim kuyruğunu doldurur ve bağlantı kesilir.
 - Ayarlar sunucuda: `appsettings.json` içinde `"Sinirlar"` bölümü ya da ortam değişkeni (`Sinirlar__IpBasinaBaglanti=50`).
+
+## Köstebek (docs/Oyunlar.md, 1)
+
+`ayarlar` → `oyun: "kostebek"`. Turlar normal çakmak; grubun içinde gizli görevli bir köstebek var.
+
+- **Kurulum:** biri köstebek olur, sadece kendi `durum`'unda `sana.rol: "kostebek"` (diğerlerinde ve Çakmak'ta `null`). Herkesin gizli görevi var (`sana.gorevin`); köstebeğinki köstebek görevi (`zorluk: "zor"`, oyun ortasında bitebilen türlerden).
+- **Suçlama oylaması** (`asama: "suclama"`): her 5 turda bir kendiliğinden (6., 11., 16. turun başında, A sormadan önce) ya da biri `sucla` deyince. `oylayanlar`: oyundan çıkmamış herkes (A ve B dahil). Her biri `suclamaOyu` ile kendisi dışında birini gösterir. Herkes oy verince ya da süre (60 sn) dolunca biter. Kimin kime oy verdiği hiçbir mesajda yok; `oyKullanan` sayısı ve `sana.oyVerdin` var.
+- **Sonuç:** en çok oyu alan suçlanır (`olay: "suclamaBitti"`, `kim`). Eşitlikte ya da hiç oy yoksa kimse (`kim: null`).
+  - Suçlanan köstebekse grup kazanır, oyun biter.
+  - Değilse `supheliler`'e eklenir (herkese açık) ve oyun sürer: A'nın turu baştan, tam süreyle. A bu arada oyundan çıktıysa tur yanar, sıra başkasına geçer.
+- **Köstebek görevini bitirirse** o turun sonucu (ifşa/güme) gösterildikten sonra oyun biter, köstebek kazanır.
+- **Son oylama:** tur sayısı bitince ya da kurucu `bitir` deyince bir oylama daha (`sonSuclama: true`). Yakalanmazsa köstebek kazanır.
+- **Köstebek oyundan çıkarsa** grup kazanır. Bağlı oyuncu 4'ün altında kalıp oyun biterse (2 dk) oylama yapılmaz, köstebek yakalanmamış sayılır.
+- `sana.suclamaHakki`: erken suçlama hakkın duruyor mu.
+- **Oyun sonunda** `ozet.kostebek`: `{ "kim": "p3", "kazanan": "grup" | "kostebek", "neden": "yakalandi" | "gorevBitti" | "yakalanmadi" | "kacti" }`. Herkesin görevi (köstebeğinki dahil) `ozet.gorevler`'de. Oyun bitmeden köstebeğin kim olduğu hiçbir mesajda yok.
 
 ## Grup paketi (Ana Plan 8.5)
 

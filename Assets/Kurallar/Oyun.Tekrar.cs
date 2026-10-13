@@ -146,12 +146,13 @@ namespace Cakmak.Kurallar
 
             if (KizginCakmak) esik = YeniEsik();
 
-            if (ayar.GizliGorevler)
+            if (GorevlerAcik)
             {
                 // Herkese aynı zorlukta görev (Ana Plan 8.2).
                 var zorluk = (Zorluk)rastgele.Next(3);
                 foreach (var o in oyuncular) IzAl(o.Id).Gorev = GorevUret(o.Id, zorluk);
             }
+            KostebekKur();
         }
 
         void TekrarTurBasi()
@@ -674,7 +675,7 @@ namespace Cakmak.Kurallar
         {
             bool bitti = asama == Asama.OyunSonu;
             var gorevler = new List<GorevSonucu>();
-            if (ayar.GizliGorevler && bitti)
+            if (GorevlerAcik && bitti)
                 foreach (var o in oyuncular)
                 {
                     var iz = IzAl(o.Id);
@@ -692,6 +693,7 @@ namespace Cakmak.Kurallar
                 Gorevler = gorevler,
                 IfsaOlanlar = ifsalar,
                 CurcunaSorulari = new List<string>(curcunaYazilan),
+                Kostebek = bitti ? kostebekSonucu?.Kopya() : null,
             };
         }
 

@@ -5,6 +5,8 @@ Yazan: G1 (Enes), 2026-10-13.
 
 **Enes'in kararı:** ilk testler bilgisayarda. Öncelik PC; PC bitince Android'e geçilecek (o zaman ayrı görev gelecek). S6 (Vivox, Steam, mağaza, rapor/engelleme) şimdilik başlamıyor, ikimiz de PC'yi bitiriyoruz.
 
+**Güncelleme (2026-10-13):** önce oyun tamamen bitecek, testler sonra. Sıra: bu dosyanın 1 ve 2. maddeleri → `tasks/g2-kostebek.md` (yeni oyunların ilki) → sonraki oyunlar. 3.3 ve 3.4 (çok bilgisayarlı ve VPS testleri) oyun bitince; 3.1 ve 3.2 geliştirirken kendi denemen olarak sürsün.
+
 `tasks/g2-s4-s5.md`'deki ilkeler ve çalışma şekli aynen geçerli (sadece senin klasörlerin; `Assets/Kurallar`, `Sunucu/`, `docs/` değişmez; sunucu tarafında sorun görürsen Enes'e kısa mesaj).
 
 ---

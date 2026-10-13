@@ -200,6 +200,8 @@ namespace Cakmak.Kurallar
         public IReadOnlyList<IfsaKaydi> IfsaOlanlar = Array.Empty<IfsaKaydi>();
         /// <summary>Curcuna'da oyuncuların yazdığı sorular (öneri havuzundan tamamlananlar hariç).</summary>
         public IReadOnlyList<string> CurcunaSorulari = Array.Empty<string>();
+        /// <summary>Köstebek oyununda kim olduğu ve kimin kazandığı, diğer oyunlarda null.</summary>
+        public KostebekSonucu Kostebek;
     }
 
     // ------------------------------------------------------------ Grup kaydı (cihazda saklanır)

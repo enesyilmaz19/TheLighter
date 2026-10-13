@@ -131,5 +131,111 @@ namespace TheLighter.Testler
             a.Istemci.Ayril();
             b.Istemci.Ayril();
         }
+
+        /// <summary>
+        /// S5 kapanışı gerçek sunucuyla: sohbet ve DM dönüşü, grup paketinin parça parça yüklenip seçilmesi,
+        /// Temiz modda UYGUNSUZ (kimseye gitmez) ve 3. ihlalde atılma.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Sohbet_GrupPaketi_TemizAtma()
+        {
+            var a = new DenemeBotu("Kurucu", 1);
+            var b = new DenemeBotu("Yazan", 2);
+            var saat = Stopwatch.StartNew();
+            double son = 0;
+            GrupPaketiYukleyici yukleyici = null;
+            var bHatalari = new List<HataMesaji>();
+            var aOlaylari = new List<OlayMesaji>();
+            string bAyrilma = null;
+            b.Istemci.HataGeldi += bHatalari.Add;
+            b.Istemci.Ayrildi += n => bAyrilma = n;
+            a.Istemci.OlayGeldi += aOlaylari.Add;
+
+            IEnumerator Bekle(Func<bool> kosul, string ne, double sn = 10)
+            {
+                double bitis = saat.Elapsed.TotalSeconds + sn;
+                while (!kosul())
+                {
+                    double g = saat.Elapsed.TotalSeconds - son;
+                    son = saat.Elapsed.TotalSeconds;
+                    a.Guncelle(g);
+                    b.Guncelle(g);
+                    if (yukleyici != null)
+                    {
+                        if (a.Istemci.SonDurum != null) yukleyici.DurumGeldi(a.Istemci.SonDurum.Surum);
+                        yukleyici.Ilerle(g);
+                    }
+                    if (a.Istemci.Durum == BaglantiDurumu.Kapali) Assert.Ignore("Yerel sunucu çalışmıyor.");
+                    if (saat.Elapsed.TotalSeconds > bitis) Assert.Fail(ne + " olmadı. a:" + a.SonHata + " b:" + b.SonHata);
+                    yield return null;
+                }
+            }
+
+            IEnumerator Dur(double sn)
+            {
+                double bitis = saat.Elapsed.TotalSeconds + sn;
+                yield return Bekle(() => saat.Elapsed.TotalSeconds >= bitis, "Bekleme", sn + 5);
+            }
+
+            a.Istemci.OdaKur(Adres, a.Isim);
+            yield return Bekle(() => a.Istemci.Durum == BaglantiDurumu.Odada, "Oda kurma");
+            b.Istemci.Katil(Adres, a.Istemci.Oda, b.Isim);
+            yield return Bekle(() => b.Istemci.Durum == BaglantiDurumu.Odada && a.Istemci.SonDurum?.Oyuncular.Count == 2, "Katılma");
+            var aId = a.Istemci.Sen.Value;
+            var bId = b.Istemci.Sen.Value;
+
+            // Genel: yazana da döner.
+            Assert.That(a.Istemci.SohbetGonder(null, "selam millet"), Is.True);
+            yield return Bekle(() => a.Istemci.Sohbet.Mesajlar(null).Count == 1 && b.Istemci.Sohbet.Mesajlar(null).Count == 1, "Genel sohbet");
+            Assert.That(a.Istemci.Sohbet.Mesajlar(null)[0].Benim, Is.True);
+            Assert.That(b.Istemci.Sohbet.Mesajlar(null)[0].Benim, Is.False);
+            Assert.That(b.Istemci.Sohbet.Mesajlar(null)[0].Kim, Is.EqualTo(aId));
+
+            // DM: kanal karşıdaki kişi.
+            Assert.That(b.Istemci.SohbetGonder(aId, "psst"), Is.True);
+            yield return Bekle(() => a.Istemci.Sohbet.Mesajlar(bId).Count == 1 && b.Istemci.Sohbet.Mesajlar(aId).Count == 1, "DM");
+            Assert.That(b.Istemci.Sohbet.Mesajlar(aId)[0].Benim, Is.True);
+            Assert.That(a.Istemci.Sohbet.Mesajlar(null).Count, Is.EqualTo(1), "DM genele düşmez");
+
+            // Grup paketi: uzun sorularla birden çok parça.
+            var sorular = new List<string>();
+            for (int i = 0; i < 120; i++) sorular.Add("Grupta en çok kim " + i + ". kez geç kalır ve bunu nasıl açıklar, uzun bir soru olsun diye ğüşıöç ekliyorum?");
+            yukleyici = new GrupPaketiYukleyici(sorular, a.Istemci.Gonder);
+            Assert.That(yukleyici.Toplam, Is.GreaterThan(1));
+            yukleyici.Basla(a.Istemci.SonDurum.Surum);
+            yield return Bekle(() => yukleyici.Durum != GrupPaketiYukleyici.Hal.Yukleniyor, "Grup paketinin yüklenmesi", 30);
+            Assert.That(yukleyici.Durum, Is.EqualTo(GrupPaketiYukleyici.Hal.Bitti), "hata: " + yukleyici.HataKodu);
+            yukleyici = null;
+            yield return Bekle(() => b.Istemci.SonDurum.GrupPaketi == 120, "Herkesin 120 soruyu görmesi");
+
+            var paketler = new List<string>(a.Istemci.SonDurum.Ayarlar.Paketler) { "@bizim" };
+            a.Istemci.Gonder(Cevirici.AyarDegistir(paketler: paketler));
+            yield return Bekle(() => b.Istemci.SonDurum.Ayarlar.Paketler.Contains("@bizim"), "@bizim seçimi");
+
+            // Temiz: uygunsuz sohbet kimseye gitmez, sadece yazana UYGUNSUZ; 3. seferde atılır.
+            a.Istemci.Gonder(Cevirici.AyarDegistir(mod: OyunModu.Temiz));
+            yield return Bekle(() => b.Istemci.SonDurum.Ayarlar.Mod == OyunModu.Temiz, "Temiz mod");
+            int genelOnce = a.Istemci.Sohbet.Mesajlar(null).Count;
+            for (int i = 1; i <= 3; i++)
+            {
+                yield return Dur(1.2);
+                Assert.That(b.Istemci.SohbetGonder(null, "siktir git"), Is.True);
+                if (i < 3)
+                {
+                    int n = i;
+                    yield return Bekle(() => bHatalari.Count(h => h.Kod == "UYGUNSUZ") == n, n + ". UYGUNSUZ");
+                    var h0 = bHatalari.Last();
+                    Assert.That(h0.Ihlal, Is.EqualTo(n));
+                    Assert.That(h0.Sinir, Is.EqualTo(3));
+                }
+            }
+            yield return Bekle(() => bAyrilma != null, "Temizden atılma");
+            Assert.That(bAyrilma, Is.EqualTo("ATILDIN.temiz"));
+            yield return Bekle(() => aOlaylari.Any(o => o.Atildi), "Atıldı olayı");
+            Assert.That(aOlaylari.First(o => o.Atildi).Neden, Is.EqualTo("temiz"));
+            Assert.That(a.Istemci.Sohbet.Mesajlar(null).Count, Is.EqualTo(genelOnce), "uygunsuz mesaj kimseye gitmedi");
+
+            a.Istemci.Ayril();
+        }
     }
 }

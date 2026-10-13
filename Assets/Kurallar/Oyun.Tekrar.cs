@@ -704,7 +704,7 @@ namespace Cakmak.Kurallar
             var ifsalar = new List<IfsaKaydi>(ifsaKayitlari.Count);
             if (bitti) foreach (var k in ifsaKayitlari) ifsalar.Add(new IfsaKaydi { Soru = k.Soru, A = k.A, B = k.B, C = k.C });
 
-            return new OyunOzeti
+            var ozet = new OyunOzeti
             {
                 OynananTur = tur,
                 Oyuncular = OyuncuKopyasi(),
@@ -712,10 +712,9 @@ namespace Cakmak.Kurallar
                 Gorevler = gorevler,
                 IfsaOlanlar = ifsalar,
                 CurcunaSorulari = new List<string>(curcunaYazilan),
-                Kostebek = bitti ? kostebekSonucu?.Kopya() : null,
-                RusRuleti = bitti ? rusRuletiSonucu?.Kopya() : null,
-                Takim = bitti ? takimSonucu?.Kopya() : null,
             };
+            if (bitti) OyunOzetine(ozet); // oyunların sonucu (köstebek kimdi, kazanan) oyun bitmeden yok
+            return ozet;
         }
 
         /// <summary>Her unvanın tek bir sahibi olmalı (eşitlikte kimse almaz). En uç 3 unvan seçilir.</summary>

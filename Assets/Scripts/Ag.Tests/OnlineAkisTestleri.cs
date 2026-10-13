@@ -63,11 +63,11 @@ namespace TheLighter.Testler
             "{\"id\":\"" + id + "\",\"isim\":\"" + isim + "\",\"renk\":" + renk + ",\"bagli\":true,\"bedelHakki\":2" + ek + "}";
 
         /// <summary>Oyun durumu: alanlar sunucunun yazdığı biçimde, değişenler <paramref name="ek"/> ile.</summary>
-        void Durum(string asama, string ek = "", int tur = 3, string oyuncuEki = "", int kalanMs = 10000)
+        void Durum(string asama, string ek = "", int tur = 3, string oyuncuEki = "", int kalanMs = 10000, string kurucu = "p1")
         {
             surum++;
             string json = "{\"t\":\"durum\",\"surum\":" + surum + ",\"oda\":\"KXTPM\",\"asama\":\"" + asama + "\",\"tur\":" + tur +
-                ",\"toplamTur\":15,\"kalanMs\":" + kalanMs + ",\"kurucu\":\"p1\"," +
+                ",\"toplamTur\":15,\"kalanMs\":" + kalanMs + ",\"kurucu\":\"" + kurucu + "\"," +
                 "\"oyuncular\":[" + Oyuncu("p1", "Enes", 0) + "," + Oyuncu("p2", "Ayşe", 1, oyuncuEki) + "," +
                 Oyuncu("p3", "Can", 2) + "," + Oyuncu("p4", "Deniz", 3) + "]," +
                 "\"miniOyun\":\"tkm\",\"kaos\":\"yok\",\"sana\":{}" + ek + "}";
@@ -76,6 +76,34 @@ namespace TheLighter.Testler
         }
 
         JsonDeger SonGiden => JsonDeger.Coz(tasima.Giden.Last());
+
+        /// <summary>Kurucu oyun ortasında "Lobiye dön": bitir gider, oyun sonu gelince tekrarOyna kendiliğinden gider.</summary>
+        [Test]
+        public void LobiyeDon_Kurucu_BitirSonraOyunSonundaTekrarOyna()
+        {
+            Durum("soruSorma", ",\"a\":\"p1\"", kurucu: "p2");
+            Assert.That(akis.LobiyeDon(), Is.EqualTo(Sonuc.Tamam));
+            Kare();
+            Assert.That(SonGiden["t"].Metin, Is.EqualTo("bitir"));
+            int n = tasima.Giden.Count;
+
+            Durum("oyunSonu", kurucu: "p2");
+            Assert.That(tasima.Giden.Count, Is.EqualTo(n + 1));
+            Assert.That(SonGiden["t"].Metin, Is.EqualTo("tekrarOyna"));
+
+            Durum("oyunSonu", kurucu: "p2");
+            Assert.That(tasima.Giden.Count, Is.EqualTo(n + 1), "bir kez gider");
+        }
+
+        [Test]
+        public void LobiyeDon_KurucuDegilse_HicbirSeyGitmez()
+        {
+            Durum("soruSorma", ",\"a\":\"p1\"");
+            int n = tasima.Giden.Count;
+            Assert.That(akis.LobiyeDon(), Is.Not.EqualTo(Sonuc.Tamam));
+            Kare();
+            Assert.That(tasima.Giden.Count, Is.EqualTo(n));
+        }
 
         [Test]
         public void Lobide_OyunEkraniYok()

@@ -253,7 +253,7 @@ namespace TheLighter.Istemci
             Kok.Add(Yazi(Metin.Al("oy.baslik", akis.Isim(g.Sen)), "baslik"));
             Kok.Add(Esnek());
             Kok.Add(Tekrar.KaosKarti(KaosKurali.GrupKarari));
-            Kok.Add(Yazi(Metin.Al("oy.aciklama", b, TurkceEk.Yonelme(c)), "aciklama", "orta"));
+            Kok.Add(Yazi(Metin.Al("oy.aciklama", b, TurkceEk.Yonelme(c), c), "aciklama", "orta"));
             Kok.Add(Esnek());
             Kok.Add(Yazi(Metin.Al("oy.gizli"), "ipucu"));
             hata = Yazi("", "hata");

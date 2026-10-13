@@ -16,7 +16,7 @@ namespace TheLighter.Istemci
     /// Grubu tanınan kurucu "Bizim paket"i seçebilir: önce sunucuya parça parça yüklenir (Temiz modda yok).
     /// PC'de geniş pencerede oyuncular solda, sohbet sağda (Ana Plan 6.2).
     /// </summary>
-    public sealed class LobiEkrani : IEkran, IOnlineEkran, IYanliEkran
+    public sealed class LobiEkrani : IEkran, IOnlineEkran, IYanliEkran, IYenidenKurulur
     {
         static readonly OyunModu[] ModSecenekleri = { OyunModu.Normal, OyunModu.Temiz, OyunModu.Curcuna };
         static readonly MiniOyunTuru[] MiniSecenekleri = { MiniOyunTuru.Tkm, MiniOyunTuru.TekCift, MiniOyunTuru.Zar, MiniOyunTuru.Karisik };
@@ -40,6 +40,7 @@ namespace TheLighter.Istemci
         readonly List<KeyValuePair<string, Button>> paketButonlari = new List<KeyValuePair<string, Button>>();
         readonly SohbetPaneli sohbet;
         readonly Button sohbetDugmesi;
+        readonly AyarlarPaneli ayarlar;
         readonly VisualElement oyuncuBolumu;
         readonly VisualElement oyuncuYeri;
         Button bizimButon;      // AyarlariKur kurar
@@ -66,6 +67,8 @@ namespace TheLighter.Istemci
             var ust = Kutu("satir");
             ust.Add(Buton(Metin.Al("lobi.ayril"), online.Ayril, "buton-kucuk"));
             ust.Add(Esnek());
+            ayarlar = new AyarlarPaneli(uygulama);
+            ust.Add(Buton(Metin.Al("menu.ayarlar"), ayarlar.Ac, "buton-kucuk"));
             if (OnlineYonetici.SohbetVar)
             {
                 sohbet = online.SohbetPaneliKur();
@@ -111,6 +114,7 @@ namespace TheLighter.Istemci
 
             atPerdesi = Kutu("menu-perde", "gizli");
             Kok.Add(atPerdesi);
+            Kok.Add(ayarlar.Kok);
             if (sohbet != null) Kok.Add(sohbet.Kok);
 
             Yenile();
@@ -468,6 +472,13 @@ namespace TheLighter.Istemci
             string isim = "";
             if (o.Kim.HasValue && gorulenIsimler.TryGetValue(o.Kim.Value, out var i)) isim = i;
             hata.text = HataMetni.Atildi(o, isim);
+        }
+
+        public IEkran YenidenKur()
+        {
+            var e = new LobiEkrani(uygulama, online);
+            e.ayarlar.Ac();
+            return e;
         }
 
         /// <summary>PC'de geniş pencere: oyuncular solda, sohbet sağda hep açık.</summary>

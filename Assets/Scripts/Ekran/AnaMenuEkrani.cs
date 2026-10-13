@@ -3,14 +3,18 @@ using static TheLighter.Istemci.Arayuz;
 
 namespace TheLighter.Istemci
 {
-    public sealed class AnaMenuEkrani : IEkran
+    /// <summary>Ana menü: elden ele, online, nasıl oynanır, ayarlar (ses, müzik, dil), oyundan çık.</summary>
+    public sealed class AnaMenuEkrani : IEkran, IYenidenKurulur
     {
+        readonly Uygulama uygulama;
         readonly VisualElement nasil;
+        readonly AyarlarPaneli ayarlar;
 
         public VisualElement Kok { get; }
 
         public AnaMenuEkrani(Uygulama uygulama)
         {
+            this.uygulama = uygulama;
             Kok = Kutu("ekran", "ana-menu");
 
             Kok.Add(Esnek());
@@ -24,6 +28,10 @@ namespace TheLighter.Istemci
 
             Kok.Add(Buton(Metin.Al("menu.nasil_oynanir"), NasilAcKapa, "buton-ikincil"));
 
+            ayarlar = new AyarlarPaneli(uygulama);
+            Kok.Add(Buton(Metin.Al("menu.ayarlar"), ayarlar.Ac, "buton-ikincil"));
+            Kok.Add(Buton(Metin.Al("menu.cikis"), uygulama.OyundanCik, "buton-ikincil"));
+
             nasil = Kutu("menu-perde", "gizli");
             var kutu = Kutu("menu-kutu");
             var kaydirma = new ScrollView(ScrollViewMode.Vertical);
@@ -34,6 +42,14 @@ namespace TheLighter.Istemci
             kutu.Add(Buton(Metin.Al("genel.tamam"), NasilAcKapa, "buton-birincil"));
             nasil.Add(kutu);
             Kok.Add(nasil);
+            Kok.Add(ayarlar.Kok);
+        }
+
+        public IEkran YenidenKur()
+        {
+            var e = new AnaMenuEkrani(uygulama);
+            e.ayarlar.Ac();
+            return e;
         }
 
         void NasilAcKapa()

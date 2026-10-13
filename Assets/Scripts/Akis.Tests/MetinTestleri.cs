@@ -51,6 +51,36 @@ namespace TheLighter.Tests
             Assert.AreEqual("İREM'e", TurkceEk.Yonelme("İREM"));
         }
 
+        /// <summary>İngilizce: Türkçesi olan her metnin İngilizcesi de var; boş kalan Türkçeye düşer.</summary>
+        [Test]
+        public void MetinTablosu_HerMetninIngilizcesiVar()
+        {
+            string yol = Path.Combine("Assets", "UI", "Resources", "TheLighter", "Metinler.csv");
+            string csv = File.ReadAllText(yol);
+            var tr = MetinTablosu.CsvOku(csv, MetinTablosu.Turkce, null);
+            var en = MetinTablosu.CsvOku(csv, MetinTablosu.Ingilizce, null);
+            Assert.That(en.Sayi, Is.EqualTo(tr.Sayi));
+            foreach (var satir in csv.Split('\n'))
+            {
+                int virgul = satir.IndexOf(',');
+                if (virgul <= 0) continue;
+                string k = satir.Substring(0, virgul);
+                if (!tr.Var(k) || k.Contains(" ")) continue;
+                if (tr.Al(k).Length > 0) Assert.That(en.Al(k), Is.Not.Empty, "İngilizcesi yok: " + k);
+            }
+        }
+
+        [Test]
+        public void MetinTablosu_BosDilYedektenGelir()
+        {
+            const string csv = "Key,Turkish(tr),English(en)\na,Merhaba,Hello\nb,Sadece Türkçe,\n";
+            var en = MetinTablosu.CsvOku(csv, MetinTablosu.Ingilizce);
+            Assert.AreEqual("Hello", en.Al("a"));
+            Assert.AreEqual("Sadece Türkçe", en.Al("b"));
+            var yok = MetinTablosu.CsvOku("Key,Turkish(tr)\na,Merhaba\n", MetinTablosu.Ingilizce);
+            Assert.AreEqual("Merhaba", yok.Al("a"), "dil sütunu hiç yoksa Türkçe");
+        }
+
         /// <summary>Kodda enum adından üretilen anahtarlar ("hata." + kod, "mini.ad." + tür) tabloda var mı.</summary>
         [Test]
         public void MetinTablosunda_EnumAnahtarlariVar()

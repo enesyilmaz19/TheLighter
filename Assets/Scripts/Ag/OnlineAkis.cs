@@ -64,6 +64,12 @@ namespace TheLighter.Ag
             var son = istemci.SonDurum;
             if (son != null && son != durum && son.Yer == OdaYeri.Oyun)
             {
+                // Kurucu oyun ortasında "Lobiye dön" dedi: oyun bitti, oyun sonu ekranı beklemeden lobiye.
+                if (lobiyeDonulecek && son.Gorunum.Asama == Asama.OyunSonu)
+                {
+                    lobiyeDonulecek = false;
+                    if (Kurucuyum) Yolla(Cevirici.TekrarOyna());
+                }
                 durum = son;
                 durumKalanMs = son.Gorunum.KalanMs;
                 gecenMs = 0;
@@ -292,6 +298,21 @@ namespace TheLighter.Ag
 
         /// <summary>Kurucu, oyun sonunda: oda lobiye döner.</summary>
         public Sonuc TekrarOyna() => Kurucuyum ? Yolla(Cevirici.TekrarOyna()) : Sonuc.SiraSendeDegil;
+
+        bool lobiyeDonulecek;
+
+        /// <summary>
+        /// Sadece kurucu, oyun ortasında: oyunu bitirir ve oyun sonu gelince hemen "tekrar oyna" der, herkes lobiye döner
+        /// (oyun sonu ekranı atlanır). Protokolde yeni mesaj yok: <c>bitir</c> + <c>tekrarOyna</c>.
+        /// </summary>
+        public Sonuc LobiyeDon()
+        {
+            if (!Kurucuyum) return Sonuc.SiraSendeDegil;
+            if (durum?.Gorunum?.Asama == Asama.OyunSonu) return TekrarOyna();
+            var s = Yolla(Cevirici.Bitir());
+            if (s == Sonuc.Tamam) lobiyeDonulecek = true;
+            return s;
+        }
 
         // ------------------------------------------------------------ Yardımcılar
 

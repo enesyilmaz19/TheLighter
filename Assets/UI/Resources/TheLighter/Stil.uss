@@ -952,3 +952,29 @@
 .oyuncu-sutunu {
     flex-shrink: 1;
 }
+
+/* ---------- Ayarlar ---------- */
+.ayar-satiri {
+    margin: 12px 0;
+}
+
+.ayar-kaydirici {
+    margin: 8px 0;
+    min-height: 60px;
+}
+
+.ayar-kaydirici #unity-dragger {
+    width: 44px;
+    height: 44px;
+    margin-top: -18px;
+    border-radius: 22px;
+    background-color: var(--alev);
+    border-width: 0;
+}
+
+.ayar-kaydirici #unity-tracker {
+    height: 10px;
+    background-color: var(--yuzey-2);
+    border-width: 0;
+    border-radius: 5px;
+}

@@ -21,7 +21,7 @@ namespace TheLighter.Istemci
     /// (EkranDurumu.Anahtar) ilgili parçayı baştan kurar, değişmediyse sadece süreleri günceller.
     /// Online'da ayrıca: kısa bildirimler (sıra atlandı, AFK...), "Buradayım" düğmesi, "oyuncular bekleniyor" katmanı.
     /// </summary>
-    public sealed class OyunEkrani : IEkran, IOnlineEkran, IYanliEkran
+    public sealed class OyunEkrani : IEkran, IOnlineEkran, IYanliEkran, IYenidenKurulur
     {
         const float BildirimSn = 3.5f;
 
@@ -43,6 +43,8 @@ namespace TheLighter.Istemci
         readonly Label durumYazisi;
         readonly VisualElement govde;
         readonly VisualElement menu;
+        readonly VisualElement onayPerdesi;
+        readonly AyarlarPaneli ayarlar;
         IOyunParcasi parca;
         string anahtar;
 
@@ -96,8 +98,12 @@ namespace TheLighter.Istemci
             beklemeKatmani.Add(bekKutu);
             Kok.Add(beklemeKatmani);
 
+            ayarlar = new AyarlarPaneli(uygulama);
             menu = MenuKur();
             Kok.Add(menu);
+            Kok.Add(ayarlar.Kok);
+            onayPerdesi = Kutu("menu-perde", "gizli");
+            Kok.Add(onayPerdesi);
             if (sohbet != null) Kok.Add(sohbet.Kok);
 
             if (onlineAkis != null)
@@ -252,39 +258,89 @@ namespace TheLighter.Istemci
 
         // ---------- Menü ----------
 
+        /// <summary>
+        /// Oyun menüsü. Elden ele: devam, ayarlar, oyunu bitir, lobiye (oyuncu ve ayar ekranına) dön, ana menü, oyundan çık.
+        /// Online: devam, ayarlar, oyunu bitir ve lobiye dön (sadece kurucu), odadan ayrıl, oyundan çık.
+        /// </summary>
         VisualElement MenuKur()
         {
             var m = Kutu("menu-perde", "gizli");
             var kutu = Kutu("menu-kutu");
+            var kaydirma = new ScrollView(ScrollViewMode.Vertical);
+            kaydirma.AddToClassList("kaydirma");
             if (!akis.Online)
             {
-                kutu.Add(Yazi(Metin.Al("oyun.menu_baslik"), "baslik"));
-                kutu.Add(Buton(Metin.Al("oyun.devam"), MenuyuKapat, "buton-birincil"));
-                kutu.Add(Buton(Metin.Al("oyun.bitir"), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil"));
-                kutu.Add(Buton(Metin.Al("oyun.ana_menu"), uygulama.AnaMenu, "buton-ikincil"));
-                kutu.Add(Yazi(Metin.Al("oyun.menu_ipucu"), "ipucu"));
+                kaydirma.Add(Yazi(Metin.Al("oyun.menu_baslik"), "baslik"));
+                kaydirma.Add(Buton(Metin.Al("oyun.devam"), MenuyuKapat, "buton-birincil"));
+                kaydirma.Add(Buton(Metin.Al("menu.ayarlar"), ayarlar.Ac, "buton-ikincil"));
+                kaydirma.Add(Buton(Metin.Al("oyun.bitir"), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil"));
+                kaydirma.Add(Buton(Metin.Al("oyun.lobiye_don"), () => Onayla("oyun.lobiye_soru", "oyun.lobiye_ipucu_elden", "oyun.lobiye_evet",
+                    uygulama.Kurulum), "buton-ikincil"));
+                kaydirma.Add(Buton(Metin.Al("oyun.ana_menu"), uygulama.AnaMenu, "buton-ikincil"));
+                kaydirma.Add(Buton(Metin.Al("menu.cikis"), () => Onayla("oyun.cikis_soru", "oyun.cikis_ipucu", "oyun.cikis_evet",
+                    uygulama.OyundanCik), "buton-ikincil"));
+                kaydirma.Add(Yazi(Metin.Al("oyun.menu_ipucu"), "ipucu"));
             }
             else
             {
-                // Online'da oyun durmaz: süre sunucuda akar. Oyunu sadece kurucu bitirir.
-                kutu.Add(Yazi(Metin.Al("online.menu_baslik", online?.Istemci.Oda ?? ""), "baslik"));
-                kutu.Add(Buton(Metin.Al("oyun.devam"), MenuyuKapat, "buton-birincil"));
+                // Online'da oyun durmaz: süre sunucuda akar. Oyunu bitirmek ve lobiye dönmek sadece kurucunun.
+                kaydirma.Add(Yazi(Metin.Al("online.menu_baslik", online?.Istemci.Oda ?? ""), "baslik"));
+                kaydirma.Add(Buton(Metin.Al("oyun.devam"), MenuyuKapat, "buton-birincil"));
+                kaydirma.Add(Buton(Metin.Al("menu.ayarlar"), ayarlar.Ac, "buton-ikincil"));
                 var bitir = Buton(Metin.Al("oyun.bitir"), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil");
-                bitir.AddToClassList("menu-bitir");
-                kutu.Add(bitir);
-                kutu.Add(Buton(Metin.Al("online.ayril"), () => online?.Ayril(), "buton-ikincil"));
-                kutu.Add(Yazi(Metin.Al("online.menu_ipucu"), "ipucu"));
+                bitir.AddToClassList("menu-kurucu");
+                kaydirma.Add(bitir);
+                var lobi = Buton(Metin.Al("oyun.lobiye_don"), () => Onayla("oyun.lobiye_soru", "oyun.lobiye_ipucu", "oyun.lobiye_evet",
+                    LobiyeDon), "buton-ikincil");
+                lobi.AddToClassList("menu-kurucu");
+                kaydirma.Add(lobi);
+                kaydirma.Add(Buton(Metin.Al("online.ayril"), () => online?.Ayril(), "buton-ikincil"));
+                kaydirma.Add(Buton(Metin.Al("menu.cikis"), () => Onayla("oyun.cikis_soru", "oyun.cikis_ipucu_online", "oyun.cikis_evet",
+                    uygulama.OyundanCik), "buton-ikincil"));
+                kaydirma.Add(Yazi(Metin.Al("online.menu_ipucu"), "ipucu"));
             }
+            kutu.Add(kaydirma);
             m.Add(kutu);
             return m;
+        }
+
+        /// <summary>Online, sadece kurucu: oyun biter, oyun sonu beklenmeden herkes lobiye döner.</summary>
+        void LobiyeDon()
+        {
+            MenuyuKapat();
+            if (onlineAkis == null) return;
+            var s = onlineAkis.LobiyeDon();
+            if (s != Sonuc.Tamam) Bildir(HataMetni.Al(s));
+        }
+
+        /// <summary>Geri alınamayan seçimden önce sorar.</summary>
+        void Onayla(string soru, string ipucu, string evet, Action tamam)
+        {
+            onayPerdesi.Clear();
+            var kutu = Kutu("menu-kutu");
+            kutu.Add(Yazi(Metin.Al(soru), "baslik"));
+            kutu.Add(Yazi(Metin.Al(ipucu), "ipucu"));
+            kutu.Add(Buton(Metin.Al(evet), () => { onayPerdesi.AddToClassList("gizli"); tamam(); }, "buton-birincil"));
+            kutu.Add(Buton(Metin.Al("genel.geri"), () => onayPerdesi.AddToClassList("gizli"), "buton-ikincil"));
+            onayPerdesi.Add(kutu);
+            onayPerdesi.RemoveFromClassList("gizli");
         }
 
         void MenuyuAc()
         {
             // Kuruculuk oyun içinde el değiştirebilir (kurucu koptuysa): her açılışta bakılır.
-            menu.Q(className: "menu-bitir")?.EnableInClassList("gizli", !akis.Kurucuyum);
+            menu.Query(className: "menu-kurucu").ForEach(b => b.EnableInClassList("gizli", !akis.Kurucuyum));
             akis.Duraklatildi = true;
             menu.RemoveFromClassList("gizli");
+        }
+
+        /// <summary>Dil değişti: aynı akışla yeni ekran, menü ve ayarlar açık.</summary>
+        public IEkran YenidenKur()
+        {
+            var e = new OyunEkrani(uygulama, akis, online);
+            e.MenuyuAc();
+            e.ayarlar.Ac();
+            return e;
         }
 
         void MenuyuKapat()

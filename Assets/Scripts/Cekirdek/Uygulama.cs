@@ -73,6 +73,7 @@ namespace TheLighter.Istemci
             Screen.sleepTimeout = SleepTimeout.NeverSleep; // elden elede telefon masada duruyor
             if (Application.isMobilePlatform) Screen.orientation = ScreenOrientation.Portrait;
 
+            Tercihler.Uygula();
             Metin.Yukle();
             PaketleriYukle();
             ArayuzuKur();
@@ -159,6 +160,32 @@ namespace TheLighter.Istemci
 
         /// <param name="neden">Odadan neden çıkıldı (sunucu kodu ya da oturumun nedeni), yoksa null.</param>
         public void OnlineMenu(string neden) => Goster(new OnlineMenuEkrani(this, Online, neden));
+
+        /// <summary>
+        /// Ayarlardan dil değişti: metinler yeni dilden okunur, ekran baştan kurulur (ayarlar açık gelir).
+        /// Baştan kurulamayan ekranlar yeni dili bir sonraki ekranda gösterir.
+        /// </summary>
+        public void DilDegisti()
+        {
+            Metin.Yukle();
+            bool acik = baglaniyor != null && !baglaniyor.ClassListContains("gizli");
+            if (baglaniyor != null) baglaniyor.RemoveFromHierarchy();
+            baglaniyor = BaglaniyorKatmani();
+            kok.Add(baglaniyor);
+            BaglaniyorGoster(acik);
+            if (ekran is IYenidenKurulur y) Goster(y.YenidenKur());
+        }
+
+        /// <summary>Oyunu kapatır. Odadaysa önce ayrılır (yeri boşuna 60 sn tutulmasın).</summary>
+        public void OyundanCik()
+        {
+            if (Online != null && Online.Istemci.Durum != TheLighter.Ag.BaglantiDurumu.Kapali) Online.Istemci.Ayril();
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
 
         /// <summary>Bağlantı koptu, kendiliğinden yeniden deneniyor: bütün ekranın üstünde "Bağlanıyor…".</summary>
         public void BaglaniyorGoster(bool acik)

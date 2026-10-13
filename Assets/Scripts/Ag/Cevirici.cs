@@ -85,6 +85,7 @@ namespace TheLighter.Ag
                 case "hata": return HataCoz(m);
                 case "olay": return OlayCoz(m);
                 case "durum": return DurumCoz(m, sen);
+                case "sohbet": return SohbetCoz(m);
                 default: return null;
             }
         }
@@ -102,14 +103,32 @@ namespace TheLighter.Ag
         {
             string kod = m["kod"].Metin;
             if (string.IsNullOrEmpty(kod)) return null;
-            return new HataMesaji { Kod = kod, Sonuc = SonucKodu(kod) };
+            return new HataMesaji
+            {
+                Kod = kod,
+                Sonuc = SonucKodu(kod),
+                Ihlal = m["ihlal"].TamsayiYa(0),
+                Sinir = m["sinir"].TamsayiYa(0),
+                Neden = m["neden"].Metin,
+            };
+        }
+
+        static GelenMesaj SohbetCoz(JsonDeger m)
+        {
+            var kimden = Id(m["kimden"]);
+            string metin = m["metin"].Metin;
+            if (!kimden.HasValue || string.IsNullOrEmpty(metin)) return null;
+            var kime = Id(m["kime"]);
+            // "kime" var ama bozuksa DM'i genele düşürme: at.
+            if (!kime.HasValue && m["kime"].Tur == JsonTuru.Metin) return null;
+            return new SohbetGelen { Id = m["id"].Metin, Kimden = kimden.Value, Kime = kime, Metin = metin };
         }
 
         static GelenMesaj OlayCoz(JsonDeger m)
         {
             string ad = m["olay"].Metin;
             var kim = Id(m["kim"]);
-            if (ad == "atildi") return new OlayMesaji { Atildi = true, Kim = kim };
+            if (ad == "atildi") return new OlayMesaji { Atildi = true, Kim = kim, Neden = m["neden"].Metin };
             var tur = Ad<OlayTuru>(ad);
             if (!tur.HasValue) return null;
             var olay = new Olay
@@ -145,6 +164,7 @@ namespace TheLighter.Ag
             {
                 d.Yer = OdaYeri.Lobi;
                 d.Ayarlar = AyarlarCoz(m["ayarlar"]);
+                d.GrupPaketi = Math.Max(0, m["grupPaketi"].TamsayiYa(0));
                 return d;
             }
             if (asama == "beklemeOdasi")
@@ -471,6 +491,63 @@ namespace TheLighter.Ag
         public static string IkiyeKatla(int tur) => Yaz(Komut(tur, "ikiyeKatla"));
         public static string BedelOde(int tur) => Yaz(Komut(tur, "bedelOde"));
         public static string KarariGec(int tur) => Yaz(Komut(tur, "karariGec"));
+
+        /// <param name="kime">null: genel sohbet. Doluysa o kişiye DM.</param>
+        public static string Sohbet(OyuncuId? kime, string metin)
+        {
+            var n = new JsonNesne().Ekle("t", "sohbet");
+            if (kime.HasValue) n.Ekle("kime", kime.Value.ToString());
+            return Yaz(n.Ekle("metin", metin));
+        }
+
+        /// <summary>Bir grup paketi parçası. <paramref name="ilk"/>: sunucudaki eski paketi siler.</summary>
+        public static string GrupPaketi(IEnumerable<string> sorular, bool ilk)
+        {
+            var n = new JsonNesne().Ekle("t", "grupPaketi");
+            if (ilk) n.Ekle("ilk", true);
+            return Yaz(n.Ekle("sorular", new List<string>(sorular)));
+        }
+
+        /// <summary>Grup paketinin bir parçası en fazla bu kadar bayt (sınır 4096, pay bırakılır).</summary>
+        public const int GrupPaketiParcaBayt = 3800;
+        /// <summary>Sunucunun grup paketi sınırları (docs/Protokol.md, "Grup paketi").</summary>
+        public const int GrupPaketiEnFazla = 500;
+        public const int GrupPaketiSoruUzunlugu = 140;
+
+        /// <summary>
+        /// Grup paketini sunucuya gidecek mesajlara böler: her biri <paramref name="sinir"/> baytı geçmez (JSON kaçışları dahil),
+        /// sıra korunur, sadece ilki <c>ilk: true</c>. Boş, 140'tan uzun ve tekrar eden (büyük/küçük harf farkıyla) sorular atlanır,
+        /// en fazla 500. Hiç soru kalmazsa boş liste.
+        /// </summary>
+        public static List<string> GrupPaketiParcalari(IEnumerable<string> sorular, int sinir = GrupPaketiParcaBayt)
+        {
+            var temiz = new List<string>();
+            var gorulen = new HashSet<string>();
+            if (sorular != null)
+                foreach (var s in sorular)
+                {
+                    string t = (s ?? "").Trim();
+                    if (t.Length == 0 || t.Length > GrupPaketiSoruUzunlugu) continue;
+                    if (!gorulen.Add(t.ToLowerInvariant())) continue;
+                    temiz.Add(t);
+                    if (temiz.Count >= GrupPaketiEnFazla) break;
+                }
+
+            var parcalar = new List<string>();
+            var parca = new List<string>();
+            foreach (var s in temiz)
+            {
+                parca.Add(s);
+                if (Encoding.UTF8.GetByteCount(GrupPaketi(parca, parcalar.Count == 0)) <= sinir) continue;
+                parca.RemoveAt(parca.Count - 1);
+                if (parca.Count == 0) continue; // tek başına sığmayan soru (140 karakterle olmaz) atlanır
+                parcalar.Add(GrupPaketi(parca, parcalar.Count == 0));
+                parca = new List<string> { s };
+                if (Encoding.UTF8.GetByteCount(GrupPaketi(parca, false)) > sinir) parca.Clear();
+            }
+            if (parca.Count > 0) parcalar.Add(GrupPaketi(parca, parcalar.Count == 0));
+            return parcalar;
+        }
 
         public static string HamleYap(int tur, Hamle h)
         {

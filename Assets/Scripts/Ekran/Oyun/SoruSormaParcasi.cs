@@ -12,7 +12,7 @@ namespace TheLighter.Istemci
     /// Soru A'ya atandıysa (Curcuna, "havuzdan sor" cezası) yazı kutusu yerine atanan soru görünür;
     /// Kör Soru turunda A soruyu hiç görmez. Hangisi olduğu görünümden okunur, kural hesaplanmaz.
     /// </summary>
-    sealed class SoruSormaParcasi : IOyunParcasi
+    sealed class SoruSormaParcasi : IOyunParcasi, IHataGosteren
     {
         const int SoruSiniri = Oyun.SoruEnFazlaKarakter;
 
@@ -85,6 +85,7 @@ namespace TheLighter.Istemci
                     Kok.Add(Yazi(Metin.Al("soru.aciklama"), "aciklama"));
                     kutu = SoruKutusu.Kur();
                     kutu.RegisterValueChangedCallback(_ => Durum());
+                    SoruKutusu.EnterIleGonder(kutu, () => { if (gonder.enabledSelf) Gonder(); });
                     Kok.Add(kutu);
 
                     var alt = Kutu("satir");
@@ -191,6 +192,18 @@ namespace TheLighter.Istemci
             else if (akis.Online) { gonderildi = true; Durum(); } // cevap gelene kadar ikinci kez gitmesin
         }
 
+        /// <summary>
+        /// Online: soruSor'a sunucudan hata geldi (Temiz modda UYGUNSUZ, GECERSIZ_GIRDI...). Tur aynen sürüyor:
+        /// gönder yeniden açılır, A başka soru yazabilir.
+        /// </summary>
+        public bool HataGoster(TheLighter.Ag.HataMesaji h)
+        {
+            gonderildi = false;
+            Durum();
+            hata.text = HataMetni.Mesaj(h);
+            return true;
+        }
+
         void Fisilda()
         {
             if (!secili.HasValue) return;
@@ -199,9 +212,33 @@ namespace TheLighter.Istemci
         }
     }
 
+    /// <summary>Sunucudan gelen hatayı kendi içinde gösterebilen parça (gösterdiyse true).</summary>
+    interface IHataGosteren
+    {
+        bool HataGoster(TheLighter.Ag.HataMesaji h);
+    }
+
     /// <summary>Kural motorunun döndürdüğü hata kodunun oyuncuya görünen metni.</summary>
     static class HataMetni
     {
+        /// <summary>
+        /// Sunucunun hata mesajı. Temiz modda UYGUNSUZ: "Gönderilmedi… 3. seferde atılırsın (1/3)", sınır mesajdan.
+        /// </summary>
+        public static string Mesaj(TheLighter.Ag.HataMesaji h)
+        {
+            if (h == null) return "";
+            if (h.Sonuc == Sonuc.Uygunsuz && h.Sinir > 0) return Metin.Al("online.uygunsuz", h.Ihlal, h.Sinir);
+            return Kod(h.Kod);
+        }
+
+        /// <summary>Biri atıldı: Temiz modda mı, kurucu mu attı.</summary>
+        public static string Atildi(TheLighter.Ag.OlayMesaji o, string isim)
+        {
+            if (o.Neden == "temiz") return Metin.Al("online.olay.atildi_temiz", isim);
+            if (o.Neden == "kurucu") return Metin.Al("online.olay.atildi_kurucu", isim, TurkceEk.Belirtme(isim));
+            return Metin.Al("online.olay.atildi", isim);
+        }
+
         public static string Al(Sonuc s) => Metin.Al("hata." + s);
 
         /// <summary>Sunucudan gelen kod: kural motorununsa onun metni, sunucununsa "hata.ODA_YOK" gibi.</summary>

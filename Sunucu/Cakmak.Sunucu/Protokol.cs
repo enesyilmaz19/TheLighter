@@ -266,7 +266,9 @@ namespace Cakmak.Sunucu
             ["oyunBitti"] = oyunBitti,
         });
 
-        public static string LobiDurumu(int surum, string oda, OyuncuId kurucu, IEnumerable<OyuncuEki> oyuncular, Ayarlar ayarlar, IEnumerable<string> paketler)
+        /// <param name="grupPaketi">Yüklenen grup paketindeki soru sayısı (0 = yok).</param>
+        public static string LobiDurumu(int surum, string oda, OyuncuId kurucu, IEnumerable<OyuncuEki> oyuncular, Ayarlar ayarlar, IEnumerable<string> paketler,
+            int grupPaketi)
         {
             var liste = EkListesi(oyuncular);
 
@@ -279,6 +281,7 @@ namespace Cakmak.Sunucu
                 ["kurucu"] = Id(kurucu),
                 ["oyuncular"] = liste,
                 ["ayarlar"] = AyarlarYaz(ayarlar, paketler),
+                ["grupPaketi"] = grupPaketi,
             });
         }
 

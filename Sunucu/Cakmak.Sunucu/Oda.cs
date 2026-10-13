@@ -14,6 +14,8 @@ namespace Cakmak.Sunucu
     sealed class Oda
     {
         public const int EnFazlaOyuncu = Oyun.EnFazlaOyuncu;
+        /// <summary>Grup paketinin <c>paketler</c>'deki adı. İstemcide de bu ad (<c>PaketBilgisi.Bizim</c>).</summary>
+        public const string GrupPaketiAdi = "@bizim";
         const int IsimEnFazla = 20;
         const int SohbetEnFazla = 200;
         /// <summary>Temiz modda bu kadar ihlalde (soru ya da sohbet) odadan atılır (Ana Plan 6.4).</summary>
@@ -38,8 +40,12 @@ namespace Cakmak.Sunucu
         readonly IReadOnlyDictionary<string, IReadOnlyList<string>> paketler;
         readonly IReadOnlyList<string> sesliCezalar;
         readonly Ayarlar ayarlar = new Ayarlar();
-        /// <summary>Kurucunun seçtiği paketler. Başta hepsi.</summary>
+        /// <summary>Kurucunun seçtiği paketler. Başta sunucudakilerin hepsi.</summary>
         List<string> seciliPaketler;
+        /// <summary>
+        /// Grubun kendi paketi ("bizim paket"): kurucu cihazındaki grup kaydından yükler. Sadece bellekte, oda kapanınca gider.
+        /// </summary>
+        List<string> grupSorulari = new List<string>();
         OyuncuId kurucu;
         Oyun oyun;
         int surum;
@@ -255,7 +261,12 @@ namespace Cakmak.Sunucu
                 foreach (var o in oyuncular) liste.Add(new Oyuncu(o.Id, o.Isim));
 
                 var sorular = new List<string>();
-                foreach (var p in seciliPaketler) sorular.AddRange(paketler[p]);
+                foreach (var p in seciliPaketler)
+                {
+                    if (p != GrupPaketiAdi) sorular.AddRange(paketler[p]);
+                    // Grubun kendi yazdığı sorular filtreden geçmedi: Temiz modda kullanılmaz (elden elede de öyle).
+                    else if (ayarlar.Mod != OyunModu.Temiz) sorular.AddRange(grupSorulari);
+                }
 
                 var kopya = new Ayarlar
                 {
@@ -293,6 +304,34 @@ namespace Cakmak.Sunucu
                 var o = oyuncular.Find(x => x.Id == kim);
                 if (o == null || o.Id == kurucu) { b.Yolla(Protokol.Hata("GECERSIZ_GIRDI")); return; }
                 Cikar(o, "kurucu");
+            }
+        }
+
+        /// <summary>
+        /// Kurucu, lobide, grup paketini yükler. Mesaj 4096 baytı geçemediği için parça parça: her mesaj eklenir,
+        /// <c>ilk</c> öncekileri siler. Tekrarlar (büyük/küçük harf farkıyla) atılır. Bozuk parça hiç eklenmez.
+        /// </summary>
+        public void GrupPaketi(Baglanti b, JsonObject m)
+        {
+            lock (kilit)
+            {
+                if (!KurucuMu(b)) return;
+                if (oyun != null) { b.Yolla(Protokol.Hata("OYUN_BASLADI")); return; }
+                var gelen = Protokol.MetinListesi(m, "sorular") ?? throw new GecersizMesaj();
+                var ilk = Protokol.Mantik(m, "ilk", false) ?? false;
+
+                var yeni = ilk ? new List<string>() : new List<string>(grupSorulari);
+                var gorulen = new HashSet<string>(yeni, StringComparer.OrdinalIgnoreCase);
+                foreach (var s in gelen)
+                {
+                    var t = TemizMetin.Temizle(s);
+                    if (t.Length == 0 || t.Length > Oyun.SoruEnFazlaKarakter) { b.Yolla(Protokol.Hata("GECERSIZ_GIRDI")); return; }
+                    if (gorulen.Add(t)) yeni.Add(t);
+                }
+                if (gelen.Count == 0 || yeni.Count > GrupKaydi.GrupPaketiSiniri) { b.Yolla(Protokol.Hata("GECERSIZ_GIRDI")); return; }
+
+                grupSorulari = yeni;
+                HerkeseDurum();
             }
         }
 
@@ -592,7 +631,7 @@ namespace Cakmak.Sunucu
             {
                 var ekler = new List<Protokol.OyuncuEki>();
                 foreach (var o in oyuncular) ekler.Add(Ek(o));
-                var json = Protokol.LobiDurumu(surum, Kod, kurucu, ekler, ayarlar, seciliPaketler);
+                var json = Protokol.LobiDurumu(surum, Kod, kurucu, ekler, ayarlar, seciliPaketler, grupSorulari.Count);
                 foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
                 return;
             }
@@ -633,12 +672,15 @@ namespace Cakmak.Sunucu
             ? (int)Math.Ceiling(Math.Max(0, (sinirlar.AzOyuncuSuresi - azOyuncuBekleme).TotalMilliseconds))
             : (int?)null;
 
-        /// <summary>En az bir paket, hepsi sunucuda var, tekrar yok.</summary>
+        /// <summary>En az bir paket, hepsi sunucuda var (grup paketi yüklendiyse o da), tekrar yok.</summary>
         bool PaketlerGecerli(List<string> secilen)
         {
             var gorulen = new HashSet<string>();
             foreach (var p in secilen)
-                if (!paketler.ContainsKey(p) || !gorulen.Add(p)) return false;
+            {
+                bool mevcut = p == GrupPaketiAdi ? grupSorulari.Count > 0 : paketler.ContainsKey(p);
+                if (!mevcut || !gorulen.Add(p)) return false;
+            }
             return secilen.Count > 0;
         }
 

@@ -1,9 +1,9 @@
 # Ağ Protokolü (online mod)
 
-Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma, sohbet + DM, Temiz filtresi).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2, 6.4 ve 8.
+Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma, sohbet + DM, Temiz filtresi, grup paketi).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2, 6.4 ve 8.
 Sunucu: `Sunucu/Cakmak.Sunucu` · İstemci: Unity (G2).
 
-Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığmıyor, parça parça yükleme gerekiyor. Grup hafızası cihazda, `ozet`'ten yazılır.
+Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobide parça parça yükler (aşağıda "Grup paketi").
 
 ---
 
@@ -34,6 +34,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 | `at` | `kim` | Kurucu; lobide, oyunda ya da bekleme odasında. Kendini atamaz. Atılan `ATILDIN` (`neden: "kurucu"`) alır, bağlantısı kapanır; bu odaya ne anahtarıyla ne aynı isimle dönebilir (hesap yok: başka bir isimle girebilir, rapor + engelleme S6). Oyundaysa oyundan çıkar, sayaçları özette kalır. Herkese `olay: "atildi"` |
 | `tekrarOyna` | — | Kurucu, `oyunSonu`'nda. Oda lobiye döner: bağlı olmayanlar düşer, bekleme odasındakiler oyuncu olur, ayarlar ve atılanların yasağı kalır |
 | `sohbet` | `kime` (`null` ya da yok = genel, `"p3"` = DM), `metin` | Odadaki herkes, her an (lobi, oyun, bekleme odası, oyun sonu). Aşağıda "Sohbet" |
+| `grupPaketi` | `sorular` (metin dizisi), `ilk` (isteğe bağlı, varsayılan `false`) | Kurucu, lobide. Grubun kendi paketini parça parça yükler. Aşağıda "Grup paketi" |
 
 **Metin temizliği** (isim, soru, sohbet): görünmez ve yön karakterleri atılır, her türlü boşluk tek boşluk olur, baş/son boşluk silinir (`TemizMetin`). Temizlenince boş kalan isim `ISIM_GECERSIZ`, soru ve sohbet `GECERSIZ_GIRDI`. Ekranda hep temizlenmiş hali görünür.
 
@@ -48,7 +49,7 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 - `soruSn`, `cevapSn`, `hamleSn`: `5–300`
 - `ceza`: `"kapali"` (varsayılan) · `"hafif"` · `"cesur"`. Cesur'da Kızgın Çakmak da açık. Temiz modda `"cesur"` olamaz: sonuç Temiz + Cesur olacaksa (hangi sırayla gönderilirse gönderilsin) `GECERSIZ_GIRDI`, önce cezayı düşür
 - `gorevler`, `kaos`: `true` / `false` (varsayılan `false`). "Hızlı başla" istemcide, bu alanları kendisi gönderir
-- `paketler`: paket adları dizisi, dosya adı uzantısız: `["Genel", "Okul"]`. Varsayılan: sunucudaki bütün paketler. Boş dizi, sunucuda olmayan ya da iki kez yazılan ad `GECERSIZ_GIRDI`. Öneri çek, Curcuna'nın boşlukları ve Kör Soru sadece seçilenlerden çeker
+- `paketler`: paket adları dizisi, dosya adı uzantısız: `["Genel", "Okul"]`. Varsayılan: sunucudaki bütün paketler. Grup paketi yüklendiyse `"@bizim"` de seçilebilir (yüklenmeden `GECERSIZ_GIRDI`; Temiz modda seçili olsa da kullanılmaz). Boş dizi, sunucuda olmayan ya da iki kez yazılan ad `GECERSIZ_GIRDI`. Öneri çek, Curcuna'nın boşlukları ve Kör Soru sadece seçilenlerden çeker
 
 ### Komutlar
 
@@ -99,7 +100,8 @@ Online'da **grup paketi yok** (sonra): yüzlerce soru 4096 baytlık mesaja sığ
 { "t": "durum", "surum": 3, "oda": "KXTPM", "asama": "lobi", "kurucu": "p1",
   "oyuncular": [ { "id": "p1", "isim": "Enes", "renk": 0, "bagli": true } ],
   "ayarlar": { "mod": "normal", "miniOyun": "tkm", "turSayisi": 15, "soruSn": 60, "cevapSn": 20, "hamleSn": 10,
-               "ceza": "kapali", "gorevler": false, "kaos": false, "paketler": ["AileDostu", "Genel", "Okul", "TatilYolculuk"] } }
+               "ceza": "kapali", "gorevler": false, "kaos": false, "paketler": ["AileDostu", "Genel", "Okul", "TatilYolculuk"] },
+  "grupPaketi": 0 }
 ```
 
 ### `durum` — bekleme odasında
@@ -236,6 +238,7 @@ Bir mesaj birden çok kuralı çiğniyorsa ilk tutan döner:
 - `baslat` oyun başladıktan sonra: `OYUN_BASLADI`.
 - `at`: `kim` yoksa ya da `"p…"` değilse `GECERSIZ_MESAJ`. Odada olmayan ya da kurucunun kendisi `GECERSIZ_GIRDI`. Kurucu değilse `KURUCU_DEGILSIN`.
 - `tekrarOyna`: oyun yoksa `OYUN_YOK`, bitmediyse `YANLIS_ASAMA`.
+- `grupPaketi`: `KURUCU_DEGILSIN` → `OYUN_BASLADI` → `sorular` yok ya da metin dizisi değil, `ilk` `true`/`false` değil (`GECERSIZ_MESAJ`) → boş dizi, temizlenince boş ya da 140 karakterden uzun soru, toplam 500'ü aşıyor (`GECERSIZ_GIRDI`; parçanın hiçbiri eklenmez, `ilk` olsa da eski paket silinmez).
 - `sohbet`: `ODADA_DEGILSIN` → `COK_HIZLI` (sohbet sınırı) → `metin` yok ya da metin değil, `kime` metin değil ya da `"p…"` değil (`GECERSIZ_MESAJ`) → temizlenince boş, 200 karakterden uzun, `kime` odada yok ya da kendin (`GECERSIZ_GIRDI`) → `UYGUNSUZ`.
 - Bilinmeyen `komut` ya da hamle `oyun` adı: `GECERSIZ_MESAJ`.
 
@@ -258,6 +261,23 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 - Aynı Wi-Fi'daki herkes aynı IP'dir: 10 kişilik grup ve yeniden bağlananlar sınırlara sığar.
 - `COK_HIZLI` alan istemci durmazsa cevaplar gönderim kuyruğunu doldurur ve bağlantı kesilir.
 - Ayarlar sunucuda: `appsettings.json` içinde `"Sinirlar"` bölümü ya da ortam değişkeni (`Sinirlar__IpBasinaBaglanti=50`).
+
+## Grup paketi (Ana Plan 8.5)
+
+"Bizim paket": grubun Curcuna soruları ve ifşa olan soruları, kurucunun cihazındaki grup kaydında (`GrupKaydi.GrupPaketi`, en fazla 500). Online'da kurucu lobide yükler:
+
+```json
+{ "t": "grupPaketi", "ilk": true, "sorular": ["Kim en çok uyur?", "…"] }   // ilk parça: öncekini siler
+{ "t": "grupPaketi", "sorular": ["…"] }                                  // sonrakiler eklenir
+```
+
+- Bir mesaj 4096 baytı geçemez: soruları sığdığı kadar parçalara böl (kısa sorularla ~40, en uzunlarla ~20 soru). Sonraki parçayı, öncekinden sonra gelen `durum`'u görünce yolla: mesaj sınırına (saniyede 10) takılmazsın.
+- Her soru isim/soru gibi temizlenir (`TemizMetin`), 1–140 karakter. Tekrarlar (büyük/küçük harf farkıyla) bir kez sayılır. Toplam en fazla 500.
+- Lobi `durum`'unda `grupPaketi`: yüklenen soru sayısı (herkes görür, sorular gitmez). 0 = yok.
+- Seçmek için `ayarlar` → `paketler`'e `"@bizim"` ekle (istemcideki `PaketBilgisi.Bizim` ile aynı ad). Öneri çek, Curcuna boşlukları ve Kör Soru ondan da çeker.
+- **Temiz modda kullanılmaz** (sorular filtreden geçmedi), elden elede de öyle.
+- Sorular sadece odanın belleğinde, oda kapanınca gider. `tekrarOyna`'da paket ve seçim kalır; oyun sonunda kayıt güncellendiyse kurucu `ilk: true` ile yeniden yükleyebilir.
+- Hangi grup kaydının yükleneceği istemcinin işi (elden ele kurulumdaki eşleşme kuralı, karar 22).
 
 ## Sohbet (Ana Plan 6.4)
 
@@ -305,4 +325,4 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 | — | `hamle` nesnesinin biçimi | 5.2'de yoktu |
 | — | Lobi `durum`'u | 5.2 sadece oyun içini gösteriyordu |
 | "Ayarlara paketler eklenir" | `paketler`: dosya adları (`"Genel"`) | İstemcinin paket listesi de dosya adını kullanıyor (`TextAsset.name`) |
-| "`Kur` grup paketinin sorularını da alır" | Online'da henüz yok | 4096 bayt sınırı, parça parça yükleme ayrı iş |
+| "`Kur` grup paketinin sorularını da alır" | Kurucu `grupPaketi` ile parça parça yükler, `paketler`'de `"@bizim"` | 4096 bayt mesaj sınırı |

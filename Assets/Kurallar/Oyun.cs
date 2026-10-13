@@ -121,6 +121,9 @@ namespace Cakmak.Kurallar
                         && a.Can >= 1 && a.Can <= EnFazlaCan;
                 case OyunTuru.Takim:
                     return !a.GizliGorevler; // kişisel görev takım oyununa karışır
+                case OyunTuru.Casus:
+                    // Sorular mekâna göre yazılmalı: Curcuna'nın genel havuzu işe yaramaz. Görev ve kaos rollerle karışır.
+                    return a.Mod != OyunModu.Curcuna && !a.GizliGorevler && !a.KaosTurlari;
                 default:
                     return true;
             }
@@ -243,14 +246,14 @@ namespace Cakmak.Kurallar
         }
 
         /// <summary>
-        /// Oyunu bitirir. Online'da kimin çağırabileceğine sunucu karar verir. Köstebek'te önce son oylama yapılır
-        /// (kurucu köstebekse oyunu bitirip kazanamasın); <paramref name="zorla"/> oylamasız hemen bitirir
-        /// (sunucu: oyuncu kalmadı), köstebek yakalanmamış sayılır.
+        /// Oyunu bitirir. Online'da kimin çağırabileceğine sunucu karar verir. Köstebek ve Casus'ta önce son oylama yapılır
+        /// (kurucu köstebek ya da casussa oyunu bitirip kazanamasın); <paramref name="zorla"/> oylamasız hemen bitirir
+        /// (sunucu: oyuncu kalmadı), gizli kişi yakalanmamış sayılır.
         /// </summary>
         public Sonuc OyunuBitir(bool zorla = false)
         {
             if (asama == Asama.OyunSonu) return Sonuc.YanlisAsama;
-            if (!zorla && Kostebekli)
+            if (!zorla && Suclamali)
             {
                 if (sonSuclama) return Sonuc.YanlisAsama;
                 SonSuclamayiBaslat();
@@ -313,6 +316,9 @@ namespace Cakmak.Kurallar
                     break;
                 case Asama.Tetik:
                     TetigiCek(); // karar vermedi: kendisi çeker
+                    break;
+                case Asama.CasusTahmini:
+                    CasusBitir(CasusKazanan.Grup, CasusNedeni.Yakalandi, null); // son şansını kullanmadı
                     break;
             }
         }
@@ -563,6 +569,16 @@ namespace Cakmak.Kurallar
         }
 
         void Yay(Olay olay) => OlayOldu?.Invoke(olay);
+
+        List<T> Karistir<T>(List<T> liste)
+        {
+            for (int i = liste.Count - 1; i > 0; i--)
+            {
+                int j = rastgele.Next(i + 1);
+                (liste[i], liste[j]) = (liste[j], liste[i]);
+            }
+            return liste;
+        }
 
         OyuncuDurumu Bul(OyuncuId id) => oyuncular.Find(o => o.Id == id);
 

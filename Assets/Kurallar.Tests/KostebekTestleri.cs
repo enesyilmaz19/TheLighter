@@ -24,32 +24,6 @@ namespace Cakmak.Kurallar.Tests
             return bulunan[0];
         }
 
-        static OyuncuId Ilk(IReadOnlyList<OyuncuId> liste, params OyuncuId[] haric)
-        {
-            foreach (var x in liste)
-                if (Array.IndexOf(haric, x) < 0) return x;
-            Assert.Fail("uygun aday yok");
-            return default;
-        }
-
-        /// <summary>Köstebek ne B ne C olur: görevi ilerlemez. A sorar, C kazanır, sonuç ekranı biter.</summary>
-        static void KostebeksizTur(Oyun oyun, OyuncuId kostebek)
-        {
-            var a = SiradakiA(oyun);
-            var b = Ilk(oyun.GorunumAl(a).Secilebilir, kostebek);
-            Assert.That(oyun.SoruSor(a, b, "Kim en çok uyur?"), Is.EqualTo(Sonuc.Tamam));
-            var c = Ilk(oyun.GorunumAl(b).Secilebilir, kostebek);
-            Assert.That(oyun.CevapSec(b, c), Is.EqualTo(Sonuc.Tamam));
-            TkmOyna(oyun, b, c, cKazansin: true);
-            Saniye(oyun, 7);
-        }
-
-        static void HerkesOyVerir(Oyun oyun, Func<OyuncuId, OyuncuId> kime, int kisi = 5)
-        {
-            for (int i = 1; i <= kisi && Durum(oyun).Asama == Asama.Suclama; i++)
-                Assert.That(oyun.SuclamaOyu(P(i), kime(P(i))), Is.EqualTo(Sonuc.Tamam));
-        }
-
         // ---------------------------------------------------- Kurulum ve gizlilik
 
         [Test]
@@ -108,7 +82,7 @@ namespace Cakmak.Kurallar.Tests
             for (int i = 0; i < Oyun.SuclamaAraligi; i++)
             {
                 Assert.That(Durum(oyun).Asama, Is.EqualTo(Asama.SoruSorma), "tur " + (i + 1));
-                KostebeksizTur(oyun, k);
+                OnsuzTur(oyun, k);
             }
             var d = Durum(oyun);
             Assert.That(d.Asama, Is.EqualTo(Asama.Suclama));
@@ -243,7 +217,7 @@ namespace Cakmak.Kurallar.Tests
             }
             Assert.That(oyun, Is.Not.Null);
             Assert.That(oyun.GorunumAl(k).Gorevin.Adet, Is.EqualTo(3));
-            if (SiradakiA(oyun) == k) KostebeksizTur(oyun, k);
+            if (SiradakiA(oyun) == k) OnsuzTur(oyun, k);
             var gosterilen = new List<OyuncuId>();
             for (int i = 0; i < 3; i++)
             {
@@ -281,8 +255,8 @@ namespace Cakmak.Kurallar.Tests
         {
             var oyun = YeniKostebek(ayarla: a => a.TurSayisi = 2);
             var k = KostebekKim(oyun);
-            KostebeksizTur(oyun, k);
-            KostebeksizTur(oyun, k);
+            OnsuzTur(oyun, k);
+            OnsuzTur(oyun, k);
             var d = Durum(oyun);
             Assert.That(d.Asama, Is.EqualTo(Asama.Suclama));
             Assert.That(d.SonSuclama, Is.True);
@@ -366,7 +340,7 @@ namespace Cakmak.Kurallar.Tests
         {
             var oyun = YeniKostebek();
             var k = KostebekKim(oyun);
-            if (SiradakiA(oyun) == k) KostebeksizTur(oyun, k);
+            if (SiradakiA(oyun) == k) OnsuzTur(oyun, k);
             var a = SiradakiA(oyun);
             int tur = Durum(oyun).Tur;
             Assert.That(oyun.Sucla(P(1) == a ? P(2) : P(1)), Is.EqualTo(Sonuc.Tamam));

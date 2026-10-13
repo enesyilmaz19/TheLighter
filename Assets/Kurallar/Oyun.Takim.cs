@@ -54,12 +54,7 @@ namespace Cakmak.Kurallar
             else
             {
                 // Rastgele ve dengeli: karıştır, sırayla dağıt.
-                var sira = new List<OyuncuDurumu>(oyuncular);
-                for (int i = sira.Count - 1; i > 0; i--)
-                {
-                    int j = rastgele.Next(i + 1);
-                    (sira[i], sira[j]) = (sira[j], sira[i]);
-                }
+                var sira = Karistir(new List<OyuncuDurumu>(oyuncular));
                 for (int i = 0; i < sira.Count; i++) sira[i].Takim = i % TakimSayisi;
             }
             // Tek sayıda kişide küçük takım 1 puanla başlar.

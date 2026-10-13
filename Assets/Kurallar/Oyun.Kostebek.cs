@@ -3,11 +3,11 @@ using System.Collections.Generic;
 namespace Cakmak.Kurallar
 {
     // Köstebek (docs/Oyunlar.md, 1): grubun içinde gizli görevli bir hain. Turlar normal çakmak, herkesin gizli görevi
-    // var. Her 5 turda bir ve erken suçlamayla "Köstebek kim?" oylaması. Köstebek görevini bitirince ya da yakalanmadan
-    // oyun bitince kazanır.
+    // var. Her 5 turda bir ve erken suçlamayla "Köstebek kim?" oylaması (Oyun.Suclama.cs). Köstebek görevini bitirince
+    // ya da yakalanmadan oyun bitince kazanır.
 
     /// <summary>Gizli rol, sadece sahibinin görünümünde (<see cref="Gorunum.Rolun"/>). Yeni roller sona.</summary>
-    public enum Rol { Yok, Kostebek }
+    public enum Rol { Yok, Kostebek, Casus }
 
     public enum KostebekKazanan { Grup, Kostebek }
 
@@ -73,12 +73,8 @@ namespace Cakmak.Kurallar
             new KostebekGorevi(GorevTuru.CokGosterilme, 3),
         };
 
-        OyuncuId kostebek;
         KostebekSonucu kostebekSonucu;
-        readonly List<OyuncuId> supheliler = new List<OyuncuId>();
         readonly HashSet<OyuncuId> suclamaKullanan = new HashSet<OyuncuId>();
-        readonly Dictionary<OyuncuId, OyuncuId> suclamaOylari = new Dictionary<OyuncuId, OyuncuId>();
-        bool sonSuclama;
 
         bool Kostebekli => ayar.Oyun == OyunTuru.Kostebek;
         /// <summary>Köstebek'te herkesin gizli görevi var: köstebeğin garip hamleleri göze batmasın.</summary>
@@ -99,127 +95,58 @@ namespace Cakmak.Kurallar
             return Sonuc.Tamam;
         }
 
-        /// <summary>"Köstebek kim?" oyu: oyundan çıkmamış herkes bir kez, kendisi dışında oyundaki birine.</summary>
-        public Sonuc SuclamaOyu(OyuncuId kim, OyuncuId hedef)
-        {
-            if (asama != Asama.Suclama) return Sonuc.YanlisAsama;
-            if (!oylayanlar.Contains(kim)) return Sonuc.SiraSendeDegil;
-            if (suclamaOylari.ContainsKey(kim)) return Sonuc.HakKalmadi;
-            if (hedef == kim || Bul(hedef) == null || cikan.Contains(hedef)) return Sonuc.Secilemez;
-
-            suclamaOylari[kim] = hedef;
-            Yay(new Olay { Tur = OlayTuru.OyVerildi, Kim = kim });
-            if (suclamaOylari.Count == oylayanlar.Count) SuclamayiBitir();
-            return Sonuc.Tamam;
-        }
-
         // ------------------------------------------------------------ Akış
 
         /// <summary>Kurulumda, görevler dağıtıldıktan sonra: köstebek seçilir, normal görevinin yerine köstebek görevi alır.</summary>
         void KostebekKur()
         {
             if (!Kostebekli) return;
-            kostebek = oyuncular[rastgele.Next(oyuncular.Count)].Id;
+            hain = oyuncular[rastgele.Next(oyuncular.Count)].Id;
             var secim = KostebekGorevleri[rastgele.Next(KostebekGorevleri.Length)];
-            IzAl(kostebek).Gorev = new Gorev
+            IzAl(hain).Gorev = new Gorev
             {
                 Tur = secim.Tur,
                 Adet = secim.Adet,
                 Zorluk = Zorluk.Zor,
-                Hedef = secim.Hedefli ? RastgeleOyuncu(kostebek) : (OyuncuId?)null,
+                Hedef = secim.Hedefli ? RastgeleOyuncu(hain) : (OyuncuId?)null,
             };
         }
 
-        /// <summary>Tur sınırında (yeni tur başlamadan): köstebek görevini bitirdiyse kazanır. true: oyun bitti.</summary>
+        /// <summary>Tur sınırında (yeni tur başlamadan, son oylamadan önce): köstebek görevini bitirdiyse kazanır. true: oyun bitti.</summary>
         bool KostebekGoreviBitti()
         {
-            if (!Kostebekli || !GorevBasarili(Bul(kostebek), IzAl(kostebek))) return false;
+            if (!Kostebekli || !GorevBasarili(Bul(hain), IzAl(hain))) return false;
             KostebekBitir(KostebekKazanan.Kostebek, KostebekNedeni.GorevBitti);
             return true;
         }
 
-        /// <summary>Yeni tur başladı: her 5 turda bir oylama.</summary>
-        void PeriyodikSuclama()
+        void KostebekYakalandi()
         {
-            if (Kostebekli && tur > 1 && (tur - 1) % SuclamaAraligi == 0) SuclamayiBaslat(null);
+            if (Kostebekli) KostebekBitir(KostebekKazanan.Grup, KostebekNedeni.Yakalandi);
         }
 
-        /// <summary>
-        /// Oyun bitecek (tur sayısı doldu ya da kurucu bitirdi): Köstebek'te önce son oylama. Kurucu da köstebek olabilir:
-        /// oyunu kendisi bitirip kazanamasın. Görevini bu turda bitirmiş köstebek oylamaya kalmadan kazanır.
-        /// true: oylama başladı ya da oyun bitti.
-        /// </summary>
-        bool SonSuclamayiBaslat()
+        void KostebekYakalanmadi()
         {
-            if (!Kostebekli || sonSuclama) return false;
-            if (KostebekGoreviBitti()) return true;
-            SoruyuKapat();
-            sonSuclama = true;
-            SuclamayiBaslat(null);
-            return true;
+            if (Kostebekli) KostebekBitir(KostebekKazanan.Kostebek, KostebekNedeni.Yakalanmadi);
         }
 
-        void SuclamayiBaslat(OyuncuId? suclayan)
+        void KostebekKacti()
         {
-            oylayanlar.Clear();
-            suclamaOylari.Clear();
-            foreach (var o in oyuncular)
-                if (!cikan.Contains(o.Id)) oylayanlar.Add(o.Id);
-            AsamayaGec(Asama.Suclama, ayar.SuclamaSuresiSn);
-            Yay(new Olay { Tur = OlayTuru.SuclamaBasladi, Kim = suclayan });
-        }
-
-        /// <summary>En çok oyu alan suçlanır; eşitlikte ya da hiç oy yoksa kimse. Köstebekse grup kazanır.</summary>
-        void SuclamayiBitir()
-        {
-            var sayilar = new Dictionary<OyuncuId, int>();
-            foreach (var hedef in suclamaOylari.Values) Artir(sayilar, hedef);
-            OyuncuId? suclanan = null;
-            int enCok = 0;
-            bool esit = false;
-            foreach (var s in sayilar)
-            {
-                if (s.Value > enCok) { enCok = s.Value; suclanan = s.Key; esit = false; }
-                else if (s.Value == enCok) esit = true;
-            }
-            if (esit) suclanan = null;
-            suclamaOylari.Clear();
-            oylayanlar.Clear();
-            Yay(new Olay { Tur = OlayTuru.SuclamaBitti, Kim = suclanan });
-
-            if (suclanan == kostebek) { KostebekBitir(KostebekKazanan.Grup, KostebekNedeni.Yakalandi); return; }
-            if (suclanan.HasValue && !supheliler.Contains(suclanan.Value)) supheliler.Add(suclanan.Value);
-            if (sonSuclama) { KostebekBitir(KostebekKazanan.Kostebek, KostebekNedeni.Yakalanmadi); return; }
-
-            // A'nın turu baştan. A bu arada oyundan çıktıysa, soru sormadan çıkan A gibi turu yanar.
-            if (cikan.Contains(a))
-            {
-                OncekiTuruUnut();
-                TurBaslat(RastgeleOyuncu(a));
-            }
-            else AsamayaGec(Asama.SoruSorma, ayar.SoruSuresiSn);
+            if (Kostebekli) KostebekBitir(KostebekKazanan.Grup, KostebekNedeni.Kacti);
         }
 
         /// <summary>Oyun bitiyor ve sonuç önceden yazılmadı (oyun zorla bitti): köstebek yakalanmadı, görevi bittiyse o sayılır.</summary>
         void KostebekSonucunuYaz()
         {
             if (!Kostebekli || kostebekSonucu != null) return;
-            var neden = GorevBasarili(Bul(kostebek), IzAl(kostebek)) ? KostebekNedeni.GorevBitti : KostebekNedeni.Yakalanmadi;
-            kostebekSonucu = new KostebekSonucu { Kostebek = kostebek, Kazanan = KostebekKazanan.Kostebek, Neden = neden };
+            var neden = GorevBasarili(Bul(hain), IzAl(hain)) ? KostebekNedeni.GorevBitti : KostebekNedeni.Yakalanmadi;
+            kostebekSonucu = new KostebekSonucu { Kostebek = hain, Kazanan = KostebekKazanan.Kostebek, Neden = neden };
         }
 
         void KostebekBitir(KostebekKazanan kazanan, KostebekNedeni neden)
         {
-            kostebekSonucu = new KostebekSonucu { Kostebek = kostebek, Kazanan = kazanan, Neden = neden };
+            kostebekSonucu = new KostebekSonucu { Kostebek = hain, Kazanan = kazanan, Neden = neden };
             Bitir();
-        }
-
-        /// <summary>Oyundan çıkan köstebekse grup kazanır. true: oyun bitti.</summary>
-        bool KostebekKacti(OyuncuId kim)
-        {
-            if (!Kostebekli || kim != kostebek) return false;
-            KostebekBitir(KostebekKazanan.Grup, KostebekNedeni.Kacti);
-            return true;
         }
 
         // ------------------------------------------------------------ Görünüm
@@ -227,16 +154,8 @@ namespace Cakmak.Kurallar
         void KostebekGorunumu(Gorunum g, OyuncuId kim)
         {
             if (!Kostebekli) return;
-            if (kim == kostebek) g.Rolun = Rol.Kostebek;
+            if (kim == hain) g.Rolun = Rol.Kostebek;
             g.SuclamaHakkin = !suclamaKullanan.Contains(kim) && !cikan.Contains(kim) && asama != Asama.OyunSonu;
-            g.Supheliler = new List<OyuncuId>(supheliler);
-            if (asama == Asama.Suclama)
-            {
-                g.Oylayanlar = new List<OyuncuId>(oylayanlar);
-                g.OyVerdin = suclamaOylari.ContainsKey(kim);
-                g.OyKullanan = suclamaOylari.Count;
-                g.SonSuclama = sonSuclama;
-            }
         }
     }
 }

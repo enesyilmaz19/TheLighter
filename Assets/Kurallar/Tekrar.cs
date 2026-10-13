@@ -206,6 +206,8 @@ namespace Cakmak.Kurallar
         public RusRuletiSonucu RusRuleti;
         /// <summary>Takım Düellosu'nda kazanan takım ve puanlar, diğer oyunlarda null.</summary>
         public TakimSonucu Takim;
+        /// <summary>Casus'ta casus kimdi, mekân (ya da kelime) neydi, kim kazandı; diğer oyunlarda null.</summary>
+        public CasusSonucu Casus;
     }
 
     // ------------------------------------------------------------ Grup kaydı (cihazda saklanır)

@@ -112,14 +112,18 @@ namespace Cakmak.Kurallar
         Gume,          // soru gizli kaldı
         OyunSonu,
         // Yeni aşamalar hep sona.
-        Suclama,       // Köstebek: "Köstebek kim?" oylaması (docs/Oyunlar.md)
+        Suclama,       // Köstebek, Casus: "Köstebek kim?" / "Casus kim?" oylaması (docs/Oyunlar.md)
         Tetik,         // Rus Ruleti: düelloyu kaybeden tetiği çeker ya da devreder
+        CasusTahmini,  // Casus: yakalanan casusun son şansı, mekânı (ya da kelimeyi) tahmin eder
     }
 
     public enum OyunModu { Normal, Temiz, Curcuna }
 
     /// <summary>Hangi oyun (docs/Oyunlar.md). Mod (soruların nereden geldiği, Temiz filtresi) her oyunda ayrı seçilir. Yeni oyunlar sona.</summary>
-    public enum OyunTuru { Cakmak, Kostebek, RusRuleti, Takim }
+    public enum OyunTuru { Cakmak, Kostebek, RusRuleti, Takim, Casus }
+
+    /// <summary>Casus neyi bilmiyor: mekânı (herkesin bir rolü var) ya da tek bir kelimeyi (Imposter, rol yok).</summary>
+    public enum CasusTuru { Mekan, Kelime }
 
     public enum MiniOyunTuru { Tkm, TekCift, Zar, Reaksiyon, Karisik }
 
@@ -182,11 +186,13 @@ namespace Cakmak.Kurallar
         /// <summary>Elden ele (tek cihaz). Açıkken kaos turlarında "Soran Gizli" çıkmaz: herkes telefonu kimin tuttuğunu görüyor.</summary>
         public bool TekCihaz;
 
-        /// <summary>Köstebek: "Köstebek kim?" oylamasının süresi (tartışma dahil).</summary>
+        /// <summary>Köstebek, Casus: "kim?" oylamasının süresi (tartışma dahil).</summary>
         public int SuclamaSuresiSn = 60;
         /// <summary>Rus Ruleti: herkesin canı, 1–3 (1 = Rus Ruleti, 3 = Son Çakmak).</summary>
         public int Can = 1;
         /// <summary>Takım Düellosu: kurucunun dağılımı (oyuncu → 0 ya da 1). null = rastgele, dengeli.</summary>
         public IReadOnlyDictionary<OyuncuId, int> TakimDagilimi;
+        /// <summary>Casus: mekân ya da kelime.</summary>
+        public CasusTuru Casus = CasusTuru.Mekan;
     }
 }

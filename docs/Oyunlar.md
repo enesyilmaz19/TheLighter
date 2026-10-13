@@ -171,8 +171,9 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 
 ## 6. Kural motoru ve iş bölümü
 
-- **Yeni ayar:** `Ayarlar.Oyun` (enum, sona eklenir). `Mod` aynen kalır. Geçersiz birleşimler `Kur`'da `GecersizGirdi` döner: Casus + Curcuna, Vampir < 6 kişi.
-- **Yeni aşamalar** (enum sonuna): `Suclama` (oylama), `Gece`, `Linc`, `Tetik`, `Final`, `CasusTahmini`.
+- **Yeni ayar:** `Ayarlar.Oyun` (enum, sona eklenir). `Mod` aynen kalır. "Birlikte olamaz" kuralları tek yerde, `Oyun.AyarlarUyumlu`: `Kur` ve sunucunun lobisi onu kullanır (yapıldı: Temiz + Cesur, Köstebek + kaos, Rus Ruleti + ceza/görev/kaos; gelecek: Casus + Curcuna). Kişi sayısı sınırı (Vampir 6+) `Kur`'da.
+- **Yeni aşamalar** (enum sonuna): `Suclama` (Köstebek, yapıldı), `Tetik` (Rus Ruleti, yapıldı); gelecek: `Gece`, `Linc`, `CasusTahmini`. Rus Ruleti'nin finali ayrı aşama değil, `Gorunum.Final` bayrağı (final düellosu normal `MiniOyun` aşaması).
+- **Olay kuralı:** motor her aşama değişikliğinde bir olay yayar. Sunucu yeni durumu olaydan sonra yollar; olaysız değişen aşama online'da ekrana gitmez. Rastgele oyun testi bunu her oyunda denetler.
 - **Her oyun ayrı dosya:** `Oyun.Kostebek.cs`, `Oyun.RusRuleti.cs`, `Oyun.Takim.cs`, `Oyun.Casus.cs`, `Oyun.Vampir.cs`. Oyuna bağlandıkları yerler:
   - tur sonu,
   - düello sonucu,

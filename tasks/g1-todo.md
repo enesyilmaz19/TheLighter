@@ -7,6 +7,7 @@ Kaynak: `docs/Ana Plan.md` · Branch'ler: `g1/<iş>` → `main`
 - [x] ~~İmza temizliği~~ → **vazgeçildi (2026-10-10).** Contributors listesi zaten temiz (sadece enesyilmaz19 ve ardatelli0). İmza sadece ilk 2 commit'in sayfasında görünüyor. Geçmiş yeniden yazılmayacak.
 - [ ] **Sözleşme oturumu (Arda ile):** aşağıdaki "Sözleşmeye önerilen değişiklikler" (14 madde), "Kararlar" (30 madde) ve `docs/Protokol.md`'nin sonundaki farklar tablosu birlikte onaylanır. Onaylananlar `docs/Ana Plan.md` 5.1/5.2'ye işlenir. Arda'nın onay bekleyenleri: kararlar 20–23, 25–30, `docs/Guvenlik.md`, `.gitignore` eklemeleri, sunucu adresinin build'e konması (karar 29).
 - [ ] **Temiz kara listesi ve izin listesi:** `Assets/Kurallar/TemizFiltre.cs` başındaki üç liste içerik (Ana Plan 4: "Temiz kara listesi ve izin listesi" G1'de). Başlangıç listesini Claude yazdı, gözden geçir, ekle/çıkar. Eklediğin her kelime için `TemizFiltreTestleri`'ne bir satır, paket soruları zaten deneniyor.
+- [x] **Öncelik (2026-10-13, Enes):** önce PC. İlk testler bilgisayarda; Android PC bitince. S6 şimdilik bekliyor. Arda'nın görevi `tasks/g2-pc.md` (S5 kapanışı, PC bulguları: aynı bilgisayarda iki pencerenin kimlik çakışması, `runInBackground` kapalı, pencere modu; PC test planı).
 - [ ] **VPS + alan adı** (aşağıda "S4 sonu"): hazır olunca `wss://<alan-adı>/ws` adresini Arda'ya ilet, 4 cihazla farklı ağlardan dene (S4 bitti ölçütünün son maddesi).
 
 ## S1 — Kural motoru (çekirdek döngü)

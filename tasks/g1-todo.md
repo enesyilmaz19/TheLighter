@@ -69,6 +69,8 @@ Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hi�
 - [ ] Uygulama systemd servisi, root olmayan kullanıcı, sadece localhost'u dinler · önünde Caddy (alan adı + HTTPS kendiliğinden, wss:// ek ayarsız). **Caddy aynı makinede olmalı:** sunucu `X-Forwarded-For`'a sadece localhost'tan güveniyor. Önüne Cloudflare gibi bir şey daha konursa `ForwardedHeadersOptions.KnownNetworks` ayarlanmalı, yoksa herkes aynı IP görünür
 - [ ] Gizli bilgiler (Vivox anahtarı vb.) sunucuda ortam değişkeninde. Repoya ve Unity build'ine asla girmez
 - [ ] Alan adı
+- [x] **Kurulum denendi (2026-10-13):** `Sunucu/Kurulum/BENIOKU.md`'nin 2. adımı WSL Ubuntu 24.04'te (systemd) birebir uygulandı: servis kum havuzuyla açıldı, oyun, gizlilik ve Temiz filtresi geçti. Rehbere `libicu74` ve `ufw` notu eklendi
+- [ ] Mağazadan önce (S6): istemci–sunucu protokol sürümü kontrolü. Sunucu güncellenince eski build'le bağlanan anlaşılır bir "güncelle" mesajı alsın. Arkadaşlar arası testte gerek yok
 
 ## S6 — mağaza ve yasal (mağazadan önce şart)
 

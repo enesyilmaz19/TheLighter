@@ -42,8 +42,8 @@ namespace TheLighter.Istemci
         readonly Button sohbetDugmesi;
         readonly VisualElement oyuncuBolumu;
         readonly VisualElement oyuncuYeri;
-        readonly Button bizimButon;
-        readonly Label bizimDurum;
+        Button bizimButon;      // AyarlariKur kurar
+        Label bizimDurum;
         GrupDosyasi grup;
         string grupIsimleri;
         GrupPaketiYukleyici yukleyici;

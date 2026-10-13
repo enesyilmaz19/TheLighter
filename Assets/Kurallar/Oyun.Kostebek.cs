@@ -146,11 +146,13 @@ namespace Cakmak.Kurallar
 
         /// <summary>
         /// Oyun bitecek (tur sayısı doldu ya da kurucu bitirdi): Köstebek'te önce son oylama. Kurucu da köstebek olabilir:
-        /// oyunu kendisi bitirip kazanamasın. true: oylama başladı.
+        /// oyunu kendisi bitirip kazanamasın. Görevini bu turda bitirmiş köstebek oylamaya kalmadan kazanır.
+        /// true: oylama başladı ya da oyun bitti.
         /// </summary>
         bool SonSuclamayiBaslat()
         {
             if (!Kostebekli || sonSuclama) return false;
+            if (KostebekGoreviBitti()) return true;
             if (asama != Asama.Ifsa) GumeyeGitti(); // tur ortasında biten soru güme sayılır (Bitir gibi)
             soru = null;                             // ifşa olan soru kayıtlarda; Bitir'deki temizlik ona dokunmasın
             sonSuclama = true;
@@ -197,6 +199,14 @@ namespace Cakmak.Kurallar
                 TurBaslat(RastgeleOyuncu(a));
             }
             else AsamayaGec(Asama.SoruSorma, ayar.SoruSuresiSn);
+        }
+
+        /// <summary>Oyun bitiyor ve sonuç önceden yazılmadı (oyun zorla bitti): köstebek yakalanmadı, görevi bittiyse o sayılır.</summary>
+        void KostebekSonucunuYaz()
+        {
+            if (!Kostebekli || kostebekSonucu != null) return;
+            var neden = GorevBasarili(Bul(kostebek), IzAl(kostebek)) ? KostebekNedeni.GorevBitti : KostebekNedeni.Yakalanmadi;
+            kostebekSonucu = new KostebekSonucu { Kostebek = kostebek, Kazanan = KostebekKazanan.Kostebek, Neden = neden };
         }
 
         void KostebekBitir(KostebekKazanan kazanan, KostebekNedeni neden)

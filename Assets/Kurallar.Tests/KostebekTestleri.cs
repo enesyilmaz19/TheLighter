@@ -222,7 +222,17 @@ namespace Cakmak.Kurallar.Tests
         [Test]
         public void Gorevini_bitiren_kostebek_o_turun_sonunda_kazanir()
         {
-            // "En az 3 farklı kişiyi göster" görevi çıkan bir oyun bul.
+            var oyun = GoreviBitmisKostebek(); // görev bu turda bitti, sonuç yine gösteriliyor
+            Saniye(oyun, 7);
+            Assert.That(Durum(oyun).Asama, Is.EqualTo(Asama.OyunSonu));
+            var sonuc = oyun.Ozet().Kostebek;
+            Assert.That(sonuc.Kazanan, Is.EqualTo(KostebekKazanan.Kostebek));
+            Assert.That(sonuc.Neden, Is.EqualTo(KostebekNedeni.GorevBitti));
+        }
+
+        /// <summary>"3 farklı kişiyi göster" görevli bir oyunda köstebeği 3 kez B yapar; son turun sonuç ekranında bırakır.</summary>
+        static Oyun GoreviBitmisKostebek()
+        {
             Oyun oyun = null;
             OyuncuId k = default;
             for (int tohum = 1; tohum <= 500 && oyun == null; tohum++)
@@ -234,7 +244,6 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(oyun, Is.Not.Null);
             Assert.That(oyun.GorunumAl(k).Gorevin.Adet, Is.EqualTo(3));
             if (SiradakiA(oyun) == k) KostebeksizTur(oyun, k);
-
             var gosterilen = new List<OyuncuId>();
             for (int i = 0; i < 3; i++)
             {
@@ -244,13 +253,27 @@ namespace Cakmak.Kurallar.Tests
                 gosterilen.Add(c);
                 Assert.That(oyun.CevapSec(k, c), Is.EqualTo(Sonuc.Tamam));
                 TkmOyna(oyun, k, c, cKazansin: true);
-                Assert.That(Durum(oyun).Asama, Is.EqualTo(Asama.Ifsa), "turun sonucu yine gösterilir");
-                Saniye(oyun, 7);
+                if (i < 2) Saniye(oyun, 7);
             }
-            Assert.That(Durum(oyun).Asama, Is.EqualTo(Asama.OyunSonu));
-            var sonuc = oyun.Ozet().Kostebek;
-            Assert.That(sonuc.Kazanan, Is.EqualTo(KostebekKazanan.Kostebek));
-            Assert.That(sonuc.Neden, Is.EqualTo(KostebekNedeni.GorevBitti));
+            Assert.That(Durum(oyun).Asama, Is.EqualTo(Asama.Ifsa));
+            return oyun;
+        }
+
+        [Test]
+        public void Gorevi_bitmisken_kurucu_bitirirse_oylama_olmaz_kostebek_kazanir()
+        {
+            var oyun = GoreviBitmisKostebek();
+            Assert.That(oyun.OyunuBitir(), Is.EqualTo(Sonuc.Tamam));
+            Assert.That(Durum(oyun).Asama, Is.EqualTo(Asama.OyunSonu), "görevini bitirmiş köstebek oylamayla yakalanamaz");
+            Assert.That(oyun.Ozet().Kostebek.Neden, Is.EqualTo(KostebekNedeni.GorevBitti));
+        }
+
+        [Test]
+        public void Gorevi_bitmisken_oyun_zorla_biterse_neden_gorev()
+        {
+            var oyun = GoreviBitmisKostebek();
+            Assert.That(oyun.OyunuBitir(zorla: true), Is.EqualTo(Sonuc.Tamam));
+            Assert.That(oyun.Ozet().Kostebek.Neden, Is.EqualTo(KostebekNedeni.GorevBitti));
         }
 
         [Test]

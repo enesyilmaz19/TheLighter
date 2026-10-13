@@ -77,7 +77,7 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **Her 5 turda bir:** 6., 11., 16. turun başında, A sormadan önce.
 - **Oylama:** oyundan çıkmamış herkes (A, B ve köstebek dahil), kendisi dışında birine, 60 sn. **En çok oyu alan** suçlanır, eşitlikte kimse. Kimin kime oy verdiği gizli.
 - **"Görevini bitirdiği an"** = o turun sonucu (ifşa/güme) gösterildikten sonra: turun ortası kesilmesin.
-- **Kurucu "bitir" derse** önce son oylama yapılır, oylama sürerken ikinci "bitir" reddedilir. Kurucu köstebekse oyunu kendisi bitirip kazanamasın.
+- **Kurucu "bitir" derse** önce son oylama yapılır, oylama sürerken ikinci "bitir" reddedilir. Kurucu köstebekse oyunu kendisi bitirip kazanamasın. Köstebek görevini o turda bitirdiyse oylama olmaz, kazanır (bitmiş görev oylamayla elinden alınmasın).
 - **Köstebek oyundan çıkarsa** grup kazanır. Online'da bağlı oyuncu 4'ün altında kalıp oyun biterse oylama yapılamaz, köstebek yakalanmamış sayılır.
 - **Köstebek görevleri (12):** 2 soruyu güme gönder · X'i 2 kez göster · aynı kişiye 2 kez sor · 3 farklı kişiyi göster · 3 farklı kişiye sor · 3 mini oyun kazan · üst üste 2 kazan · 2 kez ifşa ettir · X'i mini oyunda yen · X'e 2 kez sor · 3 soru sor · 3 kez gösteril. Mevcut görev türleri, köstebeğe göre adetle; çoğu başkalarının seçimine bağlı (grup şüphelendiği kişiyi göstermezse görevi zorlaşır). **Adetler tahmin, Playtest'te ayarlanacak.**
 

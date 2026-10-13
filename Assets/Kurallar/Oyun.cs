@@ -521,9 +521,7 @@ namespace Cakmak.Kurallar
             oneri = null;
             asama = Asama.OyunSonu;
             kalanMs = 0;
-            // Köstebek: yakalanmadan biten oyunu köstebek kazanır (kural sonucu KostebekBitir'de önceden yazılır).
-            if (Kostebekli && kostebekSonucu == null)
-                kostebekSonucu = new KostebekSonucu { Kostebek = kostebek, Kazanan = KostebekKazanan.Kostebek, Neden = KostebekNedeni.Yakalanmadi };
+            KostebekSonucunuYaz();
             Yay(new Olay { Tur = OlayTuru.OyunBitti });
         }
 

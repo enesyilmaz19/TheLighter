@@ -279,8 +279,8 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
   - Suçlanan köstebekse grup kazanır, oyun biter.
   - Değilse `supheliler`'e eklenir (herkese açık) ve oyun sürer: A'nın turu baştan, tam süreyle. A bu arada oyundan çıktıysa tur yanar, sıra başkasına geçer.
 - **Köstebek görevini bitirirse** o turun sonucu (ifşa/güme) gösterildikten sonra oyun biter, köstebek kazanır.
-- **Son oylama:** tur sayısı bitince ya da kurucu `bitir` deyince bir oylama daha (`sonSuclama: true`). Yakalanmazsa köstebek kazanır.
-- **Köstebek oyundan çıkarsa** grup kazanır. Bağlı oyuncu 4'ün altında kalıp oyun biterse (2 dk) oylama yapılmaz, köstebek yakalanmamış sayılır.
+- **Son oylama:** tur sayısı bitince ya da kurucu `bitir` deyince bir oylama daha (`sonSuclama: true`). Yakalanmazsa köstebek kazanır. Köstebek görevini o turda bitirdiyse oylama olmaz, kazanır.
+- **Köstebek oyundan çıkarsa** grup kazanır. Bağlı oyuncu 4'ün altında kalıp oyun biterse (2 dk) oylama yapılmaz, köstebek yakalanmamış sayılır (görevini bitirdiyse `neden: "gorevBitti"`).
 - `sana.suclamaHakki`: erken suçlama hakkın duruyor mu.
 - **Oyun sonunda** `ozet.kostebek`: `{ "kim": "p3", "kazanan": "grup" | "kostebek", "neden": "yakalandi" | "gorevBitti" | "yakalanmadi" | "kacti" }`. Herkesin görevi (köstebeğinki dahil) `ozet.gorevler`'de. Oyun bitmeden köstebeğin kim olduğu hiçbir mesajda yok.
 

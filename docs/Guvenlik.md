@@ -23,7 +23,7 @@
 | 4 | **Tahmin edilemeyen rastgelelik** | Gerekli: tohum bulunursa bütün görevler, eşik ve gelecek zarlar bilinir | **Bu adımda:** online'da kural motoru işletim sisteminin kriptografik kaynağını kullanır (`GuvenliRastgele`) |
 | 5 | **Girdi doğrulama** | Gerekli | Var: 4 KB mesaj, alan tipleri, ad listeleri, 140/20 karakter. **Bu adımda:** isim ve sorudan görünmez/yön karakterleri atılır, boşluklar tekleşir (`TemizMetin`); görünmez karakterle başkasının kılığına girilemez, boş görünen isim/soru yazılamaz |
 | 6 | **Oturum** | Gerekli: hesap yok, yeniden bağlanma anahtarı var | Var: 128 bit rastgele anahtar, sadece sahibine. **Bu adımda:** sabit sürede karşılaştırma |
-| 7 | **Hız ve kaynak sınırları** | Gerekli | S4: IP başına bağlantı/giriş, bağlantı başına mesaj, başlatılmayan lobi. **Bu adımda:** toplam oda (`SUNUCU_DOLU`), toplam bağlantı, odaya girmeyen bağlantı 120 sn'de kesilir |
+| 7 | **Hız ve kaynak sınırları** | Gerekli | S4: IP başına bağlantı/giriş, bağlantı başına mesaj, başlatılmayan lobi. **Bu adımda:** toplam oda (`SUNUCU_DOLU`), toplam bağlantı, odaya girmeyen bağlantı 120 sn'de kesilir. S5: sohbet saniyede 1; grup paketi oda başına en fazla 500 soru (en kötü ~160 KB bellek, oda kapanınca gider) |
 | 8 | **Tarayıcıdan gelen bağlantı** | Gerekli: bir web sayfası ziyaretçilerini sunucuya saldırtamasın | **Bu adımda:** `Origin` başlığı olan (tarayıcı) WebSocket reddedilir (403). Uygulama bu başlığı yollamaz |
 | 9 | **Bilgi sızıntısı** | Gerekli | **Bu adımda:** `Server` başlığı yok. Production'da hata sayfası yığın izi göstermez (`cakmak.service`) |
 | 10 | **Gizli bilgiler** (anahtarlar) | İleride (Vivox) | Repoda yok, `.gitignore` korur. Sunucuda `/etc/cakmak/ortam` (root:cakmak, 0640) |

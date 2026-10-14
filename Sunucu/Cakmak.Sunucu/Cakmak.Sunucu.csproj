@@ -17,6 +17,7 @@
     <Compile Include="..\..\Assets\Kurallar\**\*.cs" Link="Kurallar\%(RecursiveDir)%(Filename)%(Extension)" />
     <None Include="..\..\Assets\Icerik\*.txt" Link="Icerik\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\Assets\Icerik\Cezalar.csv" Link="Icerik\Cezalar.csv" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\Assets\Icerik\VampirSorulari.csv" Link="Icerik\VampirSorulari.csv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

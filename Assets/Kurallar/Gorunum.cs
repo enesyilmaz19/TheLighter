@@ -109,6 +109,33 @@ namespace Cakmak.Kurallar
         public string CasusKategori;
         /// <summary>CasusTahmini aşamasında: yakalanan casus (son şansını kullanıyor).</summary>
         public OyuncuId? Yakalanan;
+
+        // --- Vampir Köylü (docs/Oyunlar.md) --- Rolün Rolun'da, gece ve linç oyu Oylayanlar/OyKullanan/OyVerdin/Secilebilir'de.
+
+        /// <summary>Kaçıncı gün (1'den).</summary>
+        public int Gun;
+        /// <summary>Bugün kalan çakmak turu (bu tur hariç). 0: sıradaki linç.</summary>
+        public int KalanGunduzTuru;
+        /// <summary>Sadece vampirlere: bütün vampirler (sen dahil).</summary>
+        public IReadOnlyList<OyuncuId> Vampirler = Array.Empty<OyuncuId>();
+        /// <summary>Sadece vampirlere, gece: vampirlerin bu geceki seçimleri.</summary>
+        public IReadOnlyList<VampirSecimi> VampirSecimleri = Array.Empty<VampirSecimi>();
+        /// <summary>Sadece gözcüye: bugüne kadar baktıkları.</summary>
+        public IReadOnlyList<GozcuBilgisi> GozcuBilgilerin = Array.Empty<GozcuBilgisi>();
+        /// <summary>Sadece doktora: kendini koruma hakkı (oyun boyu 1) duruyor mu.</summary>
+        public bool KendiniKoruyabilir;
+    }
+
+    public sealed class VampirSecimi
+    {
+        public OyuncuId Kim;
+        public OyuncuId Hedef;
+    }
+
+    public sealed class GozcuBilgisi
+    {
+        public OyuncuId Kim;
+        public bool Vampir;
     }
 
     public sealed class OylamaSonucu
@@ -158,6 +185,10 @@ namespace Cakmak.Kurallar
         // --- Takım Düellosu ---
         /// <summary>Takımı (0 ya da 1); diğer oyunlarda null. Herkese açık.</summary>
         public int? Takim;
+
+        // --- Vampir Köylü ---
+        /// <summary>Elendiyse ve rol açılması açıksa rolü (herkese); yoksa null.</summary>
+        public Rol? AcikRol;
     }
 
     public sealed class MiniOyunSonucu
@@ -215,6 +246,11 @@ namespace Cakmak.Kurallar
         // Casus (docs/Oyunlar.md)
         CasusYakalandi, // Kim: casus. Oylamada yakalandı, son şansı başladı (CasusTahmini aşaması)
         CasusTahminEtti,// Kim: casus. Tahmin etti, oyun bitiyor (doğru mu: özette)
+        // Vampir Köylü (docs/Oyunlar.md)
+        LincBasladi,    // gündüz bitti, linç oylaması
+        LincBitti,      // Kim: elenen, eşitlik ya da hiç oy yoksa null
+        GeceBasladi,    // herkes gece seçimini yapar
+        GeceBitti,      // Kim: gece ölen, kimse ölmediyse null (korundu ya da vampir seçmedi: ayırt edilmez)
     }
 
     public sealed class Olay

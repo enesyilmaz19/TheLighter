@@ -115,12 +115,14 @@ namespace Cakmak.Kurallar
         Suclama,       // Köstebek, Casus: "Köstebek kim?" / "Casus kim?" oylaması (docs/Oyunlar.md)
         Tetik,         // Rus Ruleti: düelloyu kaybeden tetiği çeker ya da devreder
         CasusTahmini,  // Casus: yakalanan casusun son şansı, mekânı (ya da kelimeyi) tahmin eder
+        Linc,          // Vampir Köylü: gündüz sonu, canlılar elenecek kişiyi oylar
+        Gece,          // Vampir Köylü: canlılar sırayla gece seçimini yapar (vampir kurban, doktor koruma, gözcü bakış)
     }
 
     public enum OyunModu { Normal, Temiz, Curcuna }
 
     /// <summary>Hangi oyun (docs/Oyunlar.md). Mod (soruların nereden geldiği, Temiz filtresi) her oyunda ayrı seçilir. Yeni oyunlar sona.</summary>
-    public enum OyunTuru { Cakmak, Kostebek, RusRuleti, Takim, Casus }
+    public enum OyunTuru { Cakmak, Kostebek, RusRuleti, Takim, Casus, Vampir }
 
     /// <summary>Casus neyi bilmiyor: mekânı (herkesin bir rolü var) ya da tek bir kelimeyi (Imposter, rol yok).</summary>
     public enum CasusTuru { Mekan, Kelime }
@@ -186,7 +188,7 @@ namespace Cakmak.Kurallar
         /// <summary>Elden ele (tek cihaz). Açıkken kaos turlarında "Soran Gizli" çıkmaz: herkes telefonu kimin tuttuğunu görüyor.</summary>
         public bool TekCihaz;
 
-        /// <summary>Köstebek, Casus: "kim?" oylamasının süresi (tartışma dahil).</summary>
+        /// <summary>Köstebek, Casus: "kim?" oylamasının süresi (tartışma dahil). Vampir Köylü: linç ve gece.</summary>
         public int SuclamaSuresiSn = 60;
         /// <summary>Rus Ruleti: herkesin canı, 1–3 (1 = Rus Ruleti, 3 = Son Çakmak).</summary>
         public int Can = 1;
@@ -194,5 +196,7 @@ namespace Cakmak.Kurallar
         public IReadOnlyDictionary<OyuncuId, int> TakimDagilimi;
         /// <summary>Casus: mekân ya da kelime.</summary>
         public CasusTuru Casus = CasusTuru.Mekan;
+        /// <summary>Vampir Köylü: elenenin rolü herkese açılır (klasik). false: oyun sonuna kadar gizli.</summary>
+        public bool RolAcilir = true;
     }
 }

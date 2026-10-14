@@ -212,9 +212,11 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
   - yeni tur başlamadan oyunun kararı: bitti mi, başka akışa mı geçiyor (`TurBasindaOyunKarari`),
   - turun sonucu: ifşa mı, düelloyu kim kaybetti (`OyunTurSonucu`),
   - oyun biterken sonucun yazılması (`OyunSonuclariniYaz`) ve özete konması (`OyunOzetine`),
-  - görünüm (`OyunGorunumu`).
+  - görünüm (`OyunGorunumu`),
+  - biri oyundan çıkınca oyun bitti mi (`OyuncuCiktiOyunKarari`: gizli kişi kaçtı, Vampir'de bir taraf kazandı),
+  - gizli kişili oyunlarda oylamanın sonucu (`HainYakalandi`, `HainYakalanmadi`, `HainKacti`).
 
-  Her oyunun metodu "bu oyun değilse hiçbir şey yapma" diye başlar; yeni oyun bu altı kancaya eklenir. Oyuna özgü aşamalar (Köstebek'in oylaması, Rus Ruleti'nin tetiği) kendi dosyasında. Bugünkü Çakmak bunların hiçbirinden etkilenmez, testleri ve rastgeleliği aynen kalır.
+  Her oyunun metodu "bu oyun değilse hiçbir şey yapma" diye başlar; yeni oyun bu kancalara eklenir. Oyuna özgü aşamalar (Rus Ruleti'nin tetiği, Casus'un son şansı, Vampir'in linci ve gecesi) kendi dosyasında. Sohbet kanallarının kuralları (takım, vampir, ölüler) `Oyun.Sohbet.cs`'te; sunucu sadece dağıtır. Bugünkü Çakmak bunların hiçbirinden etkilenmez, testleri ve rastgeleliği aynen kalır.
 - **Gizlilik testleri her oyunda:** rol, mekân, vampir arkadaşları, gözcünün öğrendiği sadece sahibinin görünümünde. Bugünkü soru gizliliği testleri gibi.
 - **Protokol:**
   - `ayarlar.oyun`;

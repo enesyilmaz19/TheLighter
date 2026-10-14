@@ -1,10 +1,10 @@
 namespace Cakmak.Kurallar
 {
     // Oyunlara özel kancalar (docs/Oyunlar.md): çekirdek döngü sadece bunları çağırır, bunlar da her oyunun kendi
-    // dosyasına dağıtır (Oyun.Kostebek.cs, Oyun.RusRuleti.cs, Oyun.Takim.cs, Oyun.Casus.cs). Her oyunun metodu "bu oyun
-    // değilse hiçbir şey yapma" diye başlar. Yeni oyun: kancalarını buraya ekle. Oyuna özgü aşamaların akışı (Rus
-    // Ruleti'nin tetiği, Casus'un son şansı) kendi dosyasında, Ilerle ve EldekiIsiBitir'de aşama olarak; gizli kişili
-    // oyunların ortak oylaması Oyun.Suclama.cs'te.
+    // dosyasına dağıtır (Oyun.Kostebek.cs, Oyun.RusRuleti.cs, Oyun.Takim.cs, Oyun.Casus.cs, Oyun.Vampir.cs). Her oyunun
+    // metodu "bu oyun değilse hiçbir şey yapma" diye başlar. Yeni oyun: kancalarını buraya ekle. Oyuna özgü aşamaların akışı
+    // (Rus Ruleti'nin tetiği, Casus'un son şansı, Vampir'in linci ve gecesi) kendi dosyasında, Ilerle ve EldekiIsiBitir'de
+    // aşama olarak; gizli kişili oyunların ortak oylaması Oyun.Suclama.cs'te, sohbet kanallarının kuralları Oyun.Sohbet.cs'te.
     public sealed partial class Oyun
     {
         /// <summary>Kurulumda, görevler dağıtıldıktan sonra.</summary>

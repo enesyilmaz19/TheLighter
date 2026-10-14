@@ -579,6 +579,7 @@ namespace Cakmak.Kurallar
                     Elendi = o.Elendi,
                     DevretmeHakki = o.DevretmeHakki,
                     Takim = o.Takim,
+                    AcikRol = o.AcikRol,
                 });
             }
             return liste;

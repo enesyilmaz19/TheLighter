@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Cakmak.Kurallar
@@ -65,17 +66,8 @@ namespace Cakmak.Kurallar
         /// <summary>En çok oyu alan suçlanır; eşitlikte ya da hiç oy yoksa kimse.</summary>
         void SuclamayiBitir()
         {
-            var sayilar = new Dictionary<OyuncuId, int>();
-            foreach (var hedef in suclamaOylari.Values) Artir(sayilar, hedef);
-            OyuncuId? suclanan = null;
-            int enCok = 0;
-            bool esit = false;
-            foreach (var s in sayilar)
-            {
-                if (s.Value > enCok) { enCok = s.Value; suclanan = s.Key; esit = false; }
-                else if (s.Value == enCok) esit = true;
-            }
-            if (esit) suclanan = null;
+            var enCok = EnCokOyAlanlar(suclamaOylari.Values);
+            OyuncuId? suclanan = enCok.Count == 1 ? enCok[0] : (OyuncuId?)null;
             suclamaOylari.Clear();
             oylayanlar.Clear();
             Yay(new Olay { Tur = OlayTuru.SuclamaBitti, Kim = suclanan });
@@ -91,6 +83,19 @@ namespace Cakmak.Kurallar
                 TurBaslat(RastgeleOyuncu(a));
             }
             else AsamayaGec(Asama.SoruSorma, ayar.SoruSuresiSn);
+        }
+
+        /// <summary>En çok oyu alan(lar), oy sırasıyla. Hiç oy yoksa boş; birden çoksa eşitlik.</summary>
+        static List<OyuncuId> EnCokOyAlanlar(IEnumerable<OyuncuId> oylar)
+        {
+            var sayilar = new Dictionary<OyuncuId, int>();
+            foreach (var hedef in oylar) Artir(sayilar, hedef);
+            int enCok = 0;
+            foreach (var s in sayilar) enCok = Math.Max(enCok, s.Value);
+            var sonuc = new List<OyuncuId>();
+            foreach (var s in sayilar)
+                if (s.Value == enCok) sonuc.Add(s.Key);
+            return sonuc;
         }
 
         /// <summary>Oyundan çıkan gizli kişiyse grup kazanır. true: oyun bitti.</summary>

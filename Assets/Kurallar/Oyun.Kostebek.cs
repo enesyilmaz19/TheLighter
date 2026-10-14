@@ -7,7 +7,7 @@ namespace Cakmak.Kurallar
     // ya da yakalanmadan oyun bitince kazanır.
 
     /// <summary>Gizli rol, sadece sahibinin görünümünde (<see cref="Gorunum.Rolun"/>). Yeni roller sona.</summary>
-    public enum Rol { Yok, Kostebek, Casus }
+    public enum Rol { Yok, Kostebek, Casus, Vampir, Doktor, Gozcu, Koylu }
 
     public enum KostebekKazanan { Grup, Kostebek }
 

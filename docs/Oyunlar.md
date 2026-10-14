@@ -186,14 +186,28 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **İçerik (G1):** "Vampir" soru paketi (~40 soru), rol metinleri (G2).
 - **Kararlar (2026-10-13):** rolün açılması kurucunun ayarı. Gündüz tur sayısı canlıların yarısı. Ölüler kanalı var.
 
+**Kodlandı (2026-10-14, kural motoru + sunucu; ekranlar Arda'da).** Kodlarken netleşenler (G1 kararları, Enes değiştirebilir):
+
+- **Oyun gündüzle başlar:** kimse konuşmadan ilk gece biri ölmesin. Sıra: gündüz → linç → gece → sabah (yeni gün).
+- **Linç:** en çok oyu alan elenir (salt çoğunluk gerekmez); eşitlikte ya da hiç oy yoksa kimse. Süre 60 sn (`SuclamaSuresiSn`).
+- **2 vampir farklı kurban seçerse** ikisinden biri rastgele. Gece birbirinin seçimini görürler (online'da vampir kanalı da var), anlaşmaları kolay.
+- **Gözcü** cevabı seçer seçmez görür (elden elede ayrı bir dolaşma gerekmesin). Gece öldürülse de öğrendiği kalır.
+- **Gece herkes seçer, online'da da:** köylünün seçimi boşa ama gece herkes seçince biter; kim seçmedi diye bakmak rol vermez.
+- **Az kişi:** canlılar 4'ün altına düşünce (gün ortasında da) kalan çakmak turları atlanır.
+- **Kazanma** her elemede ve oyundan çıkışta bakılır; çıkan canlı sayılmaz. Kurucu bitirirse kazanan yok. Tur sayısı ayarı yok sayılır.
+- **Sohbet:** vampir kanalı sadece gece. Gece ve ölüler genele de DM'e de yazamaz (DM'le kural delinmesin). Bekleme odasındakiler de Vampir sürerken yazamaz, okur. Kanal kuralları kural motorunda (`Oyun.Sohbet.cs`), Takım sohbeti de oraya taşındı.
+- **Elden ele:** gece ve linçte her seçimden sonra süre baştan başlar (telefon sıradakine geçer).
+- **Sorular:** `Assets/Icerik/VampirSorulari.csv` (40 suçlama sorusu, Temiz filtresinden geçiyor). Paket değil, paket listesinde görünmez; Vampir'de öneriler sadece buradan. **Enes gözden geçirecek.**
+- **Ceza ve Curcuna açılabilir;** görev ve kaos kapalı.
+
 ---
 
 ## 6. Kural motoru ve iş bölümü
 
-- **Yeni ayar:** `Ayarlar.Oyun` (enum, sona eklenir). `Mod` aynen kalır. "Birlikte olamaz" kuralları tek yerde, `Oyun.AyarlarUyumlu`: `Kur` ve sunucunun lobisi onu kullanır (yapıldı: Temiz + Cesur, Köstebek + kaos, Rus Ruleti + ceza/görev/kaos, Takım + görev, Casus + Curcuna/görev/kaos). Kişi sayısı sınırı (Vampir 6+) `Kur`'da.
-- **Yeni aşamalar** (enum sonuna): `Suclama` (Köstebek ve Casus, yapıldı), `Tetik` (Rus Ruleti, yapıldı), `CasusTahmini` (yapıldı); gelecek: `Gece`, `Linc`. Rus Ruleti'nin finali ayrı aşama değil, `Gorunum.Final` bayrağı (final düellosu normal `MiniOyun` aşaması).
+- **Yeni ayar:** `Ayarlar.Oyun` (enum, sona eklenir). `Mod` aynen kalır. "Birlikte olamaz" kuralları tek yerde, `Oyun.AyarlarUyumlu`: `Kur` ve sunucunun lobisi onu kullanır (yapıldı: Temiz + Cesur, Köstebek + kaos, Rus Ruleti + ceza/görev/kaos, Takım + görev, Casus + Curcuna/görev/kaos, Vampir + görev/kaos). Kişi sayısı sınırı (Vampir 6+) `Kur`'da.
+- **Yeni aşamalar** (enum sonuna): `Suclama` (Köstebek ve Casus, yapıldı), `Tetik` (Rus Ruleti, yapıldı), `CasusTahmini`, `Linc`, `Gece` (yapıldı). Rus Ruleti'nin finali ayrı aşama değil, `Gorunum.Final` bayrağı (final düellosu normal `MiniOyun` aşaması).
 - **Olay kuralı:** motor her aşama değişikliğinde bir olay yayar. Sunucu yeni durumu olaydan sonra yollar; olaysız değişen aşama online'da ekrana gitmez. Rastgele oyun testi bunu her oyunda denetler.
-- **Her oyun ayrı dosya:** `Oyun.Kostebek.cs`, `Oyun.RusRuleti.cs`, `Oyun.Takim.cs`, `Oyun.Casus.cs` (yapıldı), `Oyun.Vampir.cs`. Gizli kişili oyunların (Köstebek, Casus) "kim?" oylaması ortak: `Oyun.Suclama.cs`; sonucu (yakalandı, yakalanmadı, kaçtı) yine kancalarla oyuna döner. Çekirdek döngü oyunlara tek bir yerden, `Oyun.Kancalar.cs` üzerinden bağlanır:
+- **Her oyun ayrı dosya:** `Oyun.Kostebek.cs`, `Oyun.RusRuleti.cs`, `Oyun.Takim.cs`, `Oyun.Casus.cs`, `Oyun.Vampir.cs` (hepsi yapıldı). Gizli kişili oyunların (Köstebek, Casus) "kim?" oylaması ortak: `Oyun.Suclama.cs`; sonucu (yakalandı, yakalanmadı, kaçtı) yine kancalarla oyuna döner. Çekirdek döngü oyunlara tek bir yerden, `Oyun.Kancalar.cs` üzerinden bağlanır:
   - kurulum (`OyunlariKur`),
   - yeni tur başlamadan oyunun kararı: bitti mi, başka akışa mı geçiyor (`TurBasindaOyunKarari`),
   - turun sonucu: ifşa mı, düelloyu kim kaybetti (`OyunTurSonucu`),

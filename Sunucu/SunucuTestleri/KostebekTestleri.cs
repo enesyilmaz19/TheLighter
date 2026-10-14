@@ -48,7 +48,7 @@ namespace SunucuTestleri
             await o[0].Bekle("durum", d => (bool)d["ayarlar"]["kaos"]);
             await o[0].Gonder(new { t = "ayarlar", oyun = "kostebek" });
             await o[0].Hata("GECERSIZ_GIRDI");
-            await o[0].Gonder(new { t = "ayarlar", oyun = "vampir" });
+            await o[0].Gonder(new { t = "ayarlar", oyun = "satranc" }); // böyle bir oyun yok
             await o[0].Hata("GECERSIZ_MESAJ");
         }
 

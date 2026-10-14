@@ -1,0 +1,50 @@
+# Vampir Köylü soruları: her satır bir soru. Boş satırlar ve # ile başlayanlar okunmaz.
+# .csv: soru paketi değil (paket listesinde görünmez), sadece Vampir Köylü'de öneri olarak çekilir.
+
+# --- Doğrudan suçlama ---
+Sence vampir kim?
+Sence bu gece kim ölecek?
+Bu gece kim korunmalı?
+Bugün kim linç edilmeli?
+Sence gözcü kim?
+Sence doktor kim?
+Vampirin en yakın arkadaşı kim olabilir?
+Dün geceden beri en sessiz kim?
+Bu oyunda en çok kime güveniyorsun?
+Bu oyunda en az kime güveniyorsun?
+
+# --- Davranış ---
+Grupta bugün en çok kim konuyu değiştirdi?
+Suçlanınca en çok kim savunmaya geçti?
+Grupta kim fazla masum davranıyor?
+Grupta kim herkesi suçlayıp kendini sakladı?
+Dün linçte kimin oyu en şüpheliydi?
+Grupta kim hep son anda oy veriyor?
+Grupta kim yalan söylerken gülmeye başlar?
+Grupta kim bir şey biliyormuş gibi bakıyor?
+Grupta kim fazla çabuk birini işaret etti?
+Grupta kim ölenin arkasından en az üzüldü?
+
+# --- Gece ve sabah ---
+Gece kimin kapısını çalsan sana açmaz?
+Gece yarısı kim ortadan kaybolsa kimse fark etmez?
+Sabah kim en yorgun uyandı?
+Gece ses duyunca kim ilk saklanır?
+Kim karanlıkta yolunu en iyi bulur?
+Köyde gece nöbetini kime emanet edersin?
+Vampir senin kapını çalsa kimi yardıma çağırırsın?
+Kim sarımsaktan en çok kaçar?
+Kim aynaya en az bakar?
+Kim gün ışığından en çok şikâyet eder?
+
+# --- Köy hayatı ---
+Köyde dedikoduyu ilk kim yayar?
+Köyde kim herkesin sırrını bilir?
+Köyün muhtarı kim olmalı?
+Köyde kim en çok iz sürmeyi bilir?
+Köyde kim kimseye bir şey söylemeden yaşar?
+Köyden kaçmak gerekse kim önden koşar?
+Köyde kim en iyi yalancıdır?
+Köyde kim herkesi birbirine düşürür?
+Köyde kimin hiç düşmanı yoktur?
+Köyü vampirlerden kim kurtarır?

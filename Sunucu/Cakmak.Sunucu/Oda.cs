@@ -39,6 +39,7 @@ namespace Cakmak.Sunucu
         readonly List<OdaOyuncusu> oyuncular = new List<OdaOyuncusu>();
         readonly IReadOnlyDictionary<string, IReadOnlyList<string>> paketler;
         readonly IReadOnlyList<string> sesliCezalar;
+        readonly IReadOnlyList<string> vampirSorulari;
         readonly Ayarlar ayarlar = new Ayarlar();
         /// <summary>Kurucunun seçtiği paketler. Başta sunucudakilerin hepsi.</summary>
         List<string> seciliPaketler;
@@ -69,12 +70,13 @@ namespace Cakmak.Sunucu
         /// <summary>Oda silindi. Bu bayraktan sonra kimse katılamaz.</summary>
         public bool Kapandi { get; private set; }
 
-        public Oda(string kod, IReadOnlyDictionary<string, IReadOnlyList<string>> paketler, IReadOnlyList<string> sesliCezalar,
+        public Oda(string kod, IReadOnlyDictionary<string, IReadOnlyList<string>> paketler, IReadOnlyList<string> sesliCezalar, IReadOnlyList<string> vampirSorulari,
             Sinirlar sinirlar)
         {
             Kod = kod;
             this.paketler = paketler;
             this.sesliCezalar = sesliCezalar;
+            this.vampirSorulari = vampirSorulari;
             this.sinirlar = sinirlar;
             seciliPaketler = new List<string>(paketler.Keys);
         }
@@ -225,6 +227,7 @@ namespace Cakmak.Sunucu
                 var kaos = Protokol.Mantik(m, "kaos", false);
                 var can = Protokol.Sayi(m, "can", false);
                 var casus = Protokol.Metin(m, "casus", false);
+                var rolAcilir = Protokol.Mantik(m, "rolAcilir", false);
                 var yeniTakimlar = Protokol.TakimlarCoz(m, out var takimlarVerildi);
                 var secilen = Protokol.MetinListesi(m, "paketler");
                 // Birbirine uyma kuralları (Temiz + Cesur, oyuna göre kapalı olanlar) kural motorunda tek yerde.
@@ -238,6 +241,7 @@ namespace Cakmak.Sunucu
                     KaosTurlari = kaos ?? ayarlar.KaosTurlari,
                     Can = can ?? ayarlar.Can,
                     Casus = casus == null ? ayarlar.Casus : Protokol.Coz<CasusTuru>(casus),
+                    RolAcilir = rolAcilir ?? ayarlar.RolAcilir,
                 };
 
                 // Reaksiyon sadece elden ele: online'da süre istemciden gelir ve telefonların dokunma gecikmesi farklıdır.
@@ -259,6 +263,7 @@ namespace Cakmak.Sunucu
                 ayarlar.KaosTurlari = yeni.KaosTurlari;
                 ayarlar.Can = yeni.Can;
                 ayarlar.Casus = yeni.Casus;
+                ayarlar.RolAcilir = yeni.RolAcilir;
                 if (takimlarVerildi) ayarlar.TakimDagilimi = takimlar = yeniTakimlar;
                 if (turSayisi.HasValue) ayarlar.TurSayisi = turSayisi.Value;
                 if (soruSn.HasValue) ayarlar.SoruSuresiSn = soruSn.Value;
@@ -286,12 +291,15 @@ namespace Cakmak.Sunucu
                     // Grubun kendi yazdığı sorular filtreden geçmedi: Temiz modda kullanılmaz (elden elede de öyle).
                     else if (ayarlar.Mod != OyunModu.Temiz) sorular.AddRange(grupSorulari);
                 }
+                // Vampir Köylü'nün önerileri suçlama soruları (paket seçimi bu oyunda kullanılmaz).
+                if (ayarlar.Oyun == OyunTuru.Vampir) sorular = new List<string>(vampirSorulari);
 
                 var kopya = new Ayarlar
                 {
                     Oyun = ayarlar.Oyun,
                     Can = ayarlar.Can,
                     Casus = ayarlar.Casus,
+                    RolAcilir = ayarlar.RolAcilir,
                     TakimDagilimi = takimlar == null ? null : new Dictionary<OyuncuId, int>(takimlar),
                     Mod = ayarlar.Mod,
                     MiniOyun = ayarlar.MiniOyun,
@@ -462,6 +470,12 @@ namespace Cakmak.Sunucu
                     case "tetikCek":
                         sonuc = oyun.TetikCek(b.Kim);
                         break;
+                    case "lincOyu":
+                        sonuc = oyun.LincOyu(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")));
+                        break;
+                    case "geceSecimi":
+                        sonuc = oyun.GeceSecimi(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")));
+                        break;
                     case "casusTahmini":
                         sonuc = oyun.CasusTahmini(b.Kim, Protokol.Metin(m, "tahmin"));
                         break;
@@ -479,8 +493,10 @@ namespace Cakmak.Sunucu
         // ------------------------------------------------------------ Sohbet
 
         /// <summary>
-        /// Sohbet (Ana Plan 6.4): <c>kime</c> null ise odadaki herkese (bekleme odası dahil), doluysa sadece ona ve yazana.
-        /// Sunucu mesaj saklamaz. Temiz modda filtreye takılan gönderilmez, yazan uyarılır.
+        /// Sohbet (Ana Plan 6.4): <c>kime</c> null ise odadaki herkese (bekleme odası dahil), oyuncuysa sadece ona ve yazana,
+        /// kanalsa (<c>"takim"</c>, <c>"vampir"</c>, <c>"oluler"</c>) kanalın üyelerine. Kim nereye yazabilir: kural motoru
+        /// (<see cref="Oyun.SohbeteYazabilir"/>, <see cref="Oyun.KanalAlicilari"/>). Sunucu mesaj saklamaz. Temiz modda
+        /// filtreye takılan gönderilmez, yazan uyarılır.
         /// </summary>
         public void Sohbet(Baglanti b, JsonObject m)
         {
@@ -489,13 +505,14 @@ namespace Cakmak.Sunucu
                 if (!UyeMi(b)) return;
                 if (!sinirlar.SohbetIzni(b)) { b.Yolla(Protokol.Hata("COK_HIZLI")); return; }
                 var kimeMetni = Protokol.Metin(m, "kime", false);
-                bool takimKanali = kimeMetni == Protokol.TakimKanali;
-                OyuncuId? kime = kimeMetni == null || takimKanali ? (OyuncuId?)null : Protokol.IdCoz(kimeMetni);
+                var kanal = Protokol.KanalCoz(kimeMetni);
+                OyuncuId? kime = kimeMetni == null || kanal.HasValue ? (OyuncuId?)null : Protokol.IdCoz(kimeMetni);
                 var metin = TemizMetin.Temizle(Protokol.Metin(m, "metin"));
                 var alan = kime == null ? null : oyuncular.Find(o => o.Id == kime.Value);
-                var takimArkadaslari = takimKanali ? TakimArkadaslari(b.Kim) : null;
+                // Lobide kanal yok, genel ve DM serbest. Oyunda kuralı motor bilir (Vampir: gece ve ölüler genele yazamaz).
+                var alicilar = kanal.HasValue ? oyun?.KanalAlicilari(b.Kim, kanal.Value) : null;
                 if (metin.Length == 0 || metin.Length > SohbetEnFazla || (kime != null && (alan == null || alan.Id == b.Kim))
-                    || (takimKanali && takimArkadaslari == null))
+                    || (kanal.HasValue && alicilar == null) || (!kanal.HasValue && oyun != null && !oyun.SohbeteYazabilir(b.Kim)))
                 {
                     b.Yolla(Protokol.Hata("GECERSIZ_GIRDI"));
                     return;
@@ -506,8 +523,8 @@ namespace Cakmak.Sunucu
                     return;
                 }
 
-                var json = Protokol.Sohbet(++sohbetSayaci, b.Kim, kime, metin, takimKanali);
-                if (takimKanali) foreach (var o in oyuncular) { if (takimArkadaslari.Contains(o.Id)) o.Baglanti?.Yolla(json); }
+                var json = Protokol.Sohbet(++sohbetSayaci, b.Kim, kime, metin, kanal);
+                if (kanal.HasValue) foreach (var o in oyuncular) { if (alicilar.Contains(o.Id)) o.Baglanti?.Yolla(json); }
                 else if (alan == null) foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
                 else
                 {
@@ -515,21 +532,6 @@ namespace Cakmak.Sunucu
                     b.Yolla(json);
                 }
             }
-        }
-
-        /// <summary>
-        /// Takım Düellosu sürerken yazanın takımındakiler (kendisi dahil). Takım oyunu yoksa, oyun başlamadıysa ya da yazan
-        /// oyunda değilse (bekleme odası) null.
-        /// </summary>
-        HashSet<OyuncuId> TakimArkadaslari(OyuncuId kim)
-        {
-            var g = oyun?.GorunumAl(kim);
-            if (g == null || g.Oyun != OyunTuru.Takim) return null;
-            int? takim = null;
-            foreach (var o in g.Oyuncular) if (o.Id == kim) takim = o.Takim;
-            var sonuc = new HashSet<OyuncuId>();
-            foreach (var o in g.Oyuncular) if (o.Takim == takim) sonuc.Add(o.Id);
-            return sonuc;
         }
 
         /// <summary>Kurucunun takım dağılımı: sayılar 0 ya da 1, hepsi odada. Herkesin olup olmadığı ve denge başlatırken (Kur).</summary>

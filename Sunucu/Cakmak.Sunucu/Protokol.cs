@@ -167,20 +167,25 @@ namespace Cakmak.Sunucu
         public static string Atildin(string neden) => Yaz(new JsonObject { ["t"] = "hata", ["kod"] = "ATILDIN", ["neden"] = neden });
 
         /// <summary>
-        /// Sohbet mesajı. <c>kime</c> null ise genel, doluysa DM (sadece alana ve yazana gider),
-        /// <paramref name="takim"/> ise <c>"takim"</c> (Takım Düellosu: sadece yazanın takımına).
+        /// Sohbet mesajı. <c>kime</c> null ise genel, oyuncuysa DM (sadece alana ve yazana gider), kanalsa kanalın adı
+        /// (<c>"takim"</c>, <c>"vampir"</c>, <c>"oluler"</c>).
         /// </summary>
-        public static string Sohbet(int id, OyuncuId kimden, OyuncuId? kime, string metin, bool takim = false) => Yaz(new JsonObject
+        public static string Sohbet(int id, OyuncuId kimden, OyuncuId? kime, string metin, SohbetKanali? kanal = null) => Yaz(new JsonObject
         {
             ["t"] = "sohbet",
             ["id"] = "m" + id,
             ["kimden"] = Id(kimden),
-            ["kime"] = takim ? TakimKanali : Id(kime),
+            ["kime"] = kanal.HasValue ? Ad(kanal.Value) : Id(kime),
             ["metin"] = metin,
         });
 
-        /// <summary>Sohbette <c>kime</c>'nin takım kanalı değeri.</summary>
-        public const string TakimKanali = "takim";
+        /// <summary>Sohbette <c>kime</c> bir kanalın adıysa o kanal, değilse (genel ya da oyuncu) null.</summary>
+        public static SohbetKanali? KanalCoz(string kime)
+        {
+            foreach (var k in Enum.GetValues<SohbetKanali>())
+                if (Ad(k) == kime) return k;
+            return null;
+        }
 
         public static string Hosgeldin(OyuncuId sen, string anahtar, string oda) =>
             Yaz(new JsonObject { ["t"] = "hosgeldin", ["sen"] = Id(sen), ["anahtar"] = anahtar, ["oda"] = oda });
@@ -221,6 +226,7 @@ namespace Cakmak.Sunucu
             ["can"] = a.Can,
             ["takimlar"] = TakimlarYaz(a.TakimDagilimi),
             ["casus"] = Ad(a.Casus),
+            ["rolAcilir"] = a.RolAcilir,
             ["mod"] = Ad(a.Mod),
             ["miniOyun"] = Ad(a.MiniOyun),
             ["turSayisi"] = a.TurSayisi,
@@ -289,6 +295,11 @@ namespace Cakmak.Sunucu
                 ["neden"] = Ad(o.Casus.Neden),
                 ["sir"] = o.Casus.Sir,
                 ["tahmin"] = o.Casus.Tahmin,
+            },
+            ["vampir"] = o.Vampir == null ? null : new JsonObject
+            {
+                ["kazanan"] = o.Vampir.Kazanan.HasValue ? Ad(o.Vampir.Kazanan.Value) : null,
+                ["roller"] = Dizi(o.Vampir.Roller, r => new JsonObject { ["kim"] = Id(r.Kim), ["rol"] = Ad(r.Rol) }),
             },
         };
 
@@ -380,6 +391,7 @@ namespace Cakmak.Sunucu
                     ["elendi"] = o.Elendi,
                     ["devretmeHakki"] = o.DevretmeHakki,
                     ["takim"] = o.Takim,
+                    ["acikRol"] = o.AcikRol.HasValue ? Ad(o.AcikRol.Value) : null,
                 });
             }
 
@@ -441,6 +453,8 @@ namespace Cakmak.Sunucu
                 ["casusListesi"] = Dizi(g.CasusListesi, x => x),
                 ["casusKategori"] = g.CasusKategori,
                 ["yakalanan"] = Id(g.Yakalanan),
+                ["gun"] = g.Gun,
+                ["kalanGunduzTuru"] = g.KalanGunduzTuru,
                 ["sana"] = new JsonObject
                 {
                     ["soru"] = g.Soru,
@@ -455,6 +469,10 @@ namespace Cakmak.Sunucu
                     ["suclamaHakki"] = g.SuclamaHakkin,
                     ["sir"] = g.Sirrin,
                     ["mekanRolu"] = g.MekanRolun,
+                    ["vampirler"] = Dizi(g.Vampirler, x => Id(x)),
+                    ["vampirSecimleri"] = Dizi(g.VampirSecimleri, x => new JsonObject { ["kim"] = Id(x.Kim), ["hedef"] = Id(x.Hedef) }),
+                    ["gozcuBilgilerin"] = Dizi(g.GozcuBilgilerin, x => new JsonObject { ["kim"] = Id(x.Kim), ["vampir"] = x.Vampir }),
+                    ["kendiniKoruyabilir"] = g.KendiniKoruyabilir,
                 },
                 ["ifsa"] = g.Asama == Asama.Ifsa ? new JsonObject { ["soru"] = g.IfsaSoru, ["fisilti"] = g.IfsaFisilti } : null,
                 ["ozet"] = OzetYaz(ozet),

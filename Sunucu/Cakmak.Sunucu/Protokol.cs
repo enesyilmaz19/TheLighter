@@ -99,6 +99,13 @@ namespace Cakmak.Sunucu
         }
 
         /// <summary>Metin dizisi. Alan yoksa null.</summary>
+        /// <summary>Alan yok ya da <c>null</c>sa null, varsa oyuncu kimliği.</summary>
+        public static OyuncuId? IstegeBagliId(JsonObject n, string alan)
+        {
+            var metin = Metin(n, alan, false);
+            return metin == null ? (OyuncuId?)null : IdCoz(metin);
+        }
+
         public static List<string> MetinListesi(JsonObject n, string alan)
         {
             var d = n[alan];
@@ -168,7 +175,7 @@ namespace Cakmak.Sunucu
 
         /// <summary>
         /// Sohbet mesajı. <c>kime</c> null ise genel, oyuncuysa DM (sadece alana ve yazana gider), kanalsa kanalın adı
-        /// (<c>"takim"</c>, <c>"vampir"</c>, <c>"oluler"</c>).
+        /// (<c>"takim"</c>, <c>"katil"</c>, <c>"oluler"</c>).
         /// </summary>
         public static string Sohbet(int id, OyuncuId kimden, OyuncuId? kime, string metin, SohbetKanali? kanal = null) => Yaz(new JsonObject
         {
@@ -227,6 +234,8 @@ namespace Cakmak.Sunucu
             ["takimlar"] = TakimlarYaz(a.TakimDagilimi),
             ["casus"] = Ad(a.Casus),
             ["rolAcilir"] = a.RolAcilir,
+            ["gecelikKurban"] = a.GecelikKurban,
+            ["kapaliRoller"] = Dizi(a.KapaliRoller, r => Ad(r)),
             ["mod"] = Ad(a.Mod),
             ["miniOyun"] = Ad(a.MiniOyun),
             ["turSayisi"] = a.TurSayisi,
@@ -264,6 +273,20 @@ namespace Cakmak.Sunucu
             ["zorluk"] = Ad(g.Zorluk),
         };
 
+        static JsonObject RolYaz(OyuncuRolu r) => new JsonObject { ["kim"] = Id(r.Kim), ["rol"] = Ad(r.Rol) };
+
+        /// <summary>Gece bakışı: sadece rolün doldurduğu alanlar dolu, diğerleri null ya da boş.</summary>
+        static JsonObject BulguYaz(Bulgu b) => new JsonObject
+        {
+            ["gun"] = b.Gun,
+            ["kim"] = Id(b.Kim),
+            ["supheli"] = b.Supheli,
+            ["rol"] = b.Rol.HasValue ? Ad(b.Rol.Value) : null,
+            ["ziyaretciler"] = Dizi(b.Ziyaretciler, x => Id(x)),
+            ["grup"] = Dizi(b.Grup, x => Id(x)),
+            ["kotuVar"] = b.KotuVar,
+        };
+
         /// <summary>Oyun sonu özeti. Sayaçlar zaten <c>oyuncular</c>'da, burada tekrar edilmez.</summary>
         static JsonObject OzetYaz(OyunOzeti o) => o == null ? null : new JsonObject
         {
@@ -296,10 +319,11 @@ namespace Cakmak.Sunucu
                 ["sir"] = o.Casus.Sir,
                 ["tahmin"] = o.Casus.Tahmin,
             },
-            ["vampir"] = o.Vampir == null ? null : new JsonObject
+            ["gece"] = o.Gece == null ? null : new JsonObject
             {
-                ["kazanan"] = o.Vampir.Kazanan.HasValue ? Ad(o.Vampir.Kazanan.Value) : null,
-                ["roller"] = Dizi(o.Vampir.Roller, r => new JsonObject { ["kim"] = Id(r.Kim), ["rol"] = Ad(r.Rol) }),
+                ["kazanan"] = o.Gece.Kazanan.HasValue ? Ad(o.Gece.Kazanan.Value) : null,
+                ["kazananlar"] = Dizi(o.Gece.Kazananlar, x => Id(x)),
+                ["roller"] = Dizi(o.Gece.Roller, RolYaz),
             },
         };
 
@@ -392,6 +416,7 @@ namespace Cakmak.Sunucu
                     ["devretmeHakki"] = o.DevretmeHakki,
                     ["takim"] = o.Takim,
                     ["acikRol"] = o.AcikRol.HasValue ? Ad(o.AcikRol.Value) : null,
+                    ["susturuldu"] = o.Susturuldu,
                 });
             }
 
@@ -432,6 +457,7 @@ namespace Cakmak.Sunucu
                 ["c"] = Id(g.C),
                 ["oyuncular"] = liste,
                 ["secilebilir"] = secilebilir,
+                ["ikinciSecilebilir"] = Dizi(g.IkinciSecilebilir, x => Id(x)),
                 ["miniOyun"] = Ad(g.MiniOyun),
                 ["bHamleYapti"] = g.BHamleYapti,
                 ["cHamleYapti"] = g.CHamleYapti,
@@ -469,10 +495,13 @@ namespace Cakmak.Sunucu
                     ["suclamaHakki"] = g.SuclamaHakkin,
                     ["sir"] = g.Sirrin,
                     ["mekanRolu"] = g.MekanRolun,
-                    ["vampirler"] = Dizi(g.Vampirler, x => Id(x)),
-                    ["vampirSecimleri"] = Dizi(g.VampirSecimleri, x => new JsonObject { ["kim"] = Id(x.Kim), ["hedef"] = Id(x.Hedef) }),
-                    ["gozcuBilgilerin"] = Dizi(g.GozcuBilgilerin, x => new JsonObject { ["kim"] = Id(x.Kim), ["vampir"] = x.Vampir }),
-                    ["kendiniKoruyabilir"] = g.KendiniKoruyabilir,
+                    ["katiller"] = Dizi(g.Katiller, RolYaz),
+                    ["katilSecimleri"] = Dizi(g.KatilSecimleri, x => new JsonObject { ["kim"] = Id(x.Kim), ["hedef"] = Id(x.Hedef) }),
+                    ["bulgularin"] = Dizi(g.Bulgularin, BulguYaz),
+                    ["kalanHakkin"] = g.KalanHakkin,
+                    ["cellatHedefin"] = Id(g.CellatHedefin),
+                    ["bombalilar"] = Dizi(g.Bombalilar, x => Id(x)),
+                    ["kulakSorusu"] = g.KulakSorusu,
                 },
                 ["ifsa"] = g.Asama == Asama.Ifsa ? new JsonObject { ["soru"] = g.IfsaSoru, ["fisilti"] = g.IfsaFisilti } : null,
                 ["ozet"] = OzetYaz(ozet),

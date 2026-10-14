@@ -737,7 +737,8 @@ namespace Cakmak.Kurallar
             }
             if (cellatHedefleri.TryGetValue(kim, out var cellatHedefi)) g.CellatHedefin = cellatHedefi;
             if (gercek == Rol.Bombaci) g.Bombalilar = new List<OyuncuId>(bombalilar);
-            if (gercek == Rol.Kulak && asama == Asama.Gume && !Bul(kim).Elendi) g.KulakSorusu = kulakSorusu;
+            // Alanın ömrü güme ekranı kadar (turun sonunda yazılır, ekran bitince silinir): görünüm de ona bağlı.
+            if (gercek == Rol.Kulak && !Bul(kim).Elendi) g.KulakSorusu = kulakSorusu;
 
             if (asama != Asama.Linc && asama != Asama.Gece) return;
             g.Oylayanlar = new List<OyuncuId>(oylayanlar);

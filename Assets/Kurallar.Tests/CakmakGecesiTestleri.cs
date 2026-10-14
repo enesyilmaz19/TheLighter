@@ -244,6 +244,7 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(oyun.GeceSecimi(masum, masum), Is.EqualTo(Sonuc.Secilemez), "kendini seçemez");
             Assert.That(oyun.GorunumAl(masum).Katiller, Is.Empty);
             Assert.That(oyun.GeceSecimi(katiller[0], masum), Is.EqualTo(Sonuc.Tamam));
+            Assert.That(oyun.GeceSecimi(katiller[0], Sahipleri(oyun, Rol.Masum)[1]), Is.EqualTo(Sonuc.HakKalmadi), "gece bir seçim");
             Assert.That(oyun.GorunumAl(katiller[1]).KatilSecimleri.Single().Hedef, Is.EqualTo(masum), "katiller birbirinin oyunu görür");
             Assert.That(oyun.GorunumAl(masum).KatilSecimleri, Is.Empty);
         }
@@ -314,6 +315,17 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(oyun.GorunumAl(casus).Bulgularin.Single().Rol, Is.EqualTo(Rol.Koruyucu));
             Assert.That(oyun.GorunumAl(bekci).Bulgularin.Single().Ziyaretciler, Is.EquivalentTo(new[] { katil, koruyucu }));
             Assert.That(Kisi(oyun, masumlar[0]).Elendi, Is.False, "korundu");
+        }
+
+        [Test]
+        public void Casus_Deliyi_Deli_olarak_gorur()
+        {
+            var oyun = YeniGece(6, Rol.Casus, Rol.Deli);
+            var casus = Tek(oyun, Rol.Casus);
+            var deli = Kisiler(oyun).Single(o => o.Id != casus && oyun.GorunumAl(o.Id).Rolun != Rol.Masum).Id;
+            GeceyeGec(oyun);
+            Gece(oyun, (casus, null, deli));
+            Assert.That(oyun.GorunumAl(casus).Bulgularin.Single().Rol, Is.EqualTo(Rol.Deli));
         }
 
         [Test]

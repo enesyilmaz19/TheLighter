@@ -17,7 +17,7 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 
 **Ayarlar iki eksenli olur:**
 
-- **Oyun:** Çakmak (bugünkü oyun) · Vampir Köylü · Casus · Köstebek · Rus Ruleti · Takım Düellosu.
+- **Oyun:** Çakmak (bugünkü oyun) · Çakmak Gecesi (eski Vampir Köylü) · Casus · Köstebek · Rus Ruleti · Takım Düellosu.
 - **Mod:** Normal · Temiz · Curcuna. Mod soruların nereden geldiğini ve filtreyi belirler; her oyunda geçerli, bazı birleşimler hariç (her oyunda yazılı).
 
 **Hep geçerli:**
@@ -39,7 +39,7 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 
 | | Ceza | Gizli görev | Kaos |
 |---|---|---|---|
-| Vampir Köylü | Açık olabilir | Kapalı (rollerle karışır) | Kapalı |
+| Çakmak Gecesi | Açık olabilir | Kapalı (rollerle karışır) | Kapalı |
 | Casus | Açık olabilir | Kapalı | Kapalı |
 | Köstebek | Açık olabilir | **Herkese açık** (köstebeğin hareketi gizlensin) | Kapalı |
 | Rus Ruleti | Kapalı (can sistemi zaten ceza) | Kapalı | Kapalı |
@@ -268,31 +268,31 @@ Gece telefon herkese tek tek gider, herkes bir seçim yapar; linç Grup Kararı 
 
 ### İçerik
 
-`Assets/Icerik/VampirSorulari.csv` (40 suçlama sorusu): paket değil; bu oyunda öneriler sadece buradan.
+`Assets/Icerik/GeceSorulari.csv` (40 suçlama sorusu): paket değil; bu oyunda öneriler sadece buradan.
 
 ---
 
 ## 6. Kural motoru ve iş bölümü
 
-- **Yeni ayar:** `Ayarlar.Oyun` (enum, sona eklenir). `Mod` aynen kalır. "Birlikte olamaz" kuralları tek yerde, `Oyun.AyarlarUyumlu`: `Kur` ve sunucunun lobisi onu kullanır (yapıldı: Temiz + Cesur, Köstebek + kaos, Rus Ruleti + ceza/görev/kaos, Takım + görev, Casus + Curcuna/görev/kaos, Vampir + görev/kaos). Kişi sayısı sınırı (Vampir 6+) `Kur`'da.
+- **Yeni ayar:** `Ayarlar.Oyun` (enum, sona eklenir). `Mod` aynen kalır. "Birlikte olamaz" kuralları tek yerde, `Oyun.AyarlarUyumlu`: `Kur` ve sunucunun lobisi onu kullanır (yapıldı: Temiz + Cesur, Köstebek + kaos, Rus Ruleti + ceza/görev/kaos, Takım + görev, Casus + Curcuna/görev/kaos, Çakmak Gecesi + görev/kaos/gecelik kurban/kapalı roller). Kişi sayısı sınırı (Çakmak Gecesi 6–18, diğerleri 4–10) `Kur`'da.
 - **Yeni aşamalar** (enum sonuna): `Suclama` (Köstebek ve Casus, yapıldı), `Tetik` (Rus Ruleti, yapıldı), `CasusTahmini`, `Linc`, `Gece` (yapıldı). Rus Ruleti'nin finali ayrı aşama değil, `Gorunum.Final` bayrağı (final düellosu normal `MiniOyun` aşaması).
 - **Olay kuralı:** motor her aşama değişikliğinde bir olay yayar. Sunucu yeni durumu olaydan sonra yollar; olaysız değişen aşama online'da ekrana gitmez. Rastgele oyun testi bunu her oyunda denetler.
-- **Her oyun ayrı dosya:** `Oyun.Kostebek.cs`, `Oyun.RusRuleti.cs`, `Oyun.Takim.cs`, `Oyun.Casus.cs`, `Oyun.Vampir.cs` (hepsi yapıldı). Gizli kişili oyunların (Köstebek, Casus) "kim?" oylaması ortak: `Oyun.Suclama.cs`; sonucu (yakalandı, yakalanmadı, kaçtı) yine kancalarla oyuna döner. Çekirdek döngü oyunlara tek bir yerden, `Oyun.Kancalar.cs` üzerinden bağlanır:
+- **Her oyun ayrı dosya:** `Oyun.Kostebek.cs`, `Oyun.RusRuleti.cs`, `Oyun.Takim.cs`, `Oyun.Casus.cs`, `Oyun.CakmakGecesi.cs` (hepsi yapıldı). Gizli kişili oyunların (Köstebek, Casus) "kim?" oylaması ortak: `Oyun.Suclama.cs`; sonucu (yakalandı, yakalanmadı, kaçtı) yine kancalarla oyuna döner. Çekirdek döngü oyunlara tek bir yerden, `Oyun.Kancalar.cs` üzerinden bağlanır:
   - kurulum (`OyunlariKur`),
   - yeni tur başlamadan oyunun kararı: bitti mi, başka akışa mı geçiyor (`TurBasindaOyunKarari`),
   - turun sonucu: ifşa mı, düelloyu kim kaybetti (`OyunTurSonucu`),
   - oyun biterken sonucun yazılması (`OyunSonuclariniYaz`) ve özete konması (`OyunOzetine`),
   - görünüm (`OyunGorunumu`),
-  - biri oyundan çıkınca oyun bitti mi (`OyuncuCiktiOyunKarari`: gizli kişi kaçtı, Vampir'de bir taraf kazandı),
+  - biri oyundan çıkınca oyun bitti mi (`OyuncuCiktiOyunKarari`: gizli kişi kaçtı, Çakmak Gecesi'nde bir taraf kazandı),
   - gizli kişili oyunlarda oylamanın sonucu (`HainYakalandi`, `HainYakalanmadi`, `HainKacti`).
 
-  Her oyunun metodu "bu oyun değilse hiçbir şey yapma" diye başlar; yeni oyun bu kancalara eklenir. Oyuna özgü aşamalar (Rus Ruleti'nin tetiği, Casus'un son şansı, Vampir'in linci ve gecesi) kendi dosyasında. Sohbet kanallarının kuralları (takım, vampir, ölüler) `Oyun.Sohbet.cs`'te; sunucu sadece dağıtır. Bugünkü Çakmak bunların hiçbirinden etkilenmez, testleri ve rastgeleliği aynen kalır.
+  Her oyunun metodu "bu oyun değilse hiçbir şey yapma" diye başlar; yeni oyun bu kancalara eklenir. Oyuna özgü aşamalar (Rus Ruleti'nin tetiği, Casus'un son şansı, Çakmak Gecesi'nin linci ve gecesi) kendi dosyasında. Sohbet kanallarının kuralları (takım, katil, ölüler) `Oyun.Sohbet.cs`'te; sunucu sadece dağıtır. Bugünkü Çakmak bunların hiçbirinden etkilenmez, testleri ve rastgeleliği aynen kalır.
 - **Gizlilik testleri her oyunda:** rol, mekân, vampir arkadaşları, gözcünün öğrendiği sadece sahibinin görünümünde. Bugünkü soru gizliliği testleri gibi.
 - **Protokol:**
   - `ayarlar.oyun`;
   - `durum`'da `sana.rol` / `sana.mekan`, `elenenler`, `takimlar`, `puanlar`, `tabanca`;
   - yeni komutlar `suclamaOyu`, `geceSecimi`, `casusTahmini`, `tetik`.
-- **G1 (Enes):** kurallar, testler, sunucu, protokol, içerik (köstebek görevleri, mekânlar, kelimeler, Vampir soruları).
+- **G1 (Enes):** kurallar, testler, sunucu, protokol, içerik (köstebek görevleri, mekânlar, kelimeler, Çakmak Gecesi soruları).
 - **G2 (Arda):** oyun seçimi ekranı, rol perdeleri, gece ekranları, oylama, tabanca, takım skoru, kazanan ekranı; elden ele ve online.
 
 ## 7. Önerilen sıra
@@ -303,6 +303,6 @@ En ucuzdan en pahalıya, her biri bitip test edilince sıradaki:
 2. **Rus Ruleti:** eleme hazır. Yeni olan: tabanca, can, final.
 3. **Takım Düellosu:** yeni olan sadece takım ve puan.
 4. **Casus:** yeni içerik ister (mekân ve kelime).
-5. **Vampir Köylü:** en büyüğü. Gece, roller, linç, elden elede gece dolaşması.
+5. **Çakmak Gecesi (eski Vampir Köylü):** en büyüğü. Gece, 24 rol, linç, elden elede gece dolaşması.
 
 Bugünkü yol haritasına etkisi: bu beş oyun S5 ile S6 arasına yeni bir blok olarak girer. Çıkış o kadar kayar. VPS ve testler (Enes'in kararı) oyun tamamen bitince.

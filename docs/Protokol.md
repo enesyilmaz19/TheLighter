@@ -1,6 +1,6 @@
 # Ağ Protokolü (online mod)
 
-Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma, sohbet + DM, Temiz filtresi, grup paketi; yeni oyunlardan Köstebek, Rus Ruleti, Takım Düellosu, Casus, Vampir Köylü).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2, 6.4 ve 8.
+Durum: **taslak (S4 iskeleti + S3 tekrar oynatma + S4 sınırlar + S5 kopma/AFK, bekleme odası, atma, sohbet + DM, Temiz filtresi, grup paketi; yeni oyunlardan Köstebek, Rus Ruleti, Takım Düellosu, Casus, Çakmak Gecesi).** Sözleşme oturumunda onaylanacak. Kaynak: `docs/Ana Plan.md` 5.2, 6.4 ve 8.
 Sunucu: `Sunucu/Cakmak.Sunucu` · İstemci: Unity (G2).
 
 Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobide parça parça yükler (aşağıda "Grup paketi").
@@ -29,11 +29,11 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 | `ayarlar` | `oyun`, `can`, `takimlar`, `mod`, `miniOyun`, `turSayisi`, `soruSn`, `cevapSn`, `hamleSn`, `ceza`, `gorevler`, `kaos`, `paketler` (hepsi isteğe bağlı) | Kurucu, lobide. Sadece gönderilen alanlar değişir |
 | `baslat` | — | Kurucu, lobide, en az 4 oyuncu |
 | `komut` | `tur`, `komut`, + komutun alanları (aşağıda) | Oyunda |
-| `bitir` | — | Kurucu, oyunda. Oyunu hemen bitirir. **Köstebek ve Casus'ta** önce son oylama başlar (kurucu köstebek ya da casussa oyunu bitirip kazanamasın), oylama sürerken ikinci `bitir` `YANLIS_ASAMA`. Vampir Köylü'de oyun hemen biter, kazanan yok |
+| `bitir` | — | Kurucu, oyunda. Oyunu hemen bitirir. **Köstebek ve Casus'ta** önce son oylama başlar (kurucu köstebek ya da casussa oyunu bitirip kazanamasın), oylama sürerken ikinci `bitir` `YANLIS_ASAMA`. Çakmak Gecesi'nde oyun hemen biter, kazanan yok |
 | `buradayim` | — | Oyunda, herkes. Ekrana dokununca gönder: AFK etiketi kalkar. AFK değilse bir şey olmaz. Her `komut` da aynı işi görür |
 | `at` | `kim` | Kurucu; lobide, oyunda ya da bekleme odasında. Kendini atamaz. Atılan `ATILDIN` (`neden: "kurucu"`) alır, bağlantısı kapanır; bu odaya ne anahtarıyla ne aynı isimle dönebilir (hesap yok: başka bir isimle girebilir, rapor + engelleme S6). Oyundaysa oyundan çıkar, sayaçları özette kalır. Herkese `olay: "atildi"` |
 | `tekrarOyna` | — | Kurucu, `oyunSonu`'nda. Oda lobiye döner: bağlı olmayanlar düşer, bekleme odasındakiler oyuncu olur, ayarlar ve atılanların yasağı kalır |
-| `sohbet` | `kime` (`null` ya da yok = genel, `"p3"` = DM, `"takim"` / `"vampir"` / `"oluler"` = kanal), `metin` | Odadaki herkes, her an (lobi, oyun, bekleme odası, oyun sonu); Vampir Köylü'de kısıtlı. Aşağıda "Sohbet" |
+| `sohbet` | `kime` (`null` ya da yok = genel, `"p3"` = DM, `"takim"` / `"katil"` / `"oluler"` = kanal), `metin` | Odadaki herkes, her an (lobi, oyun, bekleme odası, oyun sonu); Çakmak Gecesi'nde kısıtlı. Aşağıda "Sohbet" |
 | `grupPaketi` | `sorular` (metin dizisi), `ilk` (isteğe bağlı, varsayılan `false`) | Kurucu, lobide. Grubun kendi paketini parça parça yükler. Aşağıda "Grup paketi" |
 
 **Metin temizliği** (isim, soru, sohbet): görünmez ve yön karakterleri atılır, her türlü boşluk tek boşluk olur, baş/son boşluk silinir (`TemizMetin`). Temizlenince boş kalan isim `ISIM_GECERSIZ`, soru ve sohbet `GECERSIZ_GIRDI`. Ekranda hep temizlenmiş hali görünür.
@@ -43,23 +43,25 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 **Yeniden bağlanırken `anahtar` ile birlikte aynı `isim`'i de yolla.** Oyunda yerin tutulur, anahtar tanınır. Lobide ya da bekleme odasında kopan yerini kaybeder ve anahtarı unutulur: o zaman aynı isimle yeni giriş olur (isim yoksa `ISIM_GECERSIZ` alırdın). Atıldıysan iki durumda da `ATILDIN`.
 
 **Değerler:**
-- `oyun`: `"cakmak"` (varsayılan, bugünkü oyun) · `"kostebek"` · `"rusRuleti"` · `"takim"` · `"casus"` · `"vampir"`. Yeni oyunlar geldikçe eklenir (`docs/Oyunlar.md`). Ayarlar birbirine uymalı, sonuç uymayacaksa (hangi sırayla gönderilirse gönderilsin) `GECERSIZ_GIRDI`; kural tek yerde, `Oyun.AyarlarUyumlu`:
+- `oyun`: `"cakmak"` (varsayılan, bugünkü oyun) · `"kostebek"` · `"rusRuleti"` · `"takim"` · `"casus"` · `"cakmakGecesi"`. Yeni oyunlar geldikçe eklenir (`docs/Oyunlar.md`). Ayarlar birbirine uymalı, sonuç uymayacaksa (hangi sırayla gönderilirse gönderilsin) `GECERSIZ_GIRDI`; kural tek yerde, `Oyun.AyarlarUyumlu`:
   - Köstebek'te kaos olamaz. Gizli görevler `gorevler` ayarı ne olursa olsun herkeste vardır.
   - Rus Ruleti'nde ceza `"kapali"`, `gorevler` ve `kaos` `false` olmalı (can sistemi zaten ceza). `turSayisi` yok sayılır: son kalana kadar sürer.
   - Takım Düellosu'nda `gorevler` `false` olmalı.
   - Casus'ta `mod` `"curcuna"` olamaz (sorular mekâna göre yazılmalı), `gorevler` ve `kaos` `false` olmalı.
-  - Vampir Köylü'de `gorevler` ve `kaos` `false` olmalı. En az 6 kişi: daha azıyla `baslat` → `OYUNCU_SAYISI_GECERSIZ`. `turSayisi` yok sayılır: bir taraf kazanana kadar sürer.
+  - Çakmak Gecesi'nde `gorevler` ve `kaos` `false` olmalı. 6–18 kişi (diğer oyunlar 4–10; oda 18 kişilik, sınır dışında `baslat` → `OYUNCU_SAYISI_GECERSIZ`). `turSayisi` yok sayılır: bir taraf kazanana kadar sürer.
 - `can`: Rus Ruleti'nde herkesin canı, `1`–`3` (varsayılan `1`; `3` = Son Çakmak). Diğer oyunlarda yok sayılır
 - `takimlar`: Takım Düellosu'nda kurucunun dağılımı, `{ "p1": 0, "p2": 1, ... }`. Boş nesne `{}` = rastgele ve dengeli (varsayılan). Takım numarası `0`/`1` değilse ya da odada olmayan biri varsa `GECERSIZ_GIRDI`; sayı değilse `GECERSIZ_MESAJ`. Lobiden çıkan dağılımdan düşer, `tekrarOyna`'da dağılım sıfırlanır. Herkesin yer alıp almadığı ve denge (takımlar arasında en fazla 1 kişi fark) `baslat`'ta denetlenir: tutmuyorsa `baslat` → `GECERSIZ_GIRDI`. Lobi `durum`'unda `ayarlar.takimlar`
 - `casus`: Casus'ta casusun bilmediği şey: `"mekan"` (varsayılan; herkesin bir rolü var) · `"kelime"` (Imposter, rol yok). Diğer oyunlarda yok sayılır. Lobi `durum`'unda `ayarlar.casus`
-- `rolAcilir`: Vampir Köylü'de elenenin rolü herkese açılır mı (`true`, varsayılan, klasik) ya da oyun sonuna kadar gizli mi (`false`). Lobi `durum`'unda `ayarlar.rolAcilir`
+- `rolAcilir`: Çakmak Gecesi'nde ölenin rolü herkese açılır mı (`true`, varsayılan) ya da oyun sonuna kadar gizli mi (`false`). Lobi `durum`'unda `ayarlar.rolAcilir`
+- `gecelikKurban`: Çakmak Gecesi'nde katillerin gecede öldürdüğü kişi sayısı, `1`–`3` (varsayılan `1`; en fazla canlı katil sayısı kadar)
+- `kapaliRoller`: Çakmak Gecesi'nde kurucunun kapattığı roller, ör. `["palyaco", "deli"]` (varsayılan `[]`). Rol adı değilse `GECERSIZ_MESAJ`; `"masum"`, `"katil"` ya da bu oyunun rolü değilse `GECERSIZ_GIRDI`. Roller: aşağıda "Çakmak Gecesi"
 - `mod`: `"normal"` · `"temiz"` · `"curcuna"`
 - `miniOyun`: `"tkm"` · `"tekCift"` · `"zar"` · `"karisik"`. **`"reaksiyon"` online'da yok** (`GECERSIZ_GIRDI`): süre istemciden geliyor ve telefonların dokunma gecikmesi farklı. Sadece elden ele.
 - `turSayisi`: `0` = sınırsız, `1–100`
 - `soruSn`, `cevapSn`, `hamleSn`: `5–300`
 - `ceza`: `"kapali"` (varsayılan) · `"hafif"` · `"cesur"`. Cesur'da Kızgın Çakmak da açık. Temiz modda `"cesur"` olamaz: sonuç Temiz + Cesur olacaksa (hangi sırayla gönderilirse gönderilsin) `GECERSIZ_GIRDI`, önce cezayı düşür
 - `gorevler`, `kaos`: `true` / `false` (varsayılan `false`). "Hızlı başla" istemcide, bu alanları kendisi gönderir
-- `paketler`: paket adları dizisi, dosya adı uzantısız: `["Genel", "Okul"]`. Varsayılan: sunucudaki bütün paketler. Grup paketi yüklendiyse `"@bizim"` de seçilebilir (yüklenmeden `GECERSIZ_GIRDI`; Temiz modda seçili olsa da kullanılmaz). Boş dizi, sunucuda olmayan ya da iki kez yazılan ad `GECERSIZ_GIRDI`. Öneri çek, Curcuna'nın boşlukları ve Kör Soru sadece seçilenlerden çeker. **Vampir Köylü'de paket seçimi kullanılmaz:** öneriler sunucudaki Vampir sorularından (`Assets/Icerik/VampirSorulari.csv`, ~40 suçlama sorusu)
+- `paketler`: paket adları dizisi, dosya adı uzantısız: `["Genel", "Okul"]`. Varsayılan: sunucudaki bütün paketler. Grup paketi yüklendiyse `"@bizim"` de seçilebilir (yüklenmeden `GECERSIZ_GIRDI`; Temiz modda seçili olsa da kullanılmaz). Boş dizi, sunucuda olmayan ya da iki kez yazılan ad `GECERSIZ_GIRDI`. Öneri çek, Curcuna'nın boşlukları ve Kör Soru sadece seçilenlerden çeker. **Çakmak Gecesi'nde paket seçimi kullanılmaz:** öneriler sunucudaki suçlama sorularından (`Assets/Icerik/GeceSorulari.csv`, 40 soru)
 
 ### Komutlar
 
@@ -79,8 +81,9 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 | `karariGec` | — | `KarariGec`: "hayır". `ikiyeKatla` ya da `bedel` aşamasında, `kararVeren`. Süre dolması da aynı sonucu verir |
 | `sucla` | — | `Sucla`. Köstebek, erken suçlama: herkesin oyun boyu 1 hakkı, sadece `soruSorma` aşamasında (düello ortası kesilmez). Başka aşamada ya da Çakmak'ta `YANLIS_ASAMA`, hak bittiyse `HAK_KALMADI` |
 | `suclamaOyu` | `hedef` | `SuclamaOyu`. Sadece `suclama` aşamasında, `oylayanlar` içindekiler, bir kez. Kendin ya da oyundan çıkan `SECILEMEZ` |
-| `lincOyu` | `hedef` | `LincOyu`. Vampir Köylü, `linc` aşamasında, `oylayanlar` içindekiler, bir kez. Kendin, ölü ya da oyundan çıkan `SECILEMEZ` |
-| `geceSecimi` | `hedef` | `GeceSecimi`. Vampir Köylü, `gece` aşamasında, her canlı bir kez. Geçerli hedefler sende `secilebilir`'de (rolüne göre); dışındakiler `SECILEMEZ` |
+| `lincOyu` | `hedef` | `LincOyu`. Çakmak Gecesi, `linc` aşamasında, `oylayanlar` içindekiler (susturulan değil), bir kez. Kendin, ölü ya da oyundan çıkan `SECILEMEZ` |
+| `geceSecimi` | `hedef` (yoksa pas), `ikinci` (isteğe bağlı) | `GeceSecimi`. Çakmak Gecesi, `gece` aşamasında, her canlı bir kez. Geçerli hedefler sende `secilebilir`'de, katillerin yeteneği için `ikinciSecilebilir`'de; dışındakiler `SECILEMEZ` |
+| `suikast` | `hedef`, `rol` (zorunlu) | `Suikast`. Suikastçı, `linc` aşamasında, oyunda 1 kez (`HAK_KALMADI`). Başkası `SIRA_SENDE_DEGIL`, bu oyunun rolü olmayan `rol` `GECERSIZ_GIRDI` |
 | `casusTahmini` | `tahmin` (zorunlu) | `CasusTahmini`. Casus, `casusListesi`'nden bir mekân (ya da kelime). Oyunun her aşamasında bir kez ("Mekânı biliyorum"), `casusTahmini` aşamasında son şans olarak. Oyun hemen biter. Casus değilsen `SIRA_SENDE_DEGIL`, listede yoksa `GECERSIZ_GIRDI`, Casus oyunu değilse `YANLIS_ASAMA` |
 | `tetikCek` | — | `TetikCek`. Rus Ruleti, `tetik` aşamasında, sadece `tetikCeken` (başkası `SIRA_SENDE_DEGIL`) |
 | `tetikDevret` | `hedef` | `TetikDevret`. `tetikCeken`, oyun boyu 1 kez (`HAK_KALMADI`); tetik hedefe geçer, onun karar süresi baştan. Kendin, elenen, kopuk ya da AFK `SECILEMEZ` |
@@ -144,8 +147,9 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
                    "ifsaEttirme": 0, "saklama": 1, "miniOyunKazanma": 1,
                    "oynadigiMiniOyun": 2, "cezaCekme": 1, "yanma": 0, "bedelOdeme": 0, "bedelHakki": 2, "kaosKazanma": 0,
                    "kisitlamalar": [ { "tur": "palyaco", "metin": null, "kalan": 2 } ],
-                   "afk": false, "cikti": false, "can": 0, "elendi": false, "devretmeHakki": false, "takim": null, "acikRol": null } ],
-  "secilebilir": [],
+                   "afk": false, "cikti": false, "can": 0, "elendi": false, "devretmeHakki": false, "takim": null, "acikRol": null,
+                   "susturuldu": false } ],
+  "secilebilir": [], "ikinciSecilebilir": [],
   "miniOyun": "tkm", "bHamleYapti": true, "cHamleYapti": false, "beraberlik": 0,
   "sonMiniOyun": null,
   "oyun": "cakmak", "kaos": "yok", "isi": "ilik", "kararVeren": null,
@@ -157,14 +161,15 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
             "hamlen": { "oyun": "tkm", "secim": "tas" },
             "gorevin": { "tur": "kisiyiGoster", "hedef": "p3", "adet": 2, "zorluk": "orta" }, "oyVerdin": false,
             "rol": null, "suclamaHakki": false, "sir": null, "mekanRolu": null,
-            "vampirler": [], "vampirSecimleri": [], "gozcuBilgilerin": [], "kendiniKoruyabilir": false },
+            "katiller": [], "katilSecimleri": [], "bulgularin": [], "kalanHakkin": null, "cellatHedefin": null,
+            "bombalilar": [], "kulakSorusu": null },
   "ifsa": null,
   "ozet": null,
   "bekleme": null,
   "bekleyenler": [] }
 ```
 
-- `asama`: `"soruToplama"` · `"soruSorma"` · `"cevapSecme"` · `"miniOyun"` · `"oylama"` · `"ikiyeKatla"` · `"bedel"` · `"ifsa"` · `"gume"` · `"oyunSonu"` · `"suclama"` (Köstebek, Casus) · `"tetik"` (Rus Ruleti) · `"casusTahmini"` (Casus) · `"linc"` · `"gece"` (Vampir Köylü), aşağıda.
+- `asama`: `"soruToplama"` · `"soruSorma"` · `"cevapSecme"` · `"miniOyun"` · `"oylama"` · `"ikiyeKatla"` · `"bedel"` · `"ifsa"` · `"gume"` · `"oyunSonu"` · `"suclama"` (Köstebek, Casus) · `"tetik"` (Rus Ruleti) · `"casusTahmini"` (Casus) · `"linc"` · `"gece"` (Çakmak Gecesi), aşağıda.
   Sıra: mini oyun (Grup Kararı'nda onun yerine oylama) → İkiye Katla? → Bedel? → ifşa/güme.
 - `a`, `b`, `c`: o an boşsa `null`. **Soran Gizli** kaos turunda `a` sadece A'nın kendi mesajında dolu, olaylarda da `null`.
 - `secilebilir`: sadece seçim yapacak kişiye dolu (soru sormada A'ya, cevap seçmede B'ye). Diğerlerine `[]`.
@@ -204,7 +209,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
     "rusRuleti": null,
     "takim": null,
     "casus": null,
-    "vampir": null }
+    "gece": null }
   ```
   `kostebek`: sadece Köstebek oyununda dolu (aşağıda "Köstebek"), diğer oyunlarda `null`.
   Unvan `tur`: `"miknatis"` · `"gammaz"` · `"sirKupu"` · `"hedefTahtasi"` · `"soruMakinesi"` · `"sansli"` · `"takintili"` · `"intikamci"` · `"atesleOynayan"` · `"bedelci"` · `"cezakes"` · `"kaosCanavari"` · `"kale"` · `"gorunmez"` · `"talihsiz"` · `"sosyalKelebek"` · `"sadik"` · `"dedikoducu"` · `"gundem"` · `"yenilmez"` · `"zorba"` · `"av"` · `"ayna"` · `"uykucu"` · `"kacak"` · `"acikKitap"` · `"eliBos"` · `"kumarbaz"` · `"bumerang"` · `"sogukkanli"` (anlamları `UnvanTuru`'nda). En uç 3 unvan, eşitlikte verilmez.
@@ -219,7 +224,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 `olay`: `"turBasladi"` · `"soruSoruldu"` · `"cevapSecildi"` · `"berabere"` · `"ifsa"` · `"gume"` · `"sureDoldu"` · `"oyunBitti"` ·
 `"kaosBasladi"` · `"yandi"` · `"cezaCekildi"` · `"ikiyeKatlandi"` · `"bedelOdendi"` · `"oyVerildi"` ·
 `"siraAtlandi"` · `"afk"` · `"afkBitti"` · `"oyuncuCikti"` · `"kararBekleniyor"` · `"suclamaBasladi"` · `"suclamaBitti"` ·
-`"tetikBasladi"` · `"tetikBos"` · `"tetikPatladi"` · `"elendi"` · `"tetikDevredildi"` · `"finalBasladi"` · `"duelloPuani"` · `"ifsaBonusu"` · `"casusYakalandi"` · `"casusTahminEtti"` · `"lincBasladi"` · `"lincBitti"` · `"geceBasladi"` · `"geceBitti"` · `"atildi"` (sunucunun olayı: biri atıldı; sadece bu olayda `neden` alanı var: `"kurucu"` ya da `"temiz"`).
+`"tetikBasladi"` · `"tetikBos"` · `"tetikPatladi"` · `"elendi"` · `"tetikDevredildi"` · `"finalBasladi"` · `"duelloPuani"` · `"ifsaBonusu"` · `"casusYakalandi"` · `"casusTahminEtti"` · `"lincBasladi"` · `"lincBitti"` · `"geceBasladi"` · `"geceBitti"` · `"suikast"` · `"atildi"` (sunucunun olayı: biri atıldı; sadece bu olayda `neden` alanı var: `"kurucu"` ya da `"temiz"`).
 `soru` sadece `ifsa` olayında dolu. `ceza` sadece `cezaCekildi`'de (ceza nesnesi), `kaos` sadece `kaosBasladi`'da (kuralın adı). Animasyon ve ses için. Ekran her zaman `durum`'a göre çizilir.
 
 ### `hata`
@@ -251,7 +256,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 
 - `surum`: odanın sayacı, her `durum`'da bir artar. Eski sürümlü mesajı at (Ana Plan 5.2, kural 3). Geri dönen oyuncu da kaldığı sayıdan devam eder.
 - `renk`: 0–9, oyuncu numarasından (`p1` → 0). Arayüz kendi renk listesinde bu sıraya bakar.
-- `olay.kim`: `sureDoldu` (süresi dolan), `yandi` (çakmak elinde yanan), `cezaCekildi` (çeken), `ikiyeKatlandi` (bir el daha isteyen), `bedelOdendi` (ödeyen B), `oyVerildi` (oy veren; oyun ne olduğu yok), `siraAtlandi` (sırası gelen ama kopuk/AFK/çıkmış olan; sıra rastgele birine geçti), `afk` / `afkBitti` (AFK olan / dönen), `oyuncuCikti` (oyundan çıkan), `atildi` (atılan), `suclamaBasladi` (erken suçlama hakkını kullanan; aralıklı oylamada ve son oylamada `null`), `suclamaBitti` (en çok oyu alan; eşitlik ya da hiç oy yoksa `null`), `kararBekleniyor` (İkiye Katla ya da Bedel kararını verecek; mini oyunun ya da oylamanın süresi dolunca da gelir), `tetikBasladi` / `tetikBos` / `tetikPatladi` / `elendi` (tetiği çekecek / çeken / canı biten), `tetikDevredildi` (devreden; devralan `hedef`'te, `hedef` sadece bu olayda dolu), `duelloPuani` (düelloyu kazanan) / `ifsaBonusu` (A); bu ikisinde `takim`: puan alan takım (sadece bunlarda dolu), `casusYakalandi` / `casusTahminEtti` (casus), `lincBitti` (elenen; eşitlik ya da hiç oy yoksa `null`), `geceBitti` (gece ölen; kimse ölmediyse `null`). Diğerlerinde `null`.
+- `olay.kim`: `sureDoldu` (süresi dolan), `yandi` (çakmak elinde yanan), `cezaCekildi` (çeken), `ikiyeKatlandi` (bir el daha isteyen), `bedelOdendi` (ödeyen B), `oyVerildi` (oy veren; oyun ne olduğu yok), `siraAtlandi` (sırası gelen ama kopuk/AFK/çıkmış olan; sıra rastgele birine geçti), `afk` / `afkBitti` (AFK olan / dönen), `oyuncuCikti` (oyundan çıkan), `atildi` (atılan), `suclamaBasladi` (erken suçlama hakkını kullanan; aralıklı oylamada ve son oylamada `null`), `suclamaBitti` (en çok oyu alan; eşitlik ya da hiç oy yoksa `null`), `kararBekleniyor` (İkiye Katla ya da Bedel kararını verecek; mini oyunun ya da oylamanın süresi dolunca da gelir), `tetikBasladi` / `tetikBos` / `tetikPatladi` / `elendi` (tetiği çekecek / çeken / canı biten), `tetikDevredildi` (devreden; devralan `hedef`'te, `hedef` sadece bu olayda dolu), `duelloPuani` (düelloyu kazanan) / `ifsaBonusu` (A); bu ikisinde `takim`: puan alan takım (sadece bunlarda dolu), `casusYakalandi` / `casusTahminEtti` (casus), `lincBitti` (elenen; eşitlik ya da hiç oy yoksa `null`), `suikast` (Suikastçı'nın tahminiyle ölen), `elendi` (Çakmak Gecesi'nde gece ölen; ölenler `geceBitti`'den önce birer birer gelir). Diğerlerinde `null`.
 - Paketler ve sesli cezalar: sunucu `Assets/Icerik` altındaki `.txt` paketlerini ve `Cezalar.csv`'yi açılışta okur.
 - Sabit süreler (şimdilik ayarlanamaz): ifşa/güme ekranı 6 sn, Curcuna soru toplama 90 sn, İkiye Katla/Bedel kararı 5 sn. Oylama `hamleSn` kadar sürer.
 
@@ -267,7 +272,7 @@ Bir mesaj birden çok kuralı çiğniyorsa ilk tutan döner:
 - `at`: `kim` yoksa ya da `"p…"` değilse `GECERSIZ_MESAJ`. Odada olmayan ya da kurucunun kendisi `GECERSIZ_GIRDI`. Kurucu değilse `KURUCU_DEGILSIN`.
 - `tekrarOyna`: oyun yoksa `OYUN_YOK`, bitmediyse `YANLIS_ASAMA`.
 - `grupPaketi`: `KURUCU_DEGILSIN` → `OYUN_BASLADI` → `sorular` yok ya da metin dizisi değil, `ilk` `true`/`false` değil (`GECERSIZ_MESAJ`) → boş dizi, temizlenince boş ya da 140 karakterden uzun soru, toplam 500'ü aşıyor (`GECERSIZ_GIRDI`; parçanın hiçbiri eklenmez, `ilk` olsa da eski paket silinmez).
-- `sohbet`: `ODADA_DEGILSIN` → `COK_HIZLI` (sohbet sınırı) → `metin` yok ya da metin değil, `kime` metin değil ya da `"p…"` / kanal adı değil (`GECERSIZ_MESAJ`) → temizlenince boş, 200 karakterden uzun, `kime` odada yok ya da kendin, kanala yazamıyorsun, Vampir Köylü'de genele/DM'e yazamıyorsun (`GECERSIZ_GIRDI`) → `UYGUNSUZ`.
+- `sohbet`: `ODADA_DEGILSIN` → `COK_HIZLI` (sohbet sınırı) → `metin` yok ya da metin değil, `kime` metin değil ya da `"p…"` / kanal adı değil (`GECERSIZ_MESAJ`) → temizlenince boş, 200 karakterden uzun, `kime` odada yok ya da kendin, kanala yazamıyorsun, Çakmak Gecesi'nde genele/DM'e yazamıyorsun (`GECERSIZ_GIRDI`) → `UYGUNSUZ`.
 - Bilinmeyen `komut` ya da hamle `oyun` adı: `GECERSIZ_MESAJ`.
 
 ## Sınırlar
@@ -343,23 +348,27 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 - **Casus oyundan çıkarsa** grup kazanır. Bağlı oyuncu 4'ün altında kalıp oyun biterse casus yakalanmamış sayılır.
 - **Oyun sonunda** `ozet.casus`: `{ "kim": "p3", "kazanan": "grup" | "casus", "neden": "…", "sir": "Uçak", "tahmin": "Tren" | null }`. `neden`: `"yakalandi"` (son şansta bilemedi ya da süresi doldu) · `"yanlisTahmin"` · `"kacti"` · `"bildi"` · `"sonSanstaBildi"` · `"yakalanmadi"`. Oyun bitmeden casusun kim olduğu ve sır casusa hiçbir mesajda yok.
 
-## Vampir Köylü (docs/Oyunlar.md, 5)
+## Çakmak Gecesi (docs/Oyunlar.md, 5)
 
-`ayarlar` → `oyun: "vampir"`, isteğe bağlı `rolAcilir`. 6–10 kişi. Gizli roller, gündüz çakmak + linç, gece seçimler.
+`ayarlar` → `oyun: "cakmakGecesi"`; isteğe bağlı `rolAcilir`, `gecelikKurban`, `kapaliRoller`. 6–18 kişi. Taraflar Masumlar ve Katiller, bir de tek başına kazanan tarafsızlar. Rollerin ne yaptığı ve gece sırası: `docs/Oyunlar.md` 5 (kesin kurallar orada).
 
-- **Roller** (`sana.rol`, sadece sahibine): `"vampir"` (6–7 kişide 1, 8–10 kişide 2), `"doktor"`, `"gozcu"`, `"koylu"`. Vampirler birbirini bilir: `sana.vampirler` (sadece vampirlerde dolu, sen dahil).
-- **Gündüz:** canlıların yarısı kadar (aşağı yuvarlanır, en az 1) normal çakmak turu. `gun` (1'den), `kalanGunduzTuru` (bu tur hariç; 0 = sıradaki linç). `toplamTur` hep `0`. Canlılar 4'ün altındaysa (gün içinde düşülse de) çakmak turu yok, doğrudan linç.
-- **Linç** (`asama: "linc"`, `olay: "lincBasladi"`): canlılar `lincOyu` ile kendisi dışında bir canlıyı gösterir. `oylayanlar`, `oyKullanan`, `sana.oyVerdin`, adaylar `secilebilir`'de. Herkes oy verince ya da süre (60 sn) dolunca: en çok oyu alan elenir (`olay: "lincBitti"`, `kim`), eşitlikte ya da hiç oy yoksa kimse (`kim: null`). Kimin kime oy verdiği hiçbir mesajda yok.
-- **Gece** (`asama: "gece"`, `olay: "geceBasladi"`): **her canlı** `geceSecimi` yollar (kimin uzun düşündüğünden rol anlaşılmasın). Adaylar rolüne göre `secilebilir`'de:
-  - Vampir: kurban, vampir olmayan bir canlı. 2 vampir farklı seçerse ikisinden biri rastgele. Vampirler gece birbirinin seçimini görür: `sana.vampirSecimleri` `[ { "kim", "hedef" } ]`.
-  - Doktor: korunacak kişi, kendisi oyunda 1 kez (`sana.kendiniKoruyabilir`).
-  - Gözcü: bakılacak kişi (kendisi hariç). Cevap hemen `sana.gozcuBilgilerin`'de: `[ { "kim": "p3", "vampir": true } ]`, bütün geceler birikir.
-  - Köylü: birini düşünür, etkisi yok.
-- **Sabah** (`olay: "geceBitti"`, `kim`): kurban ölür, doktor koruduysa ya da vampir seçmediyse kimse (`kim: null`, ikisi ayırt edilmez). Sonra yeni gün (`gun` +1), A rastgele bir canlı.
-- **Ölüler:** `oyuncular[].elendi: true`, seçilmez, sırası gelmez, oylamaz. `rolAcilir` açıksa `oyuncular[].acikRol` herkese (`"vampir"` …), kapalıysa `null` (oyun sonuna kadar).
-- **Kazanma** (her eleme ve oyundan çıkışta bakılır): canlı vampir kalmazsa köylüler, canlı vampirler canlı diğerlerine eşit ya da fazlaysa vampirler. Oyundan çıkan canlı sayılmaz. Kurucu `bitir` derse ya da oyuncu kalmazsa kazanan yok.
-- **Sohbet:** aşağıda "Sohbet" (vampir ve ölüler kanalı, gece ve ölüler genele yazamaz).
-- **Oyun sonunda** `ozet.vampir`: `{ "kazanan": "koylu" | "vampir" | null, "roller": [ { "kim": "p1", "rol": "doktor" } ] }`.
+- **Roller** (`sana.rol`, sadece sahibine; Deli'ye sandığı rol):
+  - Masumlar: `"masum"` · `"koruyucu"` · `"dedektif"` · `"serif"` · `"kanunsuz"` · `"bekci"` · `"kulak"` · `"falci"` · `"deli"`
+  - Katiller: `"katil"` · `"patron"` · `"casus"` · `"susturucu"` · `"tuzakci"` · `"temizlikci"` · `"suikastci"` · `"palyaco"` · `"vampir"`
+  - Tarafsızlar: `"soytari"` · `"seriKatil"` · `"cellat"` · `"hayattaKalan"` · `"hirsiz"` · `"bombaci"`
+- **Katiller** birbirini rolleriyle bilir: `sana.katiller` `[ { "kim", "rol" } ]` (sadece katillerde dolu, ölüler dahil). Gece birbirinin kurban oyunu görür: `sana.katilSecimleri` `[ { "kim", "hedef" } ]`.
+- **Gündüz:** canlıların yarısı kadar (en az 1) çakmak turu. `gun` (1'den), `kalanGunduzTuru` (bu tur hariç; 0 = sıradaki linç). `toplamTur` hep `0`. Canlılar 4'ün altındaysa çakmak turu yok.
+- **Linç** (`asama: "linc"`, `olay: "lincBasladi"`): `oylayanlar` (canlılar, susturulan hariç) `lincOyu` ile kendisi dışında bir canlıyı gösterir. Herkes oy verince ya da süre (60 sn) dolunca en çok oyu alan elenir (`olay: "lincBitti"`, `kim`), eşitlikte kimse. Palyaço'nun kandırdığının oyu Palyaço'nun oyuna sayılır (kimse görmez). Kimin kime oy verdiği hiçbir mesajda yok.
+  - **Suikast:** linç sürerken Suikastçı `suikast` (`hedef`, `rol`) yollar: bilirse hedef, bilemezse kendisi hemen ölür (`olay: "suikast"`, `kim`: ölen). Ölenin oyu ve ona verilen oylar düşer; verenler yeniden oy verir (`sana.oyVerdin` yeniden `false`).
+- **Gece** (`asama: "gece"`, `olay: "geceBasladi"`): **her canlı** `geceSecimi` yollar; `hedef`siz = pas. Adaylar `secilebilir`'de (rolüne göre: katiller katil olmayanları, Koruyucu hakkı varsa kendini de, Bombacı bomba koyduysa kendini = patlat). Katil tarafının yeteneği (Casus, Susturucu, Tuzakçı, Temizlikçi, Palyaço, Vampir) `ikinci` ile, adayları `ikinciSecilebilir`'de. Yeteneği olmayan da birini seçebilir (etkisi yok); kimin uzun düşündüğünden rol anlaşılmasın.
+- **Sabah:** ölenler birer `olay: "elendi"` (`kim`), sonra `olay: "geceBitti"`; hiç `elendi` yoksa kimse ölmedi. Yeni gün (`gun` +1), A rastgele bir canlı.
+- **Bakışların sonuçları** sabah `sana.bulgularin`'de birikir: `[ { "gun": 2, "kim": "p3", "supheli": true | null, "rol": "katil" | null, "ziyaretciler": [], "grup": [], "kotuVar": null } ]`. Dedektif `supheli`, Casus `rol`, Bekçi `ziyaretciler`, Falcı `grup` ve `kotuVar` doldurur. Deli'ninkiler rastgele (kendisi bilmez).
+- **Haklar:** `sana.kalanHakkin`: sınırlı yeteneğin kalan hakkı (Koruyucu kendini koruma, Kanunsuz kurşun, Falcı, Temizlikçi, Suikastçı, Vampir, Hırsız, Seri Katil'in kaçınması); yoksa `null`.
+- **Sadece sahibine:** `sana.cellatHedefin` (Cellat), `sana.bombalilar` (Bombacı), `sana.kulakSorusu` (Kulak, sadece `gume` aşamasında: güme giden soru; başka hiçbir yerde yok).
+- **Herkese:** `oyuncular[].elendi`, `oyuncular[].acikRol` (rol açılması açıksa ve temizlenmediyse; Seri Katil'in kurbanı da gizli), `oyuncular[].susturuldu` (o gün yazamaz, oy veremez).
+- **Kazanma** (her ölümde ve oyundan çıkışta): Soytarı linç edilirse ya da Cellat'ın hedefi linç edilirse o, oyun biter. Masumlar: katil, Seri Katil ve Bombacı kalmadı. Katiller: öldüren tarafsız yok ve katiller diğer canlılardan az değil. Seri Katil / Bombacı: tek öldüren o ve en fazla 2 canlı. 2 canlı kalıp kimse kazanamıyorsa berabere. Hayattaki Hayatta Kalan kazananlara eklenir. Kurucu `bitir` derse kazanan yok.
+- **Sohbet:** aşağıda "Sohbet" (katil ve ölüler kanalı; gece, ölüler ve susturulan genele yazamaz).
+- **Oyun sonunda** `ozet.gece`: `{ "kazanan": "masumlar" | "katiller" | "seriKatil" | "bombaci" | "soytari" | "cellat" | "berabere" | null, "kazananlar": ["p2", …], "roller": [ { "kim": "p1", "rol": "deli" } ] }`.
 
 ## Grup paketi (Ana Plan 8.5)
 
@@ -388,9 +397,9 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 
 - **Genel** (`kime` `null` ya da yok): odadaki herkese gider, **yazana da** (yazan kendi mesajını bu dönüşle ekler; dönmezse gitmemiştir: `hata`'ya bak). Bekleme odasındakiler de yazar ve görür.
 - **Takım kanalı** (`kime: "takim"`): sadece Takım Düellosu sürerken, yazanın takımına (yukarıda "Takım Düellosu").
-- **Vampir kanalı** (`kime: "vampir"`): Vampir Köylü'de, gece, canlı vampirler arasında.
-- **Ölüler kanalı** (`kime: "oluler"`): Vampir Köylü'de, elenenler arasında, her an.
-- **Vampir Köylü'de genel ve DM:** gece kimse, ölüler (ve oyunda olmayan bekleme odası) hiç yazamaz (canlılara ipucu vermesinler); herkes okur. Oyun bitince herkes yazar.
+- **Katil kanalı** (`kime: "katil"`): Çakmak Gecesi'nde, gece, canlı katiller arasında.
+- **Ölüler kanalı** (`kime: "oluler"`): Çakmak Gecesi'nde, ölüler arasında, her an.
+- **Çakmak Gecesi'nde genel ve DM:** gece kimse, ölüler, o gün susturulan ve oyunda olmayan bekleme odası yazamaz (canlılara ipucu vermesinler); herkes okur. Oyun bitince herkes yazar.
 - Kim hangi kanala yazar ve kim okur: kural motoru (`Oyun.SohbeteYazabilir`, `Oyun.KanalAlicilari`). Gelen mesajda `kime` kanalın adı.
 - **DM** (`kime: "p3"`): sadece alana ve yazana gider. Alan odada olmalı (oyuncu ya da bekleme odasında; bağlı değilse mesaj ona hiç ulaşmaz), kendine DM `GECERSIZ_GIRDI`. İstemcide DM kanalı = karşıdaki kişi: `kimden` sensen `kime`, değilse `kimden`.
 - `metin` isim ve soruyla aynı temizlikten geçer (`TemizMetin`), temizlenince 1–200 karakter. Gelen `metin` hep temizlenmiş haldir.

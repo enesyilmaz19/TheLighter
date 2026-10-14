@@ -170,7 +170,7 @@ namespace SunucuTestleri
             Assert.That((string)(await o[1].Bekle("olay", m => (string)m["olay"] == "elendi"))["kim"], Is.EqualTo(masumlar[2].Sen));
             await o[1].Bekle("olay", m => (string)m["olay"] == "geceBitti");
             // Isırılan katil oldu: 3 katile 2 masum, katiller kazandı.
-            var son = await o[1].Bekle("durum", m => (string)m["asama"] == "oyunSonu");
+            var son = await vampir.Bekle("durum", m => (string)m["asama"] == "oyunSonu"); // o[1] Dedektif olabilir: mesajı aşağıda o bekler
             var s = son["ozet"]["gece"];
             Assert.That((string)s["kazanan"], Is.EqualTo("katiller"));
             Assert.That(Idler(s["kazananlar"]), Is.EquivalentTo(new[] { suikastci.Sen, vampir.Sen, masumlar[3].Sen }));

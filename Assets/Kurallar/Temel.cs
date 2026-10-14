@@ -115,14 +115,14 @@ namespace Cakmak.Kurallar
         Suclama,       // Köstebek, Casus: "Köstebek kim?" / "Casus kim?" oylaması (docs/Oyunlar.md)
         Tetik,         // Rus Ruleti: düelloyu kaybeden tetiği çeker ya da devreder
         CasusTahmini,  // Casus: yakalanan casusun son şansı, mekânı (ya da kelimeyi) tahmin eder
-        Linc,          // Vampir Köylü: gündüz sonu, canlılar elenecek kişiyi oylar
-        Gece,          // Vampir Köylü: canlılar sırayla gece seçimini yapar (vampir kurban, doktor koruma, gözcü bakış)
+        Linc,          // Çakmak Gecesi: gündüz sonu, canlılar elenecek kişiyi oylar
+        Gece,          // Çakmak Gecesi: canlılar sırayla gece seçimini yapar (katiller kurban, diğerleri rolünün yeteneği)
     }
 
     public enum OyunModu { Normal, Temiz, Curcuna }
 
     /// <summary>Hangi oyun (docs/Oyunlar.md). Mod (soruların nereden geldiği, Temiz filtresi) her oyunda ayrı seçilir. Yeni oyunlar sona.</summary>
-    public enum OyunTuru { Cakmak, Kostebek, RusRuleti, Takim, Casus, Vampir }
+    public enum OyunTuru { Cakmak, Kostebek, RusRuleti, Takim, Casus, CakmakGecesi }
 
     /// <summary>Casus neyi bilmiyor: mekânı (herkesin bir rolü var) ya da tek bir kelimeyi (Imposter, rol yok).</summary>
     public enum CasusTuru { Mekan, Kelime }
@@ -188,7 +188,7 @@ namespace Cakmak.Kurallar
         /// <summary>Elden ele (tek cihaz). Açıkken kaos turlarında "Soran Gizli" çıkmaz: herkes telefonu kimin tuttuğunu görüyor.</summary>
         public bool TekCihaz;
 
-        /// <summary>Köstebek, Casus: "kim?" oylamasının süresi (tartışma dahil). Vampir Köylü: linç ve gece.</summary>
+        /// <summary>Köstebek, Casus: "kim?" oylamasının süresi (tartışma dahil). Çakmak Gecesi: linç ve gece.</summary>
         public int SuclamaSuresiSn = 60;
         /// <summary>Rus Ruleti: herkesin canı, 1–3 (1 = Rus Ruleti, 3 = Son Çakmak).</summary>
         public int Can = 1;
@@ -196,7 +196,11 @@ namespace Cakmak.Kurallar
         public IReadOnlyDictionary<OyuncuId, int> TakimDagilimi;
         /// <summary>Casus: mekân ya da kelime.</summary>
         public CasusTuru Casus = CasusTuru.Mekan;
-        /// <summary>Vampir Köylü: elenenin rolü herkese açılır (klasik). false: oyun sonuna kadar gizli.</summary>
+        /// <summary>Çakmak Gecesi: elenenin rolü herkese açılır (klasik). false: oyun sonuna kadar gizli.</summary>
         public bool RolAcilir = true;
+        /// <summary>Çakmak Gecesi: katillerin gecede öldürdüğü kişi sayısı, 1–3; en fazla canlı katil sayısı kadar.</summary>
+        public int GecelikKurban = 1;
+        /// <summary>Çakmak Gecesi: kurucunun kapattığı roller (Masum ve Katil kapatılamaz).</summary>
+        public IReadOnlyList<Rol> KapaliRoller = Array.Empty<Rol>();
     }
 }

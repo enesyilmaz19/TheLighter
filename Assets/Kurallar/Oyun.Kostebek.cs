@@ -6,8 +6,20 @@ namespace Cakmak.Kurallar
     // var. Her 5 turda bir ve erken suçlamayla "Köstebek kim?" oylaması (Oyun.Suclama.cs). Köstebek görevini bitirince
     // ya da yakalanmadan oyun bitince kazanır.
 
-    /// <summary>Gizli rol, sadece sahibinin görünümünde (<see cref="Gorunum.Rolun"/>). Yeni roller sona.</summary>
-    public enum Rol { Yok, Kostebek, Casus, Vampir, Doktor, Gozcu, Koylu }
+    /// <summary>
+    /// Gizli rol, sadece sahibinin görünümünde (<see cref="Gorunum.Rolun"/>). Yeni roller sona. Casus hem Casus oyununun casusu
+    /// hem Çakmak Gecesi'nin katil tarafındaki Casus'u. Çakmak Gecesi'nin rolleri ve tarafları: Oyun.CakmakGecesi.cs.
+    /// </summary>
+    public enum Rol
+    {
+        Yok, Kostebek, Casus,
+        // Çakmak Gecesi: Masumlar
+        Masum, Koruyucu, Dedektif, Serif, Kanunsuz, Bekci, Kulak, Falci, Deli,
+        // Katiller (Casus da)
+        Katil, Patron, Susturucu, Tuzakci, Temizlikci, Suikastci, Palyaco, Vampir,
+        // Tarafsızlar
+        Soytari, SeriKatil, Cellat, HayattaKalan, Hirsiz, Bombaci,
+    }
 
     public enum KostebekKazanan { Grup, Kostebek }
 

@@ -89,9 +89,9 @@ namespace Cakmak.Kurallar
                 case Asama.Suclama when !suclamaOylari.ContainsKey(kim) && oylayanlar.Remove(kim):
                     if (suclamaOylari.Count == oylayanlar.Count) SuclamayiBitir();
                     break;
-                case Asama.Linc when !vampirOylari.ContainsKey(kim) && oylayanlar.Remove(kim):
-                case Asama.Gece when !vampirOylari.ContainsKey(kim) && oylayanlar.Remove(kim):
-                    if (vampirOylari.Count == oylayanlar.Count) VampirOylamasiBitti();
+                case Asama.Linc when !Secti(kim) && oylayanlar.Remove(kim):
+                case Asama.Gece when !Secti(kim) && oylayanlar.Remove(kim):
+                    if (SecenSayisi == oylayanlar.Count) GeceOylamasiBitti();
                     break;
                 case Asama.IkiyeKatla when kim == kararVeren:
                 case Asama.Bedel when kim == kararVeren:

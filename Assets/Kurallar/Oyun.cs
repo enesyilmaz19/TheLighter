@@ -83,7 +83,9 @@ namespace Cakmak.Kurallar
         {
             oyun = null;
             if (ayarlar == null || oyuncular == null || rastgele == null) return Sonuc.GecersizGirdi;
-            if (oyuncular.Count < EnAzOyuncu || oyuncular.Count > EnFazlaOyuncu) return Sonuc.OyuncuSayisiGecersiz;
+            bool gece = ayarlar.Oyun == OyunTuru.CakmakGecesi;
+            if (oyuncular.Count < (gece ? GeceEnAzOyuncu : EnAzOyuncu) || oyuncular.Count > (gece ? GeceEnFazlaOyuncu : EnFazlaOyuncu))
+                return Sonuc.OyuncuSayisiGecersiz;
 
             var gorulen = new HashSet<OyuncuId>();
             var isimler = new HashSet<string>(); // grup kaydı kişileri isimle eşliyor
@@ -98,7 +100,6 @@ namespace Cakmak.Kurallar
                 return Sonuc.GecersizGirdi;
 
             if (!AyarlarUyumlu(ayarlar) || ayarlar.SuclamaSuresiSn <= 0) return Sonuc.GecersizGirdi;
-            if (ayarlar.Oyun == OyunTuru.Vampir && oyuncular.Count < VampirEnAzOyuncu) return Sonuc.OyuncuSayisiGecersiz;
             if (ayarlar.Oyun == OyunTuru.Takim && !TakimDagilimiGecerli(ayarlar.TakimDagilimi, oyuncular)) return Sonuc.GecersizGirdi;
 
             oyun = new Oyun(ayarlar, oyuncular, rastgele);
@@ -125,8 +126,11 @@ namespace Cakmak.Kurallar
                 case OyunTuru.Casus:
                     // Sorular mekâna göre yazılmalı: Curcuna'nın genel havuzu işe yaramaz. Görev ve kaos rollerle karışır.
                     return a.Mod != OyunModu.Curcuna && !a.GizliGorevler && !a.KaosTurlari;
-                case OyunTuru.Vampir:
-                    return !a.GizliGorevler && !a.KaosTurlari; // görev ve kaos rollerle karışır
+                case OyunTuru.CakmakGecesi:
+                    if (a.GizliGorevler || a.KaosTurlari || a.GecelikKurban < 1 || a.GecelikKurban > EnFazlaGecelikKurban) return false;
+                    foreach (var r in a.KapaliRoller) // görev ve kaos rollerle karışır; düz Masum ve Katil kapatılamaz
+                        if (r == Rol.Masum || r == Rol.Katil || !((IList<Rol>)TumGeceRolleri).Contains(r)) return false;
+                    return true;
                 default:
                     return true;
             }
@@ -325,7 +329,7 @@ namespace Cakmak.Kurallar
                     break;
                 case Asama.Linc:
                 case Asama.Gece:
-                    VampirOylamasiBitti(); // oy vermeyen vermemiş sayılır
+                    GeceOylamasiBitti(); // seçmeyen seçmemiş sayılır
                     break;
             }
         }
@@ -402,7 +406,7 @@ namespace Cakmak.Kurallar
             TurSonuIsleri();
             if (TurBasindaOyunKarari()) return;
             tur++;
-            if (ayar.TurSayisi > 0 && tur > ayar.TurSayisi && !RusRuletli && !Vampirli) // ikisi de bir taraf kazanana kadar sürer
+            if (ayar.TurSayisi > 0 && tur > ayar.TurSayisi && !RusRuletli && !GeceOyunu) // ikisi de bir taraf kazanana kadar sürer
             {
                 tur = ayar.TurSayisi;
                 if (!SonSuclamayiBaslat()) Bitir();

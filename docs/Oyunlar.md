@@ -161,44 +161,114 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **Ceza açılabilir;** görev, kaos ve Curcuna kapalı. Temiz'de oynanır: bütün içerik Temiz filtresinden geçiyor (test var).
 - **İçerik taslağı** `Assets/Kurallar/CasusIcerik.cs`: 30 mekân × 9 rol, 5 kategori × 20 kelime. **Enes gözden geçirecek.**
 
-## 5. Vampir Köylü
+## 5. Çakmak Gecesi (eski adı Vampir Köylü)
 
-**Fikir:** gizli roller, gece ve gündüz. Gündüzleri çakmak, suçlamanın ta kendisi.
+**Fikir:** gizli roller, gece ve gündüz. Gündüzleri çakmak, suçlamanın ta kendisi. Taraflar **Masumlar** ve **Katiller**; bir de sadece kendisi kazanan **tarafsızlar**. Roller ToS, Goose Goose Duck, Feign ve Among Us'tan uyarlandı, bazıları çakmağa özel.
 
-- **Kişi:** **6–10.** 6–7 kişide 1 vampir, 8–10 kişide 2 vampir. Vampirler birbirini bilir.
-- **Roller:**
-  - **Köylü.**
-  - **Doktor:** her gece birini korur, kendini oyunda 1 kez.
-  - **Gözcü:** her gece bir kişinin vampir olup olmadığını öğrenir.
-- **Gündüz:** canlı oyuncu sayısının yarısı kadar çakmak turu (aşağı yuvarlanır, en az 1).
-  - Sorular suçlama aracı ("Sence vampir kim?", "Bu gece kim korunmalı?"). Paketten ya da serbest.
-  - B çakmağı şüphelendiğine verir. İfşa olursa suçlama herkese açılır, güme giderse gizli kalır.
-- **Linç:** gündüz sonunda bütün canlılar oy verir. Çoğunluğu alan elenir. Eşitlikte kimse elenmez.
-- **Rol açılması (ayar, kurucu seçer):** elenenin rolü açılır (klasik, kolay) ya da oyun sonuna kadar gizli kalır (zor, daha çok tartışma). Gece ölenler için de aynı.
-- **Gece:**
-  - Vampirler bir kurban seçer (2 vampirde ortak karar ya da çoğunluk).
-  - Doktor birini korur, gözcü birine bakar.
-  - Sabah kurban açıklanır (korunduysa "kimse ölmedi").
-- **Kazanma:** bütün vampirler elenirse köylüler kazanır. Vampirler sayıca köylülere eşit ya da fazla olursa vampirler kazanır.
-- **Az kişi kuralı:** canlılar 4'ün altına düşünce çakmak turları atlanır, sadece linç ve gece kalır.
-- **Elden ele (en zor kısım):** gece telefon herkese tek tek gider ve **herkes bir seçim yapar.** Köylüye "birini düşün" ekranı gelir, seçimi bir işe yaramaz. Böylece kimin uzun düşündüğünden rol anlaşılmaz. Linç, Grup Kararı gibi dolaşır.
-- **Online:** gece herkes kendi telefonunda seçer. Genel sohbet gece kapalı; vampirlere gece özel kanal. **Ölüler** genel sohbete yazamaz (canlılara ipucu veremez) ama okur; kendi aralarında "Ölüler" kanalında yazar.
-- **İçerik (G1):** "Vampir" soru paketi (~40 soru), rol metinleri (G2).
-- **Kararlar (2026-10-13):** rolün açılması kurucunun ayarı. Gündüz tur sayısı canlıların yarısı. Ölüler kanalı var.
+**Kararlar (Enes, 2026-10-14):** ad Çakmak Gecesi. 6–18 kişi (diğer oyunlar 10'da kalır, odalar 18 kişilik). Gecelik kurban sayısı ayarı. Roller kişi sayısına göre otomatik dağılır, kurucu istemediklerini kapatır. Seri Katil'in oyunda 1 kaçınma hakkı. Soytarı ya da Cellat kazanınca oyun biter. Falcı oyuncu sayısıyla orantılı ve sınırlı. Deli kendini rastgele bir masum rolü sanır.
 
-**Kodlandı (2026-10-14, kural motoru + sunucu; ekranlar Arda'da).** Kodlarken netleşenler (G1 kararları, Enes değiştirebilir):
+### Akış
 
-- **Oyun gündüzle başlar:** kimse konuşmadan ilk gece biri ölmesin. Sıra: gündüz → linç → gece → sabah (yeni gün).
-- **Linç:** en çok oyu alan elenir (salt çoğunluk gerekmez); eşitlikte ya da hiç oy yoksa kimse. Süre 60 sn (`SuclamaSuresiSn`).
-- **2 vampir farklı kurban seçerse** ikisinden biri rastgele. Gece birbirinin seçimini görürler (online'da vampir kanalı da var), anlaşmaları kolay.
-- **Gözcü** cevabı seçer seçmez görür (elden elede ayrı bir dolaşma gerekmesin). Gece öldürülse de öğrendiği kalır.
-- **Gece herkes seçer, online'da da:** köylünün seçimi boşa ama gece herkes seçince biter; kim seçmedi diye bakmak rol vermez.
-- **Az kişi:** canlılar 4'ün altına düşünce (gün ortasında da) kalan çakmak turları atlanır.
-- **Kazanma** her elemede ve oyundan çıkışta bakılır; çıkan canlı sayılmaz. Kurucu bitirirse kazanan yok. Tur sayısı ayarı yok sayılır.
-- **Sohbet:** vampir kanalı sadece gece. Gece ve ölüler genele de DM'e de yazamaz (DM'le kural delinmesin). Bekleme odasındakiler de Vampir sürerken yazamaz, okur. Kanal kuralları kural motorunda (`Oyun.Sohbet.cs`), Takım sohbeti de oraya taşındı.
-- **Elden ele:** gece ve linçte her seçimden sonra süre baştan başlar (telefon sıradakine geçer).
-- **Sorular:** `Assets/Icerik/VampirSorulari.csv` (40 suçlama sorusu, Temiz filtresinden geçiyor). Paket değil, paket listesinde görünmez; Vampir'de öneriler sadece buradan. **Enes gözden geçirecek.**
-- **Ceza ve Curcuna açılabilir;** görev ve kaos kapalı.
+- **Oyun gündüzle başlar.** Gündüz canlıların yarısı kadar (aşağı yuvarlanır, en az 1) çakmak turu. Canlılar 4'ün altındaysa (gün ortasında düşülse de) çakmak turu yok.
+- **Linç:** canlılar oy verir (susturulan veremez), en çok oyu alan elenir, eşitlikte ya da hiç oy yoksa kimse.
+- **Gece:** her canlı bir seçim yapar, yeteneği olmayan da "birini düşünür" (kimin uzun düşündüğünden rol anlaşılmasın). Seçim yapmamak (pas) da olur. Katil tarafındakiler hem kurban oyu verir hem (varsa) kendi yeteneğini kullanır: tek komut, iki hedef.
+- **Sabah:** ölenler açıklanır. Sonra yeni gün.
+- **Rolün açılması (ayar):** elenenin rolü herkese açılır ya da oyun sonuna kadar gizli kalır. Temizlikçi'nin temizlediği ve Seri Katil'in öldürdüğü kişinin rolü her durumda gizli kalır.
+- **Gecelik kurban (ayar):** 1, 2 ya da 3; en fazla canlı katil sayısı kadar. Her katil bir kişiye oy verir, en çok oy alanlar ölür (eşitlikte rastgele).
+
+### Roller
+
+**Masumlar** (bütün katiller ve öldüren tarafsızlar ölünce kazanırlar):
+
+| Rol | Ne yapar | İlham |
+|---|---|---|
+| Masum | Yeteneği yok | |
+| Koruyucu | Gece birini korur (bütün saldırılara karşı), kendini oyunda 1 kez | ToS Doctor |
+| Dedektif | Gece birine bakar: şüpheli mi? Katil tarafı, Seri Katil ve Bombacı şüpheli; Patron temiz görünür, Tuzakçı'nın işaretlediği şüpheli | ToS Sheriff |
+| Şerif | Gece birini vurabilir. Vurduğu masum tarafındansa kendisi de ölür | GGD Sheriff |
+| Kanunsuz | Oyunda 1 kurşun, cezasız | GGD Vigilante |
+| Bekçi | Gece birini izler, sabah o gece ona kimlerin uğradığını öğrenir | ToS Lookout |
+| Kulak | Çakmağa özel: güme giden soruyu güme ekranında görür (kimin sorduğunu görmez) | |
+| Falcı | Oyunda 2 kez (12+ kişide 3): gece birini seçer, sabah onunla rastgele başkalarından oluşan bir grup görür ve "grupta kötü var/yok" öğrenir. Grup canlıların üçte biri (en az 3) | ToS Psychic |
+| Deli | Kendini rastgele bir masum rolü sanır (Koruyucu, Dedektif, Bekçi ya da Falcı). Ekranında o rol yazar, sonuçları rastgele, koruması işlemez. Masum tarafında kazanır | Feign Crazy |
+
+**Katiller** (birbirini ve rollerini bilir; gece kendi kanalları var; masumlardan az değillerse ve öldüren tarafsız kalmadıysa kazanırlar):
+
+| Rol | Ne yapar | İlham |
+|---|---|---|
+| Katil | Düz katil | |
+| Patron | Dedektif'e temiz görünür | ToS Godfather |
+| Casus | Gece birinin tam rolünü öğrenir (Deli'yi Deli görür) | ToS Consigliere |
+| Susturucu | Gece birini susturur: ertesi gün yazamaz, linçte oy veremez (herkes görür) | GGD Silencer |
+| Tuzakçı | Gece birini işaretler: o gece Dedektif ona bakarsa şüpheli görür | ToS Framer |
+| Temizlikçi | Oyunda 2 kez: gece seçtiği kişi o gece ölürse rolü açılmaz | ToS Janitor |
+| Suikastçı | Linçte oyunda 1 kez birinin rolünü tahmin eder. Bilirse o kişi hemen ölür, bilemezse kendisi ölür | GGD Assassin |
+| Palyaço | Gece birini kandırır: o kişinin ertesi günkü linç oyu Palyaço'nun oy verdiği kişiye sayılır | ToS Witch |
+| Vampir | Oyunda 1 kez ısırır: ısırılan masum tarafındaysa ve o gece ölmezse ertesi sabah Katil olur | |
+
+**Tarafsızlar** (sadece kendileri kazanır):
+
+| Rol | Ne yapar |
+|---|---|
+| Soytarı | Linç edilirse kazanır, oyun biter |
+| Seri Katil | Her gece birini öldürür, öldürdüğünün rolü açılmaz. Katillerin ilk saldırısından kurtulur (oyunda 1 kez). Son kalırsa kazanır |
+| Cellat | Başta gizli bir hedefi var (masum tarafından). Hedef linç edilirse kazanır, oyun biter. Hedef başka yoldan ölürse Soytarı olur |
+| Hayatta Kalan | Oyun bitince hayattaysa, kim kazanırsa kazansın o da kazanır |
+| Hırsız | Oyunda 1 kez gece birinin rolünü çalar: o rol (ve tarafı) sabah onun olur, çalınan kendi tarafının düz rolüne düşer (Masum, Katil; tarafsızsa Hayatta Kalan). Çalmadan oyun biterse kaybeder |
+| Bombacı | Gece birine gizlice bomba koyar ya da (kendini seçerek) patlatır: bombalı herkes ölür. Son kalırsa kazanır (ToS Arsonist) |
+
+### Dağılım
+
+| Kişi | Katil | Tarafsız | Masum |
+|---|---|---|---|
+| 6–7 | 1 | 0 | geri kalanı |
+| 8–10 | 2 | 1 | geri kalanı |
+| 11–12 | 3 | 1 | geri kalanı |
+| 13–14 | 3 | 2 | geri kalanı |
+| 15–16 | 4 | 2 | geri kalanı |
+| 17–18 | 4 | 3 | geri kalanı |
+
+- Katil tarafı: her yer önce kapatılmamış özel katil rollerinden (rastgele, her biri en fazla 1), biterse düz Katil.
+- Masum tarafı: Koruyucu ve Dedektif (kapatılmadıysa), sonra özel masum rolleri; masumların üçte biri (aşağı yuvarlanır) düz Masum kalır.
+- Tarafsızlar: kapatılmamış tarafsız rollerden rastgele; hepsi kapalıysa yeri Masum'a kalır.
+- Masum ve Katil kapatılamaz.
+
+### Gece sırası
+
+1. Seçimler toplanır. Tuzakçı işaretler, Susturucu susturur, Palyaço kandırır (ertesi gün için).
+2. Koruyucu korur.
+3. Saldırılar: katillerin kurbanları, Seri Katil, Şerif, Kanunsuz, Bombacı'nın patlatması. Korunan ölmez. Seri Katil katillerin ilk saldırısından kurtulur. Şerif vurduğu masumsa kendisi de ölür (vurduğu korunsa bile).
+4. Bakışlar gecenin başındaki rollere göre: Dedektif, Casus, Bekçi (o gece hedefe yeteneğini kullanan herkes; katillerden sadece kurbanına oy verenler), Falcı, Deli'nin sahte sonuçları.
+5. Ölümler: Temizlikçi'nin ve Seri Katil'in kurbanının rolü gizli. Cellat'ın hedefi öldüyse Cellat Soytarı olur.
+6. Vampir'in ısırdığı (yaşıyorsa ve masumsa) Katil olur, Hırsız çaldığı rolü alır.
+
+### Kazanma (her ölümde ve oyundan çıkışta bakılır)
+
+- Soytarı linç edildi ya da Cellat'ın hedefi linç edildi: o kazanır, oyun biter.
+- Masumlar: canlı katil, Seri Katil ve Bombacı kalmadı.
+- Katiller: öldüren tarafsız kalmadı ve canlı katiller diğer canlılardan az değil.
+- Seri Katil / Bombacı: canlı tek öldüren o ve en fazla 2 kişi kaldı.
+- 2 ya da daha az canlı kaldıysa ve kimse kazanamıyorsa (ör. Katil ile Seri Katil) berabere.
+- Hayatta Kalan, oyun bitince hayattaysa kazananlara eklenir (beraberlikte de).
+- Kurucu bitirirse kazanan yok.
+
+### Sohbet (online)
+
+- Katil kanalı (`kime: "katil"`): gece, canlı katiller arasında.
+- Ölüler kanalı (`kime: "oluler"`): ölüler arasında, her an.
+- Genel ve DM: gece kimse, ölüler ve o gün susturulan hiç yazamaz; bekleme odası da yazamaz. Herkes okur.
+
+### Kulak ve güme kuralı (bilinçli istisna)
+
+Ana Plan 8.5: güme giden soru hiçbir yerde kalmaz. Kulak bunun tek istisnası: soruyu **sadece güme ekranı süresince ve sadece kendi görünümünde** görür. Soru kaydedilmez (özet, grup kaydı, sunucu), güme ekranı bitince bellekten de silinir.
+
+### Elden ele
+
+Gece telefon herkese tek tek gider, herkes bir seçim yapar; linç Grup Kararı gibi dolaşır. Her seçimden sonra süre baştan başlar. 18 kişide gece uzun sürer: istemci "Telefonu sıradakine ver" perdesini kısa tutsun.
+
+### İçerik
+
+`Assets/Icerik/VampirSorulari.csv` (40 suçlama sorusu): paket değil; bu oyunda öneriler sadece buradan.
 
 ---
 

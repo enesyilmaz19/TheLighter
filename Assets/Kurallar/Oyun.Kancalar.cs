@@ -1,9 +1,9 @@
 namespace Cakmak.Kurallar
 {
     // Oyunlara özel kancalar (docs/Oyunlar.md): çekirdek döngü sadece bunları çağırır, bunlar da her oyunun kendi
-    // dosyasına dağıtır (Oyun.Kostebek.cs, Oyun.RusRuleti.cs, Oyun.Takim.cs, Oyun.Casus.cs, Oyun.Vampir.cs). Her oyunun
+    // dosyasına dağıtır (Oyun.Kostebek.cs, Oyun.RusRuleti.cs, Oyun.Takim.cs, Oyun.Casus.cs, Oyun.CakmakGecesi.cs). Her oyunun
     // metodu "bu oyun değilse hiçbir şey yapma" diye başlar. Yeni oyun: kancalarını buraya ekle. Oyuna özgü aşamaların akışı
-    // (Rus Ruleti'nin tetiği, Casus'un son şansı, Vampir'in linci ve gecesi) kendi dosyasında, Ilerle ve EldekiIsiBitir'de
+    // (Rus Ruleti'nin tetiği, Casus'un son şansı, Çakmak Gecesi'nin linci ve gecesi) kendi dosyasında, Ilerle ve EldekiIsiBitir'de
     // aşama olarak; gizli kişili oyunların ortak oylaması Oyun.Suclama.cs'te, sohbet kanallarının kuralları Oyun.Sohbet.cs'te.
     public sealed partial class Oyun
     {
@@ -14,17 +14,18 @@ namespace Cakmak.Kurallar
             RusRuletiKur();
             TakimKur();
             CasusKur();
-            VampirKur();
+            GeceKur();
         }
 
         /// <summary>Yeni tur başlamadan: oyun kendi kuralıyla bitti ya da başka bir akışa geçti (Rus Ruleti finali). true: tur başlamaz.</summary>
-        bool TurBasindaOyunKarari() => KostebekGoreviBitti() || RusRuletiAraKontrol() || TakimKazandi() || VampirGunduzuBitti();
+        bool TurBasindaOyunKarari() => KostebekGoreviBitti() || RusRuletiAraKontrol() || TakimKazandi() || GunduzBitti();
 
         /// <summary>Turun sonucu belli (TuruBitir): soru ifşa mı, düelloyu (ya da oylamayı) kim kaybetti.</summary>
         void OyunTurSonucu(bool ifsa, OyuncuId? kaybeden)
         {
             RusRuletiTurSonu(kaybeden);
             TakimTurSonu(ifsa, kaybeden);
+            GeceTurSonu(ifsa);
         }
 
         /// <summary>Oyun bitiyor (Bitir): sonuç kendi kuralıyla yazılmadıysa (süre, kurucu, zorla) şimdi yazılır.</summary>
@@ -34,7 +35,7 @@ namespace Cakmak.Kurallar
             RusRuletiSonucunuYaz();
             TakimSonucunuYaz();
             CasusSonucunuYaz();
-            VampirSonucunuYaz();
+            GeceSonucunuYaz();
         }
 
         /// <summary>Oyun bitti: özete oyunların sonuçları. Oyun bitmeden çağrılmaz (köstebeğin kim olduğu sır).</summary>
@@ -44,7 +45,7 @@ namespace Cakmak.Kurallar
             o.RusRuleti = rusRuletiSonucu?.Kopya();
             o.Takim = takimSonucu?.Kopya();
             o.Casus = casusSonucu?.Kopya();
-            o.Vampir = vampirSonucu?.Kopya();
+            o.Gece = geceSonucu?.Kopya();
         }
 
         void OyunGorunumu(Gorunum g, OyuncuId kim)
@@ -54,11 +55,11 @@ namespace Cakmak.Kurallar
             TakimGorunumu(g);
             CasusGorunumu(g, kim);
             SuclamaGorunumu(g, kim);
-            VampirGorunumu(g, kim);
+            GeceGorunumu(g, kim);
         }
 
-        /// <summary>Biri oyundan çıktı: oyun bununla bitti mi (gizli kişi kaçtı, Vampir'de bir taraf kazandı). true: bitti.</summary>
-        bool OyuncuCiktiOyunKarari(OyuncuId kim) => HainCikti(kim) || VampirKazananVarsaBitir();
+        /// <summary>Biri oyundan çıktı: oyun bununla bitti mi (gizli kişi kaçtı, Çakmak Gecesi'nde bir taraf kazandı). true: bitti.</summary>
+        bool OyuncuCiktiOyunKarari(OyuncuId kim) => HainCikti(kim) || GeceKazananVarsaBitir();
 
         // Gizli kişili oyunlar (Köstebek, Casus): oylamanın sonucu oyunun kuralıyla.
 

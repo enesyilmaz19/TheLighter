@@ -51,10 +51,10 @@ namespace Cakmak.Kurallar.Tests
         }
 
         [Test]
-        public void Uc_yuz_rastgele_vampir_oyununda_hicbir_degismez_bozulmaz()
+        public void Uc_yuz_rastgele_cakmak_gecesi_oyununda_hicbir_degismez_bozulmaz()
         {
             for (int tohum = 1; tohum <= 300; tohum++)
-                Oyna(tohum, OyunTuru.Vampir);
+                Oyna(tohum, OyunTuru.CakmakGecesi);
         }
 
         [Test]
@@ -77,10 +77,10 @@ namespace Cakmak.Kurallar.Tests
             bool rusRuleti = tur == OyunTuru.RusRuleti;
             bool takim = tur == OyunTuru.Takim;
             bool casus = tur == OyunTuru.Casus;
-            bool vampir = tur == OyunTuru.Vampir;
+            bool gece = tur == OyunTuru.CakmakGecesi;
             var robot = new Random(tohum * 7919);
             int kisi = 4 + robot.Next(7);
-            if (vampir) kisi = Math.Max(kisi, Oyun.VampirEnAzOyuncu);
+            if (gece) kisi = Oyun.GeceEnAzOyuncu + robot.Next(Oyun.GeceEnFazlaOyuncu - Oyun.GeceEnAzOyuncu + 1);
             var mod = (OyunModu)robot.Next(3);
             bool s3 = robot.Next(2) == 0;
             var oyun = Kur(kisi, tohum, x =>
@@ -133,7 +133,7 @@ namespace Cakmak.Kurallar.Tests
                     if (rusRuleti) RusRuletiSonu(ozet, g, tohum);
                     if (takim) TakimSonu(ozet, tohum);
                     if (casus) CasusSonu(oyun, ozet, tohum);
-                    if (vampir) VampirSonu(oyun, ozet, g, tohum);
+                    if (gece) GeceSonu(ozet, tohum);
                     return kayit.ToString();
                 }
                 Degismezler(oyun, g, gizli, tohum);
@@ -141,7 +141,7 @@ namespace Cakmak.Kurallar.Tests
                 if (rusRuleti) RusRuletiDegismezleri(g, tohum);
                 if (takim) TakimDegismezleri(g, baslangic, olayPuani, tohum);
                 if (casus) CasusDegismezleri(oyun, g, tohum);
-                if (vampir) VampirDegismezleri(oyun, g, tohum);
+                if (gece) GeceDegismezleri(oyun, g, tohum);
 
                 int zar = robot.Next(10);
                 if (zar == 0) { Bekle(robot.Next(1, 30)); continue; }               // bekle (AFK)
@@ -210,9 +210,12 @@ namespace Cakmak.Kurallar.Tests
 
                     case Asama.Linc:
                     case Asama.Gece:
-                        var secen = g.Oylayanlar[robot.Next(g.Oylayanlar.Count)];
-                        var hedef = g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id; // geçersiz de olabilir
-                        if (g.Asama == Asama.Linc) oyun.LincOyu(secen, hedef); else oyun.GeceSecimi(secen, hedef);
+                        // Geçersizler de olur: oy hakkı olmayan, ölü, kendisi, rolüne uymayan hedef, olmayan suikast.
+                        var secen = g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id;
+                        OyuncuId? Rastgele() => robot.Next(5) == 0 ? (OyuncuId?)null : g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id;
+                        if (g.Asama == Asama.Gece) oyun.GeceSecimi(secen, Rastgele(), Rastgele());
+                        else if (robot.Next(8) == 0) oyun.Suikast(secen, g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id, Oyun.GeceRolleri[robot.Next(Oyun.GeceRolleri.Count)]);
+                        else oyun.LincOyu(secen, g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id);
                         break;
 
                     case Asama.CasusTahmini:
@@ -239,11 +242,16 @@ namespace Cakmak.Kurallar.Tests
                 x.Oyun = tur;
                 if (tur == OyunTuru.Kostebek) x.KaosTurlari = false;
                 if (tur == OyunTuru.Takim) x.GizliGorevler = false;
-                if (tur == OyunTuru.Vampir)
+                if (tur == OyunTuru.CakmakGecesi)
                 {
                     x.GizliGorevler = false;
                     x.KaosTurlari = false;
                     x.RolAcilir = robot.Next(2) == 0;
+                    x.GecelikKurban = 1 + robot.Next(Oyun.EnFazlaGecelikKurban);
+                    var kapali = new List<Rol>();
+                    foreach (var r in Oyun.GeceRolleri)
+                        if (r != Rol.Masum && r != Rol.Katil && robot.Next(4) == 0) kapali.Add(r);
+                    x.KapaliRoller = kapali;
                 }
                 if (tur == OyunTuru.Casus)
                 {
@@ -344,44 +352,56 @@ namespace Cakmak.Kurallar.Tests
         }
 
         /// <summary>
-        /// Ölü oynamaz, seçmez; açık rol sadece ölüde ve ayar açıksa; oyun sürüyorsa iki taraf da kazanmamış; vampir seçimleri ve
-        /// gözcü bilgisi sadece sahiplerinde.
+        /// Ölü oynamaz, seçmez, susturulmaz; açık rol sadece ölüde ve gerçek rolü (Deli'nin sandığı değil); katil, Cellat, Bombacı
+        /// ve Kulak bilgileri sadece sahiplerinde; oyun sürüyorsa kimse kazanmamış.
         /// </summary>
-        static void VampirDegismezleri(Oyun oyun, Gorunum g, int tohum)
+        static void GeceDegismezleri(Oyun oyun, Gorunum g, int tohum)
         {
             string t = "tohum " + tohum + ", aşama " + g.Asama;
-            int vampir = 0, koylu = 0;
+            int katil = 0, diger = 0, olduren = 0;
             foreach (var o in g.Oyuncular)
             {
                 var x = oyun.GorunumAl(o.Id);
                 if (o.Elendi)
                 {
-                    Assert.That(g.B == o.Id || g.C == o.Id || new List<OyuncuId>(g.Oylayanlar).Contains(o.Id), Is.False, t + ": ölü oynuyor");
+                    Assert.That(g.B == o.Id || g.C == o.Id || new List<OyuncuId>(g.Oylayanlar).Contains(o.Id) || o.Susturuldu, Is.False, t + ": ölü oynuyor");
                     if (g.Asama == Asama.SoruSorma) Assert.That(TekrarYardim.GercekA(oyun), Is.Not.EqualTo(o.Id), t + ": ölü soruyor");
                 }
-                if (o.AcikRol.HasValue) Assert.That(o.Elendi, Is.True, t + ": canlının rolü açık");
-                if (o.AcikRol.HasValue) Assert.That(o.AcikRol, Is.EqualTo(x.Rolun), t + ": açık rol yanlış");
-                if (x.Rolun != Rol.Vampir) Assert.That(x.VampirSecimleri.Count + x.Vampirler.Count, Is.Zero, t + ": vampir bilgisi sızdı");
-                if (x.Rolun != Rol.Gozcu) Assert.That(x.GozcuBilgilerin, Is.Empty, t + ": gözcü bilgisi sızdı");
+                if (o.AcikRol.HasValue) Assert.That(o.Elendi && (o.AcikRol == x.Rolun || o.AcikRol == Rol.Deli), Is.True, t + ": açık rol yanlış");
+                bool katilMi = Oyun.TarafI(x.Rolun) == Taraf.Katil;
+                if (!katilMi) Assert.That(x.Katiller.Count + x.KatilSecimleri.Count + x.IkinciSecilebilir.Count, Is.Zero, t + ": katil bilgisi sızdı");
+                if (x.Rolun != Rol.Cellat) Assert.That(x.CellatHedefin, Is.Null, t + ": Cellat'ın hedefi sızdı");
+                if (x.Rolun != Rol.Bombaci) Assert.That(x.Bombalilar, Is.Empty, t + ": bombalar sızdı");
+                if (x.KulakSorusu != null) Assert.That(x.Rolun == Rol.Kulak && g.Asama == Asama.Gume, Is.True, t + ": güme sorusu sızdı");
                 if (o.Elendi || o.Cikti) continue;
-                if (x.Rolun == Rol.Vampir) vampir++;
-                else koylu++;
+                if (katilMi) katil++;
+                else diger++;
+                if (x.Rolun == Rol.SeriKatil || x.Rolun == Rol.Bombaci) olduren++;
             }
-            Assert.That(vampir > 0 && vampir < koylu, Is.True, t + ": oyun bitmeliydi");
+            bool bitmeli = katil + diger <= 2 || (katil == 0 && olduren == 0) || (olduren == 0 && katil >= diger);
+            Assert.That(bitmeli, Is.False, t + ": oyun bitmeliydi");
         }
 
-        static void VampirSonu(Oyun oyun, OyunOzeti ozet, Gorunum g, int tohum)
+        /// <summary>Kazanan, kazananların son rolleriyle tutarlı; özette herkesin rolü.</summary>
+        static void GeceSonu(OyunOzeti ozet, int tohum)
         {
-            int vampir = 0, koylu = 0;
-            foreach (var o in g.Oyuncular)
+            string t = "tohum " + tohum;
+            var s = ozet.Gece;
+            Assert.That(s.Kazanan, Is.Not.Null, t + ": oyun yarıda kalmadı");
+            Assert.That(s.Roller.Count, Is.EqualTo(ozet.Oyuncular.Count), t);
+            var roller = new Dictionary<OyuncuId, Rol>();
+            foreach (var r in s.Roller) roller[r.Kim] = r.Rol;
+            foreach (var r in s.Roller)
             {
-                if (o.Elendi || o.Cikti) continue;
-                if (oyun.GorunumAl(o.Id).Rolun == Rol.Vampir) vampir++;
-                else koylu++;
+                var taraf = Oyun.TarafI(r.Rol);
+                bool kazandi = new List<OyuncuId>(s.Kazananlar).Contains(r.Kim);
+                if (s.Kazanan == GeceKazanan.Masumlar && taraf == Taraf.Masum) Assert.That(kazandi, Is.True, t + ": masum kazanamadı");
+                if (s.Kazanan == GeceKazanan.Katiller && taraf == Taraf.Katil) Assert.That(kazandi, Is.True, t + ": katil kazanamadı");
+                if (kazandi && r.Rol != Rol.HayattaKalan)
+                    Assert.That(s.Kazanan == GeceKazanan.Masumlar ? taraf == Taraf.Masum
+                        : s.Kazanan == GeceKazanan.Katiller ? taraf == Taraf.Katil
+                        : r.Rol.ToString() == s.Kazanan.ToString(), Is.True, t + ": yanlış kazanan " + r.Rol);
             }
-            var beklenen = vampir == 0 ? VampirKazanan.Koylu : vampir >= koylu ? VampirKazanan.Vampir : (VampirKazanan?)null;
-            Assert.That(ozet.Vampir.Kazanan, Is.EqualTo(beklenen), "tohum " + tohum);
-            Assert.That(ozet.Vampir.Roller.Count, Is.EqualTo(g.Oyuncular.Count), "tohum " + tohum);
         }
 
         static void CasusSonu(Oyun oyun, OyunOzeti ozet, int tohum)

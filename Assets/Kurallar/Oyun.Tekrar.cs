@@ -580,6 +580,7 @@ namespace Cakmak.Kurallar
                     DevretmeHakki = o.DevretmeHakki,
                     Takim = o.Takim,
                     AcikRol = o.AcikRol,
+                    Susturuldu = o.Susturuldu,
                 });
             }
             return liste;

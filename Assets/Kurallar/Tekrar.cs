@@ -208,8 +208,8 @@ namespace Cakmak.Kurallar
         public TakimSonucu Takim;
         /// <summary>Casus'ta casus kimdi, mekân (ya da kelime) neydi, kim kazandı; diğer oyunlarda null.</summary>
         public CasusSonucu Casus;
-        /// <summary>Vampir Köylü'de kazanan ve herkesin rolü; diğer oyunlarda null.</summary>
-        public VampirSonucu Vampir;
+        /// <summary>Çakmak Gecesi'nde kazanan, kazananlar ve herkesin rolü; diğer oyunlarda null.</summary>
+        public CakmakGecesiSonucu Gece;
     }
 
     // ------------------------------------------------------------ Grup kaydı (cihazda saklanır)

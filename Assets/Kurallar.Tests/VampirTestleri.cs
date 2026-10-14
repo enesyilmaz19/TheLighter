@@ -403,6 +403,11 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(oyun.KanalAlicilari(koylu, SohbetKanali.Oluler), Is.EqualTo(new[] { koylu }));
             Assert.That(oyun.KanalAlicilari(vampirler[0], SohbetKanali.Oluler), Is.Null, "canlı ölüler kanalına yazamaz");
 
+            Saniye(oyun, 61); // gece kimse seçmedi, sabah oldu
+            Assert.That(Durum(oyun).Asama, Is.EqualTo(Asama.SoruSorma));
+            Assert.That(oyun.SohbeteYazabilir(vampirler[0]), Is.True, "gündüz canlı yazar");
+            Assert.That(oyun.SohbeteYazabilir(koylu), Is.False, "gündüz de ölü yazamaz");
+
             oyun.OyunuBitir();
             Assert.That(oyun.SohbeteYazabilir(koylu), Is.True, "oyun bitince herkes");
         }

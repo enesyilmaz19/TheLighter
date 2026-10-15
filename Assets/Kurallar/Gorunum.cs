@@ -128,7 +128,7 @@ namespace Cakmak.Kurallar
         public OyuncuId? CellatHedefin;
         /// <summary>Sadece Bombacı'ya: bomba koyduğu (henüz patlamamış) kişiler.</summary>
         public IReadOnlyList<OyuncuId> Bombalilar = Array.Empty<OyuncuId>();
-        /// <summary>Sadece Kulak'a, Gume aşamasında: güme giden soru. Başka hiçbir yerde yok, ekran bitince silinir.</summary>
+        /// <summary>Sadece Kulak'a ve Dinleyici'ye, Gume aşamasında: güme giden soru. Başka hiçbir yerde yok, ekran bitince silinir.</summary>
         public string KulakSorusu;
         /// <summary>Gece, sadece ikinci hedefi olan katillere (Casus, Susturucu, Tuzakçı, Temizlikçi, Palyaço, Vampir): adaylar.</summary>
         public IReadOnlyList<OyuncuId> IkinciSecilebilir = Array.Empty<OyuncuId>();
@@ -250,6 +250,8 @@ namespace Cakmak.Kurallar
         GeceBasladi,    // herkes gece seçimini yapar
         GeceBitti,      // sabah: gece ölenler bundan önce birer Elendi olayıyla geldi (hiç yoksa kimse ölmedi)
         Suikast,        // Kim: linçte Suikastçı'nın tahminiyle ölen (bildiyse hedef, bilemediyse Suikastçı)
+        HakemKarari,    // B, C: düello oynanmadı, Hakem'in kararıyla bitti (Hakem'in kim olduğu yok)
+        DuelloSonduruldu, // B, C: düello söndü, soru güme, kimse ceza çekmez (Söndürücü'nün kim olduğu yok)
     }
 
     public sealed class Olay

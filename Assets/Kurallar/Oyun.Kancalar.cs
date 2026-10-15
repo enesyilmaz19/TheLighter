@@ -25,7 +25,7 @@ namespace Cakmak.Kurallar
         {
             RusRuletiTurSonu(kaybeden);
             TakimTurSonu(ifsa, kaybeden);
-            GeceTurSonu(ifsa);
+            GeceTurSonu(ifsa, kaybeden);
         }
 
         /// <summary>Oyun bitiyor (Bitir): sonuç kendi kuralıyla yazılmadıysa (süre, kurucu, zorla) şimdi yazılır.</summary>
@@ -57,6 +57,12 @@ namespace Cakmak.Kurallar
             SuclamaGorunumu(g, kim);
             GeceGorunumu(g, kim);
         }
+
+        /// <summary>A soruyu sordu (Çakmak Gecesi: tur kaydı, Kuklacı).</summary>
+        void OyunSoruSoruldu() => GeceSoruSoruldu();
+
+        /// <summary>B, C'yi seçti (Çakmak Gecesi: tur kaydı, Söndürücü, Hakem). true: düello oynanmadan tur sonuçlandı.</summary>
+        bool OyunCevapSecildi() => GeceCevapSecildi();
 
         /// <summary>Biri oyundan çıktı: oyun bununla bitti mi (gizli kişi kaçtı, Çakmak Gecesi'nde bir taraf kazandı). true: bitti.</summary>
         bool OyuncuCiktiOyunKarari(OyuncuId kim) => HainCikti(kim) || GeceKazananVarsaBitir();

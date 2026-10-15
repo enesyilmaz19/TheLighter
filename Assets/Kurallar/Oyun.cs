@@ -215,6 +215,7 @@ namespace Cakmak.Kurallar
             SoruSoruldu(hedef);
             AsamayaGec(Asama.CevapSecme, ayar.CevapSuresiSn);
             Yay(new Olay { Tur = OlayTuru.SoruSoruldu, A = GorunenA(), B = b });
+            OyunSoruSoruldu();
             return Sonuc.Tamam;
         }
 
@@ -229,6 +230,7 @@ namespace Cakmak.Kurallar
             Bul(hedef).Gosterilme++;
             Yay(new Olay { Tur = OlayTuru.CevapSecildi, A = GorunenA(), B = b, C = c });
             CakmakDevredildi(kim, hedef);
+            if (OyunCevapSecildi()) return Sonuc.Tamam;
 
             if (kaos == KaosKurali.GrupKarari) OylamayiBaslat();
             else AsamayaGec(Asama.MiniOyun, ayar.HamleSuresiSn);

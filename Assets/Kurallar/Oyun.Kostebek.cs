@@ -19,6 +19,10 @@ namespace Cakmak.Kurallar
         Katil, Patron, Susturucu, Tuzakci, Temizlikci, Suikastci, Palyaco, Vampir,
         // Tarafsızlar
         Soytari, SeriKatil, Cellat, HayattaKalan, Hirsiz, Bombaci,
+        // Çakmağa özel (Oyun.CakmakRolleri.cs): masumlar, katiller, tarafsızlar
+        Sorgucu, Hakem, Kollayici, Yuzlesmeci, Sezgici, Sinayici, Siper, Sondurucu,
+        Kundakci, Dinleyici, Fitneci, Kuklaci, Kiskirtici,
+        Kibritci, Gozde, Duellocu, SirKupu,
     }
 
     public enum KostebekKazanan { Grup, Kostebek }

@@ -10,7 +10,7 @@ namespace Cakmak.Kurallar
 
     public enum Taraf { Masum, Katil, Tarafsiz }
 
-    public enum GeceKazanan { Masumlar, Katiller, SeriKatil, Bombaci, Soytari, Cellat, Berabere }
+    public enum GeceKazanan { Masumlar, Katiller, SeriKatil, Bombaci, Soytari, Cellat, Berabere, Kibritci }
 
     public sealed class OyuncuRolu
     {
@@ -68,17 +68,37 @@ namespace Cakmak.Kurallar
             Rol.Masum, Rol.Koruyucu, Rol.Dedektif, Rol.Serif, Rol.Kanunsuz, Rol.Bekci, Rol.Kulak, Rol.Falci, Rol.Deli,
             Rol.Katil, Rol.Patron, Rol.Casus, Rol.Susturucu, Rol.Tuzakci, Rol.Temizlikci, Rol.Suikastci, Rol.Palyaco, Rol.Vampir,
             Rol.Soytari, Rol.SeriKatil, Rol.Cellat, Rol.HayattaKalan, Rol.Hirsiz, Rol.Bombaci,
+            // Çakmağa özel (Oyun.CakmakRolleri.cs)
+            Rol.Sorgucu, Rol.Hakem, Rol.Kollayici, Rol.Yuzlesmeci, Rol.Sezgici, Rol.Sinayici, Rol.Siper, Rol.Sondurucu,
+            Rol.Kundakci, Rol.Dinleyici, Rol.Fitneci, Rol.Kuklaci, Rol.Kiskirtici,
+            Rol.Kibritci, Rol.Gozde, Rol.Duellocu, Rol.SirKupu,
         };
 
-        static readonly Rol[] MasumOzelRolleri = { Rol.Serif, Rol.Kanunsuz, Rol.Bekci, Rol.Kulak, Rol.Falci, Rol.Deli };
-        static readonly Rol[] KatilOzelRolleri = { Rol.Patron, Rol.Casus, Rol.Susturucu, Rol.Tuzakci, Rol.Temizlikci, Rol.Suikastci, Rol.Palyaco, Rol.Vampir };
-        static readonly Rol[] TarafsizRoller = { Rol.Soytari, Rol.SeriKatil, Rol.Cellat, Rol.HayattaKalan, Rol.Hirsiz, Rol.Bombaci };
+        static readonly Rol[] MasumOzelRolleri =
+        {
+            Rol.Serif, Rol.Kanunsuz, Rol.Bekci, Rol.Kulak, Rol.Falci, Rol.Deli,
+            Rol.Sorgucu, Rol.Hakem, Rol.Kollayici, Rol.Yuzlesmeci, Rol.Sezgici, Rol.Sinayici, Rol.Siper, Rol.Sondurucu,
+        };
+        static readonly Rol[] KatilOzelRolleri =
+        {
+            Rol.Patron, Rol.Casus, Rol.Susturucu, Rol.Tuzakci, Rol.Temizlikci, Rol.Suikastci, Rol.Palyaco, Rol.Vampir,
+            Rol.Kundakci, Rol.Dinleyici, Rol.Fitneci, Rol.Kuklaci, Rol.Kiskirtici,
+        };
+        static readonly Rol[] TarafsizRoller =
+        {
+            Rol.Soytari, Rol.SeriKatil, Rol.Cellat, Rol.HayattaKalan, Rol.Hirsiz, Rol.Bombaci,
+            Rol.Kibritci, Rol.Gozde, Rol.Duellocu, Rol.SirKupu,
+        };
         /// <summary>Deli'nin kendini sandığı roller: sonucu sahtelenebilen, öldürmeyen masum rolleri.</summary>
         static readonly Rol[] DeliRolleri = { Rol.Koruyucu, Rol.Dedektif, Rol.Bekci, Rol.Falci };
         /// <summary>Gece yeteneği bir başkasına uğrar (Bekçi bunları görür). Katiller ayrıca: kurbanına oy verip kurban seçilen.</summary>
-        static readonly Rol[] UgrayanRoller = { Rol.Koruyucu, Rol.Dedektif, Rol.Serif, Rol.Kanunsuz, Rol.Bekci, Rol.Falci, Rol.Deli, Rol.SeriKatil, Rol.Hirsiz, Rol.Bombaci };
+        static readonly Rol[] UgrayanRoller =
+        {
+            Rol.Koruyucu, Rol.Dedektif, Rol.Serif, Rol.Kanunsuz, Rol.Bekci, Rol.Falci, Rol.Deli, Rol.SeriKatil, Rol.Hirsiz, Rol.Bombaci,
+            Rol.Hakem, Rol.Sondurucu, Rol.Kibritci,
+        };
         /// <summary>Gece ikinci hedefi olan katil rolleri (kurban oyuna ek olarak).</summary>
-        static readonly Rol[] IkinciHedefliRoller = { Rol.Casus, Rol.Susturucu, Rol.Tuzakci, Rol.Temizlikci, Rol.Palyaco, Rol.Vampir };
+        static readonly Rol[] IkinciHedefliRoller = { Rol.Casus, Rol.Susturucu, Rol.Tuzakci, Rol.Temizlikci, Rol.Palyaco, Rol.Vampir, Rol.Kundakci };
 
         public static Taraf TarafI(Rol r)
         {
@@ -89,7 +109,7 @@ namespace Cakmak.Kurallar
         /// <summary>Falcı'nın "kötü"sü: katil tarafı ve öldüren tarafsızlar.</summary>
         public static bool Kotu(Rol r) => TarafI(r) == Taraf.Katil || OldurenTarafsiz(r);
 
-        static bool OldurenTarafsiz(Rol r) => r == Rol.SeriKatil || r == Rol.Bombaci;
+        static bool OldurenTarafsiz(Rol r) => r == Rol.SeriKatil || r == Rol.Bombaci || r == Rol.Kibritci;
 
         static int KatilSayisi(int kisi) => kisi >= 15 ? 4 : kisi >= 11 ? 3 : kisi >= 8 ? 2 : 1;
         static int TarafsizSayisi(int kisi) => kisi >= 17 ? 3 : kisi >= 13 ? 2 : kisi >= 8 ? 1 : 0;
@@ -99,9 +119,12 @@ namespace Cakmak.Kurallar
         {
             switch (r)
             {
-                case Rol.Koruyucu: case Rol.Kanunsuz: case Rol.Suikastci: case Rol.Vampir: case Rol.Hirsiz: case Rol.SeriKatil: return 1;
-                case Rol.Temizlikci: return 2;
+                case Rol.Koruyucu: case Rol.Kanunsuz: case Rol.Suikastci: case Rol.Vampir: case Rol.Hirsiz: case Rol.SeriKatil:
+                case Rol.Sondurucu: case Rol.Kundakci: case Rol.Kuklaci: case Rol.Kiskirtici:
+                    return 1;
+                case Rol.Temizlikci: case Rol.Hakem: case Rol.Sinayici: case Rol.Siper: return 2;
                 case Rol.Falci: return kisi >= 12 ? 3 : 2;
+                case Rol.Sorgucu: return kisi >= 12 ? 2 : 1;
                 default: return null;
             }
         }
@@ -154,9 +177,10 @@ namespace Cakmak.Kurallar
         /// <summary>
         /// Gece seçimi: her canlı bir kez. <paramref name="hedef"/> null = pas. Katil tarafında <paramref name="hedef"/> kurban oyu,
         /// <paramref name="ikinci"/> rolün yeteneği (Casus, Susturucu, Tuzakçı, Temizlikçi, Palyaço, Vampir). Bombacı kendini seçerse
-        /// bombaları patlatır. Geçerli hedefler görünümde (<see cref="Gorunum.Secilebilir"/>, <see cref="Gorunum.IkinciSecilebilir"/>).
+        /// bombaları patlatır. Hakem'de <paramref name="ifsa"/> yarınki düellonun kararı (varsayılan ifşa). Geçerli hedefler görünümde
+        /// (<see cref="Gorunum.Secilebilir"/>, <see cref="Gorunum.IkinciSecilebilir"/>).
         /// </summary>
-        public Sonuc GeceSecimi(OyuncuId kim, OyuncuId? hedef, OyuncuId? ikinci = null)
+        public Sonuc GeceSecimi(OyuncuId kim, OyuncuId? hedef, OyuncuId? ikinci = null, bool? ifsa = null)
         {
             if (asama != Asama.Gece) return Sonuc.YanlisAsama;
             if (!oylayanlar.Contains(kim)) return Sonuc.SiraSendeDegil;
@@ -164,6 +188,7 @@ namespace Cakmak.Kurallar
             if (hedef.HasValue && !GeceAdaylari(kim).Contains(hedef.Value)) return Sonuc.Secilemez;
             if (ikinci.HasValue && !IkinciAdaylar(kim).Contains(ikinci.Value)) return Sonuc.Secilemez;
             geceSecimleri[kim] = (hedef, ikinci);
+            if (roller[kim] == Rol.Hakem && hedef.HasValue) hakemKararlari[kim] = ifsa ?? true;
             SecimKaydedildi(kim);
             return Sonuc.Tamam;
         }
@@ -233,9 +258,14 @@ namespace Cakmak.Kurallar
                 case Rol.Bombaci:
                     if (bombalilar.Count == 0) liste.Remove(kim); // kendini seçmek = patlatmak
                     break;
+                case Rol.Kibritci: // sadece bugün soru sorduğu biri
+                    liste.RemoveAll(x => !BugunSordu(kim, x));
+                    break;
                 case Rol.Kanunsuz:
                 case Rol.Falci:
                 case Rol.Hirsiz:
+                case Rol.Hakem:
+                case Rol.Sondurucu:
                     if (Hak(kim) <= 0) liste.Clear();
                     else liste.Remove(kim);
                     break;
@@ -254,6 +284,7 @@ namespace Cakmak.Kurallar
                 return new List<OyuncuId>();
             var liste = Oynayanlar();
             liste.RemoveAll(KatilTarafinda);
+            if (rol == Rol.Kundakci) liste.RemoveAll(x => !BugunGosterdi(x, kim)); // sadece bugün onu gösteren
             return liste;
         }
 
@@ -305,6 +336,7 @@ namespace Cakmak.Kurallar
             }
             gun = 1;
             kalanGunduzTuru = GunduzTuru();
+            GunBasladi();
         }
 
         /// <summary>Canlıların yarısı kadar (en az 1). Canlılar 4'ün altındaysa çakmak turu olamaz: 0, sadece linç ve gece.</summary>
@@ -322,6 +354,7 @@ namespace Cakmak.Kurallar
             if (kalanGunduzTuru > 0 && GunduzTuru() > 0) // gün içinde 4'ün altına düşüldüyse kalan turlar da atlanır
             {
                 kalanGunduzTuru--;
+                TurBayraklariniSifirla();
                 return false;
             }
             kalanGunduzTuru = 0;
@@ -329,16 +362,11 @@ namespace Cakmak.Kurallar
             return true;
         }
 
-        /// <summary>Turun sonucu: güme gittiyse Kulak soruyu güme ekranı boyunca duyar.</summary>
-        void GeceTurSonu(bool ifsa)
-        {
-            if (GeceOyunu && !ifsa) kulakSorusu = soru;
-        }
-
         void OylamaBaslat(Asama yeni, OlayTuru olay)
         {
             SoruyuKapat();
             kulakSorusu = null;
+            TurBayraklariniSifirla();
             b = null;
             c = null;
             oylayanlar.Clear();
@@ -370,6 +398,10 @@ namespace Cakmak.Kurallar
             var oylar = new List<OyuncuId>();
             foreach (var oy in lincOylari)
                 oylar.Add(kuklalar.TryGetValue(oy.Key, out var palyaco) && lincOylari.TryGetValue(palyaco, out var p) ? p : oy.Value);
+            // Kışkırtıcı'nın gösterdiği linçe 2 oyla başlar.
+            var canli = Oynayanlar();
+            foreach (var x in kiskirtilanlar)
+                if (canli.Contains(x)) { oylar.Add(x); oylar.Add(x); }
             var enCok = EnCokOyAlanlar(oylar);
             OyuncuId? elenen = enCok.Count == 1 ? enCok[0] : (OyuncuId?)null;
             lincOylari.Clear();
@@ -414,6 +446,12 @@ namespace Cakmak.Kurallar
                 if (s.Value.Hedef == s.Key && EtkinRol(s.Key) == Rol.Koruyucu) HakKullan(s.Key); // Deli'nin de hakkı düşer
                 if (s.Value.Hedef.HasValue && rol == Rol.Koruyucu) korunan.Add(s.Value.Hedef.Value);
             }
+            // Çakmağa özel: Kollayıcı bugün soru sorduğunu korur, Fitneci'nin turunda gösterilen işaretlenir.
+            foreach (var t in gununTurlari)
+            {
+                if (roller[t.A] == Rol.Kollayici && canlilar.Contains(t.A)) korunan.Add(t.B);
+                if (roller[t.A] == Rol.Fitneci && t.C.HasValue) isaretli.Add(t.C.Value);
+            }
 
             // 3. Saldırılar
             var katilOylari = new List<OyuncuId>();
@@ -450,12 +488,27 @@ namespace Cakmak.Kurallar
                     case Rol.Bombaci when h.HasValue:
                         bombalilar.Add(h.Value);
                         break;
+                    case Rol.Kibritci when h.HasValue:
+                        saldirilar.Add((h.Value, Rol.Kibritci));
+                        break;
+                    case Rol.Kundakci when s.Value.Ikinci.HasValue:
+                        HakKullan(s.Key);
+                        saldirilar.Add((s.Value.Ikinci.Value, Rol.Kundakci));
+                        break;
                 }
             }
+            var siperde = new HashSet<OyuncuId>();
             foreach (var (hedef, kaynak) in saldirilar)
             {
-                if (!canlilar.Contains(hedef) || korunan.Contains(hedef)) continue;
+                if (!canlilar.Contains(hedef) || korunan.Contains(hedef) || siperde.Contains(hedef)) continue;
                 if (kaynak == Rol.Katil && roller[hedef] == Rol.SeriKatil && Hak(hedef) > 0) { HakKullan(hedef); continue; } // kaçınma
+                // Siper: bugün C olarak gösterildiyse bu gecenin bütün saldırılarından kurtulur (hak bir kez düşer).
+                if (roller[hedef] == Rol.Siper && Hak(hedef) > 0 && gununTurlari.Exists(t => t.C == hedef))
+                {
+                    HakKullan(hedef);
+                    siperde.Add(hedef);
+                    continue;
+                }
                 bool gizli = kaynak == Rol.SeriKatil; // Seri Katil'in kurbanının rolü açılmaz
                 olenler[hedef] = gizli || (olenler.TryGetValue(hedef, out var once) && once);
             }
@@ -479,8 +532,7 @@ namespace Cakmak.Kurallar
                         DeliBulgusu(s.Key, h, canlilar);
                         break;
                     case Rol.Dedektif when h.HasValue:
-                        var rol = roller[h.Value];
-                        BulguEkle(s.Key, new Bulgu { Kim = h.Value, Supheli = (Kotu(rol) && rol != Rol.Patron) || isaretli.Contains(h.Value) });
+                        BulguEkle(s.Key, new Bulgu { Kim = h.Value, Supheli = SupheliMi(h.Value, isaretli) });
                         break;
                     case Rol.Bekci when h.HasValue:
                         BulguEkle(s.Key, new Bulgu { Kim = h.Value, Ziyaretciler = Ziyaretciler(h.Value, s.Key, secimler, kurbanlar) });
@@ -495,6 +547,10 @@ namespace Cakmak.Kurallar
                         break;
                 }
             }
+            // Gündüzden kalan şüphe bakışları (Sezgici, Sınayıcı, Söndürücü), bu gecenin işaretleriyle.
+            foreach (var (sahip, bakilan) in bekleyenSorgular)
+                BulguEkle(sahip, new Bulgu { Kim = bakilan, Supheli = SupheliMi(bakilan, isaretli) });
+            bekleyenSorgular.Clear();
 
             // 5. Ölümler
             foreach (var o in olenler)
@@ -521,6 +577,8 @@ namespace Cakmak.Kurallar
             if (GeceKazananVarsaBitir()) return;
             gun++;
             kalanGunduzTuru = GunduzTuru();
+            GunBasladi();
+            HazirliklariKur(secimler);
             OncekiTuruUnut();
             TurBaslat(RastgeleOyuncu());
         }
@@ -666,12 +724,15 @@ namespace Cakmak.Kurallar
             else if (katil == 0 && olduren.Count == 0) kazanan = GeceKazanan.Masumlar;
             else if (olduren.Count == 0 && katil >= diger) kazanan = GeceKazanan.Katiller;
             else if (katil == 0 && olduren.Count == 1 && canli.Count <= 2)
-                kazanan = roller[olduren[0]] == Rol.SeriKatil ? GeceKazanan.SeriKatil : GeceKazanan.Bombaci;
+                kazanan = TekOldurenKazanani(olduren[0]);
             else if (canli.Count <= 2) kazanan = GeceKazanan.Berabere;
             if (!kazanan.HasValue) return false;
-            GeceBitir(kazanan.Value, kazanan == GeceKazanan.SeriKatil || kazanan == GeceKazanan.Bombaci ? olduren[0] : (OyuncuId?)null);
+            GeceBitir(kazanan.Value, olduren.Count == 1 && kazanan == TekOldurenKazanani(olduren[0]) ? olduren[0] : (OyuncuId?)null);
             return true;
         }
+
+        GeceKazanan TekOldurenKazanani(OyuncuId kim) =>
+            roller[kim] == Rol.SeriKatil ? GeceKazanan.SeriKatil : roller[kim] == Rol.Bombaci ? GeceKazanan.Bombaci : GeceKazanan.Kibritci;
 
         /// <summary><paramref name="tek"/>: tek kişilik kazananlarda (Seri Katil, Bombacı, Soytarı, Cellat) kazanan.</summary>
         void GeceBitir(GeceKazanan kazanan, OyuncuId? tek)
@@ -683,8 +744,8 @@ namespace Cakmak.Kurallar
                 bool kazandi = kazanan == GeceKazanan.Masumlar ? taraf == Taraf.Masum
                     : kazanan == GeceKazanan.Katiller ? taraf == Taraf.Katil
                     : o.Id == tek;
-                // Hayatta Kalan: oyun bitince hayattaysa kim kazanırsa kazansın.
-                if (kazandi || (roller[o.Id] == Rol.HayattaKalan && !o.Elendi && !cikan.Contains(o.Id))) liste.Add(o.Id);
+                // Ek kazananlar (Hayatta Kalan, Gözde, Düellocu, Sır Küpü): kim kazanırsa kazansın.
+                if (kazandi || EkKazanan(o)) liste.Add(o.Id);
             }
             geceSonucu = YeniGeceSonucu(kazanan, liste);
             Bitir();
@@ -738,7 +799,7 @@ namespace Cakmak.Kurallar
             if (cellatHedefleri.TryGetValue(kim, out var cellatHedefi)) g.CellatHedefin = cellatHedefi;
             if (gercek == Rol.Bombaci) g.Bombalilar = new List<OyuncuId>(bombalilar);
             // Alanın ömrü güme ekranı kadar (turun sonunda yazılır, ekran bitince silinir): görünüm de ona bağlı.
-            if (gercek == Rol.Kulak && !Bul(kim).Elendi) g.KulakSorusu = kulakSorusu;
+            if ((gercek == Rol.Kulak || gercek == Rol.Dinleyici) && !Bul(kim).Elendi) g.KulakSorusu = kulakSorusu;
 
             if (asama != Asama.Linc && asama != Asama.Gece) return;
             g.Oylayanlar = new List<OyuncuId>(oylayanlar);

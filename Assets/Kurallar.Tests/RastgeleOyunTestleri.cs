@@ -151,6 +151,12 @@ namespace Cakmak.Kurallar.Tests
                     oyun.Sucla(g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id);
                     continue;
                 }
+                if (gece && zar == 2 && robot.Next(3) == 0)                           // gündüz yeteneği (çoğu geçersiz)
+                {
+                    oyun.GunduzYetenegi(g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id,
+                        robot.Next(3) == 0 ? (OyuncuId?)null : g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id);
+                    continue;
+                }
                 if (casus && zar == 2 && robot.Next(10) == 0)                         // "Mekânı biliyorum" (herkes basabilir)
                 {
                     oyun.CasusTahmini(g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id, g.CasusListesi[robot.Next(g.CasusListesi.Count)]);
@@ -213,7 +219,7 @@ namespace Cakmak.Kurallar.Tests
                         // Geçersizler de olur: oy hakkı olmayan, ölü, kendisi, rolüne uymayan hedef, olmayan suikast.
                         var secen = g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id;
                         OyuncuId? Rastgele() => robot.Next(5) == 0 ? (OyuncuId?)null : g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id;
-                        if (g.Asama == Asama.Gece) oyun.GeceSecimi(secen, Rastgele(), Rastgele());
+                        if (g.Asama == Asama.Gece) oyun.GeceSecimi(secen, Rastgele(), Rastgele(), robot.Next(3) == 0 ? (bool?)null : robot.Next(2) == 0);
                         else if (robot.Next(8) == 0) oyun.Suikast(secen, g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id, Oyun.GeceRolleri[robot.Next(Oyun.GeceRolleri.Count)]);
                         else oyun.LincOyu(secen, g.Oyuncular[robot.Next(g.Oyuncular.Count)].Id);
                         break;
@@ -372,11 +378,11 @@ namespace Cakmak.Kurallar.Tests
                 if (!katilMi) Assert.That(x.Katiller.Count + x.KatilSecimleri.Count + x.IkinciSecilebilir.Count, Is.Zero, t + ": katil bilgisi sızdı");
                 if (x.Rolun != Rol.Cellat) Assert.That(x.CellatHedefin, Is.Null, t + ": Cellat'ın hedefi sızdı");
                 if (x.Rolun != Rol.Bombaci) Assert.That(x.Bombalilar, Is.Empty, t + ": bombalar sızdı");
-                if (x.KulakSorusu != null) Assert.That(x.Rolun == Rol.Kulak && g.Asama == Asama.Gume, Is.True, t + ": güme sorusu sızdı");
+                if (x.KulakSorusu != null) Assert.That((x.Rolun == Rol.Kulak || x.Rolun == Rol.Dinleyici) && g.Asama == Asama.Gume, Is.True, t + ": güme sorusu sızdı");
                 if (o.Elendi || o.Cikti) continue;
                 if (katilMi) katil++;
                 else diger++;
-                if (x.Rolun == Rol.SeriKatil || x.Rolun == Rol.Bombaci) olduren++;
+                if (x.Rolun == Rol.SeriKatil || x.Rolun == Rol.Bombaci || x.Rolun == Rol.Kibritci) olduren++;
             }
             bool bitmeli = katil + diger <= 2 || (katil == 0 && olduren == 0) || (olduren == 0 && katil >= diger);
             Assert.That(bitmeli, Is.False, t + ": oyun bitmeliydi");
@@ -397,7 +403,7 @@ namespace Cakmak.Kurallar.Tests
                 bool kazandi = new List<OyuncuId>(s.Kazananlar).Contains(r.Kim);
                 if (s.Kazanan == GeceKazanan.Masumlar && taraf == Taraf.Masum) Assert.That(kazandi, Is.True, t + ": masum kazanamadı");
                 if (s.Kazanan == GeceKazanan.Katiller && taraf == Taraf.Katil) Assert.That(kazandi, Is.True, t + ": katil kazanamadı");
-                if (kazandi && r.Rol != Rol.HayattaKalan)
+                if (kazandi && r.Rol != Rol.HayattaKalan && r.Rol != Rol.Gozde && r.Rol != Rol.Duellocu && r.Rol != Rol.SirKupu) // ek kazananlar
                     Assert.That(s.Kazanan == GeceKazanan.Masumlar ? taraf == Taraf.Masum
                         : s.Kazanan == GeceKazanan.Katiller ? taraf == Taraf.Katil
                         : r.Rol.ToString() == s.Kazanan.ToString(), Is.True, t + ": yanlış kazanan " + r.Rol);

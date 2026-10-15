@@ -3,83 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using static Cakmak.Kurallar.Tests.Kurulum;
+using static Cakmak.Kurallar.Tests.GeceYardim;
 
 namespace Cakmak.Kurallar.Tests
 {
     /// <summary>Çakmak Gecesi (docs/Oyunlar.md, 5). Her test istemediği özel rolleri kapatır: oyundaki roller belli olur.</summary>
     public class CakmakGecesiTestleri
     {
-        static readonly Rol[] OzelRoller = Oyun.GeceRolleri.Where(r => r != Rol.Masum && r != Rol.Katil).ToArray();
-
-        /// <summary>Sadece <paramref name="acik"/> özel rolleri açık bir oyun.</summary>
-        static Oyun YeniGece(int kisi, Rol[] acik, Action<Ayarlar> ayarla = null, int tohum = 1) =>
-            Yeni(kisi, tohum, a =>
-            {
-                a.Oyun = OyunTuru.CakmakGecesi;
-                a.KapaliRoller = OzelRoller.Where(r => !acik.Contains(r)).ToList();
-                ayarla?.Invoke(a);
-            });
-
-        static Oyun YeniGece(int kisi, params Rol[] acik) => YeniGece(kisi, acik, null);
-
-        static List<OyuncuDurumu> Kisiler(Oyun oyun) => Durum(oyun).Oyuncular.ToList();
-
-        static OyuncuDurumu Kisi(Oyun oyun, OyuncuId id) => Kisiler(oyun).Find(o => o.Id == id);
-
-        /// <summary>Kendini bu rolde bilenler (Deli sandığı rolde görünür).</summary>
-        static List<OyuncuId> Sahipleri(Oyun oyun, Rol rol) =>
-            Kisiler(oyun).Where(o => oyun.GorunumAl(o.Id).Rolun == rol).Select(o => o.Id).ToList();
-
-        static OyuncuId Tek(Oyun oyun, Rol rol) => Sahipleri(oyun, rol).Single();
-
-        static List<OyuncuId> Canlilar(Oyun oyun) => Kisiler(oyun).Where(o => !o.Elendi).Select(o => o.Id).ToList();
-
-        /// <summary>Gündüzün kalan turlarını oynar (C kazanır), linç başlayınca durur.</summary>
-        static int GunduzuBitir(Oyun oyun)
-        {
-            int tur = 0;
-            while (Durum(oyun).Asama != Asama.Linc)
-            {
-                Assert.That(Durum(oyun).Asama, Is.EqualTo(Asama.SoruSorma));
-                SorVeSec(oyun, "Sence katil kim?", out _, out var b, out var c);
-                TkmOyna(oyun, b, c, cKazansin: true);
-                Saniye(oyun, 7);
-                tur++;
-            }
-            return tur;
-        }
-
-        /// <summary>Gündüzü bitirir, linçte kimse oy vermez: gece başlar.</summary>
-        static void GeceyeGec(Oyun oyun)
-        {
-            GunduzuBitir(oyun);
-            Saniye(oyun, 61);
-            Assert.That(Durum(oyun).Asama, Is.EqualTo(Asama.Gece));
-        }
-
-        /// <summary>Linçte herkes <paramref name="hedef"/>'e oy verir, hedef kendisi başkasına.</summary>
-        static void Linc(Oyun oyun, OyuncuId hedef)
-        {
-            var oylayanlar = Durum(oyun).Oylayanlar.ToList();
-            foreach (var kim in oylayanlar)
-                Assert.That(oyun.LincOyu(kim, kim == hedef ? Ilk(oylayanlar, hedef) : hedef), Is.EqualTo(Sonuc.Tamam));
-        }
-
-        /// <summary>Verilen seçimler, sonra diğer herkes pas. Gece biter.</summary>
-        static void Gece(Oyun oyun, params (OyuncuId kim, OyuncuId? hedef, OyuncuId? ikinci)[] secimler)
-        {
-            foreach (var (kim, hedef, ikinci) in secimler)
-                Assert.That(oyun.GeceSecimi(kim, hedef, ikinci), Is.EqualTo(Sonuc.Tamam), kim + " seçemedi");
-            foreach (var kim in Durum(oyun).Oylayanlar.ToList())
-            {
-                if (Durum(oyun).Asama != Asama.Gece) break; // son seçenle gece bitti
-                if (!oyun.GorunumAl(kim).OyVerdin) Assert.That(oyun.GeceSecimi(kim, null), Is.EqualTo(Sonuc.Tamam));
-            }
-            Assert.That(Durum(oyun).Asama, Is.Not.EqualTo(Asama.Gece));
-        }
-
-        static List<OyuncuId> Olenler(List<Olay> olaylar) => olaylar.Where(o => o.Tur == OlayTuru.Elendi).Select(o => o.Kim.Value).ToList();
-
         // ---------------------------------------------------- Dağılım ve gizlilik
 
         [Test]

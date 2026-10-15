@@ -53,6 +53,10 @@ namespace TheLighter.Akis
         bool tartismaBitti = true;
         SuclamaSonucu suclamaSonucu;
 
+        // Rus Ruleti: son tetiğin sonucu ve final duyurusu, bir sonraki perdede.
+        TetikSonucu tetikSonucu;
+        bool finalDuyurusu;
+
         public EldenEleAkisi(Oyun oyun, IReadOnlyList<Oyuncu> oyuncular, Ayarlar ayarlar)
         {
             if (oyun == null) throw new ArgumentNullException(nameof(oyun));
@@ -111,6 +115,8 @@ namespace TheLighter.Akis
             suresiDolan = null;
             suresiDolanBydi = false;
             suclamaSonucu = null;
+            tetikSonucu = null;
+            finalDuyurusu = false;
             Yenile();
         }
 
@@ -255,6 +261,20 @@ namespace TheLighter.Akis
             return Sonra(oyun.SuclamaOyu(Ekran.Kime.Value, hedef));
         }
 
+        // ---------- Rus Ruleti ----------
+
+        public Sonuc TetikCek()
+        {
+            if (Ekran.Tur != EkranTuru.Tetik || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.TetikCek(Ekran.Kime.Value));
+        }
+
+        public Sonuc TetikDevret(OyuncuId hedef)
+        {
+            if (Ekran.Tur != EkranTuru.Tetik || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.TetikDevret(Ekran.Kime.Value, hedef));
+        }
+
         public void TartismayiBitir()
         {
             if (Ekran.Tur != EkranTuru.SuclamaTartisma) return;
@@ -340,6 +360,22 @@ namespace TheLighter.Akis
                     suclamaSonucu = new SuclamaSonucu { Suclanan = o.Kim };
                     break;
 
+                case OlayTuru.TetikBos:
+                    if (o.Kim.HasValue) tetikSonucu = new TetikSonucu { Kim = o.Kim.Value };
+                    break;
+
+                case OlayTuru.TetikPatladi:
+                    if (o.Kim.HasValue) tetikSonucu = new TetikSonucu { Kim = o.Kim.Value, Patladi = true };
+                    break;
+
+                case OlayTuru.Elendi:
+                    if (tetikSonucu != null && o.Kim == tetikSonucu.Kim) tetikSonucu.Elendi = true;
+                    break;
+
+                case OlayTuru.FinalBasladi:
+                    finalDuyurusu = true;
+                    break;
+
                 case OlayTuru.CevapSecildi:
                 case OlayTuru.TurBasladi:
                 case OlayTuru.IkiyeKatlandi:
@@ -404,6 +440,7 @@ namespace TheLighter.Akis
                     e.SuresiDolan = suresiDolan;
                     e.SuresiDolanBydi = suresiDolanBydi;
                     e.SuclamaSonucu = suclamaSonucu;
+                    e.TetikSonucu = tetikSonucu;
                     // Oylamadan sonra telefon A'ya geri döner: perde yeniden (anahtarda oylamanın numarası).
                     string sp = "S|" + acik.Tur + "|" + acik.A + "|" + suclamaNo;
                     if (sp != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, sp);
@@ -427,6 +464,9 @@ namespace TheLighter.Akis
                     if (mp != kaldirilanPerde)
                     {
                         PerdeKur(e, EkranTuru.MiniOyunPerdesi, mp);
+                        // Rus Ruleti finalinde soru yok: tetiğin sonucu ve "FİNAL!" bu perdede.
+                        e.TetikSonucu = tetikSonucu;
+                        e.FinalDuyurusu = finalDuyurusu;
                     }
                     else
                     {
@@ -484,6 +524,20 @@ namespace TheLighter.Akis
                     string yp = "Y|" + suclamaNo + "|" + oylayan.Value;
                     if (yp != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, yp);
                     else Kur(e, EkranTuru.Suclama, GorevsizGorunum(oylayan.Value), "|" + suclamaNo + "|" + oylayan.Value);
+                    break;
+                }
+
+                case Asama.Tetik:
+                {
+                    // Açık bilgi, perde yok: telefon kaybedende, herkes ekrana bakar. Saat işler (süre dolunca çekilir).
+                    var cekecek = acik.TetikCeken;
+                    if (!cekecek.HasValue)
+                    {
+                        Kur(e, EkranTuru.Bekleniyor, Seyirci(acik), "");
+                        break;
+                    }
+                    Kur(e, EkranTuru.Tetik, GorevsizGorunum(cekecek.Value), "|" + cekecek.Value);
+                    e.Kime = cekecek;
                     break;
                 }
 

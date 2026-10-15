@@ -141,6 +141,8 @@ namespace TheLighter.Ag
                 Soru = m["soru"].Metin,
                 Ceza = CezaCoz(m["ceza"]),
                 Kaos = Ad<KaosKurali>(m["kaos"].Metin) ?? KaosKurali.Yok,
+                Hedef = Id(m["hedef"]),
+                Takim = m["takim"].Tamsayi,
             };
             return new OlayMesaji { Olay = olay, Kim = kim };
         }
@@ -210,6 +212,7 @@ namespace TheLighter.Ag
             var s = new OdaAyarlari();
             if (!a.Var) return s;
             s.Oyun = Ad<OyunTuru>(a["oyun"].Metin) ?? s.Oyun;
+            s.Can = a["can"].TamsayiYa(s.Can);
             s.Mod = Ad<OyunModu>(a["mod"].Metin) ?? s.Mod;
             s.MiniOyun = Ad<MiniOyunTuru>(a["miniOyun"].Metin) ?? s.MiniOyun;
             s.TurSayisi = a["turSayisi"].TamsayiYa(s.TurSayisi);
@@ -275,6 +278,8 @@ namespace TheLighter.Ag
                 SonSuclama = m["sonSuclama"].MantikYa(false),
                 Rolun = Ad<Rol>(sana["rol"].Metin) ?? Rol.Yok,
                 SuclamaHakkin = sana["suclamaHakki"].MantikYa(false),
+                TetikCeken = Id(m["tetikCeken"]),
+                Final = m["final"].MantikYa(false),
             };
             return g;
         }
@@ -312,6 +317,12 @@ namespace TheLighter.Ag
                     Kisitlamalar = kisit,
                     Afk = o["afk"].MantikYa(false),
                     Cikti = o["cikti"].MantikYa(false),
+                    Can = o["can"].TamsayiYa(0),
+                    Elendi = o["elendi"].MantikYa(false),
+                    DevretmeHakki = o["devretmeHakki"].MantikYa(false),
+                    Takim = o["takim"].Tamsayi,
+                    AcikRol = Ad<Rol>(o["acikRol"].Metin),
+                    Susturuldu = o["susturuldu"].MantikYa(false),
                 });
             }
             return liste;
@@ -438,6 +449,7 @@ namespace TheLighter.Ag
             return new OyunOzeti
             {
                 Kostebek = KostebekCoz(o["kostebek"]),
+                RusRuleti = RusRuletiCoz(o["rusRuleti"]),
                 OynananTur = o["oynananTur"].TamsayiYa(0),
                 Oyuncular = oyuncular,
                 Unvanlar = unvanlar,
@@ -462,6 +474,13 @@ namespace TheLighter.Ag
             };
         }
 
+        /// <summary><c>ozet.rusRuleti</c>: kazanan (yoksa null) ve elenme sırası.</summary>
+        static RusRuletiSonucu RusRuletiCoz(JsonDeger r)
+        {
+            if (r.Tur != JsonTuru.Nesne) return null;
+            return new RusRuletiSonucu { Kazanan = Id(r["kazanan"]), ElenmeSirasi = IdListesi(r["elenmeSirasi"]) };
+        }
+
         // ------------------------------------------------------------ Giden
 
         /// <summary>Sunucu istemciden gelen mesajı en fazla bu kadar bayt kabul ediyor (fazlası bağlantıyı kapatır).</summary>
@@ -478,10 +497,11 @@ namespace TheLighter.Ag
         /// <summary>Sadece değişen alanlar gönderilir; null olanlar yazılmaz.</summary>
         public static string AyarDegistir(OyunModu? mod = null, MiniOyunTuru? miniOyun = null, int? turSayisi = null,
             int? soruSn = null, int? cevapSn = null, int? hamleSn = null, CezaSeviyesi? ceza = null,
-            bool? gorevler = null, bool? kaos = null, IEnumerable<string> paketler = null, OyunTuru? oyun = null)
+            bool? gorevler = null, bool? kaos = null, IEnumerable<string> paketler = null, OyunTuru? oyun = null, int? can = null)
         {
             var n = new JsonNesne().Ekle("t", "ayarlar");
             if (oyun.HasValue) n.Ekle("oyun", AdYaz(oyun.Value));
+            if (can.HasValue) n.Ekle("can", can.Value);
             if (mod.HasValue) n.Ekle("mod", AdYaz(mod.Value));
             if (miniOyun.HasValue) n.Ekle("miniOyun", AdYaz(miniOyun.Value));
             if (turSayisi.HasValue) n.Ekle("turSayisi", turSayisi.Value);
@@ -518,6 +538,10 @@ namespace TheLighter.Ag
         public static string Sucla(int tur) => Yaz(Komut(tur, "sucla"));
         /// <summary>Köstebek, Casus: "kim?" oylamasında oy.</summary>
         public static string SuclamaOyu(int tur, OyuncuId hedef) => Yaz(Komut(tur, "suclamaOyu").Ekle("hedef", hedef.ToString()));
+        /// <summary>Rus Ruleti: tetiği çek (sadece tetikCeken).</summary>
+        public static string TetikCek(int tur) => Yaz(Komut(tur, "tetikCek"));
+        /// <summary>Rus Ruleti: tetiği devret (oyun boyu 1 kez).</summary>
+        public static string TetikDevret(int tur, OyuncuId hedef) => Yaz(Komut(tur, "tetikDevret").Ekle("hedef", hedef.ToString()));
         public static string BedelOde(int tur) => Yaz(Komut(tur, "bedelOde"));
         public static string KarariGec(int tur) => Yaz(Komut(tur, "karariGec"));
 

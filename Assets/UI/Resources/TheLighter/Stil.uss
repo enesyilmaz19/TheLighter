@@ -1034,3 +1034,24 @@
     color: var(--alev-acik);
     -unity-text-align: middle-center;
 }
+
+/* ---------- Rus Ruleti ---------- */
+.kok .banner.tetik-bam {
+    background-color: #3A1212;
+    color: var(--kirmizi);
+    font-size: 48px;
+    -unity-font-style: bold;
+}
+
+.kok .banner.tetik-tik {
+    font-size: 44px;
+}
+
+.can-listesi {
+    justify-content: center;
+    margin: 12px 0;
+}
+
+.ayar-bolumu {
+    margin: 0;
+}

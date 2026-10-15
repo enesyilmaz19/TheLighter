@@ -36,7 +36,9 @@ namespace TheLighter.Istemci
         public static Label IsiEtiketi(Gorunum g)
         {
             if (!g.Isi.HasValue) return null;
-            var l = Yazi(Metin.Al("isi.etiket", IsiYazisi(g.Isi.Value)), "isi", "isi-" + g.Isi.Value.ToString().ToLowerInvariant());
+            // Rus Ruleti'nde ısı tabancanın (Kızgın Çakmak kapalı).
+            string anahtar = g.Oyun == OyunTuru.RusRuleti ? "rus.isi_etiket" : "isi.etiket";
+            var l = Yazi(Metin.Al(anahtar, IsiYazisi(g.Isi.Value)), "isi", "isi-" + g.Isi.Value.ToString().ToLowerInvariant());
             return l;
         }
 
@@ -54,6 +56,8 @@ namespace TheLighter.Istemci
                     if (k.Tur == CezaTuru.Palyaco) { isim += " · " + Metin.Al("palyaco.etiket"); break; }
                 foreach (var s in g.Supheliler)
                     if (s == id) { isim += " · " + Metin.Al("kostebek.supheli_etiket"); break; }
+                var can = RusRuleti.CanEtiketi(g, o);
+                if (can != null) isim += " · " + can;
                 if (o.Cikti) return isim + " · " + Metin.Al("online.etiket.ayrildi");
                 if (akis is TheLighter.Ag.OnlineAkis online && !online.Bagli(id)) return isim + " · " + Metin.Al("online.etiket.baglaniyor");
                 if (o.Afk) return isim + " · " + Metin.Al("online.etiket.afk");

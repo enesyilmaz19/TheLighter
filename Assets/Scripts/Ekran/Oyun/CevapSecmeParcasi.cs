@@ -59,7 +59,7 @@ namespace TheLighter.Istemci
             if (isi != null)
             {
                 Kok.Add(isi);
-                Kok.Add(Yazi(Metin.Al("isi.ipucu"), "ipucu"));
+                Kok.Add(Yazi(Metin.Al(g.Oyun == OyunTuru.RusRuleti ? "rus.isi_ipucu" : "isi.ipucu"), "ipucu"));
             }
             var cipKutusu = Kutu("cipler");
             foreach (var id in g.Secilebilir)

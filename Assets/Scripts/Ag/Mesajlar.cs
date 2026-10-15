@@ -78,6 +78,8 @@ namespace TheLighter.Ag
     {
         /// <summary>Hangi oyun (docs/Oyunlar.md). Mod her oyunda ayrı seçilir.</summary>
         public OyunTuru Oyun = OyunTuru.Cakmak;
+        /// <summary>Rus Ruleti: herkesin canı (1–3).</summary>
+        public int Can = 1;
         public OyunModu Mod = OyunModu.Normal;
         public MiniOyunTuru MiniOyun = MiniOyunTuru.Tkm;
         public int TurSayisi = 15;

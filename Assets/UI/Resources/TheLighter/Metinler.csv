@@ -561,3 +561,27 @@ rus.son_kalan,Son kalan!,Last one standing!
 rus.kazanan_yok,Kazanan yok: canlar eşit.,No winner: lives are tied.
 rus.elenme_sirasi,Elenme sırası,Elimination order
 rus.elenen_satir,{0}. elenen: {1},Out #{0}: {1}
+takim.ad.0,Kırmızı,Red
+takim.ad.1,Mavi,Blue
+takim.hedef,"Hedef: {0} puan",Target: {0} points
+takim.hedef_kisa,/ {0},/ {0}
+takim.avans,+1 avans,+1 head start
+takim.avans_ipucu,"Kişi sayısı tekse küçük takım 1 puanla (+1 avans) başlar. Farklı takımdan ikisinin düellosunu kazanan takım +1; rakibe sorulan soru ifşa olursa soranın takımı +1.","With an odd number of players the smaller team starts with 1 point (+1 head start). Winning a duel against the other team: +1; if a question asked to a rival is revealed, the asker's team: +1."
+takim.duello_puani,+1 {0}! {1} düelloyu kazandı.,+1 {0}! {1} won the duel.
+takim.ifsa_bonusu,İfşa bonusu: +1 {0}! {1} rakibe sordu.,Reveal bonus: +1 {0}! {1} asked a rival.
+takim.kazandi,{0} takım kazandı!,{0} team wins!
+takim.berabere,Berabere!,It's a tie!
+takim.son_skor,{0} {1} – {2} {3},{0} {1} – {2} {3}
+takim.senin,{0} takımdasın.,You're on {0}.
+takim.dagit_baslik,Takımlar,Teams
+takim.rastgele_ipucu,"Kimseyi takıma koymazsan takımlar oyun başlarken rastgele ve dengeli dağıtılır. Kendin kurmak için isimlere dokun.","If you don't place anyone, teams are dealt randomly and evenly when the game starts. Tap names to build them yourself."
+takim.rastgele_bilgi,Takımlar oyun başlarken rastgele ve dengeli dağıtılacak.,Teams will be dealt randomly and evenly when the game starts.
+takim.dokun_ipucu,İsme dokun: takım değiştirir.,Tap a name to switch teams.
+takim.sutun_baslik,{0} ({1}),{0} ({1})
+takim.rastgele,Rastgele,Random
+takim.uyari_eksik,"Herkes bir takımda olmalı: takımsızlara dokun ya da Rastgele'ye bas.","Everyone needs a team: tap the unplaced players or press Random."
+takim.uyari_denge,Takımlar dengesiz: aralarında en fazla 1 kişi fark olabilir.,Teams are uneven: they can differ by at most 1 player.
+kurulum.isimsiz,{0}. oyuncu,Player {0}
+sohbet.kanal.Takim,Takım,Team
+sohbet.kanal.Katil,Katiller,Killers
+sohbet.kanal.Oluler,Ölüler,The dead

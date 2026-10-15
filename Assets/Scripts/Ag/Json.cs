@@ -45,6 +45,10 @@ namespace TheLighter.Ag
         /// <summary>Dizinin elemanı. Dizi değilse ya da sınır dışıysa <see cref="Yok"/>.</summary>
         public JsonDeger this[int i] => Tur == JsonTuru.Dizi && i >= 0 && i < dizi.Count ? dizi[i] : Yok;
 
+        /// <summary>Nesnenin alanları (sırasız). Nesne değilse boş.</summary>
+        public IEnumerable<KeyValuePair<string, JsonDeger>> Alanlar =>
+            Tur == JsonTuru.Nesne ? (IEnumerable<KeyValuePair<string, JsonDeger>>)nesne : Array.Empty<KeyValuePair<string, JsonDeger>>();
+
         /// <summary>Dizi değilse boş.</summary>
         public IReadOnlyList<JsonDeger> Elemanlar => Tur == JsonTuru.Dizi ? (IReadOnlyList<JsonDeger>)dizi : Array.Empty<JsonDeger>();
 

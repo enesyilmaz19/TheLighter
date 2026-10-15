@@ -36,6 +36,8 @@ namespace TheLighter.Istemci
             // Rus Ruleti: az önce çekilen tetik.
             if (e.TetikSonucu != null) Kok.Add(RusRuleti.TetikDuyurusu(akis, e.TetikSonucu));
             if (g.Oyun == OyunTuru.RusRuleti) Kok.Add(RusRuleti.CanListesi(akis, g));
+            // Takım Düellosu: tur başında skor tabelası.
+            if (g.Oyun == OyunTuru.Takim && e.PerdeNedeni == PerdeNedeni.SoruSirasi) Kok.Add(Takim.Tabela(g));
 
             Kok.Add(Esnek());
 

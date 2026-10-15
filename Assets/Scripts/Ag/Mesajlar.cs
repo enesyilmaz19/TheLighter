@@ -57,6 +57,8 @@ namespace TheLighter.Ag
         public string Id;
         public OyuncuId Kimden;
         public OyuncuId? Kime;
+        /// <summary>Adlı kanal ("takim", "katil", "oluler"); genel ve DM'de null.</summary>
+        public SohbetKanali? Kanal;
         public string Metin;
 
         // Mesaj metni günlüğe düşmesin.
@@ -80,6 +82,8 @@ namespace TheLighter.Ag
         public OyunTuru Oyun = OyunTuru.Cakmak;
         /// <summary>Rus Ruleti: herkesin canı (1–3).</summary>
         public int Can = 1;
+        /// <summary>Takım Düellosu: kurucunun dağılımı (oyuncu → 0 ya da 1). Boş: rastgele ve dengeli.</summary>
+        public Dictionary<OyuncuId, int> Takimlar = new Dictionary<OyuncuId, int>();
         public OyunModu Mod = OyunModu.Normal;
         public MiniOyunTuru MiniOyun = MiniOyunTuru.Tkm;
         public int TurSayisi = 15;

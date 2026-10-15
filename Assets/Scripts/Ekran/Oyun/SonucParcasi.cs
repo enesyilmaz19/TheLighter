@@ -8,6 +8,7 @@ namespace TheLighter.Istemci
     /// <summary>
     /// Herkesin baktığı sonuç ekranı: ifşa ya da güme. Süre bitince kural motoru kendiliğinden yeni tura geçer.
     /// Bu turda ceza çekildiyse önce çark döner, kartlar açılır; "Tamam" denene kadar saat durur (akış).
+    /// Takım Düellosu'nda turun puanları ve skor tabelası.
     /// </summary>
     sealed class SonucParcasi : IOyunParcasi
     {
@@ -30,6 +31,10 @@ namespace TheLighter.Istemci
                 orta.Add(Yazi(Metin.Al("sonuc.oylama", g.SonOylama.Ifsa, g.SonOylama.Gume), "banner"));
 
             orta.Add(e.Tur == EkranTuru.Ifsa ? IfsaKarti(akis, g) : GumeKarti(akis, g));
+
+            // Takım Düellosu: bu turun puanları ("+1 Mavi", "İfşa bonusu") ve skor. Online'da puan anı bildirimle gelir.
+            foreach (var p in e.PuanAnlari) orta.Add(Takim.PuanDuyurusu(akis, p));
+            if (g.Oyun == OyunTuru.Takim) orta.Add(Takim.Tabela(g));
 
             // Bu turun cezaları (yanma kartları mini oyun perdesinde gösterildi ama burada da hatırlatılır).
             if (g.TurCezalari.Count > 0)

@@ -206,6 +206,93 @@ namespace TheLighter.Testler
             foreach (var b in botlar) b.Istemci.Ayril();
         }
 
+        /// <summary>
+        /// Takım Düellosu (tasks/g2-takim.md 4, 5): kurucu dağıtır (dengesizde "baslat" reddedilir), takım sohbeti sadece
+        /// takıma düşer (iki takım, iki "pencere"), oyun 7 puanda ya da turlar bitince biter, özet tutarlı.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator DortBot_TakimDuellosu_DagitimTakimSohbetiVeSkor()
+        {
+            var botlar = new List<DenemeBotu>();
+            for (int i = 0; i < 4; i++) botlar.Add(new DenemeBotu("Tk" + (i + 1), 4000 + i));
+            var kurucu = botlar[0];
+            var olaylar = new List<OlayMesaji>();
+            var hatalar = new List<HataMesaji>();
+            kurucu.Istemci.OlayGeldi += olaylar.Add;
+            kurucu.Istemci.HataGeldi += hatalar.Add;
+            var saat = Stopwatch.StartNew();
+            double son = 0;
+
+            IEnumerator Bekle(Func<bool> kosul, double sn, string ne)
+            {
+                double bitis = saat.Elapsed.TotalSeconds + sn;
+                while (!kosul())
+                {
+                    double g = saat.Elapsed.TotalSeconds - son;
+                    son = saat.Elapsed.TotalSeconds;
+                    foreach (var b in botlar) b.Guncelle(g);
+                    if (kurucu.Istemci.Durum == BaglantiDurumu.Kapali) Assert.Ignore("Yerel sunucu çalışmıyor.");
+                    if (saat.Elapsed.TotalSeconds > bitis)
+                        Assert.Fail(ne + " olmadı: " + string.Join(", ", botlar.Select(b => b.Isim + "=" + (b.Istemci.SonDurum?.ToString() ?? "-") + " " + b.SonHata)));
+                    yield return null;
+                }
+            }
+
+            kurucu.Istemci.OdaKur(Adres, kurucu.Isim);
+            yield return Bekle(() => kurucu.Istemci.Durum == BaglantiDurumu.Odada, 10, "Oda kurma");
+            for (int i = 1; i < 4; i++) botlar[i].Istemci.Katil(Adres, kurucu.Istemci.Oda, botlar[i].Isim);
+            yield return Bekle(() => botlar.All(b => b.Istemci.Sen.HasValue) && kurucu.Istemci.SonDurum?.Oyuncular.Count == 4, 10, "Katılma");
+            var id = botlar.Select(b => b.Istemci.Sen.Value).ToList();
+
+            // Dengesiz dağılım: lobi kabul eder ama "baslat" reddedilir.
+            var dengesiz = new Dictionary<OyuncuId, int> { [id[0]] = 0, [id[1]] = 0, [id[2]] = 0, [id[3]] = 1 };
+            kurucu.Istemci.Gonder(Cevirici.AyarDegistir(oyun: OyunTuru.Takim, ceza: CezaSeviyesi.Kapali, gorevler: false, kaos: false,
+                soruSn: 10, cevapSn: 10, hamleSn: 5, miniOyun: MiniOyunTuru.Zar, turSayisi: 10, takimlar: dengesiz));
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Ayarlar?.Oyun == OyunTuru.Takim
+                && b.Istemci.SonDurum.Ayarlar.Takimlar.Count == 4), 10, "Takım ayarı herkese");
+            Assert.That(new TheLighter.Akis.TakimDagitimi(kurucu.Istemci.SonDurum.Ayarlar.Takimlar).Gecerli(id), Is.False, "ekran da uyarır");
+            kurucu.Istemci.Gonder(Cevirici.Baslat());
+            yield return Bekle(() => hatalar.Any(h => h.Kod == "GECERSIZ_GIRDI"), 10, "Dengesiz başlatın reddi");
+            Assert.That(kurucu.Istemci.SonDurum.Yer, Is.EqualTo(OdaYeri.Lobi));
+
+            // Kırmızı: 1. ve 3. bot, Mavi: 2. ve 4.
+            var dagilim = new Dictionary<OyuncuId, int> { [id[0]] = 0, [id[1]] = 1, [id[2]] = 0, [id[3]] = 1 };
+            kurucu.Istemci.Gonder(Cevirici.AyarDegistir(takimlar: dagilim));
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Ayarlar?.Takimlar.Count(kv => kv.Value == 1) == 2), 10, "Dengeli dağılım herkese");
+            kurucu.Istemci.Gonder(Cevirici.Baslat());
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Yer == OdaYeri.Oyun && b.Istemci.SonDurum.Gorunum?.TakimPuanlari.Count == 2), 10, "Başlama");
+            foreach (var o in kurucu.Istemci.SonDurum.Gorunum.Oyuncular)
+                Assert.That(o.Takim, Is.EqualTo(dagilim[o.Id]), "kurucunun dağılımı oyunda");
+
+            // Takım sohbeti: Kırmızı'nın yazdığı sadece Kırmızı'ya (yazan dahil), Mavi'nin sadece Mavi'ye.
+            var takimYeri = SohbetYeri.Adli(SohbetKanali.Takim);
+            Assert.That(botlar[0].Istemci.SohbetGonder(takimYeri, "kirmizi plan"), Is.True);
+            Assert.That(botlar[1].Istemci.SohbetGonder(takimYeri, "mavi plan"), Is.True);
+            yield return Bekle(() => botlar.All(b => b.Istemci.Sohbet.Mesajlar(takimYeri).Count >= 1), 10, "Takım mesajları");
+            double bitisAni = saat.Elapsed.TotalSeconds + 1.5;
+            yield return Bekle(() => saat.Elapsed.TotalSeconds >= bitisAni, 5, "Geç gelen mesaj beklemesi");
+            for (int i = 0; i < 4; i++)
+            {
+                var gelen = botlar[i].Istemci.Sohbet.Mesajlar(takimYeri);
+                Assert.That(gelen.Count, Is.EqualTo(1), botlar[i].Isim + " sadece kendi takımının mesajını alır");
+                Assert.That(gelen[0].Metin, Is.EqualTo(i % 2 == 0 ? "kirmizi plan" : "mavi plan"));
+                Assert.That(botlar[i].Istemci.Sohbet.Mesajlar(null), Is.Empty, "takım mesajı genele düşmez");
+            }
+
+            yield return Bekle(() => botlar.All(b => b.OyunBitti), 400, "Oyunun bitmesi");
+
+            var t = kurucu.Istemci.SonDurum.Ozet?.Takim;
+            Assert.That(t, Is.Not.Null, "özette Takım Düellosu");
+            Assert.That(t.Puanlar.Count, Is.EqualTo(2));
+            if (t.Kazanan.HasValue) Assert.That(t.Puanlar[t.Kazanan.Value], Is.GreaterThan(t.Puanlar[1 - t.Kazanan.Value]));
+            else Assert.That(t.Puanlar[0], Is.EqualTo(t.Puanlar[1]));
+            var puanOlaylari = olaylar.Where(o => o.Olay != null && (o.Olay.Tur == OlayTuru.DuelloPuani || o.Olay.Tur == OlayTuru.IfsaBonusu)).ToList();
+            Assert.That(puanOlaylari.All(o => o.Olay.Takim.HasValue), Is.True, "puan olaylarında takım");
+            Assert.That(puanOlaylari.Count, Is.EqualTo(t.Puanlar[0] + t.Puanlar[1]), "eşit takımlar: her puan bir olay");
+
+            foreach (var b in botlar) b.Istemci.Ayril();
+        }
+
         [UnityTest]
         public IEnumerator UygulamayaDonunce_YenidenBaglanir_AyniIsimleOdada()
         {

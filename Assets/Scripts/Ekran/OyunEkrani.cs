@@ -43,6 +43,7 @@ namespace TheLighter.Istemci
         OyuncuId? suclanan;
         readonly VisualElement ustCubuk;
         readonly Label turYazisi;
+        readonly VisualElement skorKutusu;
         readonly Label durumYazisi;
         readonly VisualElement govde;
         readonly VisualElement menu;
@@ -65,6 +66,9 @@ namespace TheLighter.Istemci
             ustCubuk = Kutu("ust-cubuk");
             turYazisi = Yazi("", "ust-cubuk-yazi");
             ustCubuk.Add(turYazisi);
+            // Takım Düellosu: iki takımın puanı ve hedef her ekranda.
+            skorKutusu = Kutu("takim-ust", "gizli");
+            ustCubuk.Add(skorKutusu);
             ustCubuk.Add(Esnek());
             durumYazisi = Yazi("", "ust-cubuk-yazi", "ust-cubuk-durum");
             ustCubuk.Add(durumYazisi);
@@ -167,6 +171,8 @@ namespace TheLighter.Istemci
         void Bildir(string metin)
         {
             if (string.IsNullOrEmpty(metin)) return;
+            bildirim.RemoveFromClassList("takim-0");
+            bildirim.RemoveFromClassList("takim-1");
             bildirim.text = metin;
             bildirim.RemoveFromClassList("gizli");
             bildirimKalan = BildirimSn;
@@ -220,6 +226,17 @@ namespace TheLighter.Istemci
                 case OlayTuru.FinalBasladi:
                     Bildir(Metin.Al("rus.final"));
                     break;
+                case OlayTuru.DuelloPuani:
+                case OlayTuru.IfsaBonusu:
+                    // Puan anı: "+1 Mavi". Puanın kendisi sonraki durumdan çizilir.
+                    if (o.Olay.Takim.HasValue)
+                    {
+                        Bildir(Takim.PuanMetni(akis, new PuanAni { IfsaBonusu = o.Olay.Tur == OlayTuru.IfsaBonusu, Kim = o.Kim, Takim = o.Olay.Takim.Value }));
+                        bildirim.EnableInClassList("takim-0", o.Olay.Takim == 0);
+                        bildirim.EnableInClassList("takim-1", o.Olay.Takim == 1);
+                        Takim.Canlandir(bildirim);
+                    }
+                    break;
                 case OlayTuru.SiraAtlandi: Bildir(Metin.Al("online.olay.sira_atlandi", kim, TurkceEk.Ilgi(kim))); break;
                 case OlayTuru.Afk: Bildir(Metin.Al("online.olay.afk", kim)); break;
                 case OlayTuru.AfkBitti: Bildir(Metin.Al("online.olay.afk_bitti", kim)); break;
@@ -257,6 +274,7 @@ namespace TheLighter.Istemci
             turYazisi.text = g.Tur <= 0 ? ""
                 : g.ToplamTur > 0 ? Metin.Al("oyun.tur_sinirli", g.Tur, g.ToplamTur)
                 : Metin.Al("oyun.tur_sinirsiz", g.Tur);
+            Takim.UstSkoruYaz(skorKutusu, g);
 
             // Kaos turu ve Kızgın Çakmak'ın ısısı herkese açık: üst çubukta.
             var parcalar = new System.Collections.Generic.List<string>();

@@ -494,6 +494,27 @@ namespace TheLighter.Testler
         }
 
         [Test]
+        public void Sohbet_TakimKanali_KendiSekmesine_GidenKimeTakim()
+        {
+            OdayaGir();
+            Assert.That(istemci.SohbetGonder(SohbetYeri.Adli(SohbetKanali.Takim), "biz kazanırız"), Is.True);
+            Kare();
+            Assert.That(T.Son["kime"].Metin, Is.EqualTo("takim"));
+
+            T.Mesaj(SohbetGelen("m1", "p3", "takim", "plan ne"));
+            T.Mesaj(SohbetGelen("m2", "p1", "takim", "biz kazanırız"));
+            T.Mesaj(SohbetGelen("m3", "p2", "uzayli", "bozuk kanal"));
+            Kare();
+            var takim = istemci.Sohbet.Mesajlar(SohbetYeri.Adli(SohbetKanali.Takim));
+            Assert.That(takim.Count, Is.EqualTo(2));
+            Assert.That(takim[0].Kim, Is.EqualTo(new OyuncuId(3)));
+            Assert.That(takim[1].Benim, Is.True);
+            Assert.That(istemci.Sohbet.Mesajlar(null), Is.Empty, "takım mesajı genele düşmez, bozuk kanal atılır");
+            Assert.That(istemci.Sohbet.DmKanallari, Is.Empty, "takım bir DM değil");
+            Assert.That(istemci.Sohbet.Okunmamis(SohbetYeri.Adli(SohbetKanali.Takim)), Is.EqualTo(1));
+        }
+
+        [Test]
         public void Sohbet_KopupDonunceKalir_AyrilincaSilinir()
         {
             OdayaGir();

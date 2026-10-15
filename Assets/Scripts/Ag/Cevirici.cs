@@ -119,9 +119,10 @@ namespace TheLighter.Ag
             string metin = m["metin"].Metin;
             if (!kimden.HasValue || string.IsNullOrEmpty(metin)) return null;
             var kime = Id(m["kime"]);
-            // "kime" var ama bozuksa DM'i genele düşürme: at.
-            if (!kime.HasValue && m["kime"].Tur == JsonTuru.Metin) return null;
-            return new SohbetGelen { Id = m["id"].Metin, Kimden = kimden.Value, Kime = kime, Metin = metin };
+            var kanal = Ad<SohbetKanali>(m["kime"].Metin);
+            // "kime" var ama ne kişi ne kanal: DM'i genele düşürme, at.
+            if (!kime.HasValue && !kanal.HasValue && m["kime"].Tur == JsonTuru.Metin) return null;
+            return new SohbetGelen { Id = m["id"].Metin, Kimden = kimden.Value, Kime = kime, Kanal = kanal, Metin = metin };
         }
 
         static GelenMesaj OlayCoz(JsonDeger m)
@@ -213,6 +214,12 @@ namespace TheLighter.Ag
             if (!a.Var) return s;
             s.Oyun = Ad<OyunTuru>(a["oyun"].Metin) ?? s.Oyun;
             s.Can = a["can"].TamsayiYa(s.Can);
+            foreach (var t in a["takimlar"].Alanlar)
+            {
+                var id = Id(t.Key);
+                var no = t.Value.Tamsayi;
+                if (id.HasValue && no.HasValue) s.Takimlar[id.Value] = no.Value;
+            }
             s.Mod = Ad<OyunModu>(a["mod"].Metin) ?? s.Mod;
             s.MiniOyun = Ad<MiniOyunTuru>(a["miniOyun"].Metin) ?? s.MiniOyun;
             s.TurSayisi = a["turSayisi"].TamsayiYa(s.TurSayisi);
@@ -280,6 +287,7 @@ namespace TheLighter.Ag
                 SuclamaHakkin = sana["suclamaHakki"].MantikYa(false),
                 TetikCeken = Id(m["tetikCeken"]),
                 Final = m["final"].MantikYa(false),
+                TakimPuanlari = SayiListesi(m["takimPuanlari"]),
             };
             return g;
         }
@@ -337,6 +345,14 @@ namespace TheLighter.Ag
                 if (id.HasValue) liste.Add(id.Value);
             }
             return liste;
+        }
+
+        static List<int> SayiListesi(JsonDeger dizi)
+        {
+            var l = new List<int>();
+            foreach (var x in dizi.Elemanlar)
+                if (x.Tamsayi.HasValue) l.Add(x.Tamsayi.Value);
+            return l;
         }
 
         static Ceza CezaCoz(JsonDeger c)
@@ -450,6 +466,9 @@ namespace TheLighter.Ag
             {
                 Kostebek = KostebekCoz(o["kostebek"]),
                 RusRuleti = RusRuletiCoz(o["rusRuleti"]),
+                Takim = o["takim"].Tur == JsonTuru.Nesne
+                    ? new TakimSonucu { Kazanan = o["takim"]["kazanan"].Tamsayi, Puanlar = SayiListesi(o["takim"]["puanlar"]) }
+                    : null,
                 OynananTur = o["oynananTur"].TamsayiYa(0),
                 Oyuncular = oyuncular,
                 Unvanlar = unvanlar,
@@ -497,11 +516,19 @@ namespace TheLighter.Ag
         /// <summary>Sadece değişen alanlar gönderilir; null olanlar yazılmaz.</summary>
         public static string AyarDegistir(OyunModu? mod = null, MiniOyunTuru? miniOyun = null, int? turSayisi = null,
             int? soruSn = null, int? cevapSn = null, int? hamleSn = null, CezaSeviyesi? ceza = null,
-            bool? gorevler = null, bool? kaos = null, IEnumerable<string> paketler = null, OyunTuru? oyun = null, int? can = null)
+            bool? gorevler = null, bool? kaos = null, IEnumerable<string> paketler = null, OyunTuru? oyun = null, int? can = null,
+            IReadOnlyDictionary<OyuncuId, int> takimlar = null)
         {
             var n = new JsonNesne().Ekle("t", "ayarlar");
             if (oyun.HasValue) n.Ekle("oyun", AdYaz(oyun.Value));
             if (can.HasValue) n.Ekle("can", can.Value);
+            if (takimlar != null)
+            {
+                // Boş nesne: rastgele ve dengeli.
+                var t = new JsonNesne();
+                foreach (var kv in takimlar) t.Ekle(kv.Key.ToString(), kv.Value);
+                n.Ekle("takimlar", t);
+            }
             if (mod.HasValue) n.Ekle("mod", AdYaz(mod.Value));
             if (miniOyun.HasValue) n.Ekle("miniOyun", AdYaz(miniOyun.Value));
             if (turSayisi.HasValue) n.Ekle("turSayisi", turSayisi.Value);
@@ -546,10 +573,13 @@ namespace TheLighter.Ag
         public static string KarariGec(int tur) => Yaz(Komut(tur, "karariGec"));
 
         /// <param name="kime">null: genel sohbet. Doluysa o kişiye DM.</param>
-        public static string Sohbet(OyuncuId? kime, string metin)
+        public static string Sohbet(OyuncuId? kime, string metin) => Sohbet(SohbetYeri.Kimden(kime), metin);
+
+        /// <summary>Genel (<c>kime</c> yok), DM (<c>"p3"</c>) ya da adlı kanal (<c>"takim"</c>, <c>"katil"</c>, <c>"oluler"</c>).</summary>
+        public static string Sohbet(SohbetYeri yer, string metin)
         {
             var n = new JsonNesne().Ekle("t", "sohbet");
-            if (kime.HasValue) n.Ekle("kime", kime.Value.ToString());
+            if (!yer.GenelMi) n.Ekle("kime", yer.Anahtar);
             return Yaz(n.Ekle("metin", metin));
         }
 

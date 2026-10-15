@@ -57,6 +57,9 @@ namespace TheLighter.Akis
         TetikSonucu tetikSonucu;
         bool finalDuyurusu;
 
+        // Takım Düellosu: bu turun puanları, sonuç ekranında.
+        readonly List<PuanAni> puanAnlari = new List<PuanAni>();
+
         public EldenEleAkisi(Oyun oyun, IReadOnlyList<Oyuncu> oyuncular, Ayarlar ayarlar)
         {
             if (oyun == null) throw new ArgumentNullException(nameof(oyun));
@@ -376,8 +379,20 @@ namespace TheLighter.Akis
                     finalDuyurusu = true;
                     break;
 
-                case OlayTuru.CevapSecildi:
+                case OlayTuru.DuelloPuani:
+                case OlayTuru.IfsaBonusu:
+                    if (o.Takim.HasValue)
+                        puanAnlari.Add(new PuanAni { IfsaBonusu = o.Tur == OlayTuru.IfsaBonusu, Kim = o.Kim, Takim = o.Takim.Value });
+                    break;
+
                 case OlayTuru.TurBasladi:
+                    puanAnlari.Clear();
+                    bBuEl = null;
+                    cBuEl = null;
+                    sonBerabere = null;
+                    break;
+
+                case OlayTuru.CevapSecildi:
                 case OlayTuru.IkiyeKatlandi:
                     bBuEl = null;
                     cBuEl = null;
@@ -557,6 +572,7 @@ namespace TheLighter.Akis
                     bool bekliyor = g.TurCezalari.Count > 0 && CezaAnahtari(g) != onaylananCeza;
                     Kur(e, acik.Asama == Asama.Ifsa ? EkranTuru.Ifsa : EkranTuru.Gume, g, bekliyor ? "|ceza" : "");
                     e.CezaOnayBekliyor = bekliyor;
+                    e.PuanAnlari = new List<PuanAni>(puanAnlari);
                     break;
                 }
 

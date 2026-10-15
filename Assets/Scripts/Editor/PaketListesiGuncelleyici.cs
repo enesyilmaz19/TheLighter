@@ -58,6 +58,14 @@ namespace TheLighter.Istemci.Duzenleyici
             var sesli = AssetDatabase.LoadAssetAtPath<TextAsset>(PaketListesi.SesliCezaYolu);
 
             var liste = AssetDatabase.LoadAssetAtPath<PaketListesi>(PaketListesi.AssetYolu);
+            if (liste == null && System.IO.File.Exists(PaketListesi.AssetYolu))
+            {
+                // Dosya var ama PaketListesi olarak yüklenmedi (betikler henüz derlenmedi ya da içe aktarma sürüyor).
+                // Üstüne yazılırsa git'teki liste bozulur: dokunma. Derleme bitince (InitializeOnLoad) ya da
+                // Icerik'te bir değişiklikte yeniden denenir; elle: menü → TheLighter → Soru paketlerini güncelle.
+                Debug.LogWarning("[TheLighter] " + PaketListesi.AssetYolu + " şimdi okunamadı, paket listesi sonra güncellenecek.");
+                return;
+            }
             if (liste == null)
             {
                 liste = ScriptableObject.CreateInstance<PaketListesi>();

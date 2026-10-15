@@ -484,7 +484,7 @@ namespace Cakmak.Kurallar.Tests
             GunduzuBitir(oyun);
             Linc(oyun, hedef);
             var s = oyun.Ozet().Gece;
-            Assert.That((s.Kazanan, s.Kazananlar.Single()), Is.EqualTo((GeceKazanan.Cellat, cellat)));
+            Assert.That((s.Kazanan.Value, s.Kazananlar.Single()), Is.EqualTo((GeceKazanan.Cellat, cellat)));
             Assert.That(s.Roller.Single(r => r.Kim == cellat).Rol, Is.EqualTo(Rol.Cellat));
 
             oyun = YeniGece(8, Rol.Cellat);
@@ -578,7 +578,7 @@ namespace Cakmak.Kurallar.Tests
             foreach (var k in Sahipleri(oyun, Rol.Katil)) oyun.OyuncuCikti(k);
             foreach (var m in Sahipleri(oyun, Rol.Masum).Skip(1)) oyun.OyuncuCikti(m);
             s = oyun.Ozet().Gece;
-            Assert.That((s.Kazanan, s.Kazananlar.Single()), Is.EqualTo((GeceKazanan.SeriKatil, sk)));
+            Assert.That((s.Kazanan.Value, s.Kazananlar.Single()), Is.EqualTo((GeceKazanan.SeriKatil, sk)));
 
             oyun = YeniGece(8, Rol.SeriKatil);
             oyun.OyuncuCikti(Sahipleri(oyun, Rol.Katil)[0]);

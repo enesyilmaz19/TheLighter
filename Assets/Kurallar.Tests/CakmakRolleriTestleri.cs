@@ -309,7 +309,7 @@ namespace Cakmak.Kurallar.Tests
             foreach (var k in Sahipleri(oyun, Rol.Katil)) oyun.OyuncuCikti(k);
             foreach (var m in Sahipleri(oyun, Rol.Masum).Skip(1)) oyun.OyuncuCikti(m);
             var s = oyun.Ozet().Gece;
-            Assert.That((s.Kazanan, s.Kazananlar.Single()), Is.EqualTo((GeceKazanan.Kibritci, kibritci)));
+            Assert.That((s.Kazanan.Value, s.Kazananlar.Single()), Is.EqualTo((GeceKazanan.Kibritci, kibritci)));
         }
 
         /// <summary><paramref name="kim"/>'i <paramref name="kez"/> kez B ya da C yapar, sonra katiller çıkar: masumlar kazanır.</summary>

@@ -342,6 +342,6 @@ En ucuzdan en pahalıya, her biri bitip test edilince sıradaki:
 2. **Rus Ruleti:** eleme hazır. Yeni olan: tabanca, can, final.
 3. **Takım Düellosu:** yeni olan sadece takım ve puan.
 4. **Casus:** yeni içerik ister (mekân ve kelime).
-5. **Çakmak Gecesi (eski Vampir Köylü):** en büyüğü. Gece, 24 rol, linç, elden elede gece dolaşması.
+5. **Çakmak Gecesi (eski Vampir Köylü):** en büyüğü. Gece, 41 rol (17si çakmağa özel), linç, elden elede gece dolaşması.
 
 Bugünkü yol haritasına etkisi: bu beş oyun S5 ile S6 arasına yeni bir blok olarak girer. Çıkış o kadar kayar. VPS ve testler (Enes'in kararı) oyun tamamen bitince.

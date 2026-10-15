@@ -67,7 +67,8 @@ namespace TheLighter.Testler
             // Bütün S3 özellikleri açık, kısa oyun: kaos 5. turda gelsin diye 6 tur.
             kurucu.Istemci.Gonder(Cevirici.AyarDegistir(mod: OyunModu.Normal, miniOyun: MiniOyunTuru.Karisik, turSayisi: 6,
                 soruSn: 10, cevapSn: 10, hamleSn: 5, ceza: CezaSeviyesi.Cesur, gorevler: true, kaos: true));
-            yield return Bekle(() => kurucu.Istemci.SonDurum.Ayarlar?.TurSayisi == 6 && kurucu.Istemci.SonDurum.Ayarlar.Kaos, 10, "Ayarların gelmesi");
+            // Bütün botlar aynı durumu işlemiş olsun: kurucu almışken 4. bot henüz işlememiş olabiliyor (yarış).
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Ayarlar?.TurSayisi == 6 && b.Istemci.SonDurum.Ayarlar.Kaos), 10, "Ayarların herkese gelmesi");
             Assert.That(botlar[3].Istemci.SonDurum.Ayarlar.Ceza, Is.EqualTo(CezaSeviyesi.Cesur), "ayarlar herkese gider");
 
             kurucu.Istemci.Gonder(Cevirici.Baslat());

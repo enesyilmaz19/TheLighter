@@ -24,7 +24,7 @@ Yazan: G1 (Enes), 2026-10-14.
 - Tasarım: `docs/Oyunlar.md`, 5. bölüm: rollerin ne yaptığı, gece sırası, kazanma. **Oradaki tablolar kesin kurallar**, ekran metinlerini oradan yaz.
 
 **Özetle oyun (6–18 kişi):**
-- Taraflar **Masumlar** ve **Katiller**, bir de sadece kendisi kazanan **tarafsızlar**. 24 rol.
+- Taraflar **Masumlar** ve **Katiller**, bir de sadece kendisi kazanan **tarafsızlar**. 41 rol: 24'ü ToS/GGD/Feign'den uyarlama, 17'si çakmağa özel (gündüz turuna bağlı; `docs/Oyunlar.md` 5, "Çakmağa özel roller", kurallar `Assets/Kurallar/Oyun.CakmakRolleri.cs`).
 - Roller kişi sayısına göre otomatik dağılır, kurucu istemediği rolleri kapatır.
 - Oyun gündüzle başlar: canlıların yarısı kadar çakmak turu, sonra linç.
 - Gece herkes bir seçim yapar (yeteneği olmayan da "birini düşünür"), sabah ölenler açıklanır.
@@ -47,6 +47,11 @@ Yazan: G1 (Enes), 2026-10-14.
   - `hedef = null` pas demek.
   - Katil tarafında `hedef` kurban oyu, `ikinci` rolün yeteneği.
   - Bombacı kendini seçerse bombaları patlatır.
+- **Gündüz yeteneği** (çakmağa özel roller): `GunduzYetenegi(kim, hedef)`, gündüz turu sürerken (SoruSorma, CevapSecme, MiniOyun).
+  - Sorgucu ve Sınayıcı: A iken, soruyu sormadan önce de olur.
+  - Kuklacı: A iken, `hedef` = C (soruyu sormadan önce seçerse soru gidince işler).
+  - Kışkırtıcı: B iken, C'yi seçmeden önce de olur.
+  - Hakem gece `GeceSecimi(kim, hedef, null, ifsa)` ile hazırlar (ifşa mı güme mi); Söndürücü gece hedefi seçer.
 - Her ikisinde `Oylayanlar`, `OyKullanan`, `OyVerdin`.
 - Adaylar `Secilebilir`'de, katillerin ikinci hedef adayları `IkinciSecilebilir`'de. Ekranda sadece bu listeleri göster, kendin süzme.
 - Elden elede her seçimden sonra süre baştan başlar.
@@ -66,9 +71,11 @@ Yazan: G1 (Enes), 2026-10-14.
 **Olaylar:**
 - `LincBasladi`, `LincBitti` (`Kim`: elenen ya da `null`), `Suikast` (`Kim`: ölen).
 - `GeceBasladi`, gece ölenler için birer `Elendi`, sonra `GeceBitti`.
+- `HakemKarari`, `DuelloSonduruldu` (`B`, `C`): düello oynanmadı, Hakem'in kararıyla bitti ya da söndü. Kimin yaptığı yok.
 
 **Oyun sonu:** `Ozet().Gece`:
-- `Kazanan`: Masumlar, Katiller, SeriKatil, Bombaci, Soytari, Cellat, Berabere ya da `null` (kurucu bitirdi).
+- `Kazanan`: Masumlar, Katiller, SeriKatil, Bombaci, Kibritci, Soytari, Cellat, Berabere ya da `null` (kurucu bitirdi).
+- Ek kazananlar (`Kazananlar`'da): hayattaki Hayatta Kalan, hedefini tutturan Gözde, Düellocu, Sır Küpü.
 - `Kazananlar`: kazanan oyuncular.
 - `Roller`: herkesin gerçek rolü, Deli dahil.
 
@@ -86,13 +93,17 @@ Yazan: G1 (Enes), 2026-10-14.
 3. **Gündüz:** normal çakmak ekranları.
    - Üstte "Gün 2 · linçe 1 tur".
    - Ölüler listede soluk, rolü açıldıysa rolüyle. Susturulanın yanında 🤐.
-   - Kulak, güme ekranında soruyu küçük bir "Duydun:" kutusunda görür, başkası görmez.
+   - Kulak ve Dinleyici, güme ekranında soruyu küçük bir "Duydun:" kutusunda görür, başkası görmez.
+   - **Gündüz yeteneği düğmesi:** Sorgucu, Sınayıcı ve Kuklacı'da A iken (soru yazma ekranında), Kışkırtıcı'da B iken (cevap seçme ekranında). Kuklacı düğmeye basınca C'yi seçer. Elden elede telefon zaten onda; düğme diğer rollerde hiç görünmesin ama ekranın düzeni aynı kalsın.
+   - **Hakem kararı / Düello söndü:** düello oynanmadan sonuç ekranına geçilir, "Hakem kararı" ya da "Düello söndü 🧯" yazısıyla.
+   - Gözde, Düellocu, Sır Küpü kendi sayaçlarını görsün (Gözde: `Gosterilme`, Düellocu: `MiniOyunKazanma`, Sır Küpü: `SoruAlma` ve ifşa olmadı mı).
 4. **Linç:**
    - "Linç: kim gitsin?" Canlılar listesi, oy sayısı. Elden elede sırayla dolaşır.
    - Susturulan oy veremez.
    - Suikastçı'nın ekranında bir "Suikast" düğmesi: kişi ve rol seçer, onaylar.
 5. **Gece (elden ele, en zor kısım):** telefon herkese tek tek gider, herkes bir seçim yapar.
    - Ekranlar rolüne göre: "Kurbanını seç", "Kimi koruyorsun?", "Kime bakıyorsun?", "Bomba koy / Patlat", "Birini düşün"...
+   - Hakem: kişi ve "ifşa / güme" seçer (yarınki düellosu). Söndürücü: kişi seçer. Kibritçi: sadece bugün soru sorduklarından. Kundakçı'nın ikinci seçimi: sadece bugün onu gösterenlerden. Listeler `Secilebilir`/`IkinciSecilebilir`'de, süzme.
    - Katillerde ikinci bir seçim: yetenekleri.
    - **Bütün ekranlar aynı düzende olsun ve benzer sürede bitsin.** Kimin uzun düşündüğünden rol anlaşılmasın.
    - Pas düğmesi herkeste.
@@ -109,13 +120,14 @@ Yazan: G1 (Enes), 2026-10-14.
   - Paket seçimi bu oyunda kullanılmaz; lobide gizle ya da "Bu oyunda kullanılmaz" yaz.
 - **Komutlar:**
   - `lincOyu {hedef}`.
-  - `geceSecimi {hedef?, ikinci?}`: `hedef` yoksa pas.
+  - `geceSecimi {hedef?, ikinci?, ifsa?}`: `hedef` yoksa pas; `ifsa` Hakem'in kararı.
+  - `yetenek {hedef?}`: gündüz yeteneği (Kuklacı'da `hedef` = C).
   - `suikast {hedef, rol}`.
 - **`durum`:**
   - Herkese: `gun`, `kalanGunduzTuru`, `oyuncular[].acikRol`, `oyuncular[].susturuldu`, `ikinciSecilebilir`.
   - `sana`: `rol`, `katiller`, `katilSecimleri`, `bulgularin`, `kalanHakkin`, `cellatHedefin`, `bombalilar`, `kulakSorusu`.
 - **Aşamalar:** `"linc"`, `"gece"`.
-- **Olaylar:** `lincBasladi`, `lincBitti`, `suikast`, `geceBasladi`, `elendi`, `geceBitti`.
+- **Olaylar:** `lincBasladi`, `lincBitti`, `suikast`, `geceBasladi`, `elendi`, `geceBitti`, `hakemKarari`, `duelloSonduruldu`.
 - **Sohbet:**
   - Kanallar: `kime: "katil"` (gece, katiller) ve `kime: "oluler"` (ölüler).
   - Gece genel sohbet kapalı: kutuyu kapat, "Gece: herkes uyuyor" yaz.

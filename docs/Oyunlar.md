@@ -217,6 +217,44 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 | Hırsız | Oyunda 1 kez gece birinin rolünü çalar: o rol (ve tarafı) sabah onun olur, çalınan kendi tarafının düz rolüne düşer (Masum, Katil; tarafsızsa Hayatta Kalan). Çalmadan oyun biterse kaybeder |
 | Bombacı | Gece birine gizlice bomba koyar ya da (kendini seçerek) patlatır: bombalı herkes ölür. Son kalırsa kazanır (ToS Arsonist) |
 
+### Çakmağa özel roller (Enes, 2026-10-15)
+
+Yetenekleri gündüz turuna bağlı: kim kime sordu (A → B), kim kimi gösterdi (B → C), düelloyu kim kazandı, soru ifşa mı güme mi. Bu modda kaos kapalı, A, B ve C herkesin önünde: gizli olan soru. Elden elede gizli yeteneği telefonu tutan kullanır (A ya da B); başkasının düellosuna karışanlar (Hakem, Söndürücü) gece hazırlar. Gündüzün kayıtları her sabah silinir.
+
+**Masumlar:**
+
+| Rol | Ne yapar |
+|---|---|
+| Sorgucu | Oyunda 1 kez (12+ kişide 2), A iken (soruyu sormadan önce de olur): soruyu mühürler, düello ne olursa olsun soru ifşa olur, bedel yok |
+| Hakem | Oyunda 2 kez: gece birini ve bir karar (ifşa / güme) seçer. Ertesi gün o kişinin B ya da C olduğu ilk düello oynanmaz, Hakem'in kararıyla biter. Herkes "Hakem kararı" görür, Hakem'in kim olduğunu değil |
+| Kollayıcı | O gün A iken soru sorduğu herkes (B) o gece korunur |
+| Yüzleşmeci | C olarak gösterildiği düelloyu kazanırsa, onu gösteren B'nin şüpheli olup olmadığını hemen öğrenir |
+| Sezgici | B iken gösterdiği C'nin şüpheli olup olmadığını sabah öğrenir |
+| Sınayıcı | Oyunda 2 kez, A iken: sorduğu B'nin şüpheli olup olmadığını sabah öğrenir |
+| Siper | Oyunda 2 kez, kendiliğinden: o gün C olarak gösterildiyse o gecenin bütün saldırılarından kurtulur |
+| Söndürücü | Oyunda 1 kez: gece birini seçer. Ertesi gün o kişinin karıştığı ilk düello söner: oynanmaz, soru güme gider, kimse ceza çekmez; Söndürücü o turun A'sının şüpheli olup olmadığını sabah öğrenir. Herkes "düello söndü" görür |
+
+**Katiller:**
+
+| Rol | Ne yapar |
+|---|---|
+| Kundakçı | Oyunda 1 kez: gece, o gün onu C olarak gösteren B'lerden birini yakar (ikinci hedef; korunan kurtulur) |
+| Dinleyici | Katillerin Kulak'ı: güme giden soruyu güme ekranında duyar |
+| Fitneci | A olduğu turlarda B'nin gösterdiği C, o gece Dedektif'e (ve şüphe bakışlarına) şüpheli görünür |
+| Kuklacı | Oyunda 1 kez, A iken: C'yi B'nin yerine o seçer (soruyu sormadan önce seçerse soru gidince işler; B'nin kendisi olamaz) |
+| Kışkırtıcı | Oyunda 1 kez, B iken: gösterdiği C o günün linçine 2 oyla başlar (C'yi seçmeden önce de olur) |
+
+**Tarafsızlar:**
+
+| Rol | Ne yapar |
+|---|---|
+| Kibritçi | Öldüren tarafsız: gece, o gün A iken soru sorduğu birini yakar. Son kalırsa kazanır |
+| Gözde | 4 kez (12+ kişide 5) C olarak gösterilirse kazananlara eklenir, ölse bile; oyun sürer |
+| Düellocu | 3 düello kazanırsa kazananlara eklenir, ölse bile |
+| Sır Küpü | En az 3 kez B olup bunların hiçbiri ifşa olmazsa kazananlara eklenir, ölse bile |
+
+Şüphe bakışlarının kuralı Dedektif'inki: katil tarafı ve öldüren tarafsızlar şüpheli, Patron temiz, o gecenin işaretlenenleri (Tuzakçı, Fitneci) şüpheli. Yüzleşmeci gündüz baktığı için işaretleri görmez.
+
 ### Dağılım
 
 | Kişi | Katil | Tarafsız | Masum |
@@ -236,20 +274,21 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 ### Gece sırası
 
 1. Seçimler toplanır. Tuzakçı işaretler, Susturucu susturur, Palyaço kandırır (ertesi gün için).
-2. Koruyucu korur.
-3. Saldırılar: katillerin kurbanları, Seri Katil, Şerif, Kanunsuz, Bombacı'nın patlatması. Korunan ölmez. Seri Katil katillerin ilk saldırısından kurtulur. Şerif vurduğu masumsa kendisi de ölür (vurduğu korunsa bile).
-4. Bakışlar gecenin başındaki rollere göre: Dedektif, Casus, Bekçi (o gece hedefe yeteneğini kullanan herkes; katillerden sadece kurbanına oy verenler), Falcı, Deli'nin sahte sonuçları.
+2. Koruyucu korur, Kollayıcı gündüz sorduklarını korur. Fitneci'nin turlarında gösterilenler işaretlenir.
+3. Saldırılar: katillerin kurbanları, Seri Katil, Şerif, Kanunsuz, Bombacı'nın patlatması, Kibritçi, Kundakçı. Korunan ölmez. Seri Katil katillerin ilk saldırısından kurtulur. Siper o gün C olduysa bütün saldırılardan kurtulur. Şerif vurduğu masumsa kendisi de ölür (vurduğu korunsa bile).
+4. Bakışlar gecenin başındaki rollere göre: Dedektif, Casus, Bekçi (o gece hedefe yeteneğini kullanan herkes; katillerden sadece kurbanına oy verenler), Falcı, Deli'nin sahte sonuçları; gündüzden bekleyen şüphe bakışları (Sezgici, Sınayıcı, Söndürücü).
 5. Ölümler: Temizlikçi'nin ve Seri Katil'in kurbanının rolü gizli. Cellat'ın hedefi öldüyse Cellat Soytarı olur.
 6. Vampir'in ısırdığı (yaşıyorsa ve masumsa) Katil olur, Hırsız çaldığı rolü alır.
+7. Yeni gün: dünün kayıtları silinir, bu gecenin Hakem ve Söndürücü seçimleri yarına hazırlanır (kullanılmazsa o gün biter).
 
 ### Kazanma (her ölümde ve oyundan çıkışta bakılır)
 
 - Soytarı linç edildi ya da Cellat'ın hedefi linç edildi: o kazanır, oyun biter.
 - Masumlar: canlı katil, Seri Katil ve Bombacı kalmadı.
 - Katiller: öldüren tarafsız kalmadı ve canlı katiller diğer canlılardan az değil.
-- Seri Katil / Bombacı: canlı tek öldüren o ve en fazla 2 kişi kaldı.
+- Seri Katil / Bombacı / Kibritçi: canlı tek öldüren o ve en fazla 2 kişi kaldı.
 - 2 ya da daha az canlı kaldıysa ve kimse kazanamıyorsa (ör. Katil ile Seri Katil) berabere.
-- Hayatta Kalan, oyun bitince hayattaysa kazananlara eklenir (beraberlikte de).
+- Ek kazananlar, kim kazanırsa kazansın (beraberlikte de): hayattaki Hayatta Kalan; hedefini tutturan Gözde, Düellocu, Sır Küpü (ölü de olsa).
 - Kurucu bitirirse kazanan yok.
 
 ### Sohbet (online)
@@ -260,7 +299,7 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 
 ### Kulak ve güme kuralı (bilinçli istisna)
 
-Ana Plan 8.5: güme giden soru hiçbir yerde kalmaz. Kulak bunun tek istisnası: soruyu **sadece güme ekranı süresince ve sadece kendi görünümünde** görür. Soru kaydedilmez (özet, grup kaydı, sunucu), güme ekranı bitince bellekten de silinir.
+Ana Plan 8.5: güme giden soru hiçbir yerde kalmaz. Kulak ve Dinleyici bunun tek istisnası: soruyu **sadece güme ekranı süresince ve sadece kendi görünümlerinde** görürler. Soru kaydedilmez (özet, grup kaydı, sunucu), güme ekranı bitince bellekten de silinir.
 
 ### Elden ele
 

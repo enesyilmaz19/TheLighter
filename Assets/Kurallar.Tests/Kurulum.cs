@@ -40,6 +40,34 @@ namespace Cakmak.Kurallar.Tests
             Assert.That(oyun.CevapSec(b, c), Is.EqualTo(Sonuc.Tamam));
         }
 
+        /// <summary>Listede, verilenler dışındaki ilk oyuncu.</summary>
+        public static OyuncuId Ilk(IReadOnlyList<OyuncuId> liste, params OyuncuId[] haric)
+        {
+            foreach (var x in liste)
+                if (Array.IndexOf(haric, x) < 0) return x;
+            Assert.Fail("uygun aday yok");
+            return default;
+        }
+
+        /// <summary>Verilen kişi (köstebek, casus) ne B ne C olur. A sorar, C kazanır, sonuç ekranı biter.</summary>
+        public static void OnsuzTur(Oyun oyun, OyuncuId kim)
+        {
+            var a = SiradakiA(oyun);
+            var b = Ilk(oyun.GorunumAl(a).Secilebilir, kim);
+            Assert.That(oyun.SoruSor(a, b, "Kim en çok uyur?"), Is.EqualTo(Sonuc.Tamam));
+            var c = Ilk(oyun.GorunumAl(b).Secilebilir, kim);
+            Assert.That(oyun.CevapSec(b, c), Is.EqualTo(Sonuc.Tamam));
+            TkmOyna(oyun, b, c, cKazansin: true);
+            Saniye(oyun, 7);
+        }
+
+        /// <summary>"Kim?" oylamasında herkes sırayla oy verir (oylama biterse durur).</summary>
+        public static void HerkesOyVerir(Oyun oyun, Func<OyuncuId, OyuncuId> kime, int kisi = 5)
+        {
+            for (int i = 1; i <= kisi && Durum(oyun).Asama == Asama.Suclama; i++)
+                Assert.That(oyun.SuclamaOyu(P(i), kime(P(i))), Is.EqualTo(Sonuc.Tamam));
+        }
+
         public static void Saniye(Oyun oyun, double sn) => oyun.Ilerle(TimeSpan.FromSeconds(sn));
 
         /// <summary>TKM'de C kazansın (ifşa) ya da B kazansın (güme).</summary>

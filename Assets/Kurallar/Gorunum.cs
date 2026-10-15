@@ -10,6 +10,8 @@ namespace Cakmak.Kurallar
     public sealed class Gorunum
     {
         public OyuncuId Sen;
+        /// <summary>Hangi oyun (herkese açık).</summary>
+        public OyunTuru Oyun;
         public Asama Asama;
         public int Tur;
         /// <summary>0 = sınırsız.</summary>
@@ -73,6 +75,63 @@ namespace Cakmak.Kurallar
         public bool BedelOdendi;
         /// <summary>Bu turda çekilen cezalar (yanma, kaybetme, bedel). Tur başında boşalır.</summary>
         public IReadOnlyList<CezaCekimi> TurCezalari = Array.Empty<CezaCekimi>();
+
+        // --- Köstebek ve Casus (docs/Oyunlar.md) ---
+
+        /// <summary>Sadece sana: gizli rolün. Köstebek'te köstebeğe Kostebek, Casus'ta casusa Casus, Çakmak Gecesi'nde herkese kendi rolü (Deli'ye sandığı rol); diğerlerinde Yok.</summary>
+        public Rol Rolun;
+        /// <summary>Sadece sana: erken suçlama hakkın duruyor mu (Köstebek, oyun boyu 1 kez).</summary>
+        public bool SuclamaHakkin;
+        /// <summary>Herkese (Köstebek, Casus): yanlış suçlanıp "şüpheli" etiketi alanlar.</summary>
+        public IReadOnlyList<OyuncuId> Supheliler = Array.Empty<OyuncuId>();
+        /// <summary>Suclama aşamasında: bu oyunun son oylaması (tur sayısı bitti ya da kurucu bitirdi).</summary>
+        public bool SonSuclama;
+
+        // --- Rus Ruleti (docs/Oyunlar.md) --- Tabancanın ısısı Isi'de (Kızgın Çakmak bu oyunda kapalı).
+
+        /// <summary>Tetik aşamasında tetiği çekecek (ya da devredecek) kişi.</summary>
+        public OyuncuId? TetikCeken;
+        /// <summary>Final: 3 kişi kaldı, sorusuz ikili düellolar.</summary>
+        public bool Final;
+
+        /// <summary>Takım Düellosu: iki takımın puanı (diğer oyunlarda boş).</summary>
+        public IReadOnlyList<int> TakimPuanlari = Array.Empty<int>();
+
+        // --- Casus (docs/Oyunlar.md) ---
+
+        /// <summary>Sadece sana: mekân (ya da kelime). Casusa ve diğer oyunlarda null.</summary>
+        public string Sirrin;
+        /// <summary>Sadece sana: mekândaki rolün ("Hostes"). Casusa, kelime oyununda ve diğer oyunlarda null.</summary>
+        public string MekanRolun;
+        /// <summary>Herkese, oyun boyunca: bu oyunun mekânları (ya da kategorinin kelimeleri). Casus bunlardan birini tahmin eder.</summary>
+        public IReadOnlyList<string> CasusListesi = Array.Empty<string>();
+        /// <summary>Herkese: kelime oyununda kategori ("Hayvanlar"), mekânda null.</summary>
+        public string CasusKategori;
+        /// <summary>CasusTahmini aşamasında: yakalanan casus (son şansını kullanıyor).</summary>
+        public OyuncuId? Yakalanan;
+
+        // --- Çakmak Gecesi (docs/Oyunlar.md) --- Rolün Rolun'da, gece ve linç oyu Oylayanlar/OyKullanan/OyVerdin/Secilebilir'de.
+
+        /// <summary>Kaçıncı gün (1'den).</summary>
+        public int Gun;
+        /// <summary>Bugün kalan çakmak turu (bu tur hariç). 0: sıradaki linç.</summary>
+        public int KalanGunduzTuru;
+        /// <summary>Sadece katillere: katil tarafındakiler ve rolleri (sen dahil, ölüler dahil).</summary>
+        public IReadOnlyList<OyuncuRolu> Katiller = Array.Empty<OyuncuRolu>();
+        /// <summary>Sadece katillere, gece: katillerin kurban oyları.</summary>
+        public IReadOnlyList<KatilSecimi> KatilSecimleri = Array.Empty<KatilSecimi>();
+        /// <summary>Sadece sana: gece bakışlarının sonuçları (Dedektif, Casus, Bekçi, Falcı; Deli'ye sahteleri).</summary>
+        public IReadOnlyList<Bulgu> Bulgularin = Array.Empty<Bulgu>();
+        /// <summary>Sadece sana: sınırlı yeteneğinin kalan hakkı (Koruyucu: kendini koruma, Seri Katil: kaçınma); yoksa null.</summary>
+        public int? KalanHakkin;
+        /// <summary>Sadece Cellat'a: hedefi.</summary>
+        public OyuncuId? CellatHedefin;
+        /// <summary>Sadece Bombacı'ya: bomba koyduğu (henüz patlamamış) kişiler.</summary>
+        public IReadOnlyList<OyuncuId> Bombalilar = Array.Empty<OyuncuId>();
+        /// <summary>Sadece Kulak'a ve Dinleyici'ye, Gume aşamasında: güme giden soru. Başka hiçbir yerde yok, ekran bitince silinir.</summary>
+        public string KulakSorusu;
+        /// <summary>Gece, sadece ikinci hedefi olan katillere (Casus, Susturucu, Tuzakçı, Temizlikçi, Palyaço, Vampir): adaylar.</summary>
+        public IReadOnlyList<OyuncuId> IkinciSecilebilir = Array.Empty<OyuncuId>();
     }
 
     public sealed class OylamaSonucu
@@ -110,6 +169,24 @@ namespace Cakmak.Kurallar
         public bool Afk;
         /// <summary>Oyundan çıktı (60 sn'de dönmedi). Bir daha seçilmez, sırası gelmez. Bağlıysa izler.</summary>
         public bool Cikti;
+
+        // --- Rus Ruleti ---
+        /// <summary>Kalan can (diğer oyunlarda 0).</summary>
+        public int Can;
+        /// <summary>Canı bitti: izleyici, seçilmez, sırası gelmez.</summary>
+        public bool Elendi;
+        /// <summary>Oyun boyu 1 "tetik devret" hakkı duruyor mu.</summary>
+        public bool DevretmeHakki;
+
+        // --- Takım Düellosu ---
+        /// <summary>Takımı (0 ya da 1); diğer oyunlarda null. Herkese açık.</summary>
+        public int? Takim;
+
+        // --- Çakmak Gecesi ---
+        /// <summary>Öldüyse ve rolü açıldıysa (ayar açık, temizlenmedi) rolü, herkese; yoksa null.</summary>
+        public Rol? AcikRol;
+        /// <summary>Bugün susturuldu: sohbete yazamaz, linçte oy veremez. Herkese açık.</summary>
+        public bool Susturuldu;
     }
 
     public sealed class MiniOyunSonucu
@@ -150,6 +227,31 @@ namespace Cakmak.Kurallar
         Afk,            // Kim: üst üste süresini doldurdu, AFK oldu
         OyuncuCikti,    // Kim: oyundan çıktı
         AfkBitti,       // Kim: AFK'dan döndü (bir mesaj yolladı)
+        // Köstebek ve Casus: "kim?" oylaması (docs/Oyunlar.md)
+        SuclamaBasladi, // Kim: erken suçlama hakkını kullanan, ya da null (aralıkla: Köstebek 5, Casus 4 turda bir; son oylama)
+        SuclamaBitti,   // Kim: en çok oyu alan (suçlanan), eşitlik ya da hiç oy yoksa null
+        // Rus Ruleti (docs/Oyunlar.md)
+        TetikBos,       // Kim: tetiği çekti, boş
+        TetikPatladi,   // Kim: tetiği çekti, patladı (bir can gitti; tabanca yeniden dolar)
+        Elendi,         // Kim: Rus Ruleti'nde canı bitti, Çakmak Gecesi'nde gece öldü
+        TetikDevredildi,// Kim: devreden, Hedef: devralan
+        FinalBasladi,   // 3 kişi kaldı: sorusuz ikili düellolar
+        TetikBasladi,   // Kim: tetiği çekecek (düelloyu kaybeden)
+        KararBekleniyor,// Kim: İkiye Katla ya da Bedel kararını verecek (süre dolunca da bu aşamaya geçilir)
+        // Takım Düellosu (docs/Oyunlar.md)
+        DuelloPuani,    // Kim: düelloyu kazanan, Takim: puan alan takım
+        IfsaBonusu,     // Kim: A (rakip takımdan birine sordu, ifşa oldu), Takim: puan alan takım
+        // Casus (docs/Oyunlar.md)
+        CasusYakalandi, // Kim: casus. Oylamada yakalandı, son şansı başladı (CasusTahmini aşaması)
+        CasusTahminEtti,// Kim: casus. Tahmin etti, oyun bitiyor (doğru mu: özette)
+        // Çakmak Gecesi (docs/Oyunlar.md)
+        LincBasladi,    // gündüz bitti, linç oylaması
+        LincBitti,      // Kim: elenen, eşitlik ya da hiç oy yoksa null
+        GeceBasladi,    // herkes gece seçimini yapar
+        GeceBitti,      // sabah: gece ölenler bundan önce birer Elendi olayıyla geldi (hiç yoksa kimse ölmedi)
+        Suikast,        // Kim: linçte Suikastçı'nın tahminiyle ölen (bildiyse hedef, bilemediyse Suikastçı)
+        HakemKarari,    // B, C: düello oynanmadı, Hakem'in kararıyla bitti (Hakem'in kim olduğu yok)
+        DuelloSonduruldu, // B, C: düello söndü, soru güme, kimse ceza çekmez (Söndürücü'nün kim olduğu yok)
     }
 
     public sealed class Olay
@@ -163,5 +265,9 @@ namespace Cakmak.Kurallar
         public string Soru;
         public Ceza Ceza;
         public KaosKurali Kaos;
+        /// <summary>Sadece TetikDevredildi: devralan.</summary>
+        public OyuncuId? Hedef;
+        /// <summary>Sadece DuelloPuani ve IfsaBonusu: puan alan takım.</summary>
+        public int? Takim;
     }
 }

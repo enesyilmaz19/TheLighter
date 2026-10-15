@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using NUnit.Framework;
 
@@ -16,6 +17,9 @@ namespace Cakmak.Kurallar.Tests
 
         static IEnumerable<string> Paketler() => Directory.GetFiles(IcerikKlasoru(), "*.txt");
 
+        /// <summary>Soru paketleri ve Çakmak Gecesi'nin soruları (paket değil, aynı kurallar).</summary>
+        static IEnumerable<string> SoruDosyalari() => Paketler().Append(Path.Combine(IcerikKlasoru(), "GeceSorulari.csv"));
+
         [Test]
         public void Icerik_klasorunde_paket_var()
         {
@@ -27,6 +31,13 @@ namespace Cakmak.Kurallar.Tests
         {
             var sorular = Paket.Ayristir(File.ReadAllText(Path.Combine(IcerikKlasoru(), "Genel.txt")));
             Assert.That(sorular.Count, Is.GreaterThanOrEqualTo(100));
+        }
+
+        [Test]
+        public void Cakmak_Gecesi_sorulari_en_az_40()
+        {
+            var sorular = Paket.Ayristir(File.ReadAllText(Path.Combine(IcerikKlasoru(), "GeceSorulari.csv")));
+            Assert.That(sorular.Count, Is.GreaterThanOrEqualTo(40));
         }
 
         [Test]
@@ -48,7 +59,7 @@ namespace Cakmak.Kurallar.Tests
         [Test]
         public void Her_soru_kurallara_uyuyor()
         {
-            foreach (var dosya in Paketler())
+            foreach (var dosya in SoruDosyalari())
             {
                 var ad = Path.GetFileName(dosya);
                 var gorulen = new HashSet<string>();

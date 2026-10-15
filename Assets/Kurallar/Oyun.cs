@@ -83,7 +83,9 @@ namespace Cakmak.Kurallar
         {
             oyun = null;
             if (ayarlar == null || oyuncular == null || rastgele == null) return Sonuc.GecersizGirdi;
-            if (oyuncular.Count < EnAzOyuncu || oyuncular.Count > EnFazlaOyuncu) return Sonuc.OyuncuSayisiGecersiz;
+            bool gece = ayarlar.Oyun == OyunTuru.CakmakGecesi;
+            if (oyuncular.Count < (gece ? GeceEnAzOyuncu : EnAzOyuncu) || oyuncular.Count > (gece ? GeceEnFazlaOyuncu : EnFazlaOyuncu))
+                return Sonuc.OyuncuSayisiGecersiz;
 
             var gorulen = new HashSet<OyuncuId>();
             var isimler = new HashSet<string>(); // grup kaydı kişileri isimle eşliyor
@@ -97,11 +99,41 @@ namespace Cakmak.Kurallar
                 || ayarlar.ToplamaSuresiSn <= 0 || ayarlar.SonucSuresiSn <= 0 || ayarlar.KararSuresiSn <= 0)
                 return Sonuc.GecersizGirdi;
 
-            // Temiz modda en fazla Hafif ceza (Ana Plan 8.1).
-            if (ayarlar.Mod == OyunModu.Temiz && ayarlar.CezaSeviyesi == CezaSeviyesi.Cesur) return Sonuc.GecersizGirdi;
+            if (!AyarlarUyumlu(ayarlar) || ayarlar.SuclamaSuresiSn <= 0) return Sonuc.GecersizGirdi;
+            if (ayarlar.Oyun == OyunTuru.Takim && !TakimDagilimiGecerli(ayarlar.TakimDagilimi, oyuncular)) return Sonuc.GecersizGirdi;
 
             oyun = new Oyun(ayarlar, oyuncular, rastgele);
             return Sonuc.Tamam;
+        }
+
+        /// <summary>
+        /// Ayarlar birbirine uyuyor mu (sayı aralıkları ayrı): Temiz'de en fazla Hafif ceza, oyunlara göre kapalı olanlar.
+        /// Kur ve sunucunun lobisi aynı kuralı kullanır.
+        /// </summary>
+        public static bool AyarlarUyumlu(Ayarlar a)
+        {
+            if (a.Mod == OyunModu.Temiz && a.CezaSeviyesi == CezaSeviyesi.Cesur) return false; // Ana Plan 8.1
+            switch (a.Oyun)
+            {
+                case OyunTuru.Kostebek:
+                    return !a.KaosTurlari;
+                case OyunTuru.RusRuleti:
+                    // Can sistemi zaten ceza; görev ve kaos turlara ve elemeye karışır (docs/Oyunlar.md, 0).
+                    return a.CezaSeviyesi == CezaSeviyesi.Kapali && !a.GizliGorevler && !a.KaosTurlari
+                        && a.Can >= 1 && a.Can <= EnFazlaCan;
+                case OyunTuru.Takim:
+                    return !a.GizliGorevler; // kişisel görev takım oyununa karışır
+                case OyunTuru.Casus:
+                    // Sorular mekâna göre yazılmalı: Curcuna'nın genel havuzu işe yaramaz. Görev ve kaos rollerle karışır.
+                    return a.Mod != OyunModu.Curcuna && !a.GizliGorevler && !a.KaosTurlari;
+                case OyunTuru.CakmakGecesi:
+                    if (a.GizliGorevler || a.KaosTurlari || a.GecelikKurban < 1 || a.GecelikKurban > EnFazlaGecelikKurban) return false;
+                    foreach (var r in a.KapaliRoller) // görev ve kaos rollerle karışır; düz Masum ve Katil kapatılamaz
+                        if (r == Rol.Masum || r == Rol.Katil || !((IList<Rol>)TumGeceRolleri).Contains(r)) return false;
+                    return true;
+                default:
+                    return true;
+            }
         }
 
         // ------------------------------------------------------------ Komutlar
@@ -183,6 +215,7 @@ namespace Cakmak.Kurallar
             SoruSoruldu(hedef);
             AsamayaGec(Asama.CevapSecme, ayar.CevapSuresiSn);
             Yay(new Olay { Tur = OlayTuru.SoruSoruldu, A = GorunenA(), B = b });
+            OyunSoruSoruldu();
             return Sonuc.Tamam;
         }
 
@@ -197,6 +230,7 @@ namespace Cakmak.Kurallar
             Bul(hedef).Gosterilme++;
             Yay(new Olay { Tur = OlayTuru.CevapSecildi, A = GorunenA(), B = b, C = c });
             CakmakDevredildi(kim, hedef);
+            if (OyunCevapSecildi()) return Sonuc.Tamam;
 
             if (kaos == KaosKurali.GrupKarari) OylamayiBaslat();
             else AsamayaGec(Asama.MiniOyun, ayar.HamleSuresiSn);
@@ -220,10 +254,20 @@ namespace Cakmak.Kurallar
             return Sonuc.Tamam;
         }
 
-        /// <summary>Oyunu hemen bitirir. Online'da kimin çağırabileceğine sunucu karar verir.</summary>
-        public Sonuc OyunuBitir()
+        /// <summary>
+        /// Oyunu bitirir. Online'da kimin çağırabileceğine sunucu karar verir. Köstebek ve Casus'ta önce son oylama yapılır
+        /// (kurucu köstebek ya da casussa oyunu bitirip kazanamasın); <paramref name="zorla"/> oylamasız hemen bitirir
+        /// (sunucu: oyuncu kalmadı), gizli kişi yakalanmamış sayılır.
+        /// </summary>
+        public Sonuc OyunuBitir(bool zorla = false)
         {
             if (asama == Asama.OyunSonu) return Sonuc.YanlisAsama;
+            if (!zorla && Suclamali)
+            {
+                if (sonSuclama) return Sonuc.YanlisAsama;
+                SonSuclamayiBaslat();
+                return Sonuc.Tamam;
+            }
             Bitir();
             return Sonuc.Tamam;
         }
@@ -267,13 +311,27 @@ namespace Cakmak.Kurallar
                 case Asama.Oylama:
                     OylamayiBitir();
                     break;
+                case Asama.Suclama:
+                    SuclamayiBitir();
+                    break;
                 case Asama.IkiyeKatla:
                 case Asama.Bedel:
                     KarardanVazgecildi();
                     break;
                 case Asama.Ifsa:
                 case Asama.Gume:
-                    TurBaslat(kaos == KaosKurali.YonDegisti ? RastgeleOyuncu(c.Value) : c.Value);
+                    var sonraki = kaos == KaosKurali.YonDegisti ? RastgeleOyuncu(c.Value) : c.Value;
+                    if (!TetikBekliyor(sonraki)) TurBaslat(sonraki);
+                    break;
+                case Asama.Tetik:
+                    TetigiCek(); // karar vermedi: kendisi çeker
+                    break;
+                case Asama.CasusTahmini:
+                    CasusBitir(CasusKazanan.Grup, CasusNedeni.Yakalandi, null); // son şansını kullanmadı
+                    break;
+                case Asama.Linc:
+                case Asama.Gece:
+                    GeceOylamasiBitti(); // seçmeyen seçmemiş sayılır
                     break;
             }
         }
@@ -289,6 +347,7 @@ namespace Cakmak.Kurallar
             var g = new Gorunum
             {
                 Sen = kim,
+                Oyun = ayar.Oyun,
                 Asama = asama,
                 Tur = tur,
                 ToplamTur = ayar.TurSayisi,
@@ -301,7 +360,8 @@ namespace Cakmak.Kurallar
                 BHamleYapti = bHamle.HasValue,
                 CHamleYapti = cHamle.HasValue,
                 Beraberlik = beraberlik,
-                SonMiniOyun = (asama == Asama.Ifsa || asama == Asama.Gume) && sonMiniOyun != null ? sonMiniOyun.Kopya() : null,
+                SonMiniOyun = (asama == Asama.Ifsa || asama == Asama.Gume || asama == Asama.Tetik) && sonMiniOyun != null
+                    ? sonMiniOyun.Kopya() : null,
             };
 
             if (asama == Asama.SoruSorma && kim == a)
@@ -337,6 +397,7 @@ namespace Cakmak.Kurallar
             }
 
             TekrarGorunumu(g, kim);
+            OyunGorunumu(g, kim);
             return g;
         }
 
@@ -345,11 +406,12 @@ namespace Cakmak.Kurallar
         void TurBaslat(OyuncuId yeniA)
         {
             TurSonuIsleri();
+            if (TurBasindaOyunKarari()) return;
             tur++;
-            if (ayar.TurSayisi > 0 && tur > ayar.TurSayisi)
+            if (ayar.TurSayisi > 0 && tur > ayar.TurSayisi && !RusRuletli && !GeceOyunu) // ikisi de bir taraf kazanana kadar sürer
             {
                 tur = ayar.TurSayisi;
-                Bitir();
+                if (!SonSuclamayiBaslat()) Bitir();
                 return;
             }
 
@@ -360,6 +422,24 @@ namespace Cakmak.Kurallar
                 yeniA = RastgeleOyuncu(yeniA);
             }
             a = yeniA;
+            TurDurumunuSifirla();
+            if (ayar.Mod == OyunModu.Curcuna && havuz != null && !havuz.Bos)
+            {
+                atananSoru = havuz.Cek(rastgele);
+                atananZorunlu = true;
+                degistirmeHakki = true;
+            }
+
+            TekrarTurBasi();
+            AsamayaGec(Asama.SoruSorma, ayar.SoruSuresiSn);
+            Yay(new Olay { Tur = OlayTuru.TurBasladi, A = GorunenA() });
+            if (kaos != KaosKurali.Yok) Yay(new Olay { Tur = OlayTuru.KaosBasladi, Kaos = kaos });
+            PeriyodikSuclama();
+        }
+
+        /// <summary>Yeni tur (ya da Rus Ruleti final düellosu): turun bütün durumu boşalır, mini oyun seçilir.</summary>
+        void TurDurumunuSifirla()
+        {
             b = null;
             c = null;
             soru = null;
@@ -372,21 +452,9 @@ namespace Cakmak.Kurallar
             buTurMiniOyun = ayar.MiniOyun == MiniOyunTuru.Karisik
                 ? KarisikHavuzu[rastgele.Next(KarisikHavuzu.Length)]
                 : ayar.MiniOyun;
-
             atananSoru = null;
             atananZorunlu = false;
             degistirmeHakki = false;
-            if (ayar.Mod == OyunModu.Curcuna && havuz != null && !havuz.Bos)
-            {
-                atananSoru = havuz.Cek(rastgele);
-                atananZorunlu = true;
-                degistirmeHakki = true;
-            }
-
-            TekrarTurBasi();
-            AsamayaGec(Asama.SoruSorma, ayar.SoruSuresiSn);
-            Yay(new Olay { Tur = OlayTuru.TurBasladi, A = GorunenA() });
-            if (kaos != KaosKurali.Yok) Yay(new Olay { Tur = OlayTuru.KaosBasladi, Kaos = kaos });
         }
 
         void ToplamayiBitir()
@@ -501,6 +569,7 @@ namespace Cakmak.Kurallar
             oneri = null;
             asama = Asama.OyunSonu;
             kalanMs = 0;
+            OyunSonuclariniYaz();
             Yay(new Olay { Tur = OlayTuru.OyunBitti });
         }
 
@@ -513,6 +582,16 @@ namespace Cakmak.Kurallar
         }
 
         void Yay(Olay olay) => OlayOldu?.Invoke(olay);
+
+        List<T> Karistir<T>(List<T> liste)
+        {
+            for (int i = liste.Count - 1; i > 0; i--)
+            {
+                int j = rastgele.Next(i + 1);
+                (liste[i], liste[j]) = (liste[j], liste[i]);
+            }
+            return liste;
+        }
 
         OyuncuDurumu Bul(OyuncuId id) => oyuncular.Find(o => o.Id == id);
 
@@ -529,7 +608,7 @@ namespace Cakmak.Kurallar
             {
                 if (o.Id == haric1 || o.Id == haric2) continue;
                 hepsi.Add(o.Id);
-                if (cikan.Contains(o.Id)) continue;
+                if (cikan.Contains(o.Id) || o.Elendi) continue;
                 kalan.Add(o.Id);
                 if (Aktif(o.Id)) aktif.Add(o.Id);
             }

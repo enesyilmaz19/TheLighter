@@ -2,6 +2,8 @@
 
 Hetzner CX23, Ubuntu 24.04 LTS. Hesap ve ödeme Enes'te. Neden böyle: `docs/Guvenlik.md`.
 
+**Denendi (2026-10-13):** 2. adım birebir WSL'deki Ubuntu 24.04'te (systemd ile) uygulandı. Servis kısıtlı kullanıcıyla ve kum havuzuyla açıldı (`systemd-analyze security`: 3.0 OK), paketler yüklendi, 4 kişilik oyun, soru gizliliği ve Temiz filtresi (Linux'ta Unicode) geçti, günlükte uyarı yok.
+
 ## 1. Makine
 
 - Sunucuyu açarken **SSH anahtarını** ekle (şifreyle giriş hiç açılmasın).
@@ -12,9 +14,10 @@ Hetzner CX23, Ubuntu 24.04 LTS. Hesap ve ödeme Enes'te. Neden böyle: `docs/Guv
 - `/etc/ssh/sshd_config`: `PasswordAuthentication no`, `PermitRootLogin prohibit-password`. Sonra `systemctl restart ssh`.
 - Güncellemeler ve kaba kuvvet koruması:
   ```bash
-  apt install -y unattended-upgrades fail2ban
+  apt install -y unattended-upgrades fail2ban libicu74
   ```
-  (Ubuntu'da fail2ban'ın SSH koruması kendiliğinden açık.)
+  (Ubuntu'da fail2ban'ın SSH koruması kendiliğinden açık. `libicu74`: .NET'in Unicode kütüphanesi; çoğu imajda zaten var, yoksa sunucu açılmaz.)
+- `ufw enable` "SSH bağlantısı kopabilir" diye sorar: 22 zaten izinli, `y` de. Kapatmadan önce **yeni bir terminalden** SSH ile girebildiğini dene.
 
 ## 2. Uygulama
 

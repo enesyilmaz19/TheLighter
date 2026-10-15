@@ -13,7 +13,8 @@ namespace Cakmak.Sunucu
     /// </summary>
     sealed class Oda
     {
-        public const int EnFazlaOyuncu = Oyun.EnFazlaOyuncu;
+        /// <summary>Oyun türü lobide seçilir: oda en kalabalık oyuna göre (Çakmak Gecesi). Diğer oyunlar 10'dan fazlayla başlamaz (Kur).</summary>
+        public const int EnFazlaOyuncu = Oyun.GeceEnFazlaOyuncu;
         /// <summary>Grup paketinin <c>paketler</c>'deki adı. İstemcide de bu ad (<c>PaketBilgisi.Bizim</c>).</summary>
         public const string GrupPaketiAdi = "@bizim";
         const int IsimEnFazla = 20;
@@ -39,9 +40,12 @@ namespace Cakmak.Sunucu
         readonly List<OdaOyuncusu> oyuncular = new List<OdaOyuncusu>();
         readonly IReadOnlyDictionary<string, IReadOnlyList<string>> paketler;
         readonly IReadOnlyList<string> sesliCezalar;
+        readonly IReadOnlyList<string> geceSorulari;
         readonly Ayarlar ayarlar = new Ayarlar();
         /// <summary>Kurucunun seçtiği paketler. Başta sunucudakilerin hepsi.</summary>
         List<string> seciliPaketler;
+        /// <summary>Takım Düellosu: kurucunun dağılımı (null = rastgele). Lobiden çıkan düşer, tekrar oynayınca sıfırlanır.</summary>
+        Dictionary<OyuncuId, int> takimlar;
         /// <summary>
         /// Grubun kendi paketi ("bizim paket"): kurucu cihazındaki grup kaydından yükler. Sadece bellekte, oda kapanınca gider.
         /// </summary>
@@ -67,12 +71,13 @@ namespace Cakmak.Sunucu
         /// <summary>Oda silindi. Bu bayraktan sonra kimse katılamaz.</summary>
         public bool Kapandi { get; private set; }
 
-        public Oda(string kod, IReadOnlyDictionary<string, IReadOnlyList<string>> paketler, IReadOnlyList<string> sesliCezalar,
+        public Oda(string kod, IReadOnlyDictionary<string, IReadOnlyList<string>> paketler, IReadOnlyList<string> sesliCezalar, IReadOnlyList<string> geceSorulari,
             Sinirlar sinirlar)
         {
             Kod = kod;
             this.paketler = paketler;
             this.sesliCezalar = sesliCezalar;
+            this.geceSorulari = geceSorulari;
             this.sinirlar = sinirlar;
             seciliPaketler = new List<string>(paketler.Keys);
         }
@@ -161,7 +166,7 @@ namespace Cakmak.Sunucu
                 if (oyun == null || o.Bekliyor)
                 {
                     // Lobide ya da bekleme odasında kopan yerini kaybeder.
-                    oyuncular.Remove(o);
+                    OdadanCikar(o);
                     if (oyun == null && oyuncular.Count == 0)
                     {
                         Kapandi = true;
@@ -211,6 +216,7 @@ namespace Cakmak.Sunucu
                 if (oyun != null) { b.Yolla(Protokol.Hata("OYUN_BASLADI")); return; }
 
                 // Önce hepsini oku ve kontrol et, sonra uygula: yarım değişiklik olmasın.
+                var oyunAdi = Protokol.Metin(m, "oyun", false);
                 var mod = Protokol.Metin(m, "mod", false);
                 var miniOyun = Protokol.Metin(m, "miniOyun", false);
                 var turSayisi = Protokol.Sayi(m, "turSayisi", false);
@@ -220,15 +226,33 @@ namespace Cakmak.Sunucu
                 var ceza = Protokol.Metin(m, "ceza", false);
                 var gorevler = Protokol.Mantik(m, "gorevler", false);
                 var kaos = Protokol.Mantik(m, "kaos", false);
+                var can = Protokol.Sayi(m, "can", false);
+                var casus = Protokol.Metin(m, "casus", false);
+                var rolAcilir = Protokol.Mantik(m, "rolAcilir", false);
+                var gecelikKurban = Protokol.Sayi(m, "gecelikKurban", false);
+                var kapaliRoller = Protokol.MetinListesi(m, "kapaliRoller")?.ConvertAll(Protokol.Coz<Rol>);
+                var yeniTakimlar = Protokol.TakimlarCoz(m, out var takimlarVerildi);
                 var secilen = Protokol.MetinListesi(m, "paketler");
-                var yeniMod = mod == null ? ayarlar.Mod : Protokol.Coz<OyunModu>(mod);
-                var yeniMiniOyun = miniOyun == null ? ayarlar.MiniOyun : Protokol.Coz<MiniOyunTuru>(miniOyun);
-                var yeniCeza = ceza == null ? ayarlar.CezaSeviyesi : Protokol.Coz<CezaSeviyesi>(ceza);
+                // Birbirine uyma kuralları (Temiz + Cesur, oyuna göre kapalı olanlar) kural motorunda tek yerde.
+                var yeni = new Ayarlar
+                {
+                    Oyun = oyunAdi == null ? ayarlar.Oyun : Protokol.Coz<OyunTuru>(oyunAdi),
+                    Mod = mod == null ? ayarlar.Mod : Protokol.Coz<OyunModu>(mod),
+                    MiniOyun = miniOyun == null ? ayarlar.MiniOyun : Protokol.Coz<MiniOyunTuru>(miniOyun),
+                    CezaSeviyesi = ceza == null ? ayarlar.CezaSeviyesi : Protokol.Coz<CezaSeviyesi>(ceza),
+                    GizliGorevler = gorevler ?? ayarlar.GizliGorevler,
+                    KaosTurlari = kaos ?? ayarlar.KaosTurlari,
+                    Can = can ?? ayarlar.Can,
+                    Casus = casus == null ? ayarlar.Casus : Protokol.Coz<CasusTuru>(casus),
+                    RolAcilir = rolAcilir ?? ayarlar.RolAcilir,
+                    GecelikKurban = gecelikKurban ?? ayarlar.GecelikKurban,
+                    KapaliRoller = kapaliRoller ?? ayarlar.KapaliRoller,
+                };
 
                 // Reaksiyon sadece elden ele: online'da süre istemciden gelir ve telefonların dokunma gecikmesi farklıdır.
-                // Temiz modda en fazla Hafif ceza (Ana Plan 8.1).
-                if (yeniMiniOyun == MiniOyunTuru.Reaksiyon
-                    || (yeniMod == OyunModu.Temiz && yeniCeza == CezaSeviyesi.Cesur)
+                if (yeni.MiniOyun == MiniOyunTuru.Reaksiyon
+                    || !Oyun.AyarlarUyumlu(yeni)
+                    || !TakimlarGecerli(yeniTakimlar)
                     || (secilen != null && !PaketlerGecerli(secilen))
                     || !Aralikta(turSayisi, 0, 100) || !Aralikta(soruSn, 5, 300) || !Aralikta(cevapSn, 5, 300) || !Aralikta(hamleSn, 5, 300))
                 {
@@ -236,15 +260,22 @@ namespace Cakmak.Sunucu
                     return;
                 }
 
-                ayarlar.Mod = yeniMod;
-                ayarlar.MiniOyun = yeniMiniOyun;
-                ayarlar.CezaSeviyesi = yeniCeza;
+                ayarlar.Oyun = yeni.Oyun;
+                ayarlar.Mod = yeni.Mod;
+                ayarlar.MiniOyun = yeni.MiniOyun;
+                ayarlar.CezaSeviyesi = yeni.CezaSeviyesi;
+                ayarlar.GizliGorevler = yeni.GizliGorevler;
+                ayarlar.KaosTurlari = yeni.KaosTurlari;
+                ayarlar.Can = yeni.Can;
+                ayarlar.Casus = yeni.Casus;
+                ayarlar.RolAcilir = yeni.RolAcilir;
+                ayarlar.GecelikKurban = yeni.GecelikKurban;
+                ayarlar.KapaliRoller = yeni.KapaliRoller;
+                if (takimlarVerildi) ayarlar.TakimDagilimi = takimlar = yeniTakimlar;
                 if (turSayisi.HasValue) ayarlar.TurSayisi = turSayisi.Value;
                 if (soruSn.HasValue) ayarlar.SoruSuresiSn = soruSn.Value;
                 if (cevapSn.HasValue) ayarlar.CevapSuresiSn = cevapSn.Value;
                 if (hamleSn.HasValue) ayarlar.HamleSuresiSn = hamleSn.Value;
-                if (gorevler.HasValue) ayarlar.GizliGorevler = gorevler.Value;
-                if (kaos.HasValue) ayarlar.KaosTurlari = kaos.Value;
                 if (secilen != null) seciliPaketler = secilen;
                 HerkeseDurum();
             }
@@ -267,9 +298,18 @@ namespace Cakmak.Sunucu
                     // Grubun kendi yazdığı sorular filtreden geçmedi: Temiz modda kullanılmaz (elden elede de öyle).
                     else if (ayarlar.Mod != OyunModu.Temiz) sorular.AddRange(grupSorulari);
                 }
+                // Çakmak Gecesi'nin önerileri suçlama soruları (paket seçimi bu oyunda kullanılmaz).
+                if (ayarlar.Oyun == OyunTuru.CakmakGecesi) sorular = new List<string>(geceSorulari);
 
                 var kopya = new Ayarlar
                 {
+                    Oyun = ayarlar.Oyun,
+                    Can = ayarlar.Can,
+                    Casus = ayarlar.Casus,
+                    RolAcilir = ayarlar.RolAcilir,
+                    GecelikKurban = ayarlar.GecelikKurban,
+                    KapaliRoller = new List<Rol>(ayarlar.KapaliRoller),
+                    TakimDagilimi = takimlar == null ? null : new Dictionary<OyuncuId, int>(takimlar),
                     Mod = ayarlar.Mod,
                     MiniOyun = ayarlar.MiniOyun,
                     TurSayisi = ayarlar.TurSayisi,
@@ -348,6 +388,7 @@ namespace Cakmak.Sunucu
                 if (!oyunBitti) { b.Yolla(Protokol.Hata("YANLIS_ASAMA")); return; }
 
                 oyuncular.RemoveAll(o => o.Baglanti == null);
+                ayarlar.TakimDagilimi = takimlar = null; // oyuncular değişti: takımlar yeniden (rastgele ya da kurucu)
                 foreach (var o in oyuncular)
                 {
                     o.Bekliyor = false;
@@ -429,6 +470,34 @@ namespace Cakmak.Sunucu
                     case "karariGec":
                         sonuc = oyun.KarariGec(b.Kim);
                         break;
+                    case "sucla":
+                        sonuc = oyun.Sucla(b.Kim);
+                        break;
+                    case "suclamaOyu":
+                        sonuc = oyun.SuclamaOyu(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")));
+                        break;
+                    case "tetikCek":
+                        sonuc = oyun.TetikCek(b.Kim);
+                        break;
+                    case "lincOyu":
+                        sonuc = oyun.LincOyu(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")));
+                        break;
+                    case "geceSecimi": // hedef yoksa pas
+                        sonuc = oyun.GeceSecimi(b.Kim, Protokol.IstegeBagliId(m, "hedef"), Protokol.IstegeBagliId(m, "ikinci"),
+                            Protokol.Mantik(m, "ifsa", false));
+                        break;
+                    case "yetenek": // Çakmak Gecesi'nin gündüz yeteneği (Sorgucu, Sınayıcı, Kuklacı, Kışkırtıcı)
+                        sonuc = oyun.GunduzYetenegi(b.Kim, Protokol.IstegeBagliId(m, "hedef"));
+                        break;
+                    case "suikast":
+                        sonuc = oyun.Suikast(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")), Protokol.Coz<Rol>(Protokol.Metin(m, "rol")));
+                        break;
+                    case "casusTahmini":
+                        sonuc = oyun.CasusTahmini(b.Kim, Protokol.Metin(m, "tahmin"));
+                        break;
+                    case "tetikDevret":
+                        sonuc = oyun.TetikDevret(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")));
+                        break;
                     default:
                         throw new GecersizMesaj();
                 }
@@ -440,8 +509,10 @@ namespace Cakmak.Sunucu
         // ------------------------------------------------------------ Sohbet
 
         /// <summary>
-        /// Sohbet (Ana Plan 6.4): <c>kime</c> null ise odadaki herkese (bekleme odası dahil), doluysa sadece ona ve yazana.
-        /// Sunucu mesaj saklamaz. Temiz modda filtreye takılan gönderilmez, yazan uyarılır.
+        /// Sohbet (Ana Plan 6.4): <c>kime</c> null ise odadaki herkese (bekleme odası dahil), oyuncuysa sadece ona ve yazana,
+        /// kanalsa (<c>"takim"</c>, <c>"katil"</c>, <c>"oluler"</c>) kanalın üyelerine. Kim nereye yazabilir: kural motoru
+        /// (<see cref="Oyun.SohbeteYazabilir"/>, <see cref="Oyun.KanalAlicilari"/>). Sunucu mesaj saklamaz. Temiz modda
+        /// filtreye takılan gönderilmez, yazan uyarılır.
         /// </summary>
         public void Sohbet(Baglanti b, JsonObject m)
         {
@@ -450,10 +521,14 @@ namespace Cakmak.Sunucu
                 if (!UyeMi(b)) return;
                 if (!sinirlar.SohbetIzni(b)) { b.Yolla(Protokol.Hata("COK_HIZLI")); return; }
                 var kimeMetni = Protokol.Metin(m, "kime", false);
-                OyuncuId? kime = kimeMetni == null ? (OyuncuId?)null : Protokol.IdCoz(kimeMetni);
+                var kanal = Protokol.KanalCoz(kimeMetni);
+                OyuncuId? kime = kimeMetni == null || kanal.HasValue ? (OyuncuId?)null : Protokol.IdCoz(kimeMetni);
                 var metin = TemizMetin.Temizle(Protokol.Metin(m, "metin"));
                 var alan = kime == null ? null : oyuncular.Find(o => o.Id == kime.Value);
-                if (metin.Length == 0 || metin.Length > SohbetEnFazla || (kime != null && (alan == null || alan.Id == b.Kim)))
+                // Lobide kanal yok, genel ve DM serbest. Oyunda kuralı motor bilir (Çakmak Gecesi: gece, ölüler ve susturulan genele yazamaz).
+                var alicilar = kanal.HasValue ? oyun?.KanalAlicilari(b.Kim, kanal.Value) : null;
+                if (metin.Length == 0 || metin.Length > SohbetEnFazla || (kime != null && (alan == null || alan.Id == b.Kim))
+                    || (kanal.HasValue && alicilar == null) || (!kanal.HasValue && oyun != null && !oyun.SohbeteYazabilir(b.Kim)))
                 {
                     b.Yolla(Protokol.Hata("GECERSIZ_GIRDI"));
                     return;
@@ -464,14 +539,31 @@ namespace Cakmak.Sunucu
                     return;
                 }
 
-                var json = Protokol.Sohbet(++sohbetSayaci, b.Kim, kime, metin);
-                if (alan == null) foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
+                var json = Protokol.Sohbet(++sohbetSayaci, b.Kim, kime, metin, kanal);
+                if (kanal.HasValue) foreach (var o in oyuncular) { if (alicilar.Contains(o.Id)) o.Baglanti?.Yolla(json); }
+                else if (alan == null) foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
                 else
                 {
                     alan.Baglanti?.Yolla(json);
                     b.Yolla(json);
                 }
             }
+        }
+
+        /// <summary>Kurucunun takım dağılımı: sayılar 0 ya da 1, hepsi odada. Herkesin olup olmadığı ve denge başlatırken (Kur).</summary>
+        bool TakimlarGecerli(Dictionary<OyuncuId, int> dagilim)
+        {
+            if (dagilim == null) return true;
+            foreach (var x in dagilim)
+                if (x.Value < 0 || x.Value >= Oyun.TakimSayisi || !oyuncular.Exists(o => o.Id == x.Key)) return false;
+            return true;
+        }
+
+        /// <summary>Lobide ya da bekleme odasında çıkan yerini kaybeder; lobideyse takım dağılımından da düşer.</summary>
+        void OdadanCikar(OdaOyuncusu o)
+        {
+            oyuncular.Remove(o);
+            if (oyun == null) takimlar?.Remove(o.Id);
         }
 
         /// <summary>Temiz modda filtreye takılan metin (soru ya da sohbet): gönderilmez, yazan uyarılır, son ihlalde atılır.</summary>
@@ -502,7 +594,7 @@ namespace Cakmak.Sunucu
             var olay = Protokol.AtildiOlayi(o.Id, neden);
             foreach (var x in oyuncular) x.Baglanti?.Yolla(olay);
 
-            if (oyun == null || o.Bekliyor) oyuncular.Remove(o);
+            if (oyun == null || o.Bekliyor) OdadanCikar(o);
             else if (!o.Cikti)
             {
                 o.Cikti = true;
@@ -570,7 +662,8 @@ namespace Cakmak.Sunucu
             {
                 if (azOyuncuBekleme == TimeSpan.Zero) degisti = true; // durum'a "bekleme" girsin
                 azOyuncuBekleme += gecen;
-                if (azOyuncuBekleme >= sinirlar.AzOyuncuSuresi) oyun.OyunuBitir();
+                // Oylamasız biter: kimse dönmedi, Köstebek'in son oylaması da yapılamaz.
+                if (azOyuncuBekleme >= sinirlar.AzOyuncuSuresi) oyun.OyunuBitir(zorla: true);
                 return;
             }
             if (azOyuncuBekleme > TimeSpan.Zero)

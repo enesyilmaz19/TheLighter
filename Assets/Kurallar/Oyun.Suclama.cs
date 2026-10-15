@@ -5,7 +5,7 @@ namespace Cakmak.Kurallar
 {
     // Gizli kişili oyunların ortak "kim?" oylaması (Köstebek, Casus; docs/Oyunlar.md 1 ve 4). Aralıkla ve oyun biterken
     // son kez yapılır. En çok oyu gizli kişi alırsa ya da gizli kişi kaçarsa oyunun kuralı işler (Oyun.Kancalar.cs);
-    // almazsa yanlış suçlanan şüpheli olur, oyun sürer. Oy sayımı (EnCokOyAlanlar) Vampir'in linci ve gecesiyle ortak.
+    // almazsa yanlış suçlanan şüpheli olur, oyun sürer. Oy sayımı (EnCokOyAlanlar) Çakmak Gecesi'nin linci ve gecesiyle ortak.
     public sealed partial class Oyun
     {
         /// <summary>Gizli kişi: köstebek ya da casus.</summary>

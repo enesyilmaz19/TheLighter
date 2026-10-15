@@ -20,7 +20,7 @@ namespace Cakmak.Sunucu
         /// <summary>Paket adı (dosya adı, uzantısız: "Genel") → soruları. Ada göre sıralı.</summary>
         readonly SortedDictionary<string, IReadOnlyList<string>> paketler = new SortedDictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
         readonly IReadOnlyList<string> sesliCezalar = Array.Empty<string>();
-        readonly IReadOnlyList<string> vampirSorulari = Array.Empty<string>();
+        readonly IReadOnlyList<string> geceSorulari = Array.Empty<string>();
         readonly Sinirlar sinirlar;
 
         public OdaYoneticisi(ILogger<OdaYoneticisi> log, Sinirlar sinirlar)
@@ -33,11 +33,11 @@ namespace Cakmak.Sunucu
                     paketler[Path.GetFileNameWithoutExtension(dosya)] = Paket.Ayristir(File.ReadAllText(dosya));
                 var cezalar = Path.Combine(klasor, "Cezalar.csv");
                 if (File.Exists(cezalar)) sesliCezalar = Paket.Ayristir(File.ReadAllText(cezalar));
-                var vampir = Path.Combine(klasor, "VampirSorulari.csv");
-                if (File.Exists(vampir)) vampirSorulari = Paket.Ayristir(File.ReadAllText(vampir));
+                var gece = Path.Combine(klasor, "GeceSorulari.csv");
+                if (File.Exists(gece)) geceSorulari = Paket.Ayristir(File.ReadAllText(gece));
             }
             foreach (var p in paketler) log.LogInformation("Paket {Ad}: {Adet} soru", p.Key, p.Value.Count);
-            log.LogInformation("Sesli ceza: {Adet}, Vampir sorusu: {Vampir} ({Klasor})", sesliCezalar.Count, vampirSorulari.Count, klasor);
+            log.LogInformation("Sesli ceza: {Adet}, Çakmak Gecesi sorusu: {Gece} ({Klasor})", sesliCezalar.Count, geceSorulari.Count, klasor);
         }
 
         public IEnumerable<Oda> Odalar => odalar.Values;
@@ -117,7 +117,7 @@ namespace Cakmak.Sunucu
             while (true)
             {
                 var kod = RandomNumberGenerator.GetString(KodHarfleri, KodUzunlugu);
-                var oda = new Oda(kod, paketler, sesliCezalar, vampirSorulari, sinirlar);
+                var oda = new Oda(kod, paketler, sesliCezalar, geceSorulari, sinirlar);
                 if (odalar.TryAdd(kod, oda)) return oda;
             }
         }

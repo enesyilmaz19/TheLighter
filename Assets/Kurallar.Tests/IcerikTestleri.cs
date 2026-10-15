@@ -17,8 +17,8 @@ namespace Cakmak.Kurallar.Tests
 
         static IEnumerable<string> Paketler() => Directory.GetFiles(IcerikKlasoru(), "*.txt");
 
-        /// <summary>Soru paketleri ve Vampir Köylü'nün soruları (paket değil, aynı kurallar).</summary>
-        static IEnumerable<string> SoruDosyalari() => Paketler().Append(Path.Combine(IcerikKlasoru(), "VampirSorulari.csv"));
+        /// <summary>Soru paketleri ve Çakmak Gecesi'nin soruları (paket değil, aynı kurallar).</summary>
+        static IEnumerable<string> SoruDosyalari() => Paketler().Append(Path.Combine(IcerikKlasoru(), "GeceSorulari.csv"));
 
         [Test]
         public void Icerik_klasorunde_paket_var()
@@ -34,9 +34,9 @@ namespace Cakmak.Kurallar.Tests
         }
 
         [Test]
-        public void Vampir_sorulari_en_az_40()
+        public void Cakmak_Gecesi_sorulari_en_az_40()
         {
-            var sorular = Paket.Ayristir(File.ReadAllText(Path.Combine(IcerikKlasoru(), "VampirSorulari.csv")));
+            var sorular = Paket.Ayristir(File.ReadAllText(Path.Combine(IcerikKlasoru(), "GeceSorulari.csv")));
             Assert.That(sorular.Count, Is.GreaterThanOrEqualTo(40));
         }
 

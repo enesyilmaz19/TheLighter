@@ -78,7 +78,7 @@ namespace Cakmak.Kurallar
 
         // --- Köstebek ve Casus (docs/Oyunlar.md) ---
 
-        /// <summary>Sadece sana: gizli rolün. Köstebek'te köstebeğe Kostebek, Casus'ta casusa Casus; diğer herkese ve diğer oyunlarda Yok.</summary>
+        /// <summary>Sadece sana: gizli rolün. Köstebek'te köstebeğe Kostebek, Casus'ta casusa Casus, Çakmak Gecesi'nde herkese kendi rolü (Deli'ye sandığı rol); diğerlerinde Yok.</summary>
         public Rol Rolun;
         /// <summary>Sadece sana: erken suçlama hakkın duruyor mu (Köstebek, oyun boyu 1 kez).</summary>
         public bool SuclamaHakkin;
@@ -110,32 +110,28 @@ namespace Cakmak.Kurallar
         /// <summary>CasusTahmini aşamasında: yakalanan casus (son şansını kullanıyor).</summary>
         public OyuncuId? Yakalanan;
 
-        // --- Vampir Köylü (docs/Oyunlar.md) --- Rolün Rolun'da, gece ve linç oyu Oylayanlar/OyKullanan/OyVerdin/Secilebilir'de.
+        // --- Çakmak Gecesi (docs/Oyunlar.md) --- Rolün Rolun'da, gece ve linç oyu Oylayanlar/OyKullanan/OyVerdin/Secilebilir'de.
 
         /// <summary>Kaçıncı gün (1'den).</summary>
         public int Gun;
         /// <summary>Bugün kalan çakmak turu (bu tur hariç). 0: sıradaki linç.</summary>
         public int KalanGunduzTuru;
-        /// <summary>Sadece vampirlere: bütün vampirler (sen dahil).</summary>
-        public IReadOnlyList<OyuncuId> Vampirler = Array.Empty<OyuncuId>();
-        /// <summary>Sadece vampirlere, gece: vampirlerin bu geceki seçimleri.</summary>
-        public IReadOnlyList<VampirSecimi> VampirSecimleri = Array.Empty<VampirSecimi>();
-        /// <summary>Sadece gözcüye: bugüne kadar baktıkları.</summary>
-        public IReadOnlyList<GozcuBilgisi> GozcuBilgilerin = Array.Empty<GozcuBilgisi>();
-        /// <summary>Sadece doktora: kendini koruma hakkı (oyun boyu 1) duruyor mu.</summary>
-        public bool KendiniKoruyabilir;
-    }
-
-    public sealed class VampirSecimi
-    {
-        public OyuncuId Kim;
-        public OyuncuId Hedef;
-    }
-
-    public sealed class GozcuBilgisi
-    {
-        public OyuncuId Kim;
-        public bool Vampir;
+        /// <summary>Sadece katillere: katil tarafındakiler ve rolleri (sen dahil, ölüler dahil).</summary>
+        public IReadOnlyList<OyuncuRolu> Katiller = Array.Empty<OyuncuRolu>();
+        /// <summary>Sadece katillere, gece: katillerin kurban oyları.</summary>
+        public IReadOnlyList<KatilSecimi> KatilSecimleri = Array.Empty<KatilSecimi>();
+        /// <summary>Sadece sana: gece bakışlarının sonuçları (Dedektif, Casus, Bekçi, Falcı; Deli'ye sahteleri).</summary>
+        public IReadOnlyList<Bulgu> Bulgularin = Array.Empty<Bulgu>();
+        /// <summary>Sadece sana: sınırlı yeteneğinin kalan hakkı (Koruyucu: kendini koruma, Seri Katil: kaçınma); yoksa null.</summary>
+        public int? KalanHakkin;
+        /// <summary>Sadece Cellat'a: hedefi.</summary>
+        public OyuncuId? CellatHedefin;
+        /// <summary>Sadece Bombacı'ya: bomba koyduğu (henüz patlamamış) kişiler.</summary>
+        public IReadOnlyList<OyuncuId> Bombalilar = Array.Empty<OyuncuId>();
+        /// <summary>Sadece Kulak'a ve Dinleyici'ye, Gume aşamasında: güme giden soru. Başka hiçbir yerde yok, ekran bitince silinir.</summary>
+        public string KulakSorusu;
+        /// <summary>Gece, sadece ikinci hedefi olan katillere (Casus, Susturucu, Tuzakçı, Temizlikçi, Palyaço, Vampir): adaylar.</summary>
+        public IReadOnlyList<OyuncuId> IkinciSecilebilir = Array.Empty<OyuncuId>();
     }
 
     public sealed class OylamaSonucu
@@ -186,9 +182,11 @@ namespace Cakmak.Kurallar
         /// <summary>Takımı (0 ya da 1); diğer oyunlarda null. Herkese açık.</summary>
         public int? Takim;
 
-        // --- Vampir Köylü ---
-        /// <summary>Elendiyse ve rol açılması açıksa rolü (herkese); yoksa null.</summary>
+        // --- Çakmak Gecesi ---
+        /// <summary>Öldüyse ve rolü açıldıysa (ayar açık, temizlenmedi) rolü, herkese; yoksa null.</summary>
         public Rol? AcikRol;
+        /// <summary>Bugün susturuldu: sohbete yazamaz, linçte oy veremez. Herkese açık.</summary>
+        public bool Susturuldu;
     }
 
     public sealed class MiniOyunSonucu
@@ -235,7 +233,7 @@ namespace Cakmak.Kurallar
         // Rus Ruleti (docs/Oyunlar.md)
         TetikBos,       // Kim: tetiği çekti, boş
         TetikPatladi,   // Kim: tetiği çekti, patladı (bir can gitti; tabanca yeniden dolar)
-        Elendi,         // Kim: canı bitti
+        Elendi,         // Kim: Rus Ruleti'nde canı bitti, Çakmak Gecesi'nde gece öldü
         TetikDevredildi,// Kim: devreden, Hedef: devralan
         FinalBasladi,   // 3 kişi kaldı: sorusuz ikili düellolar
         TetikBasladi,   // Kim: tetiği çekecek (düelloyu kaybeden)
@@ -246,11 +244,14 @@ namespace Cakmak.Kurallar
         // Casus (docs/Oyunlar.md)
         CasusYakalandi, // Kim: casus. Oylamada yakalandı, son şansı başladı (CasusTahmini aşaması)
         CasusTahminEtti,// Kim: casus. Tahmin etti, oyun bitiyor (doğru mu: özette)
-        // Vampir Köylü (docs/Oyunlar.md)
+        // Çakmak Gecesi (docs/Oyunlar.md)
         LincBasladi,    // gündüz bitti, linç oylaması
         LincBitti,      // Kim: elenen, eşitlik ya da hiç oy yoksa null
         GeceBasladi,    // herkes gece seçimini yapar
-        GeceBitti,      // Kim: gece ölen, kimse ölmediyse null (korundu ya da vampir seçmedi: ayırt edilmez)
+        GeceBitti,      // sabah: gece ölenler bundan önce birer Elendi olayıyla geldi (hiç yoksa kimse ölmedi)
+        Suikast,        // Kim: linçte Suikastçı'nın tahminiyle ölen (bildiyse hedef, bilemediyse Suikastçı)
+        HakemKarari,    // B, C: düello oynanmadı, Hakem'in kararıyla bitti (Hakem'in kim olduğu yok)
+        DuelloSonduruldu, // B, C: düello söndü, soru güme, kimse ceza çekmez (Söndürücü'nün kim olduğu yok)
     }
 
     public sealed class Olay

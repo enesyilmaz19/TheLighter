@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Cakmak.Kurallar;
 using NUnit.Framework;
 
 namespace SunucuTestleri
@@ -65,10 +66,10 @@ namespace SunucuTestleri
         }
 
         [Test]
-        public async Task Oda_kapasitesi_bekleyenlerle_birlikte_10()
+        public async Task Oda_kapasitesi_bekleyenlerle_birlikte()
         {
             var o = await OyunBaslat(4);
-            for (int i = 0; i < 6; i++) await Katil(o[0].Oda, "Bekleyen" + i);
+            for (int i = 4; i < Oyun.GeceEnFazlaOyuncu; i++) await Katil(o[0].Oda, "Bekleyen" + i);
             var fazla = await Baglan();
             await fazla.Gonder(new { t = "katil", oda = o[0].Oda, isim = "Fazla", anahtar = (string)null });
             await fazla.Hata("ODA_DOLU");

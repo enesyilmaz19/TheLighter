@@ -32,7 +32,7 @@ namespace SunucuTestleri
         }
 
         /// <summary>n kişilik oyun, kısa sürelerle. Herkes soruSorma durumunu görene kadar bekler.</summary>
-        async Task<List<TestIstemci>> OyunBaslat(int n, int kopukSn = 2, int azOyuncuSn = 3, int cevapSn = 20)
+        async Task<List<TestIstemci>> OyunBaslat(int n, int kopukSn = 2, int azOyuncuSn = 3, int cevapSn = 20, string oyun = "cakmak")
         {
             sunucu = Kurulum.Sunucu(("Sinirlar:KopukSn", kopukSn.ToString()), ("Sinirlar:AzOyuncuSn", azOyuncuSn.ToString()));
             var o = new List<TestIstemci>();
@@ -45,7 +45,7 @@ namespace SunucuTestleri
                 await x.Bekle("hosgeldin");
                 o.Add(x);
             }
-            await o[0].Gonder(new { t = "ayarlar", turSayisi = 0, cevapSn });
+            await o[0].Gonder(new { t = "ayarlar", turSayisi = 0, cevapSn, oyun });
             foreach (var x in o) await x.Bekle("durum", d => (int)d["ayarlar"]["cevapSn"] == cevapSn);
             await o[0].Gonder(new { t = "baslat" });
             foreach (var x in o) await x.Bekle("durum", d => (string)d["asama"] == "soruSorma");
@@ -68,6 +68,16 @@ namespace SunucuTestleri
 
         /// <summary>A olmayan bir oyuncu.</summary>
         static TestIstemci AOlmayan(List<TestIstemci> o) => o.Last(y => y != A(o));
+
+        [Test]
+        public async Task Kostebekte_4un_altinda_kimse_donmezse_oyun_oylamasiz_biter()
+        {
+            // Oyun dururken saat işlemez: son oylama başlasaydı hiç bitmezdi.
+            var o = await OyunBaslat(4, azOyuncuSn: 1, oyun: "kostebek");
+            await o[3].Kapat();
+            var d = await o[0].Bekle("durum", m => (string)m["asama"] == "oyunSonu", Uzun);
+            Assert.That((string)d["ozet"]["kostebek"]["neden"], Is.EqualTo("yakalanmadi"));
+        }
 
         [Test]
         public async Task Kopanin_yeri_tutulur_secilemez_donmezse_oyundan_cikar()

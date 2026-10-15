@@ -146,12 +146,13 @@ namespace Cakmak.Kurallar
 
             if (KizginCakmak) esik = YeniEsik();
 
-            if (ayar.GizliGorevler)
+            if (GorevlerAcik)
             {
                 // Herkese aynı zorlukta görev (Ana Plan 8.2).
                 var zorluk = (Zorluk)rastgele.Next(3);
                 foreach (var o in oyuncular) IzAl(o.Id).Gorev = GorevUret(o.Id, zorluk);
             }
+            OyunlariKur();
         }
 
         void TekrarTurBasi()
@@ -270,6 +271,16 @@ namespace Cakmak.Kurallar
             soru = null;
         }
 
+        /// <summary>
+        /// Tur bitti, sıradaki aşama soruyla ilgisiz (Köstebek oylaması, Rus Ruleti tetiği): ifşa olmadıysa güme sayılır,
+        /// metin bırakılır. İfşa olan soru kayıtlarda kalır; sonradan Bitir'deki güme temizliği ona dokunmaz.
+        /// </summary>
+        void SoruyuKapat()
+        {
+            if (asama != Asama.Ifsa) GumeyeGitti();
+            soru = null;
+        }
+
         /// <summary>Süre dolup tur yarıda kaldıysa "kendisini gösterene hemen soru" (İntikamcı) zinciri kopar.</summary>
         void OncekiTuruUnut()
         {
@@ -353,11 +364,14 @@ namespace Cakmak.Kurallar
 
         void MiniOyunSonrasi(bool cKazandi)
         {
+            if (FinalDuellosuBitti(cKazandi)) return;
             if (kaos == KaosKurali.IkiyeKatla && !katlandi)
             {
                 bekleyenCKazandi = cKazandi;
                 kararVeren = cKazandi ? b : c;
                 AsamayaGec(Asama.IkiyeKatla, ayar.KararSuresiSn);
+                // Süre dolup da gelinebilir: olaysız aşama değişikliği online'da ekrana gitmez.
+                Yay(new Olay { Tur = OlayTuru.KararBekleniyor, Kim = kararVeren });
                 return;
             }
             SonucaGec(cKazandi);
@@ -387,6 +401,7 @@ namespace Cakmak.Kurallar
                 bekleyenKaybeden = kaybeden;
                 kararVeren = b;
                 AsamayaGec(Asama.Bedel, ayar.KararSuresiSn);
+                Yay(new Olay { Tur = OlayTuru.KararBekleniyor, Kim = kararVeren });
                 return;
             }
             TuruBitir(ifsa, kaybeden, bedel: false);
@@ -395,6 +410,7 @@ namespace Cakmak.Kurallar
         void TuruBitir(bool ifsa, OyuncuId? kaybeden, bool bedel)
         {
             kararVeren = null;
+            OyunTurSonucu(ifsa, kaybeden);
             var bo = Bul(b.Value);
             var co = Bul(c.Value);
 
@@ -559,6 +575,12 @@ namespace Cakmak.Kurallar
                     Afk = afk.Contains(o.Id),
                     Cikti = cikan.Contains(o.Id),
                     Kisitlamalar = kisitlamalar,
+                    Can = o.Can,
+                    Elendi = o.Elendi,
+                    DevretmeHakki = o.DevretmeHakki,
+                    Takim = o.Takim,
+                    AcikRol = o.AcikRol,
+                    Susturuldu = o.Susturuldu,
                 });
             }
             return liste;
@@ -674,7 +696,7 @@ namespace Cakmak.Kurallar
         {
             bool bitti = asama == Asama.OyunSonu;
             var gorevler = new List<GorevSonucu>();
-            if (ayar.GizliGorevler && bitti)
+            if (GorevlerAcik && bitti)
                 foreach (var o in oyuncular)
                 {
                     var iz = IzAl(o.Id);
@@ -684,7 +706,7 @@ namespace Cakmak.Kurallar
             var ifsalar = new List<IfsaKaydi>(ifsaKayitlari.Count);
             if (bitti) foreach (var k in ifsaKayitlari) ifsalar.Add(new IfsaKaydi { Soru = k.Soru, A = k.A, B = k.B, C = k.C });
 
-            return new OyunOzeti
+            var ozet = new OyunOzeti
             {
                 OynananTur = tur,
                 Oyuncular = OyuncuKopyasi(),
@@ -693,6 +715,8 @@ namespace Cakmak.Kurallar
                 IfsaOlanlar = ifsalar,
                 CurcunaSorulari = new List<string>(curcunaYazilan),
             };
+            if (bitti) OyunOzetine(ozet); // oyunların sonucu (köstebek kimdi, kazanan) oyun bitmeden yok
+            return ozet;
         }
 
         /// <summary>Her unvanın tek bir sahibi olmalı (eşitlikte kimse almaz). En uç 3 unvan seçilir.</summary>

@@ -232,6 +232,21 @@ namespace SunucuTestleri
         }
 
         [Test]
+        public async Task Mini_oyun_suresi_dolup_bedele_gelinince_B_karari_gorur()
+        {
+            // Sadece C hamle yaptı: süre dolunca C kazanır, soru ifşa olacak, önce B'ye bedel. Bu geçiş saatten
+            // geliyor (komuttan değil); olay yayılmasaydı sunucu durum yollamaz, B bedel sorusunu hiç görmezdi.
+            var o = await AyarlaVeBaslat(4, new { t = "ayarlar", ceza = "hafif", hamleSn = 5 });
+            var (_, b) = await Sor(o, GizliMetin("Sure"));
+            var c = await Sec(o, b);
+            await Hamle(c, "kagit");
+            var olay = await b.Bekle("olay", m => (string)m["olay"] == "kararBekleniyor", TurArasi);
+            Assert.That((string)olay["kim"], Is.EqualTo(b.Sen));
+            var d = await b.Bekle("durum", m => (string)m["asama"] == "bedel", TurArasi);
+            Assert.That((string)d["kararVeren"], Is.EqualTo(b.Sen));
+        }
+
+        [Test]
         public async Task Bedel_suresi_dolarsa_karar_gecilmis_sayilir()
         {
             var (o, _, _, _, _) = await BedeleGetir();

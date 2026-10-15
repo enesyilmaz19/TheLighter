@@ -1,13 +1,13 @@
-Key,Turkish(tr)
-genel.geri,Geri
-genel.tamam,Tamam
-menu.baslik,TheLighter
-menu.alt_baslik,Gizli sorulu parti oyunu
-menu.elden_ele,Elden ele oyna
-menu.online,Online oyna
-menu.online_yakinda,Online mod yakında.
-menu.nasil_oynanir,Nasıl oynanır?
-nasil.baslik,Nasıl oynanır?
+Key,Turkish(tr),English(en)
+genel.geri,Geri,Back
+genel.tamam,Tamam,OK
+menu.baslik,TheLighter,TheLighter
+menu.alt_baslik,Gizli sorulu parti oyunu,The secret question party game
+menu.elden_ele,Elden ele oyna,Pass and play
+menu.online,Online oyna,Play online
+menu.online_yakinda,Online mod yakında.,Online mode coming soon.
+menu.nasil_oynanir,Nasıl oynanır?,How to play?
+nasil.baslik,Nasıl oynanır?,How to play?
 nasil.metin,"1. Sırası gelen, gruptan birini seçer ve ona gizli bir soru sorar. Örnek: ""Grupta sırrını en kolay kim açık eder?""
 
 2. Soruyu alan, cevap olarak gördüğü kişiye çakmağı verir.
@@ -18,427 +18,462 @@ nasil.metin,"1. Sırası gelen, gruptan birini seçer ve ona gizli bir soru sora
 
 5. Sonuç ne olursa olsun sıra çakmağı alana geçer.
 
-Elden ele modda tek telefon elden ele dolaşır. Ekranda ""Telefonu Ayşe'ye ver"" yazınca telefonu ver, başkası bakmasın."
-kurulum.baslik,Oyuncular
-kurulum.aciklama,{0}–{1} kişi. Sıra rastgele birinden başlar.
-kurulum.ekle,+ Oyuncu ekle
-kurulum.sil,Sil
-kurulum.mini_oyun,Mini oyun
-kurulum.tur,Kaç tur?
-kurulum.tur_sayi,{0} tur
-kurulum.tur_sinirsiz,Sınırsız
-kurulum.basla,Başla
-kurulum.hata_bos,{0}. oyuncunun adı boş.
-kurulum.hata_ayni,"""{0}"" iki kez yazılmış."
-kurulum.hata_az,En az {0} oyuncu lazım.
-oyun.menu,Menü
-oyun.menu_baslik,Oyun durdu
-oyun.devam,Devam et
-oyun.bitir,Oyunu bitir
-oyun.ana_menu,Ana menüye dön
-oyun.menu_ipucu,Menü açıkken süre işlemez.
-oyun.tur_sinirli,Tur {0}/{1}
-oyun.tur_sinirsiz,Tur {0}
-oyun.bekleniyor,Bekleniyor...
-perde.sira,Sıra {1}
-perde.sordu,"{0}, {2} bir soru sordu."
-perde.telefonu_ver,Telefonu {1} ver
-perde.bakmasin,Başkası ekrana bakmasın.
-perde.hazirim,"Hazırım, ben {0}"
-soru.baslik,"Sıra sende, {0}"
-soru.aciklama,Sorunu yaz ve kime soracağını seç. Soruyu sadece o görecek.
-soru.oneri,Öneri çek
-soru.kime,Kime soruyorsun?
-soru.gonder,Soruyu gönder
-soru.fisildadim,Fısıldadım
-soru.fisildadim_ipucu,Soruyu kulağına söylediysen yazmadan buna bas.
-cevap.sordu,{0} sana sordu:
-cevap.fisildadi,{0} soruyu kulağına fısıldadı.
-cevap.fisildadi_bilgi,Soruyu sadece sen duydun. Cevabını düşün.
-cevap.basili_tut,Okumak için basılı tut
-cevap.kime,Çakmağı kime veriyorsun?
-cevap.kime_ipucu,Sorunun cevabı kim? ({0} ve sen hariç)
-cevap.ver,Çakmağı ver
-mini.ad.Tkm,Taş-Kağıt-Makas
-mini.ad.TekCift,Tek-Çift
-mini.ad.Zar,Zar
-mini.ad.Karisik,Karışık
-mini.kural.Tkm,"Önce soruyu alan, sonra çakmağı alan gizlice seçer. Taş makası, makas kağıdı, kağıt taşı yener. Berabere biterse bir el daha; 3. beraberlikte zar atılır."
-mini.kural.TekCift,"Soruyu alan, toplamın tek mi çift mi çıkacağını seçer ve gizlice 1 ile 5 arasında bir sayı seçer. Sonra çakmağı alan da bir sayı seçer. Toplam onun dediği gibi çıkarsa soruyu alan kazanır."
-mini.kural.Zar,"İkiniz de zar atarsınız, büyük atan kazanır."
-mini.kural.Karisik,Her tur başka bir mini oyun.
-mini.perde_verdi,{0} çakmağı {2} verdi!
-mini.perde_anlam,{1} kazanırsa soru herkese açılır. {0} kazanırsa soru güme gider.
-mini.perde_yerlesim,"Telefonu ikinizin arasına koyun. Alt taraf {0}, üst taraf {1}."
-mini.perde_hazir,Hazırız
-mini.rol_b,Kazanırsan soru gizli kalır.
-mini.rol_c,Kazanırsan soru herkese açılır.
-mini.sec,Gizlice seç
-mini.sayi_sec,Gizlice bir sayı seç
-mini.bakma,{0} seçiyor. Bakma!
-mini.sectin_bakma,Seçtin. {0} seçerken bakma!
-mini.tek,Tek
-mini.cift,Çift
-mini.tas,Taş
-mini.kagit,Kağıt
-mini.makas,Makas
-mini.zar_at,Zar at
-mini.zar_attin,Attın. {0} bekleniyor...
-mini.bekle,Sonuç açılıyor...
-mini.beraberlik,{0}. beraberlik ({1}). Bir el daha!
-el.ikili,{0}: {1}   ·   {2}: {3}
-el.tekcift,"{0} ""{1}"" dedi   ·   {2} + {3} = {4} ({5})"
-el.oynamadi,oynamadı
-el.kazandi,{0} kazandı!
-el.sure_doldu,Süre doldu. Hamle yapmayan kaybeder.
-sonuc.ifsa_baslik,İFŞA!
-sonuc.ifsa_soru,“{0}”
-sonuc.ifsa_fisilti,"{0}, soruyu yüksek sesle söyle!"
-sonuc.soran_cevap,Soran: {0}   ·   Cevap: {1}
-sonuc.gume_baslik,Soru güme gitti
-sonuc.gume_alt,Soruyu kimse öğrenemeyecek.
-sonuc.sira,Sıra {1} geçiyor.
-sonuc.son_tur,Son tur bitti.
-son.baslik,Oyun bitti
-son.ifsalar,İfşa olan sorular
-son.ifsa_yok,Hiçbir soru ifşa olmadı. Sır küpüsünüz!
-son.fisilti,(Fısıldanan bir soru)
-son.tekrar,Tekrar oyna
-perde.sira_rastgele,Sıra rastgele {1}
-perde.sure_doldu_a,{1} süresi doldu.
-perde.sure_doldu_b,"{0} süresinde seçmedi, soru güme gitti."
-mini.ad.Reaksiyon,Reaksiyon
-mini.kural.Reaksiyon,"Ekran yeşile dönünce kendi yarına bas. Hızlı olan kazanır, kırmızıyken basan kaybeder."
-mini.tekcift_tahmin,Toplam tek mi çift mi?
-mini.once_tekcift,Önce tek mi çift mi seç.
-mini.zar_atti,zar attı
-mini.reaksiyon_bekle,Bekle...
-mini.reaksiyon_bas,BAS!
-mini.reaksiyon_bastin,Bastın!
-mini.reaksiyon_erken,Erken bastın!
-el.erken,erken bastı
-el.ms,{0} ms
-el.zarla_karar,"3. beraberlik, zarla karar: {0} {1}   ·   {2} {3}"
-son.tur,{0}. turda bitti.
-son.sayaclar,Kim ne yaptı?
-son.sayac,{0}: {1} kez gösterildi · {2} ifşa · {3} saklama
-hata.Tamam,
-hata.SiraSendeDegil,Sıra sende değil.
-hata.Secilemez,Bu kişi seçilemez.
-hata.YanlisAsama,Şu an bunu yapamazsın.
-hata.GecersizGirdi,Olmadı: soru boş ya da çok uzun olabilir.
-hata.HakKalmadi,Bunu zaten yaptın.
-hata.HavuzBos,Henüz soru paketi yok.
-hata.OyuncuSayisiGecersiz,Oyuncu sayısı uygun değil.
-hata.Uygunsuz,Temiz modda bu soru sorulamaz. Başka türlü yaz.
-kurulum.hizli,Hızlı başla
-kurulum.hizli_ipucu,Normal · TKM · 15 tur · Genel paket · Cesur cezalar · görevler ve kaos açık
-kurulum.mod,Mod
-mod.ad.Normal,Normal
-mod.ad.Temiz,Temiz
-mod.ad.Curcuna,Curcuna
-mod.aciklama.Normal,Sırası gelen sorusunu kendisi yazar.
-mod.aciklama.Temiz,"Sadece Aile Dostu soruları, en fazla Hafif ceza."
-mod.aciklama.Curcuna,"Önce herkes 2 soru yazar. Sorular karışır, sırası gelene havuzdan biri düşer."
-kurulum.paketler,Soru paketleri
-kurulum.paket_sayi,{0} ({1})
-kurulum.bizim_paket,Bizim paket ({0})
-kurulum.paket_temiz,Temiz modda sadece Aile Dostu paketi.
-kurulum.ceza,Ceza seviyesi
-ceza.seviye.Kapali,Kapalı
-ceza.seviye.Hafif,Hafif
-ceza.seviye.Cesur,Cesur
-ceza.seviye_aciklama.Kapali,Ceza yok.
-ceza.seviye_aciklama.Hafif,Uygulamanın uyguladığı cezalar ve Bedel.
-ceza.seviye_aciklama.Cesur,"Sesli cezalar, Bedel ve Kızgın Çakmak da var."
-kurulum.ceza_temiz,Temiz modda en fazla Hafif.
-kurulum.ekstra,Ekstralar
-kurulum.gorevler,Gizli görevler
-kurulum.kaos,Kaos turları (her 5 turda)
-kurulum.acik,Açık
-kurulum.kapali,Kapalı
-kurulum.hata_paket,En az bir soru paketi seç.
-hafiza.oyun,Bu grupla {0}. oyununuz
-hafiza.rekor,Rekor: {0} bir oyunda {1} kez gösterildi
-hafiza.seri,{0} üst üste {1}. kez {2}
-hafiza.efsaneler,Efsaneler ({0})
-hafiza.efsaneler_baslik,Efsaneler
-hafiza.efsaneler_ipucu,Bu grubun ifşa olan soruları.
-hafiza.kapat,Kapat
-perde.soru_yazma,Soru yazma sırası {1}
-perde.gorev,Gizli görevine bakma sırası {1}
-perde.oy,Grup Kararı: oy verme sırası {1}
-perde.kaos_baslik,KAOS TURU
-kaos.ad.Yok,
-kaos.aciklama.Yok,
-kaos.ad.TersDunya,Ters Dünya
-kaos.aciklama.TersDunya,Bu tur soruyu alan kazanırsa soru ifşa olur.
-kaos.ad.GrupKarari,Grup Kararı
-kaos.aciklama.GrupKarari,"Mini oyun yok. Soran ve soruyu alan dışındakiler oylar: ifşa mı, güme mi?"
-kaos.ad.KorSoru,Kör Soru
-kaos.aciklama.KorSoru,"Soru havuzdan çekilir, soran da göremez. Sadece soruyu alan görür."
-kaos.ad.SoranGizli,Soran Gizli
-kaos.aciklama.SoranGizli,Bu tur soranın kim olduğu gizli.
-kaos.ad.AniOlum,Ani Ölüm
-kaos.aciklama.AniOlum,"Tek el, beraberlik yok. Berabere biterse soruyu alan kaybeder."
-kaos.ad.CezaTuru,Ceza Turu
-kaos.aciklama.CezaTuru,"Kaybeden ceza çeker, ceza kapalı olsa bile."
-kaos.ad.YonDegisti,Yön Değişti
-kaos.aciklama.YonDegisti,"Bu turdan sonra sıra çakmağı alana değil, rastgele birine geçer."
-kaos.ad.IkiyeKatla,İkiye Katla
-kaos.aciklama.IkiyeKatla,Kaybeden bir el daha isteyebilir. Yine kaybederse cezası ikiye katlanır.
-oyun.kaos_etiket,Kaos: {0}
-isi.Soguk,Soğuk
-isi.Ilik,Ilık
-isi.Sicak,Sıcak
-isi.Kizgin,KIZGIN
-isi.etiket,Çakmak: {0}
-isi.ipucu,Çakmak ısınıyor. Kızgınken verirsen alan yanabilir.
-ceza.baslik,{0} ceza çekti
-ceza.neden.Kaybetti,Mini oyunu kaybetti
-ceza.neden.Bedel,Bedel ödedi
-ceza.neden.Yandi,Çakmak elinde yandı
-ceza.tur.Sesli,Sesli ceza
-ceza.tur.Palyaco,Palyaço
-ceza.tur.HavuzdanSor,Havuzdan sor
-ceza.tur.BeraberlikRakibe,Beraberlik rakibin
-ceza.tur.SorunIfsa,Sorun ifşa
-ceza.metin.Palyaco,2 tur boyunca adının yanında palyaço yazar.
-ceza.metin.HavuzdanSor,Bir sonraki sorunu havuzdan çekmek zorundasın.
-ceza.metin.BeraberlikRakibe,Bir sonraki mini oyununda beraberlik rakibinin sayılır.
-ceza.metin.SorunIfsa,"Bir sonraki sorduğun soru, mini oyun ne olursa olsun ifşa olur."
-ceza.sesli_ipucu,Şimdi yap. Şeref sözü!
-ceza.cark,Ceza çekiliyor...
-ceza.tamam,"Tamam, devam"
-ceza.yandi,Çakmak {0} elinde yandı!
-palyaco.etiket,palyaço
-karar.katla_baslik,{0} kaybetti!
-karar.katla_soru,"{0}, bir el daha ister misin? Yine kaybedersen cezan ikiye katlanır."
-karar.katla_evet,Bir el daha!
-karar.katla_hayir,Kabul ediyorum
-karar.bedel_baslik,Soru ifşa olmak üzere!
-karar.bedel_soru,"{0}, bedel ödersen soru gizli kalır ama 2 ceza çekersin. Kalan hakkın: {1}"
-karar.bedel_evet,Bedel öde
-karar.bedel_hayir,İfşa olsun
-oy.baslik,"{0}, Grup Kararı"
-oy.aciklama,"{0} çakmağı {1} verdi. Soruyu sadece {0} biliyor. Sence soru ifşa mı olsun, güme mi gitsin?"
-oy.ifsa,İfşa olsun
-oy.gume,Güme gitsin
-oy.gizli,Oyun gizli. Kimin ne dediği görünmez.
-sonuc.oylama,Grup kararı: {0} ifşa · {1} güme
-sonuc.bedel,{0} bedel ödedi! Soru gizli kaldı.
-mini.perde_anlam_ters,Ters Dünya: {0} kazanırsa soru herkese açılır. {1} kazanırsa soru güme gider.
-mini.rol_b_ters,Ters Dünya: kazanırsan soru herkese açılır.
-mini.rol_c_ters,Ters Dünya: kazanırsan soru güme gider.
-soru.atanan_baslik,Sana düşen soru:
-soru.degistir,Değiştir (1 hak)
-soru.kor,Kör Soru: havuzdan bir soru çekildi ama sen de göremezsin. Sadece kime soracağını seç.
-soru.havuzdan_ceza,Cezan var: bu tur sorun havuzdan geldi.
-toplama.baslik,"{0}, havuza soru yaz"
-toplama.aciklama,"Herkes 2 soru yazar. Sorular karışır, kimin yazdığı bilinmez. ({0}/{1})"
-toplama.ekle,Havuza ekle
-toplama.oneri,Fikir ver
-toplama.kayit,Grup kaydedilirse yazdığın sorular bu cihazda grubun paketine eklenir.
-gorev.baslik,"{0}, gizli görevin"
-gorev.aciklama,Kimseye söyleme. Oyun sonunda herkesin görevi açılır.
-gorev.gordum,"Gördüm, telefonu ver"
-zorluk.Kolay,Kolay
-zorluk.Orta,Orta
-zorluk.Zor,Zor
-gorev.tur.KisiyiGoster,{2} en az {0} kez göster.
-gorev.tur.FarkliKisiGoster,En az {0} farklı kişiyi göster.
-gorev.tur.MiniOyunKazan,En az {0} mini oyun kazan.
-gorev.tur.HicIfsaOlma,En az bir kez soru al ve aldığın hiçbir soru ifşa olmasın.
-gorev.tur.AyniKisiyeSor,Aynı kişiye en az {0} soru sor.
-gorev.tur.SeniGostersin,{1} seni en az {0} kez göstersin.
-gorev.tur.HicGosterilme,Hiç gösterilme.
-gorev.tur.KaosTurundaKazan,Bir kaos turunda mini oyun kazan.
-gorev.tur.KisiyeSor,{3} en az {0} soru sor.
-gorev.tur.SoruSor,En az {0} soru sor.
-gorev.tur.IfsaEttir,Çakmağı alan olarak en az {0} soruyu ifşa ettir.
-gorev.tur.GumeyeGonder,Soruyu alan olarak en az {0} soruyu güme gönder.
-gorev.tur.FarkliKisiyeSor,En az {0} farklı kişiye soru sor.
-gorev.tur.IntikamAl,Seni gösteren kişiye hemen sonraki turda soru sor.
-gorev.tur.SirriniAc,{4} soruyu aldığı bir turda çakmağı sen al ve soruyu ifşa ettir.
-gorev.tur.BedelOde,En az {0} kez bedel öde.
-gorev.tur.UstUsteKazan,Üst üste {0} mini oyun kazan.
-gorev.tur.HedefiYen,Mini oyunda {2} en az {0} kez yen.
-gorev.tur.HicCezaCekme,"En az {0} mini oyun oyna, hiç ceza çekme."
-gorev.tur.CokGosterilme,En az {0} kez gösteril.
-son.unvanlar,Unvanlar
-son.unvan_yok,Bu oyunda unvan çıkmadı.
-son.gorevler,Gizli görevler
-son.gorev_basarili,Başardı
-son.gorev_basarisiz,Başaramadı
-son.grup_kaydet,Bu grubu kaydet
-son.grup_ad,Grup adı (ör. Yurt 3. kat)
-son.grup_ad_bos,Gruba bir ad ver.
-son.grup_kaydedildi,{0} kaydedildi. Bu grupla {1}. oyununuz.
-son.grup_hata,Kaydedilemedi.
-son.paylas,Paylaşım kartı
-kart.alt,TheLighter · gizli sorulu parti oyunu
-kart.gorevi_yapanlar,Görevini yapanlar
-kart.kimse,Kimse
-kart.kaydet,Kaydet
-kart.kaydedildi,Kaydedildi: {0}
-kart.kaydedilemedi,Kaydedilemedi.
-unvan.ad.Miknatis,Mıknatıs
-unvan.aciklama.Miknatis,{0} kez gösterildi
-unvan.ad.Gammaz,Gammaz
-unvan.aciklama.Gammaz,{0} soruyu ifşa ettirdi
-unvan.ad.SirKupu,Sır Küpü
-unvan.aciklama.SirKupu,{0} soruyu güme gönderdi
-unvan.ad.HedefTahtasi,Hedef Tahtası
-unvan.aciklama.HedefTahtasi,{0} soru aldı
-unvan.ad.SoruMakinesi,Soru Makinesi
-unvan.aciklama.SoruMakinesi,{0} soru sordu
-unvan.ad.Sansli,Şanslı
-unvan.aciklama.Sansli,{0} mini oyun kazandı
-unvan.ad.Takintili,Takıntılı
-unvan.aciklama.Takintili,Aynı kişiye {0} soru sordu
-unvan.ad.Intikamci,İntikamcı
-unvan.aciklama.Intikamci,{0} kez kendisini gösterene hemen soru sordu
-unvan.ad.AtesleOynayan,Ateşle Oynayan
-unvan.aciklama.AtesleOynayan,Çakmak elinde {0} kez yandı
-unvan.ad.Bedelci,Bedelci
-unvan.aciklama.Bedelci,{0} kez bedel ödedi
-unvan.ad.Cezakes,Cezakeş
-unvan.aciklama.Cezakes,{0} ceza çekti
-unvan.ad.KaosCanavari,Kaos Canavarı
-unvan.aciklama.KaosCanavari,Kaos turlarında {0} kez kazandı
-unvan.ad.Kale,Kale
-unvan.aciklama.Kale,"{0} soru aldı, hiçbiri ifşa olmadı"
-unvan.ad.Gorunmez,Görünmez
-unvan.aciklama.Gorunmez,Hiç gösterilmedi
-unvan.ad.Talihsiz,Talihsiz
-unvan.aciklama.Talihsiz,"{0} mini oyun oynadı, hiç kazanamadı"
-unvan.ad.SosyalKelebek,Sosyal Kelebek
-unvan.aciklama.SosyalKelebek,{0} farklı kişiyi gösterdi
-unvan.ad.Sadik,Sadık
-unvan.aciklama.Sadik,Aynı kişiyi {0} kez gösterdi
-unvan.ad.Dedikoducu,Dedikoducu
-unvan.aciklama.Dedikoducu,{0} farklı kişiye soru sordu
-unvan.ad.Gundem,Gündem
-unvan.aciklama.Gundem,{0} farklı kişiden soru aldı
-unvan.ad.Yenilmez,Yenilmez
-unvan.aciklama.Yenilmez,Üst üste {0} mini oyun kazandı
-unvan.ad.Zorba,Zorba
-unvan.aciklama.Zorba,Aynı kişiyi {0} kez yendi
-unvan.ad.Av,Av
-unvan.aciklama.Av,Aynı kişiye {0} kez yenildi
-unvan.ad.Ayna,Ayna
-unvan.aciklama.Ayna,{0} kez berabere kaldı
-unvan.ad.Uykucu,Uykucu
-unvan.aciklama.Uykucu,Süresi {0} kez doldu
-unvan.ad.Kacak,Kaçak
-unvan.aciklama.Kacak,"{0} mini oyun oynadı, hiç ceza çekmedi"
-unvan.ad.AcikKitap,Açık Kitap
-unvan.aciklama.AcikKitap,Aldığı {0} soru ifşa oldu
-unvan.ad.EliBos,Eli Boş
-unvan.aciklama.EliBos,Çakmağı aldığı {0} soru güme gitti
-unvan.ad.Kumarbaz,Kumarbaz
-unvan.aciklama.Kumarbaz,{0} kez bir el daha dedi
-unvan.ad.Bumerang,Bumerang
-unvan.aciklama.Bumerang,Gösterdiği kişiler onu {0} kez geri gösterdi
-unvan.ad.Sogukkanli,Soğukkanlı
-unvan.aciklama.Sogukkanli,Çakmak kızgınken {0} kez verdi
-online.baslik,Online oyna
-online.isim,Adın
-online.oda_kur,Oda kur
-online.oda_kur_ipucu,"Oda kodunu arkadaşlarına söyle, onlar da koda katılsın."
-online.koda_katil,Koda katıl
-online.katil,Katıl
-online.geri_don,Kaldığın odaya dön ({0})
-online.sunucu,Sunucu
-online.sunucu_baslik,Sunucu adresi
-online.sunucu_ipucu,ws:// ya da wss:// ile başlar. Yerel deneme için ws://localhost:5000/ws.
-online.sunucu_kaydet,Kaydet
-online.sunucu_gecersiz,Bu adres olmadı: ws:// ya da wss:// ile başlamalı.
-online.baglaniyor,Bağlanıyor…
-online.baglaniyor_ipucu,"Bağlantı koptu, yeniden deniyoruz. Oyundaysan yerin 60 saniye tutuluyor."
-online.baglaniyor_kisa,Bağlanıyor…
-online.vazgec,"Vazgeç, ana menüye dön"
-online.cikis.baglanamadi,Sunucuya bağlanılamadı. İnternetini ve sunucu adresini kontrol et.
-online.cikis.ayrildin,Odadan ayrıldın.
-online.ayril,Odadan ayrıl
-online.menu_baslik,Oda {0}
-online.menu_ipucu,Online'da oyun durmaz: süre işlemeye devam eder.
-online.afk_baslik,Orada mısın?
-online.afk_aciklama,"İki kez süren doldu, sıran atlanıyor. Dönmek için dokun."
-online.buradayim,Buradayım
-online.bekleme_baslik,Oyuncular bekleniyor
-online.bekleme_aciklama,"Bağlı oyuncu 4'ten az, oyun durdu. Kimse dönmezse oyun {0} sonra biter."
-online.olay.atildi,{0} odadan atıldı.
-online.olay.sira_atlandi,{1} sırası atlandı.
-online.olay.afk,{0} AFK.
-online.olay.afk_bitti,{0} geri döndü.
-online.olay.cikti,{0} oyundan çıktı.
-online.olay.sure_doldu,{1} süresi doldu.
-online.bekle.izliyorsun,"Oyundan çıktın, izliyorsun."
-online.bekle.toplama,Herkes havuza soru yazıyor
-online.bekle.toplama_sayisi,{0}/{1} kişi bitirdi
-online.bekle.soru,{0} soru yazıyor…
-online.bekle.soru_gizli,Biri gizlice soru yazıyor…
-online.bekle.cevap,{0} çakmağı kime vereceğini düşünüyor…
-online.bekle.mini,{0} ile {1} {2} oynuyor
-online.bekle.oylama,Grup Kararı: oylar toplanıyor
-online.bekle.oy_sayisi,{0}/{1} oy
-online.bekle.oy_verdin,Oyunu verdin.
-online.bekle.karar,{0} karar veriyor…
-online.etiket.ayrildi,ayrıldı
-online.etiket.baglaniyor,bağlanıyor
-online.etiket.afk,AFK
-online.son.tekrar_bekle,Kurucu yeni oyunu başlatınca lobiye döneceksiniz.
-mini.beraberlik_online,{0}. beraberlik. Bir el daha!
-mini.online_bekle,Seçtin. {0} bekleniyor...
-lobi.ayril,Ayrıl
-lobi.kod_baslik,Oda kodu
-lobi.kopyala,Kodu kopyala
-lobi.oyuncular,Oyuncular
-lobi.sen,(sen)
-lobi.kurucu,kurucu
-lobi.at,At
-lobi.at_soru,{1} odadan atmak istiyor musun?
-lobi.at_ipucu,Atılan bu odaya aynı isimle dönemez.
-lobi.at_evet,"Evet, at"
-lobi.basla,Başlat
-lobi.hizli_ipucu,"Önerilen ayarlar: Normal, TKM, 15 tur, Cesur cezalar, görevler ve kaos. 4 kişi varsa hemen başlar."
-lobi.sureler,Süreler
-lobi.soru_sn,Soru yazma
-lobi.cevap_sn,Çakmağı verme
-lobi.hamle_sn,Mini oyun hamlesi
-lobi.sn,{0} sn
-lobi.kurucu_bekleniyor,{0} oyunu başlatınca başlayacak.
-lobi.en_az,En az {1} kişi gerekiyor ({0}/{1}).
-lobi.ozet,Ayarlar: {0}
-bekleme.baslik,Oyun sürüyor
-bekleme.aciklama_sinirli,Tur {0}/{1}. Bu oyun bitince sen de oynayacaksın.
-bekleme.aciklama_sinirsiz,Tur {0}. Bu oyun bitince sen de oynayacaksın.
-bekleme.bitti_baslik,Oyun bitti
-bekleme.bitti_aciklama,Kurucu yeni oyunu başlatınca sen de katılacaksın.
-bekleme.oyundakiler,Oyundakiler
-bekleme.bekleyenler,Bekleyenler
-hata.GECERSIZ_MESAJ,"Bir şeyler ters gitti, tekrar dene."
-hata.ODA_YOK,Bu kodla bir oda yok ya da oda kapandı.
-hata.ODA_DOLU,Oda dolu (10 kişi).
-hata.OYUN_BASLADI,"Oyun başladı, artık değiştirilemez."
-hata.ISIM_GECERSIZ,"Bu isim olmaz: boş, 20 harften uzun ya da odada aynısı var."
-hata.ODADA_DEGILSIN,Önce bir odaya gir.
-hata.ZATEN_ODADASIN,Zaten bir odadasın.
-hata.KURUCU_DEGILSIN,Bunu sadece kurucu yapabilir.
-hata.OYUN_YOK,Oyun henüz başlamadı.
-hata.ESKI_TUR,"Geç kaldın, tur değişti."
-hata.COK_HIZLI,Çok hızlı! Biraz bekleyip tekrar dene.
-hata.SUNUCU_DOLU,"Sunucu şu an dolu, biraz sonra tekrar dene."
-hata.ATILDIN,Bu odadan atıldın.
-hata.OYUNDA_DEGILSIN,"Bu oyunda değilsin, bitince katılacaksın."
-genel.kapat,Kapat
-sohbet.ac,Sohbet
-sohbet.baslik,Sohbet
-sohbet.genel,Genel
-sohbet.dm_ac,+ Özel mesaj
-sohbet.gonder,Gönder
-sohbet.sekme_okunmamis,{0} ({1})
-sohbet.cok_hizli,Biraz yavaş: saniyede bir mesaj.
-sohbet.gonderilemedi,Mesaj gönderilemedi.
-gorev.gordum_online,"Tamam, gördüm"
+Elden ele modda tek telefon elden ele dolaşır. Ekranda ""Telefonu Ayşe'ye ver"" yazınca telefonu ver, başkası bakmasın.","1. On your turn, pick someone from the group and ask them a secret question. Example: ""Who in the group would spill a secret the fastest?""
+
+2. The one who got the question hands the lighter to the person they think is the answer.
+
+3. The one who gave the lighter and the one who got it play a mini game.
+
+4. If the one who got the lighter wins, the question is revealed to everyone. If the giver wins, the question is lost and nobody will ever know.
+
+5. Whatever happens, the turn passes to the one who got the lighter.
+
+In pass and play, one phone goes around the group. When the screen says ""Give the phone to Ayşe"", hand it over and don't let anyone else look."
+kurulum.baslik,Oyuncular,Players
+kurulum.aciklama,{0}–{1} kişi. Sıra rastgele birinden başlar.,{0}–{1} players. A random player goes first.
+kurulum.ekle,+ Oyuncu ekle,+ Add player
+kurulum.sil,Sil,Remove
+kurulum.mini_oyun,Mini oyun,Mini game
+kurulum.tur,Kaç tur?,How many rounds?
+kurulum.tur_sayi,{0} tur,{0} rounds
+kurulum.tur_sinirsiz,Sınırsız,Unlimited
+kurulum.basla,Başla,Start
+kurulum.hata_bos,{0}. oyuncunun adı boş.,Player {0} has no name.
+kurulum.hata_ayni,"""{0}"" iki kez yazılmış.","""{0}"" is written twice."
+kurulum.hata_az,En az {0} oyuncu lazım.,You need at least {0} players.
+oyun.menu,Menü,Menu
+oyun.menu_baslik,Oyun durdu,Game paused
+oyun.devam,Devam et,Continue
+oyun.bitir,Oyunu bitir,End game
+oyun.ana_menu,Ana menüye dön,Back to main menu
+oyun.menu_ipucu,Menü açıkken süre işlemez.,The timer stops while the menu is open.
+oyun.tur_sinirli,Tur {0}/{1},Round {0}/{1}
+oyun.tur_sinirsiz,Tur {0},Round {0}
+oyun.bekleniyor,Bekleniyor...,Waiting...
+perde.sira,Sıra {1},{0}'s turn
+perde.sordu,"{0}, {2} bir soru sordu.",{0} asked {1} a question.
+perde.telefonu_ver,Telefonu {1} ver,Give the phone to {0}
+perde.bakmasin,Başkası ekrana bakmasın.,Nobody else should look at the screen.
+perde.hazirim,"Hazırım, ben {0}","Ready, I'm {0}"
+soru.baslik,"Sıra sende, {0}","Your turn, {0}"
+soru.aciklama,Sorunu yaz ve kime soracağını seç. Soruyu sadece o görecek.,Write your question and choose who to ask. Only they will see it.
+soru.oneri,Öneri çek,Get a suggestion
+soru.kime,Kime soruyorsun?,Who are you asking?
+soru.gonder,Soruyu gönder,Send question
+soru.fisildadim,Fısıldadım,I whispered it
+soru.fisildadim_ipucu,Soruyu kulağına söylediysen yazmadan buna bas.,"If you said the question in their ear, tap this instead of typing."
+cevap.sordu,{0} sana sordu:,{0} asked you:
+cevap.fisildadi,{0} soruyu kulağına fısıldadı.,{0} whispered the question in your ear.
+cevap.fisildadi_bilgi,Soruyu sadece sen duydun. Cevabını düşün.,Only you heard the question. Think of your answer.
+cevap.basili_tut,Okumak için basılı tut,Hold to read
+cevap.kime,Çakmağı kime veriyorsun?,Who gets the lighter?
+cevap.kime_ipucu,Sorunun cevabı kim? ({0} ve sen hariç),Who is the answer? (not {0} or you)
+cevap.ver,Çakmağı ver,Give the lighter
+mini.ad.Tkm,Taş-Kağıt-Makas,Rock-Paper-Scissors
+mini.ad.TekCift,Tek-Çift,Odd-Even
+mini.ad.Zar,Zar,Dice
+mini.ad.Karisik,Karışık,Mixed
+mini.kural.Tkm,"Önce soruyu alan, sonra çakmağı alan gizlice seçer. Taş makası, makas kağıdı, kağıt taşı yener. Berabere biterse bir el daha; 3. beraberlikte zar atılır.","First the one who got the question, then the one who got the lighter picks in secret. Rock beats scissors, scissors beats paper, paper beats rock. On a tie, play again; on the 3rd tie, dice decide."
+mini.kural.TekCift,"Soruyu alan, toplamın tek mi çift mi çıkacağını seçer ve gizlice 1 ile 5 arasında bir sayı seçer. Sonra çakmağı alan da bir sayı seçer. Toplam onun dediği gibi çıkarsa soruyu alan kazanır.","The one who got the question calls odd or even for the total and secretly picks a number from 1 to 5. Then the one who got the lighter picks a number too. If the total matches the call, the one who got the question wins."
+mini.kural.Zar,"İkiniz de zar atarsınız, büyük atan kazanır.","You both roll a die, the higher roll wins."
+mini.kural.Karisik,Her tur başka bir mini oyun.,A different mini game every round.
+mini.perde_verdi,{0} çakmağı {2} verdi!,{0} gave the lighter to {1}!
+mini.perde_anlam,{1} kazanırsa soru herkese açılır. {0} kazanırsa soru güme gider.,"If {1} wins, the question is revealed. If {0} wins, the question is lost."
+mini.perde_yerlesim,"Telefonu ikinizin arasına koyun. Alt taraf {0}, üst taraf {1}.","Put the phone between you. Bottom side: {0}, top side: {1}."
+mini.perde_hazir,Hazırız,We're ready
+mini.rol_b,Kazanırsan soru gizli kalır.,"If you win, the question stays secret."
+mini.rol_c,Kazanırsan soru herkese açılır.,"If you win, the question is revealed to everyone."
+mini.sec,Gizlice seç,Pick in secret
+mini.sayi_sec,Gizlice bir sayı seç,Pick a number in secret
+mini.bakma,{0} seçiyor. Bakma!,{0} is picking. Don't look!
+mini.sectin_bakma,Seçtin. {0} seçerken bakma!,Done. Don't look while {0} picks!
+mini.tek,Tek,Odd
+mini.cift,Çift,Even
+mini.tas,Taş,Rock
+mini.kagit,Kağıt,Paper
+mini.makas,Makas,Scissors
+mini.zar_at,Zar at,Roll
+mini.zar_attin,Attın. {0} bekleniyor...,Rolled. Waiting for {0}...
+mini.bekle,Sonuç açılıyor...,Revealing the result...
+mini.beraberlik,{0}. beraberlik ({1}). Bir el daha!,Tie #{0} ({1}). One more round!
+el.ikili,{0}: {1}   ·   {2}: {3},{0}: {1}   ·   {2}: {3}
+el.tekcift,"{0} ""{1}"" dedi   ·   {2} + {3} = {4} ({5})","{0} called ""{1}""   ·   {2} + {3} = {4} ({5})"
+el.oynamadi,oynamadı,didn't play
+el.kazandi,{0} kazandı!,{0} wins!
+el.sure_doldu,Süre doldu. Hamle yapmayan kaybeder.,Time's up. Whoever didn't move loses.
+sonuc.ifsa_baslik,İFŞA!,REVEALED!
+sonuc.ifsa_soru,“{0}”,“{0}”
+sonuc.ifsa_fisilti,"{0}, soruyu yüksek sesle söyle!","{0}, say the question out loud!"
+sonuc.soran_cevap,Soran: {0}   ·   Cevap: {1},Asked by: {0}   ·   Answer: {1}
+sonuc.gume_baslik,Soru güme gitti,The question is lost
+sonuc.gume_alt,Soruyu kimse öğrenemeyecek.,Nobody will ever know the question.
+sonuc.sira,Sıra {1} geçiyor.,Now it's {0}'s turn.
+sonuc.son_tur,Son tur bitti.,The last round is over.
+son.baslik,Oyun bitti,Game over
+son.ifsalar,İfşa olan sorular,Revealed questions
+son.ifsa_yok,Hiçbir soru ifşa olmadı. Sır küpüsünüz!,No question was revealed. You keep secrets well!
+son.fisilti,(Fısıldanan bir soru),(A whispered question)
+son.tekrar,Tekrar oyna,Play again
+perde.sira_rastgele,Sıra rastgele {1},Random turn: {0}
+perde.sure_doldu_a,{1} süresi doldu.,{0} ran out of time.
+perde.sure_doldu_b,"{0} süresinde seçmedi, soru güme gitti.","{0} didn't choose in time, the question is lost."
+mini.ad.Reaksiyon,Reaksiyon,Reaction
+mini.kural.Reaksiyon,"Ekran yeşile dönünce kendi yarına bas. Hızlı olan kazanır, kırmızıyken basan kaybeder.","When the screen turns green, tap your half. The faster one wins; tapping on red loses."
+mini.tekcift_tahmin,Toplam tek mi çift mi?,Will the total be odd or even?
+mini.once_tekcift,Önce tek mi çift mi seç.,First choose odd or even.
+mini.zar_atti,zar attı,rolled
+mini.reaksiyon_bekle,Bekle...,Wait...
+mini.reaksiyon_bas,BAS!,TAP!
+mini.reaksiyon_bastin,Bastın!,Tapped!
+mini.reaksiyon_erken,Erken bastın!,Too early!
+el.erken,erken bastı,tapped too early
+el.ms,{0} ms,{0} ms
+el.zarla_karar,"3. beraberlik, zarla karar: {0} {1}   ·   {2} {3}","3rd tie, dice decide: {0} {1}   ·   {2} {3}"
+son.tur,{0}. turda bitti.,Ended in round {0}.
+son.sayaclar,Kim ne yaptı?,Who did what?
+son.sayac,{0}: {1} kez gösterildi · {2} ifşa · {3} saklama,{0}: named {1} times · {2} revealed · {3} kept
+hata.Tamam,,
+hata.SiraSendeDegil,Sıra sende değil.,It's not your turn.
+hata.Secilemez,Bu kişi seçilemez.,You can't choose this person.
+hata.YanlisAsama,Şu an bunu yapamazsın.,You can't do that right now.
+hata.GecersizGirdi,Olmadı: soru boş ya da çok uzun olabilir.,That didn't work: the question may be empty or too long.
+hata.HakKalmadi,Bunu zaten yaptın.,You already did that.
+hata.HavuzBos,Henüz soru paketi yok.,No question pack yet.
+hata.OyuncuSayisiGecersiz,Oyuncu sayısı uygun değil.,Invalid number of players.
+hata.Uygunsuz,Temiz mod: bu soru gönderilmedi. Başka türlü yaz.,Clean mode: this question wasn't sent. Try wording it differently.
+kurulum.hizli,Hızlı başla,Quick start
+kurulum.hizli_ipucu,Normal · TKM · 15 tur · Genel paket · Cesur cezalar · görevler ve kaos açık,Normal · RPS · 15 rounds · General pack · Bold penalties · tasks and chaos on
+kurulum.mod,Mod,Mode
+mod.ad.Normal,Normal,Normal
+mod.ad.Temiz,Temiz,Clean
+mod.ad.Curcuna,Curcuna,Chaos Mix
+mod.aciklama.Normal,Sırası gelen sorusunu kendisi yazar.,Whoever's turn it is writes their own question.
+mod.aciklama.Temiz,"Sadece Aile Dostu soruları, en fazla Hafif ceza.","Family Friendly questions only, at most Light penalties."
+mod.aciklama.Curcuna,"Önce herkes 2 soru yazar. Sorular karışır, sırası gelene havuzdan biri düşer.",Everyone writes 2 questions first. They get shuffled and each player draws one from the pool.
+kurulum.paketler,Soru paketleri,Question packs
+kurulum.paket_sayi,{0} ({1}),{0} ({1})
+kurulum.bizim_paket,Bizim paket ({0}),Our pack ({0})
+kurulum.paket_temiz,Temiz modda sadece Aile Dostu paketi.,Clean mode uses only the Family Friendly pack.
+kurulum.ceza,Ceza seviyesi,Penalty level
+ceza.seviye.Kapali,Kapalı,Off
+ceza.seviye.Hafif,Hafif,Light
+ceza.seviye.Cesur,Cesur,Bold
+ceza.seviye_aciklama.Kapali,Ceza yok.,No penalties.
+ceza.seviye_aciklama.Hafif,Uygulamanın uyguladığı cezalar ve Bedel.,"Penalties applied by the app, plus the Price."
+ceza.seviye_aciklama.Cesur,"Sesli cezalar, Bedel ve Kızgın Çakmak da var.","Spoken penalties, the Price and the Angry Lighter too."
+kurulum.ceza_temiz,Temiz modda en fazla Hafif.,At most Light in Clean mode.
+kurulum.ekstra,Ekstralar,Extras
+kurulum.gorevler,Gizli görevler,Secret tasks
+kurulum.kaos,Kaos turları (her 5 turda),Chaos rounds (every 5 rounds)
+kurulum.acik,Açık,On
+kurulum.kapali,Kapalı,Off
+kurulum.hata_paket,En az bir soru paketi seç.,Choose at least one question pack.
+hafiza.oyun,Bu grupla {0}. oyununuz,Game #{0} with this group
+hafiza.rekor,Rekor: {0} bir oyunda {1} kez gösterildi,Record: {0} was named {1} times in one game
+hafiza.seri,{0} üst üste {1}. kez {2},{0} was {2} {1} times in a row
+hafiza.efsaneler,Efsaneler ({0}),Legends ({0})
+hafiza.efsaneler_baslik,Efsaneler,Legends
+hafiza.efsaneler_ipucu,Bu grubun ifşa olan soruları.,This group's revealed questions.
+hafiza.kapat,Kapat,Close
+perde.soru_yazma,Soru yazma sırası {1},{0}'s turn to write questions
+perde.gorev,Gizli görevine bakma sırası {1},{0}'s turn to see their secret task
+perde.oy,Grup Kararı: oy verme sırası {1},Group Vote: {0}'s turn to vote
+perde.kaos_baslik,KAOS TURU,CHAOS ROUND
+kaos.ad.Yok,,
+kaos.aciklama.Yok,,
+kaos.ad.TersDunya,Ters Dünya,Upside Down
+kaos.aciklama.TersDunya,Bu tur soruyu alan kazanırsa soru ifşa olur.,"This round, the question is revealed if the one who got the question wins."
+kaos.ad.GrupKarari,Grup Kararı,Group Vote
+kaos.aciklama.GrupKarari,"Mini oyun yok. Soran ve soruyu alan dışındakiler oylar: ifşa mı, güme mi?",No mini game. Everyone except the asker and the one asked votes: reveal or lose?
+kaos.ad.KorSoru,Kör Soru,Blind Question
+kaos.aciklama.KorSoru,"Soru havuzdan çekilir, soran da göremez. Sadece soruyu alan görür.",The question comes from the pool and even the asker can't see it. Only the one asked sees it.
+kaos.ad.SoranGizli,Soran Gizli,Secret Asker
+kaos.aciklama.SoranGizli,Bu tur soranın kim olduğu gizli.,"This round, nobody knows who's asking."
+kaos.ad.AniOlum,Ani Ölüm,Sudden Death
+kaos.aciklama.AniOlum,"Tek el, beraberlik yok. Berabere biterse soruyu alan kaybeder.","One round, no ties. On a tie, the one who got the question loses."
+kaos.ad.CezaTuru,Ceza Turu,Penalty Round
+kaos.aciklama.CezaTuru,"Kaybeden ceza çeker, ceza kapalı olsa bile.","The loser takes a penalty, even if penalties are off."
+kaos.ad.YonDegisti,Yön Değişti,Direction Change
+kaos.aciklama.YonDegisti,"Bu turdan sonra sıra çakmağı alana değil, rastgele birine geçer.","After this round, the turn goes to a random player instead of the one who got the lighter."
+kaos.ad.IkiyeKatla,İkiye Katla,Double Down
+kaos.aciklama.IkiyeKatla,Kaybeden bir el daha isteyebilir. Yine kaybederse cezası ikiye katlanır.,The loser can ask for one more round. Losing again doubles the penalty.
+oyun.kaos_etiket,Kaos: {0},Chaos: {0}
+isi.Soguk,Soğuk,Cold
+isi.Ilik,Ilık,Warm
+isi.Sicak,Sıcak,Hot
+isi.Kizgin,KIZGIN,BURNING
+isi.etiket,Çakmak: {0},Lighter: {0}
+isi.ipucu,Çakmak ısınıyor. Kızgınken verirsen alan yanabilir.,"The lighter is heating up. If you hand it over while burning, the receiver may get burned."
+ceza.baslik,{0} ceza çekti,{0} takes a penalty
+ceza.neden.Kaybetti,Mini oyunu kaybetti,Lost the mini game
+ceza.neden.Bedel,Bedel ödedi,Paid the Price
+ceza.neden.Yandi,Çakmak elinde yandı,Got burned by the lighter
+ceza.tur.Sesli,Sesli ceza,Spoken penalty
+ceza.tur.Palyaco,Palyaço,Clown
+ceza.tur.HavuzdanSor,Havuzdan sor,Ask from the pool
+ceza.tur.BeraberlikRakibe,Beraberlik rakibin,Ties go to your rival
+ceza.tur.SorunIfsa,Sorun ifşa,Your question is revealed
+ceza.metin.Palyaco,2 tur boyunca adının yanında palyaço yazar.,"For 2 rounds, ""clown"" appears next to your name."
+ceza.metin.HavuzdanSor,Bir sonraki sorunu havuzdan çekmek zorundasın.,Your next question must come from the pool.
+ceza.metin.BeraberlikRakibe,Bir sonraki mini oyununda beraberlik rakibinin sayılır.,"In your next mini game, a tie counts for your rival."
+ceza.metin.SorunIfsa,"Bir sonraki sorduğun soru, mini oyun ne olursa olsun ifşa olur.","The next question you ask will be revealed, whatever happens in the mini game."
+ceza.sesli_ipucu,Şimdi yap. Şeref sözü!,Do it now. On your honor!
+ceza.cark,Ceza çekiliyor...,Drawing a penalty...
+ceza.tamam,"Tamam, devam","OK, continue"
+ceza.yandi,Çakmak {1} elinde yandı!,The lighter burned {0}!
+palyaco.etiket,palyaço,clown
+karar.katla_baslik,{0} kaybetti!,{0} lost!
+karar.katla_soru,"{0}, bir el daha ister misin? Yine kaybedersen cezan ikiye katlanır.","{0}, want one more round? If you lose again, your penalty doubles."
+karar.katla_evet,Bir el daha!,One more round!
+karar.katla_hayir,Kabul ediyorum,I accept
+karar.bedel_baslik,Soru ifşa olmak üzere!,The question is about to be revealed!
+karar.bedel_soru,"{0}, bedel ödersen soru gizli kalır ama 2 ceza çekersin. Kalan hakkın: {1}","{0}, if you pay the Price the question stays secret, but you take 2 penalties. Uses left: {1}"
+karar.bedel_evet,Bedel öde,Pay the Price
+karar.bedel_hayir,İfşa olsun,Reveal it
+oy.baslik,"{0}, Grup Kararı","{0}, Group Vote"
+oy.aciklama,"{0} çakmağı {1} verdi. Soruyu sadece {0} biliyor. Sence soru ifşa mı olsun, güme mi gitsin?",{0} gave the lighter to {2}. Only {0} knows the question. Should it be revealed or lost?
+oy.ifsa,İfşa olsun,Reveal
+oy.gume,Güme gitsin,Lose it
+oy.gizli,Oyun gizli. Kimin ne dediği görünmez.,The vote is secret. Nobody sees who voted what.
+sonuc.oylama,Grup kararı: {0} ifşa · {1} güme,Group vote: {0} reveal · {1} lose
+sonuc.bedel,{0} bedel ödedi! Soru gizli kaldı.,{0} paid the Price! The question stays secret.
+mini.perde_anlam_ters,Ters Dünya: {0} kazanırsa soru herkese açılır. {1} kazanırsa soru güme gider.,"Upside Down: if {0} wins, the question is revealed. If {1} wins, the question is lost."
+mini.rol_b_ters,Ters Dünya: kazanırsan soru herkese açılır.,"Upside Down: if you win, the question is revealed."
+mini.rol_c_ters,Ters Dünya: kazanırsan soru güme gider.,"Upside Down: if you win, the question is lost."
+soru.atanan_baslik,Sana düşen soru:,Your question:
+soru.degistir,Değiştir (1 hak),Change (1 use)
+soru.kor,Kör Soru: havuzdan bir soru çekildi ama sen de göremezsin. Sadece kime soracağını seç.,"Blind Question: a question was drawn from the pool, but you can't see it either. Just choose who to ask."
+soru.havuzdan_ceza,Cezan var: bu tur sorun havuzdan geldi.,Penalty: your question this round came from the pool.
+toplama.baslik,"{0}, havuza soru yaz","{0}, add questions to the pool"
+toplama.aciklama,"Herkes 2 soru yazar. Sorular karışır, kimin yazdığı bilinmez. ({0}/{1})",Everyone writes 2 questions. They get shuffled; nobody knows who wrote what. ({0}/{1})
+toplama.ekle,Havuza ekle,Add to pool
+toplama.oneri,Fikir ver,Give me an idea
+toplama.kayit,Grup kaydedilirse yazdığın sorular bu cihazda grubun paketine eklenir.,"If the group is saved, your questions are added to the group's pack on this device."
+gorev.baslik,"{0}, gizli görevin","{0}, your secret task"
+gorev.aciklama,Kimseye söyleme. Oyun sonunda herkesin görevi açılır.,Don't tell anyone. Everyone's task is revealed at the end.
+gorev.gordum,"Gördüm, telefonu ver","Got it, pass the phone"
+zorluk.Kolay,Kolay,Easy
+zorluk.Orta,Orta,Medium
+zorluk.Zor,Zor,Hard
+gorev.tur.KisiyiGoster,{2} en az {0} kez göster.,Name {1} at least {0} times.
+gorev.tur.FarkliKisiGoster,En az {0} farklı kişiyi göster.,Name at least {0} different people.
+gorev.tur.MiniOyunKazan,En az {0} mini oyun kazan.,Win at least {0} mini games.
+gorev.tur.HicIfsaOlma,En az bir kez soru al ve aldığın hiçbir soru ifşa olmasın.,Get asked at least once and never have a question revealed.
+gorev.tur.AyniKisiyeSor,Aynı kişiye en az {0} soru sor.,Ask the same person at least {0} questions.
+gorev.tur.SeniGostersin,{1} seni en az {0} kez göstersin.,Get {1} to name you at least {0} times.
+gorev.tur.HicGosterilme,Hiç gösterilme.,Never get named.
+gorev.tur.KaosTurundaKazan,Bir kaos turunda mini oyun kazan.,Win a mini game in a chaos round.
+gorev.tur.KisiyeSor,{3} en az {0} soru sor.,Ask {1} at least {0} questions.
+gorev.tur.SoruSor,En az {0} soru sor.,Ask at least {0} questions.
+gorev.tur.IfsaEttir,Çakmağı alan olarak en az {0} soruyu ifşa ettir.,"As the lighter receiver, get at least {0} questions revealed."
+gorev.tur.GumeyeGonder,Soruyu alan olarak en az {0} soruyu güme gönder.,"As the one asked, make at least {0} questions get lost."
+gorev.tur.FarkliKisiyeSor,En az {0} farklı kişiye soru sor.,Ask at least {0} different people.
+gorev.tur.IntikamAl,Seni gösteren kişiye hemen sonraki turda soru sor.,Ask the person who named you a question in the very next round.
+gorev.tur.SirriniAc,{4} soruyu aldığı bir turda çakmağı sen al ve soruyu ifşa ettir.,"In a round where {1} is asked, get the lighter and reveal the question."
+gorev.tur.BedelOde,En az {0} kez bedel öde.,Pay the Price at least {0} times.
+gorev.tur.UstUsteKazan,Üst üste {0} mini oyun kazan.,Win {0} mini games in a row.
+gorev.tur.HedefiYen,Mini oyunda {2} en az {0} kez yen.,Beat {1} in mini games at least {0} times.
+gorev.tur.HicCezaCekme,"En az {0} mini oyun oyna, hiç ceza çekme.",Play at least {0} mini games and never take a penalty.
+gorev.tur.CokGosterilme,En az {0} kez gösteril.,Get named at least {0} times.
+son.unvanlar,Unvanlar,Titles
+son.unvan_yok,Bu oyunda unvan çıkmadı.,No titles this game.
+son.gorevler,Gizli görevler,Secret tasks
+son.gorev_basarili,Başardı,Done
+son.gorev_basarisiz,Başaramadı,Failed
+son.grup_kaydet,Bu grubu kaydet,Save this group
+son.grup_ad,Grup adı (ör. Yurt 3. kat),Group name (e.g. Dorm 3rd floor)
+son.grup_ad_bos,Gruba bir ad ver.,Give the group a name.
+son.grup_kaydedildi,{0} kaydedildi. Bu grupla {1}. oyununuz.,{0} saved. Game #{1} with this group.
+son.grup_hata,Kaydedilemedi.,Couldn't save.
+son.paylas,Paylaşım kartı,Share card
+kart.alt,TheLighter · gizli sorulu parti oyunu,TheLighter · the secret question party game
+kart.gorevi_yapanlar,Görevini yapanlar,Completed their task
+kart.kimse,Kimse,Nobody
+kart.kaydet,Kaydet,Save
+kart.kaydedildi,Kaydedildi: {0},Saved: {0}
+kart.kaydedilemedi,Kaydedilemedi.,Couldn't save.
+unvan.ad.Miknatis,Mıknatıs,Magnet
+unvan.aciklama.Miknatis,{0} kez gösterildi,Named {0} times
+unvan.ad.Gammaz,Gammaz,Snitch
+unvan.aciklama.Gammaz,{0} soruyu ifşa ettirdi,Got {0} questions revealed
+unvan.ad.SirKupu,Sır Küpü,Vault
+unvan.aciklama.SirKupu,{0} soruyu güme gönderdi,Made {0} questions get lost
+unvan.ad.HedefTahtasi,Hedef Tahtası,Bullseye
+unvan.aciklama.HedefTahtasi,{0} soru aldı,Was asked {0} questions
+unvan.ad.SoruMakinesi,Soru Makinesi,Question Machine
+unvan.aciklama.SoruMakinesi,{0} soru sordu,Asked {0} questions
+unvan.ad.Sansli,Şanslı,Lucky
+unvan.aciklama.Sansli,{0} mini oyun kazandı,Won {0} mini games
+unvan.ad.Takintili,Takıntılı,Obsessed
+unvan.aciklama.Takintili,Aynı kişiye {0} soru sordu,Asked the same person {0} questions
+unvan.ad.Intikamci,İntikamcı,Avenger
+unvan.aciklama.Intikamci,{0} kez kendisini gösterene hemen soru sordu,Asked back right away {0} times
+unvan.ad.AtesleOynayan,Ateşle Oynayan,Playing with Fire
+unvan.aciklama.AtesleOynayan,Çakmak elinde {0} kez yandı,Burned by the lighter {0} times
+unvan.ad.Bedelci,Bedelci,Price Payer
+unvan.aciklama.Bedelci,{0} kez bedel ödedi,Paid the Price {0} times
+unvan.ad.Cezakes,Cezakeş,Penalty Collector
+unvan.aciklama.Cezakes,{0} ceza çekti,Took {0} penalties
+unvan.ad.KaosCanavari,Kaos Canavarı,Chaos Monster
+unvan.aciklama.KaosCanavari,Kaos turlarında {0} kez kazandı,Won {0} times in chaos rounds
+unvan.ad.Kale,Kale,Fortress
+unvan.aciklama.Kale,"{0} soru aldı, hiçbiri ifşa olmadı","Was asked {0} questions, none revealed"
+unvan.ad.Gorunmez,Görünmez,Invisible
+unvan.aciklama.Gorunmez,Hiç gösterilmedi,Never named
+unvan.ad.Talihsiz,Talihsiz,Unlucky
+unvan.aciklama.Talihsiz,"{0} mini oyun oynadı, hiç kazanamadı","Played {0} mini games, never won"
+unvan.ad.SosyalKelebek,Sosyal Kelebek,Social Butterfly
+unvan.aciklama.SosyalKelebek,{0} farklı kişiyi gösterdi,Named {0} different people
+unvan.ad.Sadik,Sadık,Loyal
+unvan.aciklama.Sadik,Aynı kişiyi {0} kez gösterdi,Named the same person {0} times
+unvan.ad.Dedikoducu,Dedikoducu,Gossip
+unvan.aciklama.Dedikoducu,{0} farklı kişiye soru sordu,Asked {0} different people
+unvan.ad.Gundem,Gündem,Hot Topic
+unvan.aciklama.Gundem,{0} farklı kişiden soru aldı,Was asked by {0} different people
+unvan.ad.Yenilmez,Yenilmez,Unbeatable
+unvan.aciklama.Yenilmez,Üst üste {0} mini oyun kazandı,Won {0} mini games in a row
+unvan.ad.Zorba,Zorba,Bully
+unvan.aciklama.Zorba,Aynı kişiyi {0} kez yendi,Beat the same person {0} times
+unvan.ad.Av,Av,Prey
+unvan.aciklama.Av,Aynı kişiye {0} kez yenildi,Lost to the same person {0} times
+unvan.ad.Ayna,Ayna,Mirror
+unvan.aciklama.Ayna,{0} kez berabere kaldı,Tied {0} times
+unvan.ad.Uykucu,Uykucu,Sleepyhead
+unvan.aciklama.Uykucu,Süresi {0} kez doldu,Ran out of time {0} times
+unvan.ad.Kacak,Kaçak,Escape Artist
+unvan.aciklama.Kacak,"{0} mini oyun oynadı, hiç ceza çekmedi","Played {0} mini games, never took a penalty"
+unvan.ad.AcikKitap,Açık Kitap,Open Book
+unvan.aciklama.AcikKitap,Aldığı {0} soru ifşa oldu,{0} of their questions were revealed
+unvan.ad.EliBos,Eli Boş,Empty Handed
+unvan.aciklama.EliBos,Çakmağı aldığı {0} soru güme gitti,{0} questions they got the lighter for were lost
+unvan.ad.Kumarbaz,Kumarbaz,Gambler
+unvan.aciklama.Kumarbaz,{0} kez bir el daha dedi,Asked for one more round {0} times
+unvan.ad.Bumerang,Bumerang,Boomerang
+unvan.aciklama.Bumerang,Gösterdiği kişiler onu {0} kez geri gösterdi,Named back {0} times by people they named
+unvan.ad.Sogukkanli,Soğukkanlı,Cool Head
+unvan.aciklama.Sogukkanli,Çakmak kızgınken {0} kez verdi,Handed over the burning lighter {0} times
+online.baslik,Online oyna,Play online
+online.isim,Adın,Your name
+online.oda_kur,Oda kur,Create room
+online.oda_kur_ipucu,"Oda kodunu arkadaşlarına söyle, onlar da koda katılsın.",Tell your friends the room code so they can join.
+online.koda_katil,Koda katıl,Join with code
+online.katil,Katıl,Join
+online.geri_don,Kaldığın odaya dön ({0}),Back to your room ({0})
+online.sunucu,Sunucu,Server
+online.sunucu_baslik,Sunucu adresi,Server address
+online.sunucu_ipucu,ws:// ya da wss:// ile başlar. Yerel deneme için ws://localhost:5000/ws.,Starts with ws:// or wss://. For local testing: ws://localhost:5000/ws.
+online.sunucu_kaydet,Kaydet,Save
+online.sunucu_gecersiz,Bu adres olmadı: ws:// ya da wss:// ile başlamalı.,Invalid address: it must start with ws:// or wss://.
+online.baglaniyor,Bağlanıyor…,Connecting…
+online.baglaniyor_ipucu,"Bağlantı koptu, yeniden deniyoruz. Oyundaysan yerin 60 saniye tutuluyor.","Connection lost, trying again. If you're in a game, your seat is held for 60 seconds."
+online.baglaniyor_kisa,Bağlanıyor…,Connecting…
+online.vazgec,"Vazgeç, ana menüye dön","Cancel, back to main menu"
+online.cikis.baglanamadi,Sunucuya bağlanılamadı. İnternetini ve sunucu adresini kontrol et.,Couldn't connect to the server. Check your internet and the server address.
+online.cikis.ayrildin,Odadan ayrıldın.,You left the room.
+online.ayril,Odadan ayrıl,Leave room
+online.menu_baslik,Oda {0},Room {0}
+online.menu_ipucu,Online'da oyun durmaz: süre işlemeye devam eder.,Online games don't pause: the timer keeps running.
+online.afk_baslik,Orada mısın?,Are you there?
+online.afk_aciklama,"İki kez süren doldu, sıran atlanıyor. Dönmek için dokun.","Your time ran out twice, so your turn is skipped. Tap to come back."
+online.buradayim,Buradayım,I'm here
+online.bekleme_baslik,Oyuncular bekleniyor,Waiting for players
+online.bekleme_aciklama,"Bağlı oyuncu 4'ten az, oyun durdu. Kimse dönmezse oyun {0} sonra biter.","Fewer than 4 players connected, the game is paused. If nobody returns, it ends in {0}."
+online.olay.atildi,{0} odadan atıldı.,{0} was kicked.
+online.olay.atildi_temiz,{0} atıldı (Temiz mod).,{0} was kicked (Clean mode).
+online.olay.atildi_kurucu,Kurucu {1} attı.,The host kicked {0}.
+online.olay.sira_atlandi,{1} sırası atlandı.,{0}'s turn was skipped.
+online.olay.afk,{0} AFK.,{0} is AFK.
+online.olay.afk_bitti,{0} geri döndü.,{0} is back.
+online.olay.cikti,{0} oyundan çıktı.,{0} left the game.
+online.olay.sure_doldu,{1} süresi doldu.,{0} ran out of time.
+online.bekle.izliyorsun,"Oyundan çıktın, izliyorsun.","You left the game, you're watching."
+online.bekle.toplama,Herkes havuza soru yazıyor,Everyone is writing questions for the pool
+online.bekle.toplama_sayisi,{0}/{1} kişi bitirdi,{0}/{1} done
+online.bekle.soru,{0} soru yazıyor…,{0} is writing a question…
+online.bekle.soru_gizli,Biri gizlice soru yazıyor…,Someone is secretly writing a question…
+online.bekle.cevap,{0} çakmağı kime vereceğini düşünüyor…,{0} is deciding who gets the lighter…
+online.bekle.mini,{0} ile {1} {2} oynuyor,{0} and {1} are playing {2}
+online.bekle.oylama,Grup Kararı: oylar toplanıyor,Group Vote: collecting votes
+online.bekle.oy_sayisi,{0}/{1} oy,{0}/{1} votes
+online.bekle.oy_verdin,Oyunu verdin.,You voted.
+online.bekle.karar,{0} karar veriyor…,{0} is deciding…
+online.etiket.ayrildi,ayrıldı,left
+online.etiket.baglaniyor,bağlanıyor,connecting
+online.etiket.afk,AFK,AFK
+online.son.tekrar_bekle,Kurucu yeni oyunu başlatınca lobiye döneceksiniz.,You'll go back to the lobby when the host starts a new game.
+mini.beraberlik_online,{0}. beraberlik. Bir el daha!,Tie #{0}. One more round!
+mini.online_bekle,Seçtin. {0} bekleniyor...,Done. Waiting for {0}...
+lobi.ayril,Ayrıl,Leave
+lobi.kod_baslik,Oda kodu,Room code
+lobi.kopyala,Kodu kopyala,Copy code
+lobi.oyuncular,Oyuncular,Players
+lobi.sen,(sen),(you)
+lobi.kurucu,kurucu,host
+lobi.at,At,Kick
+lobi.at_soru,{1} odadan atmak istiyor musun?,Kick {0} from the room?
+lobi.at_ipucu,Atılan bu odaya aynı isimle dönemez.,Kicked players can't return to this room with the same name.
+lobi.at_evet,"Evet, at","Yes, kick"
+lobi.basla,Başlat,Start
+lobi.hizli_ipucu,"Önerilen ayarlar: Normal, TKM, 15 tur, Cesur cezalar, görevler ve kaos. 4 kişi varsa hemen başlar.","Recommended settings: Normal, RPS, 15 rounds, Bold penalties, tasks and chaos. Starts right away if there are 4 players."
+lobi.sureler,Süreler,Timers
+lobi.soru_sn,Soru yazma,Writing a question
+lobi.cevap_sn,Çakmağı verme,Handing the lighter
+lobi.hamle_sn,Mini oyun hamlesi,Mini game move
+lobi.sn,{0} sn,{0} s
+lobi.kurucu_bekleniyor,{0} oyunu başlatınca başlayacak.,The game starts when {0} starts it.
+lobi.en_az,En az {1} kişi gerekiyor ({0}/{1}).,At least {1} players needed ({0}/{1}).
+lobi.ozet,Ayarlar: {0},Settings: {0}
+bekleme.baslik,Oyun sürüyor,Game in progress
+bekleme.aciklama_sinirli,Tur {0}/{1}. Bu oyun bitince sen de oynayacaksın.,Round {0}/{1}. You'll play when this game ends.
+bekleme.aciklama_sinirsiz,Tur {0}. Bu oyun bitince sen de oynayacaksın.,Round {0}. You'll play when this game ends.
+bekleme.bitti_baslik,Oyun bitti,Game over
+bekleme.bitti_aciklama,Kurucu yeni oyunu başlatınca sen de katılacaksın.,You'll join when the host starts a new game.
+bekleme.oyundakiler,Oyundakiler,In the game
+bekleme.bekleyenler,Bekleyenler,Waiting
+hata.GECERSIZ_MESAJ,"Bir şeyler ters gitti, tekrar dene.","Something went wrong, try again."
+hata.ODA_YOK,Bu kodla bir oda yok ya da oda kapandı.,"No room with this code, or the room has closed."
+hata.ODA_DOLU,Oda dolu (10 kişi).,The room is full (10 players).
+hata.OYUN_BASLADI,"Oyun başladı, artık değiştirilemez.","The game has started, this can't be changed now."
+hata.ISIM_GECERSIZ,"Bu isim olmaz: boş, 20 harften uzun ya da odada aynısı var.","That name won't work: empty, longer than 20 letters, or already taken in the room."
+hata.ODADA_DEGILSIN,Önce bir odaya gir.,Join a room first.
+hata.ZATEN_ODADASIN,Zaten bir odadasın.,You're already in a room.
+hata.KURUCU_DEGILSIN,Bunu sadece kurucu yapabilir.,Only the host can do that.
+hata.OYUN_YOK,Oyun henüz başlamadı.,The game hasn't started yet.
+hata.ESKI_TUR,"Geç kaldın, tur değişti.","Too late, the round changed."
+hata.COK_HIZLI,Çok hızlı! Biraz bekleyip tekrar dene.,Too fast! Wait a moment and try again.
+hata.SUNUCU_DOLU,"Sunucu şu an dolu, biraz sonra tekrar dene.","The server is full right now, try again later."
+hata.ATILDIN,"Bu odadan atılmıştın, geri giremezsin.","You were kicked from this room, you can't come back."
+hata.ATILDIN.kurucu,Kurucu seni odadan attı.,The host kicked you from the room.
+hata.ATILDIN.temiz,Temiz modda uygunsuz yazmaya devam ettiğin için odadan atıldın.,You were kicked for repeatedly writing inappropriate things in Clean mode.
+hata.OYUNDA_DEGILSIN,"Bu oyunda değilsin, bitince katılacaksın.","You're not in this game, you'll join when it ends."
+genel.kapat,Kapat,Close
+sohbet.ac,Sohbet,Chat
+sohbet.baslik,Sohbet,Chat
+sohbet.genel,Genel,General
+sohbet.dm_ac,+ Özel mesaj,+ Private message
+sohbet.gonder,Gönder,Send
+sohbet.sekme_okunmamis,{0} ({1}),{0} ({1})
+sohbet.cok_hizli,Biraz yavaş: saniyede bir mesaj.,Slow down: one message per second.
+sohbet.gonderilemedi,Mesaj gönderilemedi.,Message couldn't be sent.
+gorev.gordum_online,"Tamam, gördüm","OK, got it"
+online.uygunsuz,"Gönderilmedi, kimse görmedi. {1}. seferde odadan atılırsın ({0}/{1}).","Not sent, nobody saw it. You'll be kicked on attempt {1} ({0}/{1})."
+lobi.bizim_yukleniyor,Bizim paket yükleniyor… ({0}/{1}),Uploading our pack… ({0}/{1})
+lobi.bizim_hata,Bizim paket yüklenemedi.,Couldn't upload our pack.
+menu.ayarlar,Ayarlar,Settings
+menu.cikis,Oyundan çık,Quit game
+ayarlar.baslik,Ayarlar,Settings
+ayarlar.ses,Ses,Sound
+ayarlar.muzik,Müzik,Music
+ayarlar.dil,Dil,Language
+ayarlar.dil_ipucu,Soru paketleri ve sesli cezalar şimdilik Türkçe.,Question packs and spoken penalties are in Turkish for now.
+dil.tr,Türkçe,Türkçe
+dil.en,English,English
+oyun.lobiye_don,Lobiye dön,Back to lobby
+oyun.lobiye_soru,Lobiye dönülsün mü?,Back to the lobby?
+oyun.lobiye_ipucu,"Oyun biter, herkes lobiye döner.",The game ends and everyone goes back to the lobby.
+oyun.lobiye_ipucu_elden,"Oyun biter, oyuncu ve ayar ekranına dönersiniz.",The game ends and you go back to players and settings.
+oyun.lobiye_evet,"Evet, lobiye dön","Yes, back to lobby"
+oyun.cikis_soru,Oyundan çıkmak istiyor musun?,Quit the game?
+oyun.cikis_ipucu,Oyun kapanır.,The game will close.
+oyun.cikis_ipucu_online,"Oyun kapanır, odadan da ayrılırsın.",The game will close and you'll leave the room.
+oyun.cikis_evet,"Evet, çık","Yes, quit"

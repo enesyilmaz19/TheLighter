@@ -915,3 +915,66 @@
 .sohbet-alt {
     margin-top: 8px;
 }
+
+/* ---------- PC: geniş pencere (Ana Plan 6.2) ----------
+   Solda oyuncular, ortada aynı sütun, sağda sohbet. Uygulama.cs pencere yeterince genişse .kok'a "genis" ekler. */
+.kok.genis {
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.kok.genis .sahne {
+    width: auto;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.yan {
+    width: 640px;
+    flex-shrink: 0;
+    padding: 48px 24px;
+}
+
+.yan .menu-kutu {
+    padding: 32px;
+    border-radius: 28px;
+}
+
+.sohbet-yan {
+    flex-grow: 1;
+}
+
+.sohbet-yan .sohbet-kutu {
+    max-height: 100%;
+}
+
+.oyuncu-sutunu {
+    flex-shrink: 1;
+}
+
+/* ---------- Ayarlar ---------- */
+.ayar-satiri {
+    margin: 12px 0;
+}
+
+.ayar-kaydirici {
+    margin: 8px 0;
+    min-height: 60px;
+}
+
+.ayar-kaydirici #unity-dragger {
+    width: 44px;
+    height: 44px;
+    margin-top: -18px;
+    border-radius: 22px;
+    background-color: var(--alev);
+    border-width: 0;
+}
+
+.ayar-kaydirici #unity-tracker {
+    height: 10px;
+    background-color: var(--yuzey-2);
+    border-width: 0;
+    border-radius: 5px;
+}

@@ -157,6 +157,7 @@ namespace TheLighter.Testler
         public void Katil_AyniOdanınSakliAnahtariylaGeriDoner_BaskaOdadaAnahtarYollamaz()
         {
             kalici.Yaz(OnlineIstemci.KayitOda, "KXTPM");
+            kalici.Yaz(OnlineIstemci.KayitIsim, "Ayşe");
             kalici.Yaz(OnlineIstemci.KayitAnahtar, "ESKI");
 
             istemci.Katil(Adres, "KXTPM", "Ayşe");
@@ -165,6 +166,39 @@ namespace TheLighter.Testler
             Assert.That(T.Son["anahtar"].Metin, Is.EqualTo("ESKI"));
 
             istemci.Katil(Adres, "ABCDE", "Ayşe");
+            T.Acil();
+            Kare();
+            Assert.That(T.Son["anahtar"].Var, Is.False);
+        }
+
+        /// <summary>
+        /// PC'de aynı bilgisayarda iki pencere (aynı PlayerPrefs): ikincisi başka isimle girerken birincinin
+        /// anahtarını yollarsa birincinin yerine geçer. Anahtar sadece aynı isimle gider.
+        /// </summary>
+        [Test]
+        public void Katil_BaskaIsimleSakliAnahtarYollamaz_AyniIsimYollar()
+        {
+            kalici.Yaz(OnlineIstemci.KayitOda, "KXTPM");
+            kalici.Yaz(OnlineIstemci.KayitIsim, "İrem");
+            kalici.Yaz(OnlineIstemci.KayitAnahtar, "ESKI");
+
+            istemci.Katil(Adres, "KXTPM", "Ali");
+            T.Acil();
+            Kare();
+            Assert.That(T.Son["anahtar"].Var, Is.False, "başka isim: başkasının anahtarı gitmez");
+
+            istemci.Katil(Adres, "KXTPM", "irem");
+            T.Acil();
+            Kare();
+            Assert.That(T.Son["anahtar"].Metin, Is.EqualTo("ESKI"), "aynı isim (büyük/küçük harf farkıyla): geri dönüş");
+        }
+
+        [Test]
+        public void Katil_SakliIsimYoksaAnahtarYollamaz()
+        {
+            kalici.Yaz(OnlineIstemci.KayitOda, "KXTPM");
+            kalici.Yaz(OnlineIstemci.KayitAnahtar, "ESKI");
+            istemci.Katil(Adres, "KXTPM", "Ali");
             T.Acil();
             Kare();
             Assert.That(T.Son["anahtar"].Var, Is.False);
@@ -413,6 +447,90 @@ namespace TheLighter.Testler
             Kare();
             Assert.That(istemci.Tur, Is.EqualTo(3));
             Assert.That(istemci.SonDurum.Gorunum.Sen, Is.EqualTo(new OyuncuId(1)), "görünüm kimin olduğunu bilir");
+        }
+
+        // ------------------------------------------------------------ Sohbet (S5)
+
+        static string SohbetGelen(string id, string kimden, string kime, string metin) =>
+            "{\"t\":\"sohbet\",\"id\":\"" + id + "\",\"kimden\":\"" + kimden + "\",\"kime\":" +
+            (kime == null ? "null" : "\"" + kime + "\"") + ",\"metin\":\"" + metin + "\"}";
+
+        [Test]
+        public void Sohbet_YazilanYereldeEklenmez_SunucuDonunceBenimOlarakEklenir()
+        {
+            OdayaGir();
+            Assert.That(istemci.SohbetGonder(null, "selam"), Is.True);
+            Kare();
+            Assert.That(T.Son["t"].Metin, Is.EqualTo("sohbet"));
+            Assert.That(T.Son["kime"].Var, Is.False);
+            Assert.That(istemci.SonGidenSohbet, Is.True);
+            Assert.That(istemci.Sohbet.Mesajlar(null), Is.Empty, "sunucu dönmeden görünmez");
+
+            T.Mesaj(SohbetGelen("m1", "p1", null, "selam"));
+            Kare();
+            var m = istemci.Sohbet.Mesajlar(null).Single();
+            Assert.That(m.Benim, Is.True);
+            Assert.That(istemci.Sohbet.Okunmamis(null), Is.EqualTo(0), "kendi mesajım okunmamış sayılmaz");
+
+            istemci.Gonder(Cevirici.Buradayim());
+            Assert.That(istemci.SonGidenSohbet, Is.False, "son giden artık sohbet değil");
+        }
+
+        [Test]
+        public void Sohbet_DmKanalaDuser_GenelOkunmamisSayilir()
+        {
+            OdayaGir();
+            T.Mesaj(SohbetGelen("m1", "p2", null, "naber"));
+            T.Mesaj(SohbetGelen("m2", "p3", "p1", "psst"));
+            T.Mesaj(SohbetGelen("m3", "p1", "p3", "efendim"));
+            Kare();
+            Assert.That(istemci.Sohbet.Mesajlar(null).Single().Kim, Is.EqualTo(new OyuncuId(2)));
+            Assert.That(istemci.Sohbet.Okunmamis(null), Is.EqualTo(1));
+            var dm = istemci.Sohbet.Mesajlar(new OyuncuId(3));
+            Assert.That(dm.Count, Is.EqualTo(2));
+            Assert.That(dm[0].Benim, Is.False);
+            Assert.That(dm[1].Benim, Is.True);
+            Assert.That(istemci.Sohbet.DmKanallari, Is.EqualTo(new[] { new OyuncuId(3) }));
+        }
+
+        [Test]
+        public void Sohbet_KopupDonunceKalir_AyrilincaSilinir()
+        {
+            OdayaGir();
+            T.Mesaj(SohbetGelen("m1", "p2", null, "naber"));
+            Kare();
+            T.Kop();
+            Kare();
+            Assert.That(istemci.Sohbet.Mesajlar(null).Count, Is.EqualTo(1), "kopup dönerken korunur");
+            istemci.Ayril();
+            Assert.That(istemci.Sohbet.Mesajlar(null), Is.Empty, "odadan çıkınca silinir");
+        }
+
+        [Test]
+        public void Sohbet_OdadaDegilkenGonderilmez()
+        {
+            Assert.That(istemci.SohbetGonder(null, "selam"), Is.False);
+        }
+
+        [Test]
+        public void Uygunsuz_EkranaGider_Cikmaz()
+        {
+            OdayaGir();
+            T.Mesaj("{\"t\":\"hata\",\"kod\":\"UYGUNSUZ\",\"ihlal\":2,\"sinir\":3}");
+            Kare();
+            Assert.That(istemci.Durum, Is.EqualTo(BaglantiDurumu.Odada));
+            Assert.That(hatalar.Single().Ihlal, Is.EqualTo(2));
+            Assert.That(hatalar.Single().Sinir, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void TemizdenAtildin_NedenleCikar()
+        {
+            OdayaGir();
+            T.Mesaj("{\"t\":\"hata\",\"kod\":\"ATILDIN\",\"neden\":\"temiz\"}");
+            Kare();
+            Assert.That(ayrilmalar, Is.EqualTo(new[] { "ATILDIN.temiz" }));
+            Assert.That(kalici.Oku(OnlineIstemci.KayitAnahtar), Is.Null);
         }
     }
 }

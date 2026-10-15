@@ -5,7 +5,8 @@ namespace TheLighter.Akis
 {
     /// <summary>
     /// Oyuncuya görünen metinlerin tablosu. Unity Localization'ın CSV biçimini okur:
-    /// ilk satır başlık, "Key" sütunu anahtar, "Turkish(tr)" sütunu metin.
+    /// ilk satır başlık, "Key" sütunu anahtar, dil sütunları "Turkish(tr)", "English(en)"...
+    /// Seçilen dilde boş kalan metin yedek dilden (Türkçe) gelir.
     /// Aynı dosya ileride Localization'a (Window → Asset Management → Localization Tables → Import CSV)
     /// aktarılıp String Table'a çevrilebilir.
     /// </summary>
@@ -15,7 +16,11 @@ namespace TheLighter.Akis
 
         public int Sayi => metinler.Count;
 
-        public static MetinTablosu CsvOku(string csv, string dilSutunu = "Turkish(tr)")
+        public const string Turkce = "Turkish(tr)";
+        public const string Ingilizce = "English(en)";
+
+        /// <param name="yedekSutun">Seçilen dilde metin boşsa buradan (null: yedek yok).</param>
+        public static MetinTablosu CsvOku(string csv, string dilSutunu = Turkce, string yedekSutun = Turkce)
         {
             var t = new MetinTablosu();
             var satirlar = Satirlar(csv ?? "");
@@ -24,6 +29,8 @@ namespace TheLighter.Akis
             var baslik = satirlar[0];
             int anahtarSutunu = baslik.IndexOf("Key");
             int metinSutunu = baslik.IndexOf(dilSutunu);
+            int yedek = yedekSutun != null ? baslik.IndexOf(yedekSutun) : -1;
+            if (metinSutunu < 0) metinSutunu = yedek;
             if (anahtarSutunu < 0 || metinSutunu < 0) return t;
 
             for (int i = 1; i < satirlar.Count; i++)
@@ -32,7 +39,9 @@ namespace TheLighter.Akis
                 if (s.Count <= anahtarSutunu) continue;
                 string anahtar = s[anahtarSutunu].Trim();
                 if (anahtar.Length == 0 || anahtar.StartsWith("#")) continue;
-                t.metinler[anahtar] = s.Count > metinSutunu ? s[metinSutunu] : "";
+                string m = s.Count > metinSutunu ? s[metinSutunu] : "";
+                if (m.Length == 0 && yedek >= 0 && s.Count > yedek) m = s[yedek];
+                t.metinler[anahtar] = m;
             }
             return t;
         }

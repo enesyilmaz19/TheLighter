@@ -18,6 +18,11 @@ namespace TheLighter.Istemci
         const string TemaYolu = "TheLighter/Tema";
         const string StilYolu = "TheLighter/Stil";
         static readonly Vector2Int ReferansCozunurluk = new Vector2Int(1080, 1920);
+        /// <summary>
+        /// Panel biriminde bu genişlikten itibaren PC yerleşimi: solda oyuncular, ortada oyun, sağda sohbet (Ana Plan 6.2).
+        /// İki yan sütun (640) + orta sütun (1200) + boşluklar. 16:9 yatay pencere ≈ 3400.
+        /// </summary>
+        const float GenisEsik = 2600f;
 
         static Uygulama ornek;
 
@@ -25,6 +30,9 @@ namespace TheLighter.Istemci
         UIDocument belge;
         VisualElement kok;
         VisualElement sahne;
+        VisualElement solYan;
+        VisualElement sagYan;
+        bool genis;
         IEkran ekran;
         VisualElement baglaniyor;
         Rect sonGuvenliAlan;
@@ -65,6 +73,7 @@ namespace TheLighter.Istemci
             Screen.sleepTimeout = SleepTimeout.NeverSleep; // elden elede telefon masada duruyor
             if (Application.isMobilePlatform) Screen.orientation = ScreenOrientation.Portrait;
 
+            Tercihler.Uygula();
             Metin.Yukle();
             PaketleriYukle();
             ArayuzuKur();
@@ -98,8 +107,12 @@ namespace TheLighter.Istemci
             else Debug.LogError("[TheLighter] Stil bulunamadı: Resources/" + StilYolu + ".uss");
 
             kok = Arayuz.Kutu("kok");
+            solYan = Arayuz.Kutu("yan", "yan-sol", "gizli");
             sahne = Arayuz.Kutu("sahne");
+            sagYan = Arayuz.Kutu("yan", "yan-sag", "gizli");
+            kok.Add(solYan);
             kok.Add(sahne);
+            kok.Add(sagYan);
             baglaniyor = BaglaniyorKatmani();
             kok.Add(baglaniyor);
             root.Add(kok);
@@ -128,6 +141,17 @@ namespace TheLighter.Istemci
             sahne.Clear();
             ekran = yeni;
             sahne.Add(yeni.Kok);
+            YanlariKur();
+        }
+
+        /// <summary>Geniş pencerede (PC) ekranın yan sütunları; dar ekranda ekran her şeyi kendi sütununa alır.</summary>
+        void YanlariKur()
+        {
+            solYan.Clear();
+            sagYan.Clear();
+            if (ekran is IYanliEkran y) y.Yerlesim(genis, solYan, sagYan);
+            solYan.EnableInClassList("gizli", !genis || solYan.childCount == 0);
+            sagYan.EnableInClassList("gizli", !genis || sagYan.childCount == 0);
         }
 
         public void AnaMenu() => Goster(new AnaMenuEkrani(this));
@@ -136,6 +160,32 @@ namespace TheLighter.Istemci
 
         /// <param name="neden">Odadan neden çıkıldı (sunucu kodu ya da oturumun nedeni), yoksa null.</param>
         public void OnlineMenu(string neden) => Goster(new OnlineMenuEkrani(this, Online, neden));
+
+        /// <summary>
+        /// Ayarlardan dil değişti: metinler yeni dilden okunur, ekran baştan kurulur (ayarlar açık gelir).
+        /// Baştan kurulamayan ekranlar yeni dili bir sonraki ekranda gösterir.
+        /// </summary>
+        public void DilDegisti()
+        {
+            Metin.Yukle();
+            bool acik = baglaniyor != null && !baglaniyor.ClassListContains("gizli");
+            if (baglaniyor != null) baglaniyor.RemoveFromHierarchy();
+            baglaniyor = BaglaniyorKatmani();
+            kok.Add(baglaniyor);
+            BaglaniyorGoster(acik);
+            if (ekran is IYenidenKurulur y) Goster(y.YenidenKur());
+        }
+
+        /// <summary>Oyunu kapatır. Odadaysa önce ayrılır (yeri boşuna 60 sn tutulmasın).</summary>
+        public void OyundanCik()
+        {
+            if (Online != null && Online.Istemci.Durum != TheLighter.Ag.BaglantiDurumu.Kapali) Online.Istemci.Ayril();
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
 
         /// <summary>Bağlantı koptu, kendiliğinden yeniden deneniyor: bütün ekranın üstünde "Bağlanıyor…".</summary>
         public void BaglaniyorGoster(bool acik)
@@ -309,6 +359,14 @@ namespace TheLighter.Istemci
             kok.style.paddingRight = (Screen.width - alan.xMax) / piksel;
             kok.style.paddingTop = (Screen.height - alan.yMax) / piksel;
             kok.style.paddingBottom = alan.yMin / piksel;
+
+            bool simdiGenis = alan.width / piksel >= GenisEsik;
+            if (simdiGenis != genis)
+            {
+                genis = simdiGenis;
+                kok.EnableInClassList("genis", genis);
+                YanlariKur();
+            }
         }
     }
 }

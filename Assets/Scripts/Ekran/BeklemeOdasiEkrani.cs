@@ -7,8 +7,9 @@ namespace TheLighter.Istemci
     /// <summary>
     /// Oyun sürerken katılan: oyunda değil, sonraki oyunda oynayacak. Sadece herkese açık bilgi gelir
     /// (oyuncular, tur); soru, görev, seçim hiçbir şey yok. Oyun bitince kurucunun "Tekrar oyna"sını bekler.
+    /// Sohbete yazabilir ve DM alabilir (docs/Protokol.md, "Sohbet"). PC'de listeler solda, sohbet sağda.
     /// </summary>
-    public sealed class BeklemeOdasiEkrani : IEkran, IOnlineEkran
+    public sealed class BeklemeOdasiEkrani : IEkran, IOnlineEkran, IYanliEkran
     {
         readonly OnlineYonetici online;
         readonly Label baslik;
@@ -16,6 +17,10 @@ namespace TheLighter.Istemci
         readonly VisualElement oyuncular;
         readonly VisualElement bekleyenler;
         readonly Label hata;
+        readonly SohbetPaneli sohbet;
+        readonly Button sohbetDugmesi;
+        readonly VisualElement listeler;
+        readonly VisualElement listeYeri;
         int sonSurum = -1;
 
         public VisualElement Kok { get; }
@@ -28,6 +33,12 @@ namespace TheLighter.Istemci
             var ust = Kutu("satir");
             ust.Add(Buton(Metin.Al("lobi.ayril"), online.Ayril, "buton-kucuk"));
             ust.Add(Esnek());
+            if (OnlineYonetici.SohbetVar)
+            {
+                sohbet = online.SohbetPaneliKur();
+                sohbetDugmesi = Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk");
+                ust.Add(sohbetDugmesi);
+            }
             Kok.Add(ust);
 
             var kaydirma = new ScrollView(ScrollViewMode.Vertical);
@@ -39,15 +50,20 @@ namespace TheLighter.Istemci
             aciklama = Yazi("", "aciklama");
             kaydirma.Add(aciklama);
 
-            kaydirma.Add(Yazi(Metin.Al("bekleme.oyundakiler"), "alt-baslik"));
+            listeYeri = Kutu("lobi-oyuncu-yeri");
+            kaydirma.Add(listeYeri);
+            listeler = Kutu("lobi-oyuncu-bolumu");
+            listeler.Add(Yazi(Metin.Al("bekleme.oyundakiler"), "alt-baslik"));
             oyuncular = Kutu("isim-listesi");
-            kaydirma.Add(oyuncular);
-            kaydirma.Add(Yazi(Metin.Al("bekleme.bekleyenler"), "alt-baslik"));
+            listeler.Add(oyuncular);
+            listeler.Add(Yazi(Metin.Al("bekleme.bekleyenler"), "alt-baslik"));
             bekleyenler = Kutu("isim-listesi");
-            kaydirma.Add(bekleyenler);
+            listeler.Add(bekleyenler);
+            listeYeri.Add(listeler);
 
             hata = Yazi("", "hata");
             Kok.Add(hata);
+            if (sohbet != null) Kok.Add(sohbet.Kok);
             Yenile();
         }
 
@@ -94,12 +110,29 @@ namespace TheLighter.Istemci
         {
             var d = online.Istemci.SonDurum;
             if (d != null && d.Surum != sonSurum) Yenile();
+            sohbet?.Guncelle(gecenSn);
         }
 
         public void ArkaPlanaGecti() { }
 
-        public void HataGeldi(HataMesaji h) => hata.text = HataMetni.Kod(h.Kod);
+        public void HataGeldi(HataMesaji h)
+        {
+            if (sohbet != null && online.Istemci.SonGidenSohbet) sohbet.HataGoster(HataMetni.Mesaj(h));
+            else hata.text = HataMetni.Mesaj(h);
+        }
 
         public void OlayGeldi(OlayMesaji o) { }
+
+        public void Yerlesim(bool genis, VisualElement sol, VisualElement sag)
+        {
+            if (genis) sol.Add(listeler);
+            else listeYeri.Add(listeler);
+            listeler.EnableInClassList("menu-kutu", genis);
+            if (sohbet == null) return;
+            sohbet.YanaAl(genis);
+            sohbetDugmesi.EnableInClassList("gizli", genis);
+            if (genis) sag.Add(sohbet.Kok);
+            else Kok.Add(sohbet.Kok);
+        }
     }
 }

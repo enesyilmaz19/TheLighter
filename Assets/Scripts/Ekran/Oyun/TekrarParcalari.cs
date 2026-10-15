@@ -159,6 +159,7 @@ namespace TheLighter.Istemci
 
             kutu = SoruKutusu.Kur();
             kutu.RegisterValueChangedCallback(_ => Durum());
+            SoruKutusu.EnterIleGonder(kutu, () => { if (ekle.enabledSelf) Ekle(); });
             Kok.Add(kutu);
 
             var alt = Kutu("satir");
@@ -252,7 +253,7 @@ namespace TheLighter.Istemci
             Kok.Add(Yazi(Metin.Al("oy.baslik", akis.Isim(g.Sen)), "baslik"));
             Kok.Add(Esnek());
             Kok.Add(Tekrar.KaosKarti(KaosKurali.GrupKarari));
-            Kok.Add(Yazi(Metin.Al("oy.aciklama", b, TurkceEk.Yonelme(c)), "aciklama", "orta"));
+            Kok.Add(Yazi(Metin.Al("oy.aciklama", b, TurkceEk.Yonelme(c), c), "aciklama", "orta"));
             Kok.Add(Esnek());
             Kok.Add(Yazi(Metin.Al("oy.gizli"), "ipucu"));
             hata = Yazi("", "hata");
@@ -356,6 +357,29 @@ namespace TheLighter.Istemci
             var icYazi = kutu.Q(className: TextField.inputUssClassName)?.Q<TextElement>();
             if (icYazi != null) icYazi.style.whiteSpace = WhiteSpace.Normal;
             return kutu;
+        }
+
+        /// <summary>
+        /// PC: Enter gönderir (satır atlamaz), odak kutuda kalır. Shift+Enter yok sayılır: soru tek satır.
+        /// Telefonda klavyenin "Enter"ı da aynı.
+        /// </summary>
+        public static void EnterIleGonder(TextField kutu, System.Action gonder)
+        {
+            kutu.RegisterCallback<KeyDownEvent>(e =>
+            {
+                bool enter = e.keyCode == UnityEngine.KeyCode.Return || e.keyCode == UnityEngine.KeyCode.KeypadEnter;
+                if (!enter && e.character != '\n' && e.character != '\r') return;
+                e.StopImmediatePropagation();
+                if (enter) gonder();
+                kutu.schedule.Execute(() => kutu.Focus());
+            }, TrickleDown.TrickleDown);
+            // Yapıştırılan satır sonları da tek boşluk olur.
+            kutu.RegisterValueChangedCallback(ev =>
+            {
+                var v = ev.newValue ?? "";
+                if (v.IndexOf('\n') >= 0 || v.IndexOf('\r') >= 0)
+                    kutu.SetValueWithoutNotify(v.Replace("\r\n", " ").Replace('\n', ' ').Replace('\r', ' '));
+            });
         }
     }
 }

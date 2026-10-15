@@ -13,21 +13,44 @@ namespace TheLighter.Istemci
         void OlayGeldi(OlayMesaji o);
     }
 
-    /// <summary>Cihazda kalıcı küçük ayarlar: PlayerPrefs.</summary>
+    /// <summary>
+    /// Cihazda kalıcı küçük ayarlar: PlayerPrefs. PC'de aynı bilgisayarda birden çok pencereyle denerken
+    /// <c>-profil 2</c> komut satırı argümanı her pencereye ayrı kayıt verir (anahtarlar "profil2." önekiyle).
+    /// </summary>
     sealed class PlayerPrefsKalici : IKalici
     {
-        public string Oku(string ad) => PlayerPrefs.HasKey(ad) ? PlayerPrefs.GetString(ad) : null;
+        readonly string onek;
+
+        public PlayerPrefsKalici(string onek = null) { this.onek = onek ?? ""; }
+
+        public string Oku(string ad) => PlayerPrefs.HasKey(onek + ad) ? PlayerPrefs.GetString(onek + ad) : null;
 
         public void Yaz(string ad, string deger)
         {
-            PlayerPrefs.SetString(ad, deger ?? "");
+            PlayerPrefs.SetString(onek + ad, deger ?? "");
             PlayerPrefs.Save();
         }
 
         public void Sil(string ad)
         {
-            PlayerPrefs.DeleteKey(ad);
+            PlayerPrefs.DeleteKey(onek + ad);
             PlayerPrefs.Save();
+        }
+
+        /// <summary>"-profil N" (N: harf/rakam, en fazla 16) varsa "profilN.", yoksa boş önek.</summary>
+        public static string KomutSatirindanOnek(string[] argumanlar)
+        {
+            if (argumanlar == null) return "";
+            for (int i = 0; i + 1 < argumanlar.Length; i++)
+            {
+                if (argumanlar[i] != "-profil") continue;
+                string ad = argumanlar[i + 1];
+                if (string.IsNullOrEmpty(ad) || ad.Length > 16) return "";
+                foreach (char c in ad)
+                    if (!(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9')) return "";
+                return "profil" + ad + ".";
+            }
+            return "";
         }
     }
 
@@ -47,31 +70,37 @@ namespace TheLighter.Istemci
         const string KayitSonIsim = "online.son_isim";
 
         readonly Uygulama uygulama;
-        readonly IKalici kalici = new PlayerPrefsKalici();
+        readonly IKalici kalici = new PlayerPrefsKalici(PlayerPrefsKalici.KomutSatirindanOnek(Environment.GetCommandLineArgs()));
         OdaAyarlari sonAyarlar;
         OnlineAkis akis;
 
         public OnlineIstemci Istemci { get; }
 
-        /// <summary>
-        /// Sohbet ve DM protokolü sunucuda henüz yok (docs/Protokol.md, "Henüz yok"). Gelince true olur,
-        /// gelen mesajlar <see cref="Sohbet"/>'e eklenir. O zamana kadar sohbet düğmesi görünmez.
-        /// </summary>
-        public static bool SohbetVar => false;
+        /// <summary>Sohbet ve DM açık (docs/Protokol.md, "Sohbet"). Kapatmak gerekirse tek yer burası.</summary>
+        public static bool SohbetVar => true;
 
         /// <summary>Bu odanın sohbeti. Cihazda saklanmaz, odadan çıkınca silinir.</summary>
-        public SohbetDefteri Sohbet { get; } = new SohbetDefteri();
+        public SohbetDefteri Sohbet => Istemci.Sohbet;
 
-        /// <summary>Sohbet mesajı gönderir. Protokol gelene kadar false (gönderilmedi).</summary>
-        public bool SohbetGonder(OyuncuId? kanal, string metin)
+        /// <summary>
+        /// Sohbet mesajı gönderir. Yazılan yerelde eklenmez: sunucu yazana da geri yollar, o zaman görünür
+        /// (dönmezse gitmemiştir, hata gelir). Odada değilse false.
+        /// </summary>
+        public bool SohbetGonder(OyuncuId? kanal, string metin) => SohbetVar && Istemci.SohbetGonder(kanal, metin);
+
+        /// <summary>Sohbette görünen kişiler: oyuncular ve bekleme odasındakiler (onlar da yazar, DM alır).</summary>
+        IReadOnlyList<OdaOyuncusu> SohbetKisileri()
         {
-            // Protokol gelince: SohbetVar ve Odada ise Istemci.Gonder(Cevirici.Sohbet(kanal, metin)), sonra Sohbet.Ekle(benim mesajım).
-            return false;
+            var d = Istemci.SonDurum;
+            var liste = new List<OdaOyuncusu>();
+            if (d == null) return liste;
+            liste.AddRange(d.Oyuncular);
+            liste.AddRange(d.Bekleyenler);
+            return liste;
         }
 
-        /// <summary>Lobi ya da oyun ekranına eklenecek sohbet katmanı.</summary>
-        public SohbetPaneli SohbetPaneliKur() => new SohbetPaneli(Sohbet, SohbetGonder,
-            () => (IReadOnlyList<OdaOyuncusu>)Istemci.SonDurum?.Oyuncular ?? new List<OdaOyuncusu>(), () => Istemci.Sen);
+        /// <summary>Lobi, bekleme odası ya da oyun ekranına eklenecek sohbet paneli.</summary>
+        public SohbetPaneli SohbetPaneliKur() => new SohbetPaneli(Sohbet, SohbetGonder, SohbetKisileri, () => Istemci.Sen);
 
         /// <summary>Lobide son görülen ayarlar (oyun ekranı mod ve öneriler için kullanır).</summary>
         public OdaAyarlari SonAyarlar => sonAyarlar;
@@ -206,7 +235,6 @@ namespace TheLighter.Istemci
         void Ayrildi(string neden)
         {
             akis = null;
-            Sohbet.Temizle();
             uygulama.BaglaniyorGoster(false);
             uygulama.OnlineMenu(neden == OnlineIstemci.NedenAyrildin ? null : neden);
         }

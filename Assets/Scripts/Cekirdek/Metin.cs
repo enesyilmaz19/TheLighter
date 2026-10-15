@@ -4,9 +4,10 @@ using UnityEngine;
 namespace TheLighter.Istemci
 {
     /// <summary>
-    /// Oyuncuya görünen bütün metinler Assets/UI/Resources/TheLighter/Metinler.csv içinde.
-    /// Koda metin gömülmez. CSV, Unity Localization'ın CSV biçiminde: Localization paketi kurulunca
-    /// içe aktarılıp String Table'a çevrilir ve sadece bu sınıfın içi değişir.
+    /// Oyuncuya görünen bütün metinler Assets/UI/Resources/TheLighter/Metinler.csv içinde, dil başına bir sütun
+    /// (Türkçe, İngilizce). Koda metin gömülmez. CSV, Unity Localization'ın CSV biçiminde: Localization paketi
+    /// kurulunca içe aktarılıp String Table'a çevrilir ve sadece bu sınıfın içi değişir.
+    /// Seçili dil <see cref="Tercihler.Dil"/>'de; bir metin o dilde boşsa Türkçesi gösterilir.
     /// </summary>
     public static class Metin
     {
@@ -22,8 +23,11 @@ namespace TheLighter.Istemci
                 tablo = MetinTablosu.CsvOku("");
                 return;
             }
-            tablo = MetinTablosu.CsvOku(dosya.text);
+            tablo = MetinTablosu.CsvOku(dosya.text, Sutun(Tercihler.Dil));
         }
+
+        /// <summary>"tr" → "Turkish(tr)", "en" → "English(en)".</summary>
+        public static string Sutun(string dil) => dil == Tercihler.Ingilizce ? MetinTablosu.Ingilizce : MetinTablosu.Turkce;
 
         public static string Al(string anahtar, params object[] parametreler)
         {

@@ -24,6 +24,12 @@ namespace TheLighter.Ag
         public string Kod;
         /// <summary>Kod kural motorunun <see cref="Cakmak.Kurallar.Sonuc"/> değeriyse o, değilse null.</summary>
         public Sonuc? Sonuc;
+        /// <summary>UYGUNSUZ (Temiz mod): bu odada kaçıncı ihlal. Yoksa 0.</summary>
+        public int Ihlal;
+        /// <summary>UYGUNSUZ: kaçıncı ihlalde atılırsın. Yoksa 0.</summary>
+        public int Sinir;
+        /// <summary>ATILDIN: "kurucu" ya da "temiz". Yasaklı geri girişte null.</summary>
+        public string Neden;
 
         public override string ToString() => "hata " + Kod;
     }
@@ -36,8 +42,25 @@ namespace TheLighter.Ag
         /// <summary>Sunucunun olayı: kurucu <see cref="Kim"/>'i attı.</summary>
         public bool Atildi;
         public OyuncuId? Kim;
+        /// <summary>Sadece <see cref="Atildi"/>'de: "kurucu" ya da "temiz".</summary>
+        public string Neden;
 
         public override string ToString() => "olay " + (Atildi ? "atildi" : Olay.Tur.ToString());
+    }
+
+    /// <summary>
+    /// <c>sohbet</c>: genel ya da DM mesajı. Genel yazana da döner (yazan kendi mesajını bununla ekler).
+    /// <see cref="Kime"/> null ise genel.
+    /// </summary>
+    public sealed class SohbetGelen : GelenMesaj
+    {
+        public string Id;
+        public OyuncuId Kimden;
+        public OyuncuId? Kime;
+        public string Metin;
+
+        // Mesaj metni günlüğe düşmesin.
+        public override string ToString() => "sohbet " + Id;
     }
 
     /// <summary>Odadaki birinin kural motorunda olmayan bilgileri.</summary>
@@ -83,6 +106,8 @@ namespace TheLighter.Ag
 
         /// <summary>Sadece lobide.</summary>
         public OdaAyarlari Ayarlar;
+        /// <summary>Lobide: kurucunun yüklediği grup paketinin soru sayısı (sorular gelmez). 0 = yok.</summary>
+        public int GrupPaketi;
 
         /// <summary>Bekleme odasında: oyun bitti, kurucunun "tekrar oyna"sı bekleniyor.</summary>
         public bool OyunBitti;

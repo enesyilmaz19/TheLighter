@@ -30,6 +30,25 @@ namespace TheLighter.Tests
             Assert.AreEqual(EkranTuru.MiniOyun, a.Ekran.Tur);
         }
 
+        /// <summary>Temiz modda filtreye takılan soru gitmez (Sonuc.Uygunsuz), A aynı ekranda kalır, başka soru yazabilir.</summary>
+        [Test]
+        public void TemizMod_UygunsuzSoru_ReddedilirAsamaKalir()
+        {
+            var ayar = new Ayarlar { Mod = OyunModu.Temiz, TurSayisi = 10 };
+            Assert.AreEqual(Sonuc.Tamam, EldenEleAkisi.Kur(ayar, Oyuncular(5), 1, out var a));
+            a.PerdeyiKaldir();
+            Assert.AreEqual(EkranTuru.SoruSorma, a.Ekran.Tur);
+            var b = a.Ekran.Gorunum.Secilebilir[0];
+            var sen = a.Ekran.Gorunum.Sen;
+
+            Assert.AreEqual(Sonuc.Uygunsuz, a.SoruGonder(b, "siktir git"));
+            Assert.AreEqual(EkranTuru.SoruSorma, a.Ekran.Tur, "tur aynen sürer");
+            Assert.AreEqual(sen, a.Ekran.Gorunum.Sen);
+
+            Assert.AreEqual(Sonuc.Tamam, a.SoruGonder(b, "En son kime yalan söyledin?"));
+            Assert.AreEqual(EkranTuru.Perde, a.Ekran.Tur);
+        }
+
         [Test]
         public void IlkEkran_PerdeVeSaatDurur()
         {

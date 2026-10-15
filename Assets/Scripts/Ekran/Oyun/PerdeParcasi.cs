@@ -92,7 +92,7 @@ namespace TheLighter.Istemci
             var yanma = Tekrar.Filtrele(g.TurCezalari, true);
             if (yanma.Count > 0)
             {
-                Kok.Add(Yazi(Metin.Al("ceza.yandi", TurkceEk.Ilgi(c)), "banner", "yanma"));
+                Kok.Add(Yazi(Metin.Al("ceza.yandi", c, TurkceEk.Ilgi(c)), "banner", "yanma"));
                 foreach (var cek in yanma) Kok.Add(Tekrar.CezaKarti(akis, cek));
             }
             if (g.Kaos != KaosKurali.Yok) Kok.Add(Tekrar.KaosSeridi(g.Kaos));

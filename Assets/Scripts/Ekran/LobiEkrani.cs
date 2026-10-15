@@ -202,7 +202,7 @@ namespace TheLighter.Istemci
                 bool gorevAcik = herkeste || a.Gorevler;
                 gorev.text = Metin.Al("kurulum.gorevler") + ": " + Metin.Al(herkeste ? "kurulum.herkeste" : gorevAcik ? "kurulum.acik" : "kurulum.kapali");
                 gorev.EnableInClassList("secili", gorevAcik);
-                gorev.SetEnabled(!herkeste && (a.Gorevler || OyunSecimi.Uyumlu(ka, x => x.GizliGorevler = true)));
+                gorev.SetEnabled(herkeste || a.Gorevler || OyunSecimi.Uyumlu(ka, x => x.GizliGorevler = true));
                 kaos.text = Metin.Al("kurulum.kaos") + ": " + Metin.Al(a.Kaos ? "kurulum.acik" : "kurulum.kapali");
                 kaos.EnableInClassList("secili", a.Kaos);
                 kaos.SetEnabled(a.Kaos || OyunSecimi.Uyumlu(ka, x => x.KaosTurlari = true));

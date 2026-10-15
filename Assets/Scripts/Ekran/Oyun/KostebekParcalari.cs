@@ -70,6 +70,8 @@ namespace TheLighter.Istemci
             kutu.Add(Buton(Metin.Al("genel.geri"), () => perde.AddToClassList("gizli"), "buton-ikincil"));
             perde.Add(kutu);
             perde.RemoveFromClassList("gizli");
+            // Perde parçaya erken eklendi; sonradan eklenen düğmelerin üstünde dursun.
+            perde.BringToFront();
         }
 
         static void Yap(IOyunAkisi akis, VisualElement perde, OyuncuId kim, System.Action<string> hataYaz)

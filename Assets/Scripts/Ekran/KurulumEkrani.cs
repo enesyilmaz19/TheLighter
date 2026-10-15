@@ -245,7 +245,8 @@ namespace TheLighter.Istemci
             bool gorevAcik = herkeste || ayarlar.GizliGorevler;
             gorevButonu.text = Metin.Al("kurulum.gorevler") + ": " + Metin.Al(herkeste ? "kurulum.herkeste" : gorevAcik ? "kurulum.acik" : "kurulum.kapali");
             gorevButonu.EnableInClassList("secili", gorevAcik);
-            gorevButonu.SetEnabled(!herkeste && (ayarlar.GizliGorevler || OyunSecimi.Uyumlu(ayarlar, a => a.GizliGorevler = true)));
+            // Kilitli ama açık (Köstebek'te herkeste) soluklaşmasın, okunabilir kalsın: tıklama yok sayılır.
+            gorevButonu.SetEnabled(herkeste || ayarlar.GizliGorevler || OyunSecimi.Uyumlu(ayarlar, a => a.GizliGorevler = true));
             kaosButonu.text = Metin.Al("kurulum.kaos") + ": " + Metin.Al(ayarlar.KaosTurlari ? "kurulum.acik" : "kurulum.kapali");
             kaosButonu.EnableInClassList("secili", ayarlar.KaosTurlari);
             kaosButonu.SetEnabled(ayarlar.KaosTurlari || OyunSecimi.Uyumlu(ayarlar, a => a.KaosTurlari = true));

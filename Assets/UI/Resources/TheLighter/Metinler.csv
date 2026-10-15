@@ -485,7 +485,7 @@ oyun.ad.RusRuleti,Rus Ruleti,Russian Roulette
 oyun.ad.Takim,Takım Düellosu,Team Duel
 oyun.ad.Casus,Casus,Spy
 oyun.ad.CakmakGecesi,Çakmak Gecesi,Lighter Night
-oyun.aciklama.Cakmak,"Gizli soru, çakmak ve mini oyun: C kazanırsa soru ifşa, B kazanırsa güme.","Secret question, lighter and mini game: if C wins the question is revealed, if B wins it's lost."
+oyun.aciklama.Cakmak,"Sırası gelen gizli bir soru sorar, soruyu alan çakmağı cevaba verir. Düelloyu çakmağı alan kazanırsa soru herkese açılır.","Ask a secret question; the one asked hands the lighter to the answer. If the lighter's receiver wins the duel, the question is revealed."
 oyun.aciklama.Kostebek,"Aranızda gizli görevli bir köstebek var. Her 5 turda bir ""Köstebek kim?"" oylaması; herkesin bir erken suçlama hakkı var. Köstebek görevini bitirir ya da yakalanmazsa kazanır.","There's a Mole with a secret task among you. A ""Who's the Mole?"" vote every 5 rounds; everyone gets one early accusation. The Mole wins by finishing their task or never getting caught."
 oyun.aciklama.RusRuleti,"Düelloyu kaybeden tetiği çeker. Canı biten elenir, son kalan kazanır.",The duel's loser pulls the trigger. Out of lives means out; the last one standing wins.
 oyun.aciklama.Takim,"İki takım. Düellolar ve ifşalar takıma puan getirir, 7 puana ulaşan kazanır.",Two teams. Duels and reveals score points; first to 7 wins.

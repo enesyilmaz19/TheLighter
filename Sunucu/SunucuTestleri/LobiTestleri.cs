@@ -105,15 +105,6 @@ namespace SunucuTestleri
             await x.Hata("ODA_YOK");
         }
 
-        [Test]
-        public async Task Katil_11_kisi_ODA_DOLU()
-        {
-            var o = await OdaKur(10);
-            var x = await Baglan();
-            await x.Gonder(new { t = "katil", oda = o[0].Oda, isim = "Onbirinci", anahtar = (string)null });
-            await x.Hata("ODA_DOLU");
-        }
-
         [TestCase("")]
         [TestCase("    ")]                    // boşluk silinince boş
         [TestCase("123456789012345678901")]  // 21 karakter

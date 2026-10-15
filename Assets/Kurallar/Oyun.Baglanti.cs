@@ -14,8 +14,8 @@ namespace Cakmak.Kurallar
         readonly HashSet<OyuncuId> cikan = new HashSet<OyuncuId>();
         readonly Dictionary<OyuncuId, int> ardArdaSure = new Dictionary<OyuncuId, int>();
 
-        /// <summary>Seçilebilir ve sırası gelince oynar. Kopuk, AFK ya da çıkmış oyuncu atlanır.</summary>
-        bool Aktif(OyuncuId id) => !kopuk.Contains(id) && !afk.Contains(id) && !cikan.Contains(id);
+        /// <summary>Seçilebilir ve sırası gelince oynar. Kopuk, AFK, çıkmış ya da (Rus Ruleti'nde) elenmiş oyuncu atlanır.</summary>
+        bool Aktif(OyuncuId id) => !kopuk.Contains(id) && !afk.Contains(id) && !cikan.Contains(id) && !Bul(id).Elendi;
 
         /// <summary>Bağlantısı koptu. Yeri tutulur ve süreler işler, ama B/C seçilemez, sırası gelirse atlanır.</summary>
         public Sonuc OyuncuKoptu(OyuncuId kim)
@@ -57,6 +57,7 @@ namespace Cakmak.Kurallar
             kopuk.Remove(kim);
             afk.Remove(kim);
             Yay(new Olay { Tur = OlayTuru.OyuncuCikti, Kim = kim });
+            if (OyuncuCiktiOyunKarari(kim)) return Sonuc.Tamam;
             EldekiIsiBitir(kim);
             return Sonuc.Tamam;
         }
@@ -84,9 +85,21 @@ namespace Cakmak.Kurallar
                 case Asama.Oylama when !oylar.ContainsKey(kim) && oylayanlar.Remove(kim):
                     if (oylar.Count == oylayanlar.Count) OylamayiBitir();
                     break;
+                // "Kim?" oylaması: oy vermeden çıkan düşer, verdiyse oyu sayılır.
+                case Asama.Suclama when !suclamaOylari.ContainsKey(kim) && oylayanlar.Remove(kim):
+                    if (suclamaOylari.Count == oylayanlar.Count) SuclamayiBitir();
+                    break;
+                case Asama.Linc when !Secti(kim) && oylayanlar.Remove(kim):
+                case Asama.Gece when !Secti(kim) && oylayanlar.Remove(kim):
+                    if (SecenSayisi == oylayanlar.Count) GeceOylamasiBitti();
+                    break;
                 case Asama.IkiyeKatla when kim == kararVeren:
                 case Asama.Bedel when kim == kararVeren:
                     KarardanVazgecildi();
+                    break;
+                // Tetiği çekmeden çıkan çekmez: oyundan zaten çıktı.
+                case Asama.Tetik when kim == tetikCeken:
+                    TetikSonrasi();
                     break;
             }
         }

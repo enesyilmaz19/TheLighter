@@ -68,11 +68,25 @@ namespace TheLighter.Ag
         /// <summary>Hiçbir yere yazılmaz, sadece <see cref="IKalici"/>'ye (bu oda için).</summary>
         string anahtar;
 
+        /// <summary>
+        /// Bu odanın sohbeti (genel + DM). Sunucudan dönen mesajlar eklenir, yazılan yerelde eklenmez.
+        /// Cihazda saklanmaz: odadan çıkınca silinir. Kopup dönerken korunur (sunucu eskileri yeniden yollamaz).
+        /// </summary>
+        public SohbetDefteri Sohbet { get; } = new SohbetDefteri();
+
+        /// <summary>
+        /// Son giden mesaj sohbet miydi. UYGUNSUZ, COK_HIZLI gibi hatalar hangi isteğe ait, ona göre
+        /// sohbet panelinde ya da oyun ekranında gösterilir.
+        /// </summary>
+        public bool SonGidenSohbet { get; private set; }
+
         /// <summary>Son kabul edilen durum. Odadan çıkınca null.</summary>
         public DurumMesaji SonDurum { get; private set; }
 
         public event Action<DurumMesaji> DurumGeldi;
         public event Action<OlayMesaji> OlayGeldi;
+        /// <summary>Sohbet mesajı geldi (<see cref="Sohbet"/>'e eklendikten sonra).</summary>
+        public event Action<SohbetMesaji> SohbetGeldi;
         /// <summary>Odadayken gelen hata (ESKI_TUR, SIRA_SENDE_DEGIL...): ekran kısa bir uyarı gösterir.</summary>
         public event Action<HataMesaji> HataGeldi;
         /// <summary>Odadan çıkıldı ya da girilemedi. Neden: sunucu kodu ("ODA_YOK", "ATILDIN", "ISIM_GECERSIZ"...) ya da Neden* sabitleri.</summary>
@@ -121,6 +135,8 @@ namespace TheLighter.Ag
             Sen = null;
             SonDurum = null;
             sira.Clear();
+            Sohbet.Temizle();
+            SonGidenSohbet = false;
             denemeSayisi = 0;
             Durum = BaglantiDurumu.Giriyor;
             TasimaAc();
@@ -138,6 +154,7 @@ namespace TheLighter.Ag
             Sen = null;
             SonDurum = null;
             sira.Clear();
+            Sohbet.Temizle();
             bekleyenIlkMesaj = null;
             Yaz("çıkış: " + neden);
             if (onceki != BaglantiDurumu.Kapali) Ayrildi?.Invoke(neden);
@@ -159,7 +176,16 @@ namespace TheLighter.Ag
             if (Encoding.UTF8.GetByteCount(json) > Cevirici.EnFazlaBayt) return false;
             if (sira.Count >= EnFazlaSira) sira.Dequeue();
             sira.Enqueue(json);
+            SonGidenSohbet = false;
             SiraBosalt();
+            return true;
+        }
+
+        /// <summary>Sohbet mesajı yollar (kanal null: genel). Ekrana sunucu geri yollayınca düşer.</summary>
+        public bool SohbetGonder(OyuncuId? kime, string metin)
+        {
+            if (!Gonder(Cevirici.Sohbet(kime, metin))) return false;
+            SonGidenSohbet = true;
             return true;
         }
 
@@ -306,8 +332,31 @@ namespace TheLighter.Ag
                 case HataMesaji hata:
                     HataIsle(hata);
                     break;
+
+                case SohbetGelen sg:
+                    if (Durum != BaglantiDurumu.Odada) return;
+                    var sm = SohbetMesajiYap(sg, Sen);
+                    Sohbet.Ekle(sm);
+                    SohbetGeldi?.Invoke(sm);
+                    break;
             }
         }
+
+        /// <summary>
+        /// Gelen sohbeti deftere uygun hale getirir: <c>kimden</c> sensen senin mesajın.
+        /// DM kanalı karşıdaki kişi: <c>kimden</c> sensen <c>kime</c>, değilse <c>kimden</c>.
+        /// </summary>
+        public static SohbetMesaji SohbetMesajiYap(SohbetGelen g, OyuncuId? sen)
+        {
+            bool benim = sen.HasValue && g.Kimden == sen.Value;
+            OyuncuId? kanal = null;
+            if (g.Kime.HasValue) kanal = benim ? g.Kime : g.Kimden;
+            return new SohbetMesaji { Kanal = kanal, Kim = g.Kimden, Metin = g.Metin, Benim = benim };
+        }
+
+        /// <summary>ATILDIN'in çıkış nedeni: "ATILDIN.kurucu", "ATILDIN.temiz" ya da (yasaklı geri giriş) "ATILDIN".</summary>
+        public static string AtilmaNedeni(string neden) =>
+            neden == "kurucu" || neden == "temiz" ? "ATILDIN." + neden : "ATILDIN";
 
         void HataIsle(HataMesaji h)
         {
@@ -316,7 +365,7 @@ namespace TheLighter.Ag
             {
                 case "ATILDIN":
                     // Atıldın: bir daha deneme, anahtarı unut.
-                    Cik(h.Kod, unut: true);
+                    Cik(AtilmaNedeni(h.Neden), unut: true);
                     return;
                 case "ODA_YOK":
                     // Oda kapanmış (ya da kod yanlış). Saklı anahtar artık işe yaramaz.

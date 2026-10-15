@@ -21,7 +21,7 @@ namespace TheLighter.Istemci
     /// (EkranDurumu.Anahtar) ilgili parçayı baştan kurar, değişmediyse sadece süreleri günceller.
     /// Online'da ayrıca: kısa bildirimler (sıra atlandı, AFK...), "Buradayım" düğmesi, "oyuncular bekleniyor" katmanı.
     /// </summary>
-    public sealed class OyunEkrani : IEkran, IOnlineEkran
+    public sealed class OyunEkrani : IEkran, IOnlineEkran, IYanliEkran
     {
         const float BildirimSn = 3.5f;
 
@@ -34,6 +34,8 @@ namespace TheLighter.Istemci
         readonly VisualElement beklemeKatmani;
         readonly Label beklemeYazisi;
         readonly SohbetPaneli sohbet;
+        readonly Button sohbetDugmesi;
+        readonly OyuncuSutunu oyuncuSutunu;
         float bildirimKalan;
         float buradayimBekle;
         readonly VisualElement ustCubuk;
@@ -64,8 +66,10 @@ namespace TheLighter.Istemci
             if (online != null && OnlineYonetici.SohbetVar)
             {
                 sohbet = online.SohbetPaneliKur();
-                ustCubuk.Add(Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk"));
+                sohbetDugmesi = Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk");
+                ustCubuk.Add(sohbetDugmesi);
             }
+            if (online != null) oyuncuSutunu = new OyuncuSutunu(online.Istemci);
             ustCubuk.Add(Buton(Metin.Al("oyun.menu"), MenuyuAc, "buton-kucuk"));
             Kok.Add(ustCubuk);
 
@@ -109,6 +113,7 @@ namespace TheLighter.Istemci
             else parca.Guncelle(akis.Ekran);
 
             sohbet?.Guncelle(gecenSn);
+            oyuncuSutunu?.Guncelle();
             if (bildirimKalan > 0)
             {
                 bildirimKalan -= gecenSn;
@@ -156,7 +161,15 @@ namespace TheLighter.Istemci
         {
             // Eski tur: ekran zaten yeni durumu çiziyor, kullanıcıya söylemeye gerek yok.
             if (h.Kod == "ESKI_TUR") return;
-            Bildir(HataMetni.Kod(h.Kod));
+            // Son giden sohbetse hata sohbetindir (Temiz modda UYGUNSUZ, COK_HIZLI...).
+            if (sohbet != null && online != null && online.Istemci.SonGidenSohbet)
+            {
+                sohbet.HataGoster(HataMetni.Mesaj(h));
+                return;
+            }
+            // Soru ekranı kendisi gösterir ve gönder düğmesini yeniden açar (Temiz: tur aynen sürer).
+            if (parca is IHataGosteren hg && hg.HataGoster(h)) return;
+            Bildir(HataMetni.Mesaj(h));
         }
 
         public void OlayGeldi(OlayMesaji o)
@@ -164,7 +177,7 @@ namespace TheLighter.Istemci
             string kim = akis.Isim(o.Kim);
             if (o.Atildi)
             {
-                Bildir(Metin.Al("online.olay.atildi", kim));
+                Bildir(HataMetni.Atildi(o, kim));
                 return;
             }
             switch (o.Olay.Tur)
@@ -177,6 +190,17 @@ namespace TheLighter.Istemci
                     if (o.Kim.HasValue) Bildir(Metin.Al("online.olay.sure_doldu", kim, TurkceEk.Ilgi(kim)));
                     break;
             }
+        }
+
+        /// <summary>PC'de geniş pencere: solda oyuncular, sağda sohbet hep açık. Dar ekranda sohbet düğmeyle açılır.</summary>
+        public void Yerlesim(bool genis, VisualElement sol, VisualElement sag)
+        {
+            if (oyuncuSutunu != null && genis) sol.Add(oyuncuSutunu.Kok);
+            if (sohbet == null) return;
+            sohbet.YanaAl(genis);
+            sohbetDugmesi.EnableInClassList("gizli", genis);
+            if (genis) sag.Add(sohbet.Kok);
+            else Kok.Add(sohbet.Kok);
         }
 
         void Ciz()

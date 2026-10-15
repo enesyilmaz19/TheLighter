@@ -9,9 +9,10 @@ using static TheLighter.Istemci.Arayuz;
 namespace TheLighter.Istemci
 {
     /// <summary>
-    /// Sohbet katmanı (Ana Plan 4, "Sohbet arayüzü"): Genel ve DM sekmeleri, mesaj listesi, yazı kutusu.
+    /// Sohbet (Ana Plan 4, "Sohbet arayüzü"; protokol: docs/Protokol.md "Sohbet"): Genel ve DM sekmeleri,
+    /// mesaj listesi, yazı kutusu. Telefonda "Sohbet" düğmesiyle açılan katman; PC'de geniş pencerede sağ sütunda
+    /// hep açık (<see cref="YanaAl"/>). Enter gönderir, odak kutuda kalır.
     /// Mobilde klavye açılınca alt boşluk klavye kadar büyür, yazı kutusu klavyenin altında kalmaz.
-    /// İskelet: protokol gelene kadar <see cref="OnlineYonetici.SohbetVar"/> false, düğme oyuncuya görünmüyor.
     /// </summary>
     public sealed class SohbetPaneli
     {
@@ -26,6 +27,8 @@ namespace TheLighter.Istemci
         readonly Button yolla;
         readonly Label sayac;
         readonly Label hata;
+        readonly Button kapat;
+        bool yan;
         OyuncuId? kanal;
         int cizilenMesaj = -1;
         string cizilenKanal;
@@ -48,7 +51,8 @@ namespace TheLighter.Istemci
             var ust = Kutu("satir");
             ust.Add(Yazi(Metin.Al("sohbet.baslik"), "baslik"));
             ust.Add(Esnek());
-            ust.Add(Buton(Metin.Al("genel.kapat"), Kapat, "buton-kucuk"));
+            kapat = Buton(Metin.Al("genel.kapat"), Kapat, "buton-kucuk");
+            ust.Add(kapat);
             kutuKap.Add(ust);
 
             sekmeler = Kutu("secenekler", "sohbet-sekmeler");
@@ -69,10 +73,15 @@ namespace TheLighter.Istemci
             kutu = new TextField { maxLength = SohbetDefteri.EnFazlaKarakter };
             kutu.AddToClassList("isim-kutusu");
             kutu.RegisterValueChangedCallback(_ => Durum());
+            // Enter gönderir; odak kutuda kalır, arka arkaya yazılabilir.
             kutu.RegisterCallback<KeyDownEvent>(e =>
             {
-                if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter) Yolla();
-            });
+                bool enter = e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter;
+                if (!enter && e.character != '\n' && e.character != '\r') return;
+                e.StopImmediatePropagation();
+                if (enter) Yolla();
+                kutu.schedule.Execute(() => kutu.Focus());
+            }, TrickleDown.TrickleDown);
             alt.Add(kutu);
             yolla = Buton(Metin.Al("sohbet.gonder"), Yolla, "buton-birincil");
             alt.Add(yolla);
@@ -91,7 +100,30 @@ namespace TheLighter.Istemci
             Ciz();
         }
 
-        public void Kapat() => Kok.AddToClassList("gizli");
+        public void Kapat()
+        {
+            if (!yan) Kok.AddToClassList("gizli");
+        }
+
+        /// <summary>
+        /// true: PC'de sağ sütunda hep açık (kapat düğmesi yok). false: telefondaki gibi açılıp kapanan katman (kapalı başlar).
+        /// </summary>
+        public void YanaAl(bool yanda)
+        {
+            yan = yanda;
+            Kok.EnableInClassList("menu-perde", !yanda);
+            Kok.EnableInClassList("sohbet-yan", yanda);
+            Kok.EnableInClassList("gizli", !yanda);
+            kapat.EnableInClassList("gizli", yanda);
+            cizilenMesaj = -1;
+        }
+
+        /// <summary>Sohbete ait hata (UYGUNSUZ, COK_HIZLI...): panelin altında. Katmansa açılır ki görülsün.</summary>
+        public void HataGoster(string metin)
+        {
+            if (!Acik) Ac();
+            hata.text = metin ?? "";
+        }
 
         /// <summary>Her karede: yeni mesaj geldiyse listeyi çizer, klavye açıksa alt boşluğu ayarlar.</summary>
         public void Guncelle(float gecenSn)
@@ -193,6 +225,7 @@ namespace TheLighter.Istemci
             }
             defter.Gonderildi();
             kutu.value = "";
+            kutu.Focus();
         }
 
         string Isim(OyuncuId id)

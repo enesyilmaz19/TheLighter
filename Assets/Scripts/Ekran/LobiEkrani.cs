@@ -13,8 +13,10 @@ namespace TheLighter.Istemci
     /// Online lobi: oda kodu, oyuncular (renk, bağlı mı, kurucu), ayarlar. Ayarları sadece kurucu değiştirir;
     /// her değişiklikte sadece o alan gönderilir, ekran sunucudan gelen durumu çizer (tahmin yok).
     /// Kurucu olmayan ayarların özetini görür. "Başlat" en az 4 kişiyle. Reaksiyon online'da yok.
+    /// Grubu tanınan kurucu "Bizim paket"i seçebilir: önce sunucuya parça parça yüklenir (Temiz modda yok).
+    /// PC'de geniş pencerede oyuncular solda, sohbet sağda (Ana Plan 6.2).
     /// </summary>
-    public sealed class LobiEkrani : IEkran, IOnlineEkran
+    public sealed class LobiEkrani : IEkran, IOnlineEkran, IYanliEkran
     {
         static readonly OyunModu[] ModSecenekleri = { OyunModu.Normal, OyunModu.Temiz, OyunModu.Curcuna };
         static readonly MiniOyunTuru[] MiniSecenekleri = { MiniOyunTuru.Tkm, MiniOyunTuru.TekCift, MiniOyunTuru.Zar, MiniOyunTuru.Karisik };
@@ -37,6 +39,16 @@ namespace TheLighter.Istemci
         readonly List<Action<OdaAyarlari>> yenileyiciler = new List<Action<OdaAyarlari>>();
         readonly List<KeyValuePair<string, Button>> paketButonlari = new List<KeyValuePair<string, Button>>();
         readonly SohbetPaneli sohbet;
+        readonly Button sohbetDugmesi;
+        readonly VisualElement oyuncuBolumu;
+        readonly VisualElement oyuncuYeri;
+        Button bizimButon;      // AyarlariKur kurar
+        Label bizimDurum;
+        GrupDosyasi grup;
+        string grupIsimleri;
+        GrupPaketiYukleyici yukleyici;
+        /// <summary>Görülen herkesin ismi: atılan listeden düştükten sonra "atıldı" olayı gelince ismi lazım.</summary>
+        readonly Dictionary<OyuncuId, string> gorulenIsimler = new Dictionary<OyuncuId, string>();
         int sonSurum = -1;
 
         public VisualElement Kok { get; }
@@ -57,7 +69,8 @@ namespace TheLighter.Istemci
             if (OnlineYonetici.SohbetVar)
             {
                 sohbet = online.SohbetPaneliKur();
-                ust.Add(Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk"));
+                sohbetDugmesi = Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk");
+                ust.Add(sohbetDugmesi);
             }
             Kok.Add(ust);
 
@@ -73,9 +86,14 @@ namespace TheLighter.Istemci
             kodKutusu.Add(Buton(Metin.Al("lobi.kopyala"), () => GUIUtility.systemCopyBuffer = Istemci.Oda ?? "", "buton-kucuk"));
             kaydirma.Add(kodKutusu);
 
-            kaydirma.Add(Yazi(Metin.Al("lobi.oyuncular"), "alt-baslik"));
+            // PC'de bu bölüm sol sütuna taşınır (Yerlesim).
+            oyuncuYeri = Kutu("lobi-oyuncu-yeri");
+            kaydirma.Add(oyuncuYeri);
+            oyuncuBolumu = Kutu("lobi-oyuncu-bolumu");
+            oyuncuBolumu.Add(Yazi(Metin.Al("lobi.oyuncular"), "alt-baslik"));
             oyuncuListesi = Kutu("isim-listesi");
-            kaydirma.Add(oyuncuListesi);
+            oyuncuBolumu.Add(oyuncuListesi);
+            oyuncuYeri.Add(oyuncuBolumu);
 
             ozet = Yazi("", "aciklama");
             kaydirma.Add(ozet);
@@ -125,7 +143,11 @@ namespace TheLighter.Istemci
                 paketButonlari.Add(new KeyValuePair<string, Button>(ad, b));
                 paketKutusu.Add(b);
             }
+            bizimButon = Buton("", BizimPaketDegistir, "secenek", "gizli");
+            paketKutusu.Add(bizimButon);
             ayarKutusu.Add(paketKutusu);
+            bizimDurum = Yazi("", "ipucu");
+            ayarKutusu.Add(bizimDurum);
             var paketNotu = Yazi("", "ipucu");
             ayarKutusu.Add(paketNotu);
             yenileyiciler.Add(a =>
@@ -137,6 +159,7 @@ namespace TheLighter.Istemci
                     pb.Value.SetEnabled(!temiz || a.Paketler.Contains(pb.Key));
                 }
                 paketNotu.text = temiz ? Metin.Al("kurulum.paket_temiz") : "";
+                BizimCiz(a);
             });
 
             var cezaButonlari = Bolum("kurulum.ceza", CezaSecenekleri, c => Metin.Al("ceza.seviye." + c), a => a.Ceza,
@@ -213,6 +236,77 @@ namespace TheLighter.Istemci
             else Gonder(Cevirici.AyarDegistir(mod: m));
         }
 
+        // ---------- Bizim paket (grup paketi) ----------
+
+        /// <summary>Lobidekilerin grubu (elden eledeki eşleşme kuralı). İsimler değişmedikçe dosyalar yeniden okunmaz.</summary>
+        void GrubuBul(DurumMesaji d)
+        {
+            var isimler = new List<string>();
+            foreach (var o in d.Oyuncular) isimler.Add(o.Isim);
+            string anahtar = string.Join("\n", isimler);
+            if (anahtar == grupIsimleri) return;
+            grupIsimleri = anahtar;
+            grup = GrupDeposu.Eslesen(isimler);
+        }
+
+        int YerelBizimSayisi => grup != null ? grup.Kayit.GrupPaketi.Count : 0;
+
+        /// <summary>Sadece grubu tanınan kurucuya, paketi doluysa ve Temiz değilse. Seçili olan da (gruptan biri çıktıysa) görünür.</summary>
+        void BizimCiz(OdaAyarlari a)
+        {
+            bool secili = a.Paketler.Contains(PaketBilgisi.Bizim);
+            bool goster = a.Mod != OyunModu.Temiz && (YerelBizimSayisi > 0 || secili);
+            bizimButon.EnableInClassList("gizli", !goster);
+            int sayi = D != null && D.GrupPaketi > 0 ? D.GrupPaketi : YerelBizimSayisi;
+            bizimButon.text = Metin.Al("kurulum.bizim_paket", sayi);
+            bizimButon.EnableInClassList("secili", secili);
+            bizimButon.SetEnabled(yukleyici == null || yukleyici.Durum != GrupPaketiYukleyici.Hal.Yukleniyor);
+        }
+
+        void BizimPaketDegistir()
+        {
+            hata.text = "";
+            var a = D?.Ayarlar;
+            if (a == null || !Kurucu) return;
+            if (a.Paketler.Contains(PaketBilgisi.Bizim))
+            {
+                PaketDegistir(PaketBilgisi.Bizim);
+                return;
+            }
+            // Sunucuda bu odanın paketi varsa (tekrar oyna) hemen seçilir; yoksa önce yüklenir.
+            if (D.GrupPaketi > 0 || YerelBizimSayisi == 0)
+            {
+                if (D.GrupPaketi > 0) PaketDegistir(PaketBilgisi.Bizim);
+                return;
+            }
+            yukleyici = new GrupPaketiYukleyici(grup.Kayit.GrupPaketi, Istemci.Gonder);
+            yukleyici.Basla(D.Surum);
+            BizimYuklemeDurumu();
+        }
+
+        void BizimYuklemeDurumu()
+        {
+            if (yukleyici == null) return;
+            switch (yukleyici.Durum)
+            {
+                case GrupPaketiYukleyici.Hal.Yukleniyor:
+                    bizimDurum.text = Metin.Al("lobi.bizim_yukleniyor", yukleyici.Biten, yukleyici.Toplam);
+                    break;
+                case GrupPaketiYukleyici.Hal.Bitti:
+                    yukleyici = null;
+                    bizimDurum.text = "";
+                    if (D?.Ayarlar != null && D.GrupPaketi > 0 && !D.Ayarlar.Paketler.Contains(PaketBilgisi.Bizim))
+                        PaketDegistir(PaketBilgisi.Bizim);
+                    break;
+                case GrupPaketiYukleyici.Hal.Hata:
+                    bizimDurum.text = Metin.Al("lobi.bizim_hata") +
+                        (yukleyici.HataKodu != null ? " " + HataMetni.Kod(yukleyici.HataKodu) : "");
+                    yukleyici = null;
+                    break;
+            }
+            if (D?.Ayarlar != null) BizimCiz(D.Ayarlar);
+        }
+
         void PaketDegistir(string ad)
         {
             var secili = new List<string>(D.Ayarlar.Paketler);
@@ -249,6 +343,7 @@ namespace TheLighter.Istemci
             oyuncuListesi.Clear();
             foreach (var o in d.Oyuncular)
             {
+                gorulenIsimler[o.Id] = o.Isim;
                 var oyuncu = o;
                 var satir = Kutu("satir", "lobi-oyuncu");
                 satir.Add(RenkNoktasi(o.Renk));
@@ -291,6 +386,7 @@ namespace TheLighter.Istemci
             sonSurum = d.Surum;
 
             kodYazisi.text = d.Oda ?? Istemci.Oda ?? "";
+            GrubuBul(d);
             OyunculariCiz(d);
 
             var a = d.Ayarlar;
@@ -298,7 +394,7 @@ namespace TheLighter.Istemci
 
             // Kurucu ayarları değiştirir; diğerleri sadece özeti görür.
             ayarKutusu.EnableInClassList("gizli", !Kurucu);
-            ozet.text = Ozet(a);
+            ozet.text = Ozet(a, d.GrupPaketi);
             ozet.EnableInClassList("gizli", Kurucu);
 
             int kisi = d.Oyuncular.Count;
@@ -316,7 +412,7 @@ namespace TheLighter.Istemci
             return o?.Isim ?? "";
         }
 
-        static string Ozet(OdaAyarlari a)
+        static string Ozet(OdaAyarlari a, int grupPaketi)
         {
             var parca = new List<string>
             {
@@ -327,19 +423,64 @@ namespace TheLighter.Istemci
             };
             if (a.Gorevler) parca.Add(Metin.Al("kurulum.gorevler"));
             if (a.Kaos) parca.Add(Metin.Al("kurulum.kaos"));
+            if (grupPaketi > 0 && a.Mod != OyunModu.Temiz && a.Paketler.Contains(PaketBilgisi.Bizim))
+                parca.Add(Metin.Al("kurulum.bizim_paket", grupPaketi));
             return Metin.Al("lobi.ozet", string.Join(" · ", parca));
         }
 
         public void Guncelle(float gecenSn)
         {
-            if (D != null && D.Surum != sonSurum) Yenile();
+            if (D != null && D.Surum != sonSurum)
+            {
+                yukleyici?.DurumGeldi(D.Surum);
+                Yenile();
+            }
+            if (yukleyici != null)
+            {
+                yukleyici.Ilerle(gecenSn);
+                BizimYuklemeDurumu();
+            }
             sohbet?.Guncelle(gecenSn);
         }
 
         public void ArkaPlanaGecti() { }
 
-        public void HataGeldi(HataMesaji h) => hata.text = HataMetni.Kod(h.Kod);
+        public void HataGeldi(HataMesaji h)
+        {
+            if (sohbet != null && Istemci.SonGidenSohbet)
+            {
+                sohbet.HataGoster(HataMetni.Mesaj(h));
+                return;
+            }
+            if (yukleyici != null)
+            {
+                yukleyici.HataGeldi(h.Kod);
+                BizimYuklemeDurumu();
+                return;
+            }
+            hata.text = HataMetni.Mesaj(h);
+        }
 
-        public void OlayGeldi(OlayMesaji o) { }
+        public void OlayGeldi(OlayMesaji o)
+        {
+            if (!o.Atildi) return;
+            // Atılan listeden zaten düşüyor; neden kısaca yazılır (Temiz mod mu, kurucu mu).
+            string isim = "";
+            if (o.Kim.HasValue && gorulenIsimler.TryGetValue(o.Kim.Value, out var i)) isim = i;
+            hata.text = HataMetni.Atildi(o, isim);
+        }
+
+        /// <summary>PC'de geniş pencere: oyuncular solda, sohbet sağda hep açık.</summary>
+        public void Yerlesim(bool genis, VisualElement sol, VisualElement sag)
+        {
+            if (genis) sol.Add(oyuncuBolumu);
+            else oyuncuYeri.Add(oyuncuBolumu);
+            oyuncuBolumu.EnableInClassList("menu-kutu", genis);
+            if (sohbet == null) return;
+            sohbet.YanaAl(genis);
+            sohbetDugmesi.EnableInClassList("gizli", genis);
+            if (genis) sag.Add(sohbet.Kok);
+            else Kok.Add(sohbet.Kok);
+        }
     }
 }

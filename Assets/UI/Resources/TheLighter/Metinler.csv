@@ -130,7 +130,7 @@ hata.GecersizGirdi,Olmadı: soru boş ya da çok uzun olabilir.
 hata.HakKalmadi,Bunu zaten yaptın.
 hata.HavuzBos,Henüz soru paketi yok.
 hata.OyuncuSayisiGecersiz,Oyuncu sayısı uygun değil.
-hata.Uygunsuz,Temiz modda bu soru sorulamaz. Başka türlü yaz.
+hata.Uygunsuz,"Temiz mod: bu soru gönderilmedi. Başka türlü yaz."
 kurulum.hizli,Hızlı başla
 kurulum.hizli_ipucu,Normal · TKM · 15 tur · Genel paket · Cesur cezalar · görevler ve kaos açık
 kurulum.mod,Mod
@@ -369,6 +369,8 @@ online.buradayim,Buradayım
 online.bekleme_baslik,Oyuncular bekleniyor
 online.bekleme_aciklama,"Bağlı oyuncu 4'ten az, oyun durdu. Kimse dönmezse oyun {0} sonra biter."
 online.olay.atildi,{0} odadan atıldı.
+online.olay.atildi_temiz,{0} atıldı (Temiz mod).
+online.olay.atildi_kurucu,Kurucu {1} attı.
 online.olay.sira_atlandi,{1} sırası atlandı.
 online.olay.afk,{0} AFK.
 online.olay.afk_bitti,{0} geri döndü.
@@ -430,7 +432,9 @@ hata.OYUN_YOK,Oyun henüz başlamadı.
 hata.ESKI_TUR,"Geç kaldın, tur değişti."
 hata.COK_HIZLI,Çok hızlı! Biraz bekleyip tekrar dene.
 hata.SUNUCU_DOLU,"Sunucu şu an dolu, biraz sonra tekrar dene."
-hata.ATILDIN,Bu odadan atıldın.
+hata.ATILDIN,"Bu odadan atılmıştın, geri giremezsin."
+hata.ATILDIN.kurucu,Kurucu seni odadan attı.
+hata.ATILDIN.temiz,Temiz modda uygunsuz yazmaya devam ettiğin için odadan atıldın.
 hata.OYUNDA_DEGILSIN,"Bu oyunda değilsin, bitince katılacaksın."
 genel.kapat,Kapat
 sohbet.ac,Sohbet
@@ -442,3 +446,6 @@ sohbet.sekme_okunmamis,{0} ({1})
 sohbet.cok_hizli,Biraz yavaş: saniyede bir mesaj.
 sohbet.gonderilemedi,Mesaj gönderilemedi.
 gorev.gordum_online,"Tamam, gördüm"
+online.uygunsuz,"Gönderilmedi, kimse görmedi. {1}. seferde odadan atılırsın ({0}/{1})."
+lobi.bizim_yukleniyor,Bizim paket yükleniyor… ({0}/{1})
+lobi.bizim_hata,Bizim paket yüklenemedi.

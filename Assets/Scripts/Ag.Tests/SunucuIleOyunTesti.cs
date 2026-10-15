@@ -93,6 +93,66 @@ namespace TheLighter.Testler
             foreach (var b in botlar) b.Istemci.Ayril();
         }
 
+        /// <summary>
+        /// Köstebek gerçek sunucuyla (tasks/g2-kostebek.md 6): bir bot erken suçlar, botlar oy verir, 6. turda aralıklı oylama
+        /// ya da son oylama; oyun köstebek açılışıyla biter. Köstebeğin kim olduğu oyun bitmeden kimsenin durumunda yok.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator DortBot_Kostebek_SuclamaVeAcilis()
+        {
+            var botlar = new List<DenemeBotu>();
+            for (int i = 0; i < 4; i++) botlar.Add(new DenemeBotu("Kos" + (i + 1), 2000 + i));
+            var kurucu = botlar[0];
+            botlar[2].ErkenSuclasin = true;
+            var olaylar = new List<OlayMesaji>();
+            kurucu.Istemci.OlayGeldi += olaylar.Add;
+            var saat = Stopwatch.StartNew();
+            double son = 0;
+
+            IEnumerator Bekle(Func<bool> kosul, double sn, string ne)
+            {
+                double bitis = saat.Elapsed.TotalSeconds + sn;
+                while (!kosul())
+                {
+                    double g = saat.Elapsed.TotalSeconds - son;
+                    son = saat.Elapsed.TotalSeconds;
+                    foreach (var b in botlar) b.Guncelle(g);
+                    if (kurucu.Istemci.Durum == BaglantiDurumu.Kapali) Assert.Ignore("Yerel sunucu çalışmıyor.");
+                    if (saat.Elapsed.TotalSeconds > bitis)
+                        Assert.Fail(ne + " olmadı: " + string.Join(", ", botlar.Select(b => b.Isim + "=" + (b.Istemci.SonDurum?.ToString() ?? "-") + " " + b.SonHata)));
+                    yield return null;
+                }
+            }
+
+            kurucu.Istemci.OdaKur(Adres, kurucu.Isim);
+            yield return Bekle(() => kurucu.Istemci.Durum == BaglantiDurumu.Odada, 10, "Oda kurma");
+            for (int i = 1; i < 4; i++) botlar[i].Istemci.Katil(Adres, kurucu.Istemci.Oda, botlar[i].Isim);
+            yield return Bekle(() => kurucu.Istemci.SonDurum?.Oyuncular.Count == 4, 10, "Katılma");
+
+            kurucu.Istemci.Gonder(Cevirici.AyarDegistir(oyun: OyunTuru.Kostebek, kaos: false, turSayisi: 6,
+                soruSn: 10, cevapSn: 10, hamleSn: 5, miniOyun: MiniOyunTuru.Zar));
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Ayarlar?.Oyun == OyunTuru.Kostebek && b.Istemci.SonDurum.Ayarlar.TurSayisi == 6),
+                10, "Köstebek ayarı");
+            kurucu.Istemci.Gonder(Cevirici.Baslat());
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Yer == OdaYeri.Oyun), 10, "Başlama");
+
+            // Rol sadece köstebeğin kendi durumunda; görev herkeste (ayar kapalı olsa da).
+            Assert.That(botlar.Count(b => b.Istemci.SonDurum.Gorunum.Rolun == Rol.Kostebek), Is.EqualTo(1));
+            foreach (var b in botlar) Assert.That(b.Istemci.SonDurum.Gorunum.Gorevin, Is.Not.Null, b.Isim + " görevsiz");
+
+            yield return Bekle(() => botlar.All(b => b.OyunBitti), 300, "Oyunun bitmesi");
+            // Erken suçlama (Kim dolu) olduysa oylaması da bitmeli; köstebek görevini erkenden bitirdiyse hiç olmayabilir.
+            if (olaylar.Any(o => o.Olay != null && o.Olay.Tur == OlayTuru.SuclamaBasladi))
+                Assert.That(olaylar.Any(o => o.Olay != null && o.Olay.Tur == OlayTuru.SuclamaBitti), Is.True, "başlayan oylama bitti");
+
+            var k = kurucu.Istemci.SonDurum.Ozet?.Kostebek;
+            Assert.That(k, Is.Not.Null, "köstebek açılışı özette");
+            var kostebekBot = botlar.First(b => b.Istemci.Sen == k.Kostebek);
+            Assert.That(kostebekBot, Is.Not.Null);
+
+            foreach (var b in botlar) b.Istemci.Ayril();
+        }
+
         [UnityTest]
         public IEnumerator UygulamayaDonunce_YenidenBaglanir_AyniIsimleOdada()
         {

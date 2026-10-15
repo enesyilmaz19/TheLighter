@@ -111,6 +111,8 @@ namespace TheLighter.Istemci
 
             Kok.Add(Esnek());
             hata = Yazi("", "hata");
+            // Köstebek: erken suçlama (hakkı olan varsa). Elden elede "Kim suçluyor?" sorulur.
+            Kok.Add(Kostebek.SuclamaDugmesi(akis, Kok, m => hata.text = m));
             Kok.Add(hata);
             gonder = Buton(Metin.Al("soru.gonder"), Gonder, "buton-birincil", "buton-buyuk");
             Kok.Add(gonder);

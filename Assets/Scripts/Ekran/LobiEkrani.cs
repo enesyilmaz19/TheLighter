@@ -32,6 +32,7 @@ namespace TheLighter.Istemci
         readonly VisualElement oyuncuListesi;
         readonly VisualElement ayarKutusu;
         readonly Label ozet;
+        readonly Label oyunTarifi;
         readonly Label hata;
         readonly Button basla;
         readonly Label baslaIpucu;
@@ -100,6 +101,9 @@ namespace TheLighter.Istemci
 
             ozet = Yazi("", "aciklama");
             kaydirma.Add(ozet);
+            // Seçili oyunun kısa tarifi herkese (kurucu olmayan da ne oynayacağını bilsin).
+            oyunTarifi = Yazi("", "ipucu");
+            kaydirma.Add(oyunTarifi);
 
             ayarKutusu = Kutu("lobi-ayarlar");
             kaydirma.Add(ayarKutusu);
@@ -126,6 +130,9 @@ namespace TheLighter.Istemci
         {
             ayarKutusu.Add(Buton(Metin.Al("kurulum.hizli"), HizliBasla, "buton-birincil", "buton-buyuk"));
             ayarKutusu.Add(Yazi(Metin.Al("lobi.hizli_ipucu"), "ipucu"));
+
+            // Oyun ve mod iki ayrı eksen (docs/Oyunlar.md 0).
+            Bolum("kurulum.oyun", OyunSecimi.Secenekler, o => Metin.Al("oyun.ad." + o), a => a.Oyun, OyunSec);
 
             Bolum("kurulum.mod", ModSecenekleri, m => Metin.Al("mod.ad." + m), a => a.Mod, ModSec);
             var modAciklama = Yazi("", "ipucu");
@@ -180,17 +187,25 @@ namespace TheLighter.Istemci
 
             ayarKutusu.Add(Yazi(Metin.Al("kurulum.ekstra"), "alt-baslik"));
             var ekstra = Kutu("secenekler");
-            var gorev = Buton("", () => Gonder(Cevirici.AyarDegistir(gorevler: !D.Ayarlar.Gorevler)), "secenek");
+            var gorev = Buton("", () =>
+            {
+                if (!OyunSecimi.GorevlerHerkeste(D.Ayarlar.Oyun)) Gonder(Cevirici.AyarDegistir(gorevler: !D.Ayarlar.Gorevler));
+            }, "secenek");
             var kaos = Buton("", () => Gonder(Cevirici.AyarDegistir(kaos: !D.Ayarlar.Kaos)), "secenek");
             ekstra.Add(gorev);
             ekstra.Add(kaos);
             ayarKutusu.Add(ekstra);
             yenileyiciler.Add(a =>
             {
-                gorev.text = Metin.Al("kurulum.gorevler") + ": " + Metin.Al(a.Gorevler ? "kurulum.acik" : "kurulum.kapali");
-                gorev.EnableInClassList("secili", a.Gorevler);
+                var ka = OyunSecimi.OdadanAyarlar(a);
+                bool herkeste = OyunSecimi.GorevlerHerkeste(a.Oyun);
+                bool gorevAcik = herkeste || a.Gorevler;
+                gorev.text = Metin.Al("kurulum.gorevler") + ": " + Metin.Al(herkeste ? "kurulum.herkeste" : gorevAcik ? "kurulum.acik" : "kurulum.kapali");
+                gorev.EnableInClassList("secili", gorevAcik);
+                gorev.SetEnabled(!herkeste && (a.Gorevler || OyunSecimi.Uyumlu(ka, x => x.GizliGorevler = true)));
                 kaos.text = Metin.Al("kurulum.kaos") + ": " + Metin.Al(a.Kaos ? "kurulum.acik" : "kurulum.kapali");
                 kaos.EnableInClassList("secili", a.Kaos);
+                kaos.SetEnabled(a.Kaos || OyunSecimi.Uyumlu(ka, x => x.KaosTurlari = true));
             });
 
             ayarKutusu.Add(Yazi(Metin.Al("lobi.sureler"), "alt-baslik"));
@@ -311,6 +326,24 @@ namespace TheLighter.Istemci
             if (D?.Ayarlar != null) BizimCiz(D.Ayarlar);
         }
 
+        /// <summary>
+        /// Oyun değişince uymayan ayarlar aynı mesajda kapanır (sunucu uyumsuz sonucu GECERSIZ_GIRDI ile reddeder,
+        /// hangi sırayla gönderilirse gönderilsin). Neyin uymadığı kural motoruna sorulur.
+        /// </summary>
+        void OyunSec(OyunTuru o)
+        {
+            var once = OyunSecimi.OdadanAyarlar(D.Ayarlar);
+            var sonra = OyunSecimi.OdadanAyarlar(D.Ayarlar);
+            sonra.Oyun = o;
+            OyunSecimi.Uyumla(sonra);
+            Gonder(Cevirici.AyarDegistir(
+                oyun: o,
+                kaos: sonra.KaosTurlari != once.KaosTurlari ? sonra.KaosTurlari : (bool?)null,
+                gorevler: sonra.GizliGorevler != once.GizliGorevler ? sonra.GizliGorevler : (bool?)null,
+                ceza: sonra.CezaSeviyesi != once.CezaSeviyesi ? sonra.CezaSeviyesi : (CezaSeviyesi?)null,
+                mod: sonra.Mod != once.Mod ? sonra.Mod : (OyunModu?)null));
+        }
+
         void PaketDegistir(string ad)
         {
             var secili = new List<string>(D.Ayarlar.Paketler);
@@ -327,7 +360,7 @@ namespace TheLighter.Istemci
         void HizliBasla()
         {
             bool genelVar = uygulama.Paketler.Exists(p => p.Ad == PaketBilgisi.Genel);
-            Gonder(Cevirici.AyarDegistir(mod: OyunModu.Normal, miniOyun: MiniOyunTuru.Tkm, turSayisi: 15,
+            Gonder(Cevirici.AyarDegistir(oyun: OyunTuru.Cakmak, mod: OyunModu.Normal, miniOyun: MiniOyunTuru.Tkm, turSayisi: 15,
                 ceza: CezaSeviyesi.Cesur, gorevler: true, kaos: true,
                 paketler: genelVar ? new[] { PaketBilgisi.Genel } : null));
             if (D.Oyuncular.Count >= Oyun.EnAzOyuncu) Gonder(Cevirici.Baslat());
@@ -399,6 +432,7 @@ namespace TheLighter.Istemci
             // Kurucu ayarları değiştirir; diğerleri sadece özeti görür.
             ayarKutusu.EnableInClassList("gizli", !Kurucu);
             ozet.text = Ozet(a, d.GrupPaketi);
+            oyunTarifi.text = Metin.Al("oyun.aciklama." + a.Oyun);
             ozet.EnableInClassList("gizli", Kurucu);
 
             int kisi = d.Oyuncular.Count;
@@ -420,12 +454,13 @@ namespace TheLighter.Istemci
         {
             var parca = new List<string>
             {
+                Metin.Al("oyun.ad." + a.Oyun),
                 Metin.Al("mod.ad." + a.Mod),
                 Metin.Al("mini.ad." + a.MiniOyun),
                 a.TurSayisi == 0 ? Metin.Al("kurulum.tur_sinirsiz") : Metin.Al("kurulum.tur_sayi", a.TurSayisi),
                 Metin.Al("ceza.seviye." + a.Ceza),
             };
-            if (a.Gorevler) parca.Add(Metin.Al("kurulum.gorevler"));
+            if (a.Gorevler || OyunSecimi.GorevlerHerkeste(a.Oyun)) parca.Add(Metin.Al("kurulum.gorevler"));
             if (a.Kaos) parca.Add(Metin.Al("kurulum.kaos"));
             if (grupPaketi > 0 && a.Mod != OyunModu.Temiz && a.Paketler.Contains(PaketBilgisi.Bizim))
                 parca.Add(Metin.Al("kurulum.bizim_paket", grupPaketi));

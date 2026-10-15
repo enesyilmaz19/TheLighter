@@ -43,6 +43,9 @@ namespace TheLighter.Istemci
             var kaydirma = new ScrollView(ScrollViewMode.Vertical);
             kaydirma.AddToClassList("kaydirma");
 
+            // Köstebek: önce köstebek açılışı (kim, kim kazandı, neden).
+            if (ozet != null && ozet.Kostebek != null) kaydirma.Add(Kostebek.Acilis(akis, ozet));
+
             grupKutusu = Kutu("grup-kutusu");
             kaydirma.Add(grupKutusu);
             GrupuIsle();

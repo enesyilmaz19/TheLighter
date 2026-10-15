@@ -31,6 +31,7 @@ namespace TheLighter.Istemci
         readonly List<TextField> kutular = new List<TextField>();
         readonly List<VisualElement> satirlar = new List<VisualElement>();
         readonly List<Button> silButonlari = new List<Button>();
+        readonly List<Button> oyunButonlari = new List<Button>();
         readonly List<Button> modButonlari = new List<Button>();
         readonly List<Button> miniButonlari = new List<Button>();
         readonly List<Button> turButonlari = new List<Button>();
@@ -40,6 +41,7 @@ namespace TheLighter.Istemci
         readonly VisualElement hafizaKutusu;
         readonly VisualElement paketKutusu;
         readonly VisualElement efsanePerdesi;
+        readonly Label oyunAciklama;
         readonly Label modAciklama;
         readonly Label paketNotu;
         readonly Label cezaAciklama;
@@ -59,6 +61,7 @@ namespace TheLighter.Istemci
             var son = uygulama.SonAyarlar;
             ayarlar = new Ayarlar
             {
+                Oyun = son.Oyun,
                 Mod = son.Mod,
                 MiniOyun = son.MiniOyun,
                 TurSayisi = son.TurSayisi,
@@ -83,6 +86,12 @@ namespace TheLighter.Istemci
             // Çok ayar yeni oyuncuyu korkutur: tek dokunuşla önerilen oyun (Ana Plan 8.8).
             kaydirma.Add(Buton(Metin.Al("kurulum.hizli"), HizliBasla, "buton-birincil", "buton-buyuk"));
             kaydirma.Add(Yazi(Metin.Al("kurulum.hizli_ipucu"), "ipucu"));
+
+            // Oyun ve mod iki ayrı eksen (docs/Oyunlar.md 0): oyun kendi amacı ve kazananıyla, mod soruların nereden geldiği.
+            kaydirma.Add(Yazi(Metin.Al("kurulum.oyun"), "alt-baslik"));
+            kaydirma.Add(Secenekler(OyunSecimi.Secenekler, o => Metin.Al("oyun.ad." + o), o => ayarlar.Oyun = o, oyunButonlari));
+            oyunAciklama = Yazi("", "ipucu");
+            kaydirma.Add(oyunAciklama);
 
             kaydirma.Add(Yazi(Metin.Al("kurulum.baslik"), "baslik"));
             kaydirma.Add(Yazi(Metin.Al("kurulum.aciklama", EnAz, EnFazla), "aciklama"));
@@ -120,7 +129,12 @@ namespace TheLighter.Istemci
 
             kaydirma.Add(Yazi(Metin.Al("kurulum.ekstra"), "alt-baslik"));
             var ekstra = Kutu("secenekler");
-            gorevButonu = Buton("", () => { ayarlar.GizliGorevler = !ayarlar.GizliGorevler; Durum(); }, "secenek");
+            gorevButonu = Buton("", () =>
+            {
+                if (OyunSecimi.GorevlerHerkeste(ayarlar.Oyun)) return;
+                ayarlar.GizliGorevler = !ayarlar.GizliGorevler;
+                Durum();
+            }, "secenek");
             kaosButonu = Buton("", () => { ayarlar.KaosTurlari = !ayarlar.KaosTurlari; Durum(); }, "secenek");
             ekstra.Add(gorevButonu);
             ekstra.Add(kaosButonu);
@@ -205,6 +219,12 @@ namespace TheLighter.Istemci
 
             bool temiz = ayarlar.Mod == OyunModu.Temiz;
             if (temiz && ayarlar.CezaSeviyesi == CezaSeviyesi.Cesur) ayarlar.CezaSeviyesi = CezaSeviyesi.Hafif;
+            // Oyun değişince uymayan ayarlar kapanır (Köstebek'te kaos yok); kural motoruna sorulur.
+            OyunSecimi.Uyumla(ayarlar);
+
+            for (int i = 0; i < OyunSecimi.Secenekler.Length; i++)
+                oyunButonlari[i].EnableInClassList("secili", OyunSecimi.Secenekler[i] == ayarlar.Oyun);
+            oyunAciklama.text = Metin.Al("oyun.aciklama." + ayarlar.Oyun);
 
             for (int i = 0; i < ModSecenekleri.Length; i++)
                 modButonlari[i].EnableInClassList("secili", ModSecenekleri[i] == ayarlar.Mod);
@@ -221,10 +241,14 @@ namespace TheLighter.Istemci
             cezaAciklama.text = Metin.Al("ceza.seviye_aciklama." + ayarlar.CezaSeviyesi)
                 + (temiz ? "  " + Metin.Al("kurulum.ceza_temiz") : "");
 
-            gorevButonu.text = Metin.Al("kurulum.gorevler") + ": " + Metin.Al(ayarlar.GizliGorevler ? "kurulum.acik" : "kurulum.kapali");
-            gorevButonu.EnableInClassList("secili", ayarlar.GizliGorevler);
+            bool herkeste = OyunSecimi.GorevlerHerkeste(ayarlar.Oyun);
+            bool gorevAcik = herkeste || ayarlar.GizliGorevler;
+            gorevButonu.text = Metin.Al("kurulum.gorevler") + ": " + Metin.Al(herkeste ? "kurulum.herkeste" : gorevAcik ? "kurulum.acik" : "kurulum.kapali");
+            gorevButonu.EnableInClassList("secili", gorevAcik);
+            gorevButonu.SetEnabled(!herkeste && (ayarlar.GizliGorevler || OyunSecimi.Uyumlu(ayarlar, a => a.GizliGorevler = true)));
             kaosButonu.text = Metin.Al("kurulum.kaos") + ": " + Metin.Al(ayarlar.KaosTurlari ? "kurulum.acik" : "kurulum.kapali");
             kaosButonu.EnableInClassList("secili", ayarlar.KaosTurlari);
+            kaosButonu.SetEnabled(ayarlar.KaosTurlari || OyunSecimi.Uyumlu(ayarlar, a => a.KaosTurlari = true));
 
             // Grup: isimler değiştikçe yeniden eşlenir. Grup değişirse hafıza kartı ve "Bizim paket" yeniden kurulur.
             eslesen = GrupDeposu.Eslesen(YazilanIsimler(), gruplar);
@@ -360,6 +384,7 @@ namespace TheLighter.Istemci
         /// <summary>Normal, TKM, 15 tur, Genel paket, Cesur, görevler açık, kaos açık (Ana Plan 8.8).</summary>
         void HizliBasla()
         {
+            ayarlar.Oyun = OyunTuru.Cakmak;
             ayarlar.Mod = OyunModu.Normal;
             ayarlar.MiniOyun = MiniOyunTuru.Tkm;
             ayarlar.TurSayisi = 15;

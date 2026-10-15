@@ -978,3 +978,59 @@
     border-width: 0;
     border-radius: 5px;
 }
+
+/* ---------- Köstebek ---------- */
+/* Rol kartı: köstebek ve köstebek olmayan aynı boyda ve biçimde, sadece yazı ve kenar rengi farklı. */
+.rol-karti {
+    background-color: var(--yuzey);
+    border-width: 4px;
+    border-color: var(--cizgi);
+    border-radius: 36px;
+    padding: 32px 36px;
+    margin: 16px 0;
+}
+
+.rol-karti.rol-kostebek {
+    border-color: var(--kirmizi);
+}
+
+.kok .rol-ad {
+    font-size: 64px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.suclama-dugmesi {
+    margin: 12px 0;
+}
+
+.kostebek-acilis {
+    background-color: var(--alev-koyu);
+    border-width: 4px;
+    border-color: var(--alev);
+    border-radius: 36px;
+    padding: 32px 36px;
+    margin: 8px 0 24px 0;
+    align-items: center;
+}
+
+.kostebek-acilis.kazanan-kostebek {
+    border-color: var(--kirmizi);
+}
+
+.orta-satir {
+    justify-content: center;
+}
+
+.kok .kostebek-isim {
+    font-size: 72px;
+    -unity-font-style: bold;
+    margin-left: 16px;
+}
+
+.kok .kostebek-kazanan {
+    font-size: 52px;
+    -unity-font-style: bold;
+    color: var(--alev-acik);
+    -unity-text-align: middle-center;
+}

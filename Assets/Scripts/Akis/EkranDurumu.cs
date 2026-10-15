@@ -34,6 +34,17 @@ namespace TheLighter.Akis
 
         /// <summary>İkiye Katla ya da Bedel: karar veren 5 saniyede seçer. Telefon ortada, herkes görür.</summary>
         Karar,
+
+        // --- Yeni oyunlar (docs/Oyunlar.md) ---
+
+        /// <summary>
+        /// Elden ele, "Köstebek kim?" oylamasından önce: telefon ortada, herkes tartışır (istemcinin sayacı).
+        /// Kural motorunun saati bu sırada ve oylama boyunca durur. Online'da yok (sunucunun süresi tartışmayı da kapsar).
+        /// </summary>
+        SuclamaTartisma,
+
+        /// <summary>"Köstebek kim?": telefonu tutan kişi (online'da herkes kendi telefonunda) gizlice birini gösterir.</summary>
+        Suclama,
     }
 
     public enum PerdeNedeni
@@ -52,6 +63,15 @@ namespace TheLighter.Akis
 
         /// <summary>Grup Kararı: bu kişi oy verecek.</summary>
         Oy,
+
+        /// <summary>"Köstebek kim?" oylaması: bu kişi oy verecek.</summary>
+        Suclama,
+    }
+
+    /// <summary>Biten "kim?" oylamasının sonucu: en çok oyu alan, eşitlikte null. Bir sonraki ekranda duyurulur.</summary>
+    public sealed class SuclamaSonucu
+    {
+        public OyuncuId? Suclanan;
     }
 
     /// <summary>İfşa olan bir soru. Herkese açık olduktan sonra kaydedilir. Güme giden soru hiç gelmez.</summary>
@@ -124,6 +144,18 @@ namespace TheLighter.Akis
         /// </summary>
         public bool CezaOnayBekliyor;
 
+        /// <summary>
+        /// Elden ele: az önce biten "kim?" oylaması (yoksa null). Perde kaldırılana kadar duyurulur:
+        /// "Ali suçlandı… köstebek değildi" ya da "Kimse suçlanmadı".
+        /// </summary>
+        public SuclamaSonucu SuclamaSonucu;
+
+        /// <summary>SuclamaTartisma: oylamayı erken suçlamayla başlatan (aralıkla ya da son oylamada null).</summary>
+        public OyuncuId? SuclamaBaslatan;
+
+        /// <summary>SuclamaTartisma: tartışmanın kalan süresi (istemcinin sayacı).</summary>
+        public int TartismaKalanMs;
+
         /// <summary>Perdedeyse perdenin anahtarı. Aynı anahtarlı perde bir kez gösterilir.</summary>
         public string PerdeAnahtari;
 
@@ -137,6 +169,8 @@ namespace TheLighter.Akis
         /// </summary>
         public bool SaatDurur =>
             Tur == EkranTuru.Perde || Tur == EkranTuru.MiniOyunPerdesi || Tur == EkranTuru.SoruToplama
-            || Tur == EkranTuru.GorevGoster || Tur == EkranTuru.Oylama || CezaOnayBekliyor;
+            || Tur == EkranTuru.GorevGoster || Tur == EkranTuru.Oylama || CezaOnayBekliyor
+            || Tur == EkranTuru.SuclamaTartisma || Tur == EkranTuru.Suclama
+            || (Tur == EkranTuru.Perde && PerdeNedeni == PerdeNedeni.Suclama);
     }
 }

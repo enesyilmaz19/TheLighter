@@ -30,6 +30,10 @@ namespace TheLighter.Istemci
                     : Metin.Al("perde.sure_doldu_a", dolan, TurkceEk.Ilgi(dolan)), "banner"));
             }
 
+            // Köstebek: az önce biten "kim?" oylamasının sonucu, telefon A'ya dönerken herkes görsün.
+            if (e.SuclamaSonucu != null)
+                Kok.Add(Yazi(Kostebek.SonucMetni(akis, e.SuclamaSonucu.Suclanan), "banner"));
+
             Kok.Add(Esnek());
 
             // Kaos turu: tur başında herkes görsün diye büyük duyuru, telefon A'ya geçmeden önce (Ana Plan 8.3).
@@ -55,6 +59,9 @@ namespace TheLighter.Istemci
                     break;
                 case PerdeNedeni.Oy:
                     Kok.Add(Yazi(Metin.Al("perde.oy", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    break;
+                case PerdeNedeni.Suclama:
+                    Kok.Add(Yazi(Metin.Al("perde.suclama", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
                     break;
                 default:
                     string a = akis.Isim(g.A);

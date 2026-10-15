@@ -52,6 +52,23 @@ namespace TheLighter.Akis
         void CezalariOnayla();
         Sonuc OyunuBitir();
 
+        // --- Köstebek (docs/Oyunlar.md, 1) ---
+
+        /// <summary>
+        /// Erken suçlama hakkı duran oyuncular (kural motorunun görünümünden). Elden elede herkes, online'da sadece ben.
+        /// Boşsa düğme görünmez.
+        /// </summary>
+        IReadOnlyList<OyuncuId> SuclamaHakkiOlanlar { get; }
+
+        /// <summary>Erken suçlama: "Köstebek kim?" oylaması hemen başlar. Sadece soru sorma sırasında.</summary>
+        Sonuc Sucla(OyuncuId kim);
+
+        /// <summary>"Köstebek kim?" oyu: telefonu tutan (online'da ben) <paramref name="hedef"/>'i gösterir.</summary>
+        Sonuc SuclamaOyu(OyuncuId hedef);
+
+        /// <summary>Elden ele: tartışma bitti, telefon oylamaya dolaşsın. Online'da bir şey yapmaz.</summary>
+        void TartismayiBitir();
+
         // --- Yardımcılar ---
 
         /// <summary>Renk numarası (renk listesindeki sıra).</summary>

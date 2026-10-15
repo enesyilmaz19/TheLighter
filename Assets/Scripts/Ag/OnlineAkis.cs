@@ -197,6 +197,20 @@ namespace TheLighter.Ag
                     break;
                 }
 
+                case Asama.Suclama:
+                {
+                    // "Köstebek kim?": herkes kendi telefonunda, tartışma sohbette ve sunucunun süresinde.
+                    bool oylayanim = false;
+                    foreach (var id in g.Oylayanlar) if (id == ben) oylayanim = true;
+                    if (oylayanim && !g.OyVerdin)
+                    {
+                        Kur(e, EkranTuru.Suclama, tur);
+                        e.Kime = ben;
+                    }
+                    else Bekle(e, null, "suclama" + tur);
+                    break;
+                }
+
                 case Asama.IkiyeKatla:
                 case Asama.Bedel:
                     Kur(e, EkranTuru.Karar, tur + "|" + g.Asama);
@@ -295,6 +309,27 @@ namespace TheLighter.Ag
 
         /// <summary>AFK etiketini kaldırır.</summary>
         public void Buradayim() => istemci.Gonder(Cevirici.Buradayim());
+
+        // ------------------------------------------------------------ Köstebek
+
+        /// <summary>Online'da sadece kendi hakkım (sunucu sadece bana söyler).</summary>
+        public IReadOnlyList<OyuncuId> SuclamaHakkiOlanlar
+        {
+            get
+            {
+                var g = durum?.Gorunum;
+                if (g == null || !istemci.Sen.HasValue || !g.SuclamaHakkin) return Array.Empty<OyuncuId>();
+                return new[] { istemci.Sen.Value };
+            }
+        }
+
+        /// <summary>Erken suçlama: online'da hep kendi adıma (<paramref name="kim"/> yok sayılır).</summary>
+        public Sonuc Sucla(OyuncuId kim) => Yolla(Cevirici.Sucla(Tur));
+
+        public Sonuc SuclamaOyu(OyuncuId hedef) => Yolla(Cevirici.SuclamaOyu(Tur, hedef));
+
+        /// <summary>Online'da tartışma ekranı yok: süre sunucuda.</summary>
+        public void TartismayiBitir() { }
 
         /// <summary>Kurucu, oyun sonunda: oda lobiye döner.</summary>
         public Sonuc TekrarOyna() => Kurucuyum ? Yolla(Cevirici.TekrarOyna()) : Sonuc.SiraSendeDegil;

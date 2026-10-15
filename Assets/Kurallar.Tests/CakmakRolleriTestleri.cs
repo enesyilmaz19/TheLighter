@@ -46,18 +46,21 @@ namespace Cakmak.Kurallar.Tests
         [Test]
         public void Sorgucu_A_iken_muhurler_duello_kaybedilse_de_soru_ifsa()
         {
-            var oyun = YeniGece(8, Rol.Sorgucu);
+            var oyun = YeniGece(12, Rol.Sorgucu); // 12+ kişide 2 hak: turda bir kez kuralı görünsün
             var sorgucu = Tek(oyun, Rol.Sorgucu);
             var olaylar = Dinle(oyun);
+            Assert.That(oyun.GorunumAl(sorgucu).KalanHakkin, Is.EqualTo(2));
+            ADisinda(oyun, sorgucu);
+            Assert.That(oyun.GunduzYetenegi(sorgucu), Is.EqualTo(Sonuc.SiraSendeDegil), "A değilken");
             SiraVer(oyun, sorgucu);
             var b = Diger(oyun, sorgucu);
             Assert.That(oyun.GunduzYetenegi(b), Is.EqualTo(Sonuc.SiraSendeDegil));
             Assert.That(oyun.GunduzYetenegi(sorgucu), Is.EqualTo(Sonuc.Tamam));
-            Assert.That(oyun.GunduzYetenegi(sorgucu), Is.EqualTo(Sonuc.HakKalmadi));
+            Assert.That(oyun.GunduzYetenegi(sorgucu), Is.EqualTo(Sonuc.HakKalmadi), "turda bir kez");
             olaylar.Clear();
             Tur(oyun, b, Diger(oyun, sorgucu, b), cKazansin: false);
             Assert.That(olaylar.Exists(o => o.Tur == OlayTuru.Ifsa), Is.True, "B kazandı ama mühürlü");
-            Assert.That(oyun.GorunumAl(sorgucu).KalanHakkin, Is.Zero);
+            Assert.That(oyun.GorunumAl(sorgucu).KalanHakkin, Is.EqualTo(1));
         }
 
         [Test]
@@ -208,8 +211,14 @@ namespace Cakmak.Kurallar.Tests
             var masum = Sahipleri(oyun, Rol.Masum)[0];
             ADisinda(oyun, kundakci, masum);
             Tur(oyun, masum, kundakci, cKazansin: true);
-            GeceyeGec(oyun);
-            Assert.That(oyun.GorunumAl(kundakci).IkinciSecilebilir, Has.Member(masum));
+            while (Durum(oyun).Asama != Asama.Linc) // günün kalanında kimse onu göstermesin
+            {
+                var a = SiradakiA(oyun);
+                var b = Diger(oyun, a);
+                Tur(oyun, b, Diger(oyun, a, b, kundakci), cKazansin: true);
+            }
+            Saniye(oyun, 61);
+            Assert.That(oyun.GorunumAl(kundakci).IkinciSecilebilir, Is.EqualTo(new[] { masum }), "sadece bugün onu gösteren");
             Gece(oyun, (kundakci, null, masum));
             Assert.That(Kisi(oyun, masum).Elendi, Is.True);
             Assert.That(oyun.GorunumAl(kundakci).KalanHakkin, Is.Zero);

@@ -483,7 +483,11 @@ namespace Cakmak.Sunucu
                         sonuc = oyun.LincOyu(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")));
                         break;
                     case "geceSecimi": // hedef yoksa pas
-                        sonuc = oyun.GeceSecimi(b.Kim, Protokol.IstegeBagliId(m, "hedef"), Protokol.IstegeBagliId(m, "ikinci"));
+                        sonuc = oyun.GeceSecimi(b.Kim, Protokol.IstegeBagliId(m, "hedef"), Protokol.IstegeBagliId(m, "ikinci"),
+                            Protokol.Mantik(m, "ifsa", false));
+                        break;
+                    case "yetenek": // Çakmak Gecesi'nin gündüz yeteneği (Sorgucu, Sınayıcı, Kuklacı, Kışkırtıcı)
+                        sonuc = oyun.GunduzYetenegi(b.Kim, Protokol.IstegeBagliId(m, "hedef"));
                         break;
                     case "suikast":
                         sonuc = oyun.Suikast(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")), Protokol.Coz<Rol>(Protokol.Metin(m, "rol")));

@@ -104,8 +104,33 @@ namespace SunucuTestleri
             await o[0].Hata("YANLIS_ASAMA");
             await o[0].Gonder("{\"t\":\"komut\",\"tur\":1,\"komut\":\"suikast\",\"hedef\":\"p2\"}");
             await o[0].Hata("GECERSIZ_MESAJ");
+            await o[0].Gonder("{\"t\":\"komut\",\"tur\":1,\"komut\":\"geceSecimi\",\"ifsa\":\"evet\"}");
+            await o[0].Hata("GECERSIZ_MESAJ");
+            await o[0].Gonder(new { t = "komut", tur = 1, komut = "yetenek" });
+            await o[0].Hata("YANLIS_ASAMA");
             await o[0].Gonder(new { t = "sohbet", kime = "oluler", metin = "merhaba" });
             await o[0].Hata("GECERSIZ_GIRDI");
+        }
+
+        [Test]
+        public async Task Yetenek_Kiskirtici_B_iken_kullanir_hakki_duser_baskasi_SIRA_SENDE_DEGIL()
+        {
+            var o = await GeceBaslat(8, "kiskirtici");
+            var kiskirtici = RolSahipleri(o, "kiskirtici").Single();
+            for (int i = 0; i < 4 && (string)o[0].SonDurum["a"] == kiskirtici.Sen; i++) await TurOyna(o);
+            var a = Kim(o, (string)o[0].SonDurum["a"]);
+            Assert.That(a, Is.Not.EqualTo(kiskirtici));
+            Assert.That((int)kiskirtici.SonDurum["sana"]["kalanHakkin"], Is.EqualTo(1));
+
+            await a.Gonder(new { t = "komut", tur = Tur(a), komut = "soruSor", hedef = kiskirtici.Sen, metin = "Kim?" });
+            await kiskirtici.Bekle("durum", m => (string)m["asama"] == "cevapSecme");
+            await a.Gonder(new { t = "komut", tur = Tur(a), komut = "yetenek" });
+            await a.Hata("SIRA_SENDE_DEGIL");
+            await kiskirtici.Gonder(new { t = "komut", tur = Tur(kiskirtici), komut = "yetenek" });
+            var c = Kim(o, (string)kiskirtici.SonDurum["secilebilir"][0]);
+            await kiskirtici.Gonder(new { t = "komut", tur = Tur(kiskirtici), komut = "cevapSec", hedef = c.Sen });
+            var d = await kiskirtici.Bekle("durum", m => (string)m["asama"] == "miniOyun");
+            Assert.That((int)d["sana"]["kalanHakkin"], Is.Zero, "yetenek C seçilince işledi");
         }
 
         [Test]

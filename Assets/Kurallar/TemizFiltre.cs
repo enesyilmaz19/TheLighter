@@ -15,14 +15,18 @@ namespace Cakmak.Kurallar
     /// </summary>
     public static class TemizFiltre
     {
-        /// <summary>Bunlarla başlayan kelime yakalanır.</summary>
+        /// <summary>
+        /// Bunlarla başlayan kelime yakalanır. k ile biten kökün ğ'lisi de var: ek alınca kök değişir ("yarrağı").
+        /// </summary>
         static readonly string[] kokler = Hazirla(true,
-            "sik", "orospu", "orosbu", "yarrak", "dalyarak", "amcık", "amına", "göt", "piç", "pezevenk", "kahpe",
-            "kaltak", "gavat", "ibne", "puşt", "şerefsiz", "yavşak", "taşak", "fuck", "bitch", "cunt", "whore", "shit");
+            "sik", "orospu", "orosbu", "yarrak", "yarrağ", "dalyarak", "dalyarağ", "amcık", "amcığ", "amına", "amını",
+            "göt", "piç", "pezevenk", "pezeveng", "kahpe", "kaltak", "kaltağ", "gavat", "ibne", "puşt", "şerefsiz",
+            "yavşak", "yavşağ", "taşak", "taşağ", "sürtük", "sürtüğ", "kevaşe", "boktan",
+            "fuck", "motherfuck", "bitch", "cunt", "whore", "shit", "asshole");
 
-        /// <summary>Sadece kelimenin kendisiyse yakalanır: başka kelimelerin başında çok geçer ("am" → "amaç").</summary>
+        /// <summary>Sadece kelimenin kendisiyse yakalanır: başka kelimelerin başında çok geçer ("am" → "amaç", "nigga" → "Nigar").</summary>
         static readonly string[] kisaltmalar = Hazirla(true,
-            "am", "amk", "amq", "aq", "mk", "mq", "oç", "sg", "bok", "dick", "pussy");
+            "am", "amk", "amq", "aq", "mk", "mq", "oç", "sg", "bok", "dick", "pussy", "nigga", "niggas", "nigger", "niggers");
 
         /// <summary>
         /// Bir kökle başlayan masum kelimeler, kelime başı eşleşir. ı korunarak karşılaştırılır: "sık" (ve "şık") masum,

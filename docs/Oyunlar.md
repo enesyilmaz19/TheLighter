@@ -159,7 +159,7 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **Roller herkese ayrı:** her mekânda en az 9 rol (10 kişide casus dışında 9 kişi).
 - **Casus oyundan çıkarsa** grup kazanır; oyun zorla biterse (az kişi) casus yakalanmamış sayılır.
 - **Ceza açılabilir;** görev, kaos ve Curcuna kapalı. Temiz'de oynanır: bütün içerik Temiz filtresinden geçiyor (test var).
-- **İçerik taslağı** `Assets/Kurallar/CasusIcerik.cs`: 30 mekân × 9 rol, 5 kategori × 20 kelime. **Enes gözden geçirecek.**
+- **İçerik taslağı** `Assets/Kurallar/CasusIcerik.cs`: 30 mekân × 9 rol, 8 kategori × 20 kelime. Gözden geçirildi (2026-10-17): Şehirler, Ülkeler, Taşıtlar eklendi.
 
 ## 5. Çakmak Gecesi (eski adı Vampir Köylü)
 
@@ -307,7 +307,7 @@ Gece telefon herkese tek tek gider, herkes bir seçim yapar; linç Grup Kararı 
 
 ### İçerik
 
-`Assets/Icerik/GeceSorulari.csv` (40 suçlama sorusu): paket değil; bu oyunda öneriler sadece buradan.
+`Assets/Icerik/GeceSorulari.csv` (48 suçlama sorusu): paket değil; bu oyunda öneriler sadece buradan.
 
 ---
 

@@ -93,7 +93,7 @@ Yazan: G1 (Enes), 2026-10-14.
 3. **Gündüz:** normal çakmak ekranları.
    - Üstte "Gün 2 · linçe 1 tur".
    - Ölüler listede soluk, rolü açıldıysa rolüyle. Susturulanın yanında 🤐.
-   - Kulak ve Dinleyici, güme ekranında soruyu küçük bir "Duydun:" kutusunda görür, başkası görmez.
+   - Kulak ve Dinleyici, güme ekranında soruyu küçük bir "Duydun:" kutusunda görür, başkası görmez. Soru yazma ekranında herkese küçük bir not: "Bu oyunda güme giden soruyu Kulak ya da Dinleyici duyabilir." Ana Plan 8.5'in tek istisnası bu; kişisel bir soru yazan, güme güvencesine yaslanmasın.
    - **Gündüz yeteneği düğmesi:** Sorgucu, Sınayıcı ve Kuklacı'da A iken (soru yazma ekranında), Kışkırtıcı'da B iken (cevap seçme ekranında). Kuklacı düğmeye basınca C'yi seçer. Elden elede telefon zaten onda; düğme diğer rollerde hiç görünmesin ama ekranın düzeni aynı kalsın.
    - **Hakem kararı / Düello söndü:** düello oynanmadan sonuç ekranına geçilir, "Hakem kararı" ya da "Düello söndü 🧯" yazısıyla.
    - Gözde, Düellocu, Sır Küpü kendi sayaçlarını görsün (Gözde: `Gosterilme`, Düellocu: `MiniOyunKazanma`, Sır Küpü: `SoruAlma` ve ifşa olmadı mı).

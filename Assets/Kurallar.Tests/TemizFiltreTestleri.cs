@@ -27,6 +27,26 @@ namespace Cakmak.Kurallar.Tests
         [TestCase("yarrrrak")]
         [TestCase("SİKTİR")]
         [TestCase("SIKTIR")]
+        // Ünsüz yumuşaması: k → ğ, kök değişir
+        [TestCase("yarrağı")]
+        [TestCase("dalyarrağın")]
+        [TestCase("amcığı")]
+        [TestCase("taşağa")]
+        [TestCase("yavşağın")]
+        [TestCase("kaltağı")]
+        [TestCase("pezevengi")]
+        [TestCase("sürtüğe")]
+        // İçerik gözden geçirmesinde eklenenler
+        [TestCase("amını")]
+        [TestCase("boktan oyun")]
+        [TestCase("sürtük")]
+        [TestCase("kevaşe")]
+        [TestCase("motherfucker")]
+        [TestCase("asshole")]
+        [TestCase("nigga")]
+        [TestCase("niggas")]
+        [TestCase("nigger")]
+        [TestCase("niggers")]
         public void Yakalar(string metin)
         {
             Assert.That(TemizFiltre.Uygunsuz(metin), Is.True);
@@ -43,6 +63,9 @@ namespace Cakmak.Kurallar.Tests
         [TestCase("şık giyinmiş, sık sık geliyor")]
         [TestCase("şikayet etti")]
         [TestCase("ocakta boks maçı var")]
+        [TestCase("yara bandı, taşa takıldım")]
+        [TestCase("sürtünme kuvveti")]
+        [TestCase("Nigar abla bokser köpeğini getirdi")]
         [TestCase("100 kişi geldi")]
         [TestCase("Grupta en çok kim uyur?")]
         [TestCase("")]

@@ -61,7 +61,7 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 - `soruSn`, `cevapSn`, `hamleSn`: `5–300`
 - `ceza`: `"kapali"` (varsayılan) · `"hafif"` · `"cesur"`. Cesur'da Kızgın Çakmak da açık. Temiz modda `"cesur"` olamaz: sonuç Temiz + Cesur olacaksa (hangi sırayla gönderilirse gönderilsin) `GECERSIZ_GIRDI`, önce cezayı düşür
 - `gorevler`, `kaos`: `true` / `false` (varsayılan `false`). "Hızlı başla" istemcide, bu alanları kendisi gönderir
-- `paketler`: paket adları dizisi, dosya adı uzantısız: `["Genel", "Okul"]`. Varsayılan: sunucudaki bütün paketler. Grup paketi yüklendiyse `"@bizim"` de seçilebilir (yüklenmeden `GECERSIZ_GIRDI`; Temiz modda seçili olsa da kullanılmaz). Boş dizi, sunucuda olmayan ya da iki kez yazılan ad `GECERSIZ_GIRDI`. Öneri çek, Curcuna'nın boşlukları ve Kör Soru sadece seçilenlerden çeker. **Çakmak Gecesi'nde paket seçimi kullanılmaz:** öneriler sunucudaki suçlama sorularından (`Assets/Icerik/GeceSorulari.csv`, 40 soru)
+- `paketler`: paket adları dizisi, dosya adı uzantısız: `["Genel", "Okul"]`. Varsayılan: sunucudaki bütün paketler. Grup paketi yüklendiyse `"@bizim"` de seçilebilir (yüklenmeden `GECERSIZ_GIRDI`; Temiz modda seçili olsa da kullanılmaz). Boş dizi, sunucuda olmayan ya da iki kez yazılan ad `GECERSIZ_GIRDI`. Öneri çek, Curcuna'nın boşlukları ve Kör Soru sadece seçilenlerden çeker. **Çakmak Gecesi'nde paket seçimi kullanılmaz:** öneriler sunucudaki suçlama sorularından (`Assets/Icerik/GeceSorulari.csv`, 48 soru)
 
 ### Komutlar
 

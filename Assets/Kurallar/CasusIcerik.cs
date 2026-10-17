@@ -26,7 +26,7 @@ namespace Cakmak.Kurallar
         {
             new CasusGrubu("Uçak", "Pilot", "Yardımcı pilot", "Hostes", "Kabin amiri", "Business yolcusu", "Ekonomi yolcusu", "Bebekli anne", "Uçmaktan korkan yolcu", "Hava polisi"),
             new CasusGrubu("Hastane", "Doktor", "Hemşire", "Cerrah", "Hasta", "Hasta yakını", "Stajyer doktor", "Temizlik görevlisi", "Ambulans şoförü", "Danışma görevlisi"),
-            new CasusGrubu("Düğün", "Gelin", "Damat", "Nikâh memuru", "Sağdıç", "Davetli teyze", "Fotoğrafçı", "Orkestra şefi", "Garson", "Takı takan amca"),
+            new CasusGrubu("Düğün", "Gelin", "Damat", "Nikâh memuru", "Sağdıç", "Davetli teyze", "Fotoğrafçı", "Orkestracı", "Garson", "Takı takan amca"),
             new CasusGrubu("Okul", "Öğretmen", "Müdür", "Öğrenci", "Hademe", "Kantinci", "Veli", "Rehber öğretmen", "Nöbetçi öğrenci", "Beden eğitimi öğretmeni"),
             new CasusGrubu("Stadyum", "Futbolcu", "Hakem", "Teknik direktör", "Taraftar", "Seyyar satıcı", "Spiker", "Kaleci", "Güvenlik görevlisi", "Yedek oyuncu"),
             new CasusGrubu("Plaj", "Cankurtaran", "Turist", "Dondurmacı", "Şezlong görevlisi", "Sörfçü", "Kumdan kale yapan çocuk", "Güneşlenen teyze", "Mısırcı", "Voleybolcu"),
@@ -69,6 +69,12 @@ namespace Cakmak.Kurallar
                 "Sırt çantası", "Diş fırçası", "Bardak", "Çakmak", "Kulaklık", "Cüzdan", "Tencere", "Merdiven", "Saç kurutma makinesi", "Pil"),
             new CasusGrubu("Spor ve oyunlar", "Futbol", "Basketbol", "Voleybol", "Tenis", "Yüzme", "Satranç", "Okey", "Tavla", "Boks", "Kayak",
                 "Bisiklet", "Golf", "Bowling", "Dart", "Güreş", "Masa tenisi", "Sörf", "Koşu", "Okçuluk", "Saklambaç"),
+            new CasusGrubu("Şehirler", "İstanbul", "Ankara", "İzmir", "Antalya", "Bursa", "Trabzon", "Konya", "Gaziantep", "Eskişehir", "Adana",
+                "Diyarbakır", "Erzurum", "Rize", "Mardin", "Çanakkale", "Edirne", "Samsun", "Van", "Hatay", "Kayseri"),
+            new CasusGrubu("Ülkeler", "Almanya", "Fransa", "İtalya", "İspanya", "Japonya", "Çin", "Brezilya", "Mısır", "Rusya", "Amerika",
+                "İngiltere", "Hindistan", "Yunanistan", "Kanada", "Meksika", "Arjantin", "Avustralya", "Hollanda", "Güney Kore", "Azerbaycan"),
+            new CasusGrubu("Taşıtlar", "Otobüs", "Tren", "Uçak", "Gemi", "Motosiklet", "Taksi", "Dolmuş", "Metro", "Tramvay", "Vapur",
+                "Helikopter", "Kayık", "Traktör", "Ambulans", "Kamyon", "Teleferik", "Denizaltı", "Kaykay", "Fayton", "Roket"),
         };
     }
 }

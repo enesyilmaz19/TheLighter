@@ -516,16 +516,68 @@ namespace Cakmak.Kurallar.Tests
         }
 
         [Test]
-        public void Hirsiz_rolu_sabah_alir_calinan_duz_role_duser()
+        public void Hirsiz_oldurdugunun_rolunu_sabah_alir()
         {
             var oyun = YeniGece(8, Rol.Hirsiz, Rol.Koruyucu);
             var hirsiz = Tek(oyun, Rol.Hirsiz);
             var koruyucu = Tek(oyun, Rol.Koruyucu);
             GeceyeGec(oyun);
             Gece(oyun, (hirsiz, koruyucu, null));
+            Assert.That(Kisi(oyun, koruyucu).Elendi, Is.True);
+            Assert.That(oyun.GorunumAl(koruyucu).Rolun, Is.EqualTo(Rol.Koruyucu), "ölünün rolü değişmez");
             Assert.That(oyun.GorunumAl(hirsiz).Rolun, Is.EqualTo(Rol.Koruyucu));
-            Assert.That(oyun.GorunumAl(hirsiz).KalanHakkin, Is.EqualTo(1));
-            Assert.That(oyun.GorunumAl(koruyucu).Rolun, Is.EqualTo(Rol.Masum));
+            Assert.That(oyun.GorunumAl(hirsiz).KalanHakkin, Is.EqualTo(1), "kalan hakkıyla");
+        }
+
+        [Test]
+        public void Hirsiz_korunani_olduremez_hakki_yine_gider_o_gece_olurse_alamaz()
+        {
+            var oyun = YeniGece(8, Rol.Hirsiz, Rol.Koruyucu);
+            var hirsiz = Tek(oyun, Rol.Hirsiz);
+            var koruyucu = Tek(oyun, Rol.Koruyucu);
+            var masum = Sahipleri(oyun, Rol.Masum)[0];
+            GeceyeGec(oyun);
+            Gece(oyun, (hirsiz, masum, null), (koruyucu, masum, null));
+            Assert.That(Kisi(oyun, masum).Elendi, Is.False, "korunan ölmez");
+            Assert.That(oyun.GorunumAl(hirsiz).Rolun, Is.EqualTo(Rol.Hirsiz));
+            Assert.That(oyun.GorunumAl(hirsiz).KalanHakkin, Is.Zero);
+            GeceyeGec(oyun);
+            Assert.That(oyun.GorunumAl(hirsiz).Secilebilir, Is.Empty, "hakkı bitti");
+
+            oyun = YeniGece(8, Rol.Hirsiz);
+            hirsiz = Tek(oyun, Rol.Hirsiz);
+            masum = Sahipleri(oyun, Rol.Masum)[0];
+            var katiller = Sahipleri(oyun, Rol.Katil);
+            GeceyeGec(oyun);
+            Gece(oyun, (hirsiz, masum, null), (katiller[0], hirsiz, null), (katiller[1], hirsiz, null));
+            Assert.That(Kisi(oyun, masum).Elendi && Kisi(oyun, hirsiz).Elendi, Is.True, "ikisi de öldü");
+            Assert.That(oyun.GorunumAl(hirsiz).Rolun, Is.EqualTo(Rol.Hirsiz), "ölen alamaz");
+        }
+
+        [Test]
+        public void Hirsiz_Cellati_oldururse_hedefini_alir_hedef_de_olduyse_Soytari_olur()
+        {
+            var oyun = YeniGece(13, Rol.Hirsiz, Rol.Cellat);
+            var hirsiz = Tek(oyun, Rol.Hirsiz);
+            var cellat = Tek(oyun, Rol.Cellat);
+            var hedef = oyun.GorunumAl(cellat).CellatHedefin.Value;
+            GeceyeGec(oyun);
+            Gece(oyun, (hirsiz, cellat, null));
+            Assert.That(oyun.GorunumAl(hirsiz).Rolun, Is.EqualTo(Rol.Cellat));
+            Assert.That(oyun.GorunumAl(hirsiz).CellatHedefin, Is.EqualTo(hedef));
+
+            // Hedefi Hırsız'dan sonra seçen öldürür: Cellat hedefinden önce ölür, Soytarı'ya Hırsız'da döner.
+            oyun = YeniGece(13, Rol.Hirsiz, Rol.Cellat, Rol.Kanunsuz);
+            hirsiz = Tek(oyun, Rol.Hirsiz);
+            cellat = Tek(oyun, Rol.Cellat);
+            hedef = oyun.GorunumAl(cellat).CellatHedefin.Value;
+            var kanunsuz = Tek(oyun, Rol.Kanunsuz);
+            Assume.That(hedef, Is.Not.EqualTo(kanunsuz));
+            GeceyeGec(oyun);
+            Gece(oyun, (hirsiz, cellat, null), (kanunsuz, hedef, null));
+            Assert.That(Kisi(oyun, hedef).Elendi && Kisi(oyun, cellat).Elendi, Is.True);
+            Assert.That(oyun.GorunumAl(hirsiz).Rolun, Is.EqualTo(Rol.Soytari));
+            Assert.That(oyun.GorunumAl(hirsiz).CellatHedefin, Is.Null);
         }
 
         [Test]

@@ -23,7 +23,7 @@ Her görev dosyasının sonundaki "Testler" ve "Bitti ölçütü" bölümleri o 
 
 ## 1. Her PR'dan önce (otomatik)
 
-- **Unity EditMode:** hepsi yeşil. Bugün main'de 487 geçen, 2 atlanan (atlananlar senin botların, yerel sunucusuz koşmaz).
+- **Unity EditMode:** hepsi yeşil. Bugün main'de 489 geçen, 2 atlanan (atlananlar senin botların, yerel sunucusuz koşmaz).
 - **Botlar:** yerel sunucuyla `SunucuIleOyunTesti`:
 
   ```bash
@@ -42,7 +42,7 @@ Her görev dosyasının sonundaki "Testler" ve "Bitti ölçütü" bölümleri o 
   dotnet test Sunucu/SunucuTestleri
   ```
 
-  Bugün 363 ve 183, hepsi yeşil. Sen kurallara dokunmuyorsun; kırmızı görürsen G1'e yaz.
+  Bugün 365 ve 183, hepsi yeşil. Sen kurallara dokunmuyorsun; kırmızı görürsen G1'e yaz.
 
 ## 2. Oyun denemeleri (elle)
 

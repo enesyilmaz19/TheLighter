@@ -27,9 +27,9 @@ G1 tarafı bitti: altı oyunun hepsinin kuralları ve sunucusu main'de, testleri
 
 | Test | Sonuç |
 |---|---|
-| `dotnet test Sunucu/KuralTestleri` | 342/342 |
+| `dotnet test Sunucu/KuralTestleri` | 363/363 |
 | `dotnet test Sunucu/SunucuTestleri` | 183/183 |
-| Unity EditMode | 466 geçen, 0 kalan, 2 atlanan (atlananlar senin botların; yerel sunucuyla 2/2 geçiyor) |
+| Unity EditMode | 487 geçen, 0 kalan, 2 atlanan (atlananlar senin botların; yerel sunucuyla 2/2 geçiyor) |
 
 Senin `SunucuIleOyunTesti`'nde ara sıra kırmızı veren bir satır var (71. satır, yarış). Düzeltmesi `g2-takim.md` 0. bölümde.
 

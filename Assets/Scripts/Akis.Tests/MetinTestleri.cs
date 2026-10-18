@@ -122,6 +122,8 @@ namespace TheLighter.Tests
                 Assert.IsTrue(t.Var("casus.tur." + c), "Eksik: casus.tur." + c);
                 Assert.IsTrue(t.Var("casus.tur_aciklama." + c), "Eksik: casus.tur_aciklama." + c);
             }
+            // Casus ve Çakmak Gecesi'nde rol perdesi "gizli görev" değil "gizli rol" der.
+            Assert.IsTrue(t.Var("perde.rol"), "Eksik: perde.rol");
             // Köstebek ve Casus aynı oylama ekranını kullanır: "kostebek." anahtarının "casus." karşılığı da olmalı.
             foreach (var ad in new[] { "kim", "basladi", "sonuc_yanlis", "son_aciklama", "aralik", "oy_aciklama", "bekle" })
             {

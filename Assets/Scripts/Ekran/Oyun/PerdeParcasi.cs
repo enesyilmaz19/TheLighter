@@ -62,7 +62,9 @@ namespace TheLighter.Istemci
                     Kok.Add(Yazi(Metin.Al("perde.soru_yazma", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
                     break;
                 case PerdeNedeni.Gorev:
-                    Kok.Add(Yazi(Metin.Al("perde.gorev", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    // Casus ve Çakmak Gecesi'nde bakılan şey görev değil, gizli rol.
+                    bool rol = g.Oyun == OyunTuru.Casus || g.Oyun == OyunTuru.CakmakGecesi;
+                    Kok.Add(Yazi(Metin.Al(rol ? "perde.rol" : "perde.gorev", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
                     break;
                 case PerdeNedeni.Oy:
                     Kok.Add(Yazi(Metin.Al("perde.oy", isim, TurkceEk.Bulunma(isim)), "perde-ust"));

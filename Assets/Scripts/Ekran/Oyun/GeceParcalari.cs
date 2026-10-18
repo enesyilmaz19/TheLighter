@@ -424,7 +424,6 @@ namespace TheLighter.Istemci
         readonly Label katilOylari;
         readonly Label hata;
         readonly Button sec;
-        readonly Button pas;
         readonly List<OyuncuId> ciptekiler = new List<OyuncuId>();
         readonly List<Button> cipler = new List<Button>();
         readonly List<OyuncuId> ikinciCiptekiler = new List<OyuncuId>();
@@ -510,15 +509,10 @@ namespace TheLighter.Istemci
 
             hata = Yazi("", "hata");
             Kok.Add(hata);
-            var alt = Kutu("satir");
-            pas = Buton(Metin.Al("gece.pas"), Pas, "buton-ikincil");
+            // Tek düğme: bir şey seçiliyse "Seç", değilse "Kimseyi seçmeden geç" (pas).
             sec = Buton(Metin.Al("gece.sec"), Sec, "buton-birincil", "buton-buyuk");
-            alt.Add(pas);
-            alt.Add(Esnek());
-            alt.Add(sec);
-            Kok.Add(alt);
+            Kok.Add(sec);
             // Herkes en az bu kadar bekler: kimin hızlı geçtiğinden rol anlaşılmasın.
-            GecikmeliAc(pas, Kostebek.RolPerdesiMs);
             GecikmeliAc(sec, Kostebek.RolPerdesiMs);
             Durum();
             Guncelle(e);
@@ -536,13 +530,9 @@ namespace TheLighter.Istemci
             hata.text = "";
         }
 
-        void Sec() => Gonder(secili, ikinciSecili, hakem && secili.HasValue ? ifsa : (bool?)null);
-
-        void Pas() => Gonder(null, null, null);
-
-        void Gonder(OyuncuId? hedef, OyuncuId? ikinci, bool? karar)
+        void Sec()
         {
-            var s = akis.GeceSecimi(hedef, ikinci, karar);
+            var s = akis.GeceSecimi(secili, ikinciSecili, hakem && secili.HasValue ? ifsa : (bool?)null);
             if (s != Sonuc.Tamam) hata.text = HataMetni.Al(s);
             else if (akis.Online) Kok.SetEnabled(false);
         }

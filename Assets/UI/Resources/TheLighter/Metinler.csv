@@ -177,6 +177,7 @@ hafiza.efsaneler_ipucu,Bu grubun ifşa olan soruları.,This group's revealed que
 hafiza.kapat,Kapat,Close
 perde.soru_yazma,Soru yazma sırası {1},{0}'s turn to write questions
 perde.gorev,Gizli görevine bakma sırası {1},{0}'s turn to see their secret task
+perde.rol,Gizli rolüne bakma sırası {1},{0}'s turn to see their secret role
 perde.oy,Grup Kararı: oy verme sırası {1},Group Vote: {0}'s turn to vote
 perde.kaos_baslik,KAOS TURU,CHAOS ROUND
 kaos.ad.Yok,,
@@ -829,7 +830,6 @@ gece.gece_baslik,Gece {0} · {1},Night {0} · {1}
 gece.patlat,💥 Patlat,💥 Detonate
 gece.hakem_ifsa,Karar: ifşa,Ruling: reveal
 gece.hakem_gume,Karar: güme,Ruling: hide
-gece.pas,Pas,Pass
 gece.sec,Seç,Choose
 gece.sec_bos,Kimseyi seçmeden geç,Skip without choosing
 gece.katil_oy_yok,Öbür katiller henüz oy vermedi.,The other killers haven't voted yet.

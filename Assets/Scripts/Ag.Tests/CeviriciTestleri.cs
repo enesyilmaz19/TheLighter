@@ -346,6 +346,12 @@ namespace TheLighter.Testler
 
             var don = JsonDeger.Coz(Cevirici.Katil("KXTPM", "Ayşe", "abc"));
             Assert.That(don["anahtar"].Metin, Is.EqualTo("abc"));
+
+            // Protokol sürümü ikisinde de (docs/Protokol.md, "Sürüm").
+            Assert.That(k["surum"].Tamsayi, Is.EqualTo(Cevirici.ProtokolSurumu));
+            Assert.That(ilk["surum"].Tamsayi, Is.EqualTo(Cevirici.ProtokolSurumu));
+            Assert.That(don["surum"].Tamsayi, Is.EqualTo(Cevirici.ProtokolSurumu));
+            Assert.That(Cevirici.ProtokolSurumu, Is.GreaterThanOrEqualTo(1));
         }
 
         [Test]

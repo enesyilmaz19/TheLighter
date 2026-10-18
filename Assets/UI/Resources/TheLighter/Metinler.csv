@@ -585,3 +585,7 @@ kurulum.isimsiz,{0}. oyuncu,Player {0}
 sohbet.kanal.Takim,Takım,Team
 sohbet.kanal.Katil,Katiller,Killers
 sohbet.kanal.Oluler,Ölüler,The dead
+hata.GUNCELLE,Oyunun bu sürümü eski: online için güncellemen lazım.,This version of the game is out of date: update it to play online.
+guncelle.baslik,Oyunu güncelle,Update the game
+guncelle.aciklama,"Sunucu yeni bir sürüme geçti, bu sürümle online oynanamıyor. Oyunun son sürümünü indir. Elden ele oynamaya devam edebilirsin.","The server moved to a new version, so this one can't play online. Download the latest version of the game. You can keep playing pass-and-play."
+guncelle.elden_ele,Elden ele oyna,Play pass-and-play

@@ -32,6 +32,9 @@ namespace TheLighter.Testler
             var t = Tablo();
             Assert.IsTrue(t.Var("online.cikis." + OnlineIstemci.NedenBaglanamadi));
             Assert.IsTrue(t.Var("online.cikis." + OnlineIstemci.NedenAyrildin));
+            // GUNCELLE: kendi ekranı var.
+            foreach (var k in new[] { "hata." + OnlineIstemci.NedenGuncelle, "guncelle.baslik", "guncelle.aciklama", "guncelle.elden_ele" })
+                Assert.IsTrue(t.Var(k), "Eksik: " + k);
         }
 
         /// <summary>S5: atılma nedenleri, Temiz uyarısı, grup paketi yükleme.</summary>

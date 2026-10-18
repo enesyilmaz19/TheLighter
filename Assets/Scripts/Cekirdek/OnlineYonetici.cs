@@ -260,6 +260,12 @@ namespace TheLighter.Istemci
         {
             akis = null;
             uygulama.BaglaniyorGoster(false);
+            // Sürüm eski: menüde hata satırı değil, ayrı ekran (docs/Protokol.md, "Sürüm").
+            if (neden == OnlineIstemci.NedenGuncelle)
+            {
+                uygulama.Goster(new GuncelleEkrani(uygulama));
+                return;
+            }
             uygulama.OnlineMenu(neden == OnlineIstemci.NedenAyrildin ? null : neden);
         }
 

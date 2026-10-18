@@ -59,6 +59,16 @@ namespace TheLighter.Istemci
             // Casus: soru mekâna göre; telefon sende, rolüne dokunarak bakabilirsin.
             var rolum = Casus.RolumDugmesi(g);
             if (rolum != null) Kok.Add(rolum);
+            // Çakmak Gecesi: rol, son gecenin bulguları, gündüz yeteneği (rolü uymayanda boş kutu), Kulak notu.
+            if (Gece.Mi(g))
+            {
+                Kok.Add(Yazi(Metin.Al("gece.rolun_kisa", Gece.RolAdi(g.Rolun)), "ipucu"));
+                Kok.Add(Gece.BulguKutusu(akis, g));
+                var yetenekPerdesi = Kutu("menu-perde", "gizli");
+                Kok.Add(Gece.GunduzYetenegi(akis, g, true, yetenekPerdesi, m => hata.text = m));
+                Kok.Add(yetenekPerdesi);
+                Kok.Add(Gece.KulakNotu(g));
+            }
 
             switch (bicim)
             {

@@ -84,6 +84,12 @@ namespace TheLighter.Ag
         public int Can = 1;
         /// <summary>Casus: mekân ya da kelime (Imposter).</summary>
         public CasusTuru Casus = CasusTuru.Mekan;
+        /// <summary>Çakmak Gecesi: ölenin rolü açılsın mı.</summary>
+        public bool RolAcilir = true;
+        /// <summary>Çakmak Gecesi: katillerin gecede öldürdüğü kişi sayısı (1–3).</summary>
+        public int GecelikKurban = 1;
+        /// <summary>Çakmak Gecesi: kurucunun kapattığı roller.</summary>
+        public List<Rol> KapaliRoller = new List<Rol>();
         /// <summary>Takım Düellosu: kurucunun dağılımı (oyuncu → 0 ya da 1). Boş: rastgele ve dengeli.</summary>
         public Dictionary<OyuncuId, int> Takimlar = new Dictionary<OyuncuId, int>();
         public OyunModu Mod = OyunModu.Normal;

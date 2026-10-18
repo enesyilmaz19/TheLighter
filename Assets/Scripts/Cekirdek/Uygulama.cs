@@ -51,6 +51,8 @@ namespace TheLighter.Istemci
         public List<PaketBilgisi> Paketler { get; private set; } = new List<PaketBilgisi>();
 
         List<string> sesliCezalar = new List<string>();
+        /// <summary>Çakmak Gecesi'nin suçlama soruları (Assets/Icerik/GeceSorulari.csv): bu oyunda öneriler sadece buradan.</summary>
+        List<string> geceSorulari = new List<string>();
 
         /// <summary>Online mod: oturum ve online ekranlar arası geçiş.</summary>
         public OnlineYonetici Online { get; private set; }
@@ -236,6 +238,9 @@ namespace TheLighter.Istemci
                 // Takım Düellosu: kurulumda dağıtıldıysa (yoksa rastgele). Kimlikler isim sırasıyla: p1 = 1. isim.
                 TakimDagilimi = ayarlar.Oyun == OyunTuru.Takim ? ayarlar.TakimDagilimi : null,
                 Casus = ayarlar.Casus,
+                RolAcilir = ayarlar.RolAcilir,
+                GecelikKurban = ayarlar.GecelikKurban,
+                KapaliRoller = new List<Rol>(ayarlar.KapaliRoller),
                 Mod = ayarlar.Mod,
                 MiniOyun = ayarlar.MiniOyun,
                 TurSayisi = ayarlar.TurSayisi,
@@ -249,7 +254,8 @@ namespace TheLighter.Istemci
                 SesliCezalar = sesliCezalar,
                 // Elden ele: herkes telefonu kimin tuttuğunu görüyor, "Soran Gizli" çıkmasın.
                 TekCihaz = true,
-                OneriSorulari = sorular,
+                // Çakmak Gecesi'nde paket seçimi kullanılmaz: öneriler suçlama sorularından (docs/Oyunlar.md 5, İçerik).
+                OneriSorulari = ayarlar.Oyun == OyunTuru.CakmakGecesi ? geceSorulari : sorular,
             };
 
             var s = EldenEleAkisi.Kur(oyunAyari, oyuncular, Environment.TickCount, out var akis);
@@ -285,6 +291,7 @@ namespace TheLighter.Istemci
                     });
                 }
                 if (liste.SesliCezalar != null) sesliCezalar = Paket.Ayristir(liste.SesliCezalar.text);
+                if (liste.GeceSorulari != null) geceSorulari = Paket.Ayristir(liste.GeceSorulari.text);
             }
             if (Paketler.Count == 0) Debug.LogWarning("[TheLighter] Soru paketi yok. Menü → TheLighter → Soru paketlerini güncelle.");
             if (Paketler.Find(p => p.Ad == PaketBilgisi.Genel) == null && Paketler.Count > 0)

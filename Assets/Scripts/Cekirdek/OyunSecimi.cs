@@ -11,7 +11,8 @@ namespace TheLighter.Istemci
     public static class OyunSecimi
     {
         /// <summary>Ekranı hazır olan oyunlar (tasks/g2-test.md sırasıyla eklenir).</summary>
-        public static readonly OyunTuru[] Secenekler = { OyunTuru.Cakmak, OyunTuru.Kostebek, OyunTuru.RusRuleti, OyunTuru.Takim, OyunTuru.Casus };
+        public static readonly OyunTuru[] Secenekler =
+            { OyunTuru.Cakmak, OyunTuru.Kostebek, OyunTuru.RusRuleti, OyunTuru.Takim, OyunTuru.Casus, OyunTuru.CakmakGecesi };
 
         /// <summary>Casus: casusun bilmediği şey (mekân ya da kelime, Imposter).</summary>
         public static readonly CasusTuru[] CasusSecenekleri = { CasusTuru.Mekan, CasusTuru.Kelime };
@@ -60,6 +61,9 @@ namespace TheLighter.Istemci
             Oyun = o.Oyun,
             Can = o.Can,
             Casus = o.Casus,
+            RolAcilir = o.RolAcilir,
+            GecelikKurban = o.GecelikKurban,
+            KapaliRoller = new System.Collections.Generic.List<Rol>(o.KapaliRoller),
             Mod = o.Mod,
             MiniOyun = o.MiniOyun,
             TurSayisi = o.TurSayisi,

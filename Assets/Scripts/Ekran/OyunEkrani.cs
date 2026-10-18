@@ -38,6 +38,12 @@ namespace TheLighter.Istemci
         readonly OyuncuSutunu oyuncuSutunu;
         /// <summary>Casus: liste, rolüm (online), "Mekânı biliyorum". Diğer oyunlarda null.</summary>
         readonly CasusSeridi casusSeridi;
+        /// <summary>Online, Çakmak Gecesi: "Rolüm" (rol kartı ve bütün bulgular).</summary>
+        readonly VisualElement rolPerdesi;
+        /// <summary>Online, Çakmak Gecesi: gece ölenler (sabah duyurusu için) ve sonraki durum'da duyurulacaklar (roller açılmış olsun).</summary>
+        readonly System.Collections.Generic.List<OyuncuId> geceOlenler = new System.Collections.Generic.List<OyuncuId>();
+        readonly System.Collections.Generic.List<GeceDuyurusu> bekleyenDuyurular = new System.Collections.Generic.List<GeceDuyurusu>();
+        int duyuruSurumu = -1;
         float bildirimKalan;
         float buradayimBekle;
         /// <summary>Online: biten "kim?" oylamasının sonucu, sonraki durum gelince duyurulur (oyun bittiyse açılış gösterir).</summary>
@@ -81,6 +87,11 @@ namespace TheLighter.Istemci
                 ustCubuk.Add(sohbetDugmesi);
             }
             if (online != null) oyuncuSutunu = new OyuncuSutunu(online.Istemci);
+            if (online != null && akis.Ayarlar.Oyun == OyunTuru.CakmakGecesi)
+            {
+                rolPerdesi = Kutu("menu-perde", "gizli");
+                ustCubuk.Add(Buton(Metin.Al("casus.rolum"), RolumuAc, "buton-kucuk"));
+            }
             ustCubuk.Add(Buton(Metin.Al("oyun.menu"), MenuyuAc, "buton-kucuk"));
             Kok.Add(ustCubuk);
 
@@ -121,6 +132,7 @@ namespace TheLighter.Istemci
             Kok.Add(onayPerdesi);
             if (sohbet != null) Kok.Add(sohbet.Kok);
             if (casusSeridi != null) Kok.Add(casusSeridi.Perde);
+            if (rolPerdesi != null) Kok.Add(rolPerdesi);
 
             if (onlineAkis != null)
                 Kok.RegisterCallback<PointerDownEvent>(_ => { if (onlineAkis.BenAfkyim) Buradayim(); }, TrickleDown.TrickleDown);
@@ -136,6 +148,14 @@ namespace TheLighter.Istemci
 
             sohbet?.Guncelle(gecenSn);
             oyuncuSutunu?.Guncelle();
+            // Online, Çakmak Gecesi: sabah/linç/suikast duyurusu, olaydan sonraki durum gelince (açılan roller onda).
+            if (bekleyenDuyurular.Count > 0 && (online?.Istemci.SonDurum?.Surum ?? -1) != duyuruSurumu)
+            {
+                var metinler = new System.Collections.Generic.List<string>();
+                foreach (var d in bekleyenDuyurular) metinler.Add(Gece.DuyuruMetni(akis, akis.Ekran.Gorunum, d));
+                bekleyenDuyurular.Clear();
+                Bildir(string.Join("  ", metinler));
+            }
             if (suclamaBitti && akis.Ekran.Gorunum != null && akis.Ekran.Gorunum.Asama != Asama.Suclama)
             {
                 // Oyun sürüyorsa suçlanan köstebek değildi; bittiyse oyun sonu açılışı söyler.
@@ -229,6 +249,8 @@ namespace TheLighter.Istemci
                 case OlayTuru.Elendi:
                     if (o.Kim.HasValue && akis.Ayarlar.Oyun == OyunTuru.RusRuleti)
                         Bildir(RusRuleti.TetikMetni(akis, new TetikSonucu { Kim = o.Kim.Value, Patladi = true, Elendi = true }));
+                    // Çakmak Gecesi: gece ölenler birer birer gelir, sabah toplu duyurulur.
+                    if (o.Kim.HasValue && akis.Ayarlar.Oyun == OyunTuru.CakmakGecesi) geceOlenler.Add(o.Kim.Value);
                     break;
                 case OlayTuru.TetikDevredildi:
                     Bildir(Metin.Al("rus.devretti", kim, akis.Isim(o.Olay.Hedef)));
@@ -238,6 +260,33 @@ namespace TheLighter.Istemci
                     break;
                 case OlayTuru.CasusYakalandi:
                     Bildir(Metin.Al("casus.yakalandi", kim));
+                    break;
+                // ---- Çakmak Gecesi ----
+                case OlayTuru.LincBasladi:
+                    Bildir(Metin.Al("gece.linc_basladi"));
+                    break;
+                case OlayTuru.LincBitti:
+                    Duyur(new GeceDuyurusu
+                    {
+                        Tur = GeceDuyurusu.Turu.Linc,
+                        Olenler = o.Kim.HasValue ? new[] { o.Kim.Value } : new OyuncuId[0],
+                    });
+                    break;
+                case OlayTuru.Suikast:
+                    if (o.Kim.HasValue) Duyur(new GeceDuyurusu { Tur = GeceDuyurusu.Turu.Suikast, Olenler = new[] { o.Kim.Value } });
+                    break;
+                case OlayTuru.GeceBasladi:
+                    geceOlenler.Clear();
+                    Bildir(Metin.Al("gece.gece_basladi"));
+                    break;
+                case OlayTuru.GeceBitti:
+                    Duyur(new GeceDuyurusu { Tur = GeceDuyurusu.Turu.Sabah, Olenler = new System.Collections.Generic.List<OyuncuId>(geceOlenler) });
+                    break;
+                case OlayTuru.HakemKarari:
+                    Bildir(Metin.Al("gece.hakem_karari"));
+                    break;
+                case OlayTuru.DuelloSonduruldu:
+                    Bildir(Metin.Al("gece.sonduruldu"));
                     break;
                 case OlayTuru.DuelloPuani:
                 case OlayTuru.IfsaBonusu:
@@ -258,6 +307,30 @@ namespace TheLighter.Istemci
                     if (o.Kim.HasValue) Bildir(Metin.Al("online.olay.sure_doldu", kim, TurkceEk.Ilgi(kim)));
                     break;
             }
+        }
+
+        /// <summary>Duyuru bir sonraki durum'la gösterilir: açılan roller ve ölüler o durumda.</summary>
+        void Duyur(GeceDuyurusu d)
+        {
+            bekleyenDuyurular.Add(d);
+            duyuruSurumu = online?.Istemci.SonDurum?.Surum ?? -1;
+        }
+
+        /// <summary>Online, Çakmak Gecesi: kendi rolüm ve bütün bulgularım (kendi telefonum).</summary>
+        void RolumuAc()
+        {
+            var g = akis.Ekran.Gorunum;
+            rolPerdesi.Clear();
+            var kutu = Kutu("menu-kutu");
+            var kaydirma = new ScrollView(ScrollViewMode.Vertical);
+            kaydirma.AddToClassList("kaydirma");
+            if (g != null && g.Rolun != Rol.Yok) kaydirma.Add(Gece.RolKarti(akis, g));
+            if (g != null) kaydirma.Add(Gece.TumBulgular(akis, g));
+            kutu.Add(kaydirma);
+            kutu.Add(Buton(Metin.Al("genel.tamam"), () => rolPerdesi.AddToClassList("gizli"), "buton-birincil"));
+            rolPerdesi.Add(kutu);
+            rolPerdesi.RemoveFromClassList("gizli");
+            rolPerdesi.BringToFront();
         }
 
         /// <summary>PC'de geniş pencere: solda oyuncular, sağda sohbet hep açık. Dar ekranda sohbet düğmeyle açılır.</summary>
@@ -289,6 +362,8 @@ namespace TheLighter.Istemci
                 : g.ToplamTur > 0 ? Metin.Al("oyun.tur_sinirli", g.Tur, g.ToplamTur)
                 : Metin.Al("oyun.tur_sinirsiz", g.Tur);
             Takim.UstSkoruYaz(skorKutusu, g);
+            // Çakmak Gecesi: tur sayısı yok; gün ve linçe kalan tur.
+            if (Gece.Mi(g) && g.Gun > 0) turYazisi.text = Gece.GunYazisi(g);
 
             // Kaos turu ve Kızgın Çakmak'ın ısısı herkese açık: üst çubukta.
             var parcalar = new System.Collections.Generic.List<string>();
@@ -320,6 +395,8 @@ namespace TheLighter.Istemci
                 case EkranTuru.Suclama: return new SuclamaParcasi(akis, e);
                 case EkranTuru.Tetik: return new TetikParcasi(akis, e);
                 case EkranTuru.CasusTahmini: return new CasusTahminiParcasi(akis, e);
+                case EkranTuru.Linc: return new LincParcasi(akis, e);
+                case EkranTuru.Gece: return new GeceParcasi(akis, e);
                 case EkranTuru.Karar: return new KararParcasi(akis, e);
                 case EkranTuru.OyunSonu: return new OyunSonuParcasi(uygulama, akis, e, online);
                 default: return akis.Online ? (IOyunParcasi)new OnlineBekleParcasi(akis, e) : new BekleParcasi();

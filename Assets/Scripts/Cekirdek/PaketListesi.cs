@@ -15,11 +15,15 @@ namespace TheLighter.Istemci
         public const string AssetYolu = "Assets/UI/Resources/TheLighter/PaketListesi.asset";
         public const string IcerikKlasoru = "Assets/Icerik";
         public const string SesliCezaYolu = "Assets/Icerik/Cezalar.csv";
+        public const string GeceSorulariYolu = "Assets/Icerik/GeceSorulari.csv";
 
         public List<TextAsset> Paketler = new List<TextAsset>();
 
         /// <summary>🗣️ sesli ceza metinleri (Cesur seviyede çekilir).</summary>
         public TextAsset SesliCezalar;
+
+        /// <summary>Çakmak Gecesi'nin suçlama soruları: paket değil, sadece bu oyunda öneri olarak.</summary>
+        public TextAsset GeceSorulari;
     }
 
     /// <summary>Bir soru paketi: dosya adı (kimlik), görünen ad ("# Paket: Aile Dostu") ve soruları.</summary>

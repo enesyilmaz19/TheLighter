@@ -15,8 +15,9 @@ namespace TheLighter.Istemci
     public sealed class KurulumEkrani : IEkran
     {
         // Oyuncu sınırları kural motorundan. İsim uzunluğu sadece ekrana sığsın diye.
-        const int EnAz = Oyun.EnAzOyuncu;
-        const int EnFazla = Oyun.EnFazlaOyuncu;
+        // Çakmak Gecesi 6–18, diğer oyunlar 4–10 (kural motorunun sabitleri).
+        int EnAz => OyuncuSayisi.EnAz(ayarlar.Oyun);
+        int EnFazla => OyuncuSayisi.EnFazla(ayarlar.Oyun);
         const int IsimUzunlugu = 14;
         const int GosterilenSeri = 3;
 
@@ -58,6 +59,10 @@ namespace TheLighter.Istemci
         readonly Label oyunAciklama;
         readonly Label modAciklama;
         readonly Label paketNotu;
+        readonly Label kisiAciklama;
+        readonly VisualElement paketBolumu;
+        readonly Label geceSoruNotu;
+        readonly GeceAyarlari geceAyarlari;
         readonly Label cezaAciklama;
         readonly Button gorevButonu;
         readonly Button kaosButonu;
@@ -78,6 +83,9 @@ namespace TheLighter.Istemci
                 Oyun = son.Oyun,
                 Can = son.Can,
                 Casus = son.Casus,
+                RolAcilir = son.RolAcilir,
+                GecelikKurban = son.GecelikKurban,
+                KapaliRoller = new List<Rol>(son.KapaliRoller),
                 Mod = son.Mod,
                 MiniOyun = son.MiniOyun,
                 TurSayisi = son.TurSayisi,
@@ -122,7 +130,8 @@ namespace TheLighter.Istemci
             kaydirma.Add(casusBolumu);
 
             kaydirma.Add(Yazi(Metin.Al("kurulum.baslik"), "baslik"));
-            kaydirma.Add(Yazi(Metin.Al("kurulum.aciklama", EnAz, EnFazla), "aciklama"));
+            kisiAciklama = Yazi("", "aciklama");
+            kaydirma.Add(kisiAciklama);
             liste = Kutu("isim-listesi");
             kaydirma.Add(liste);
             ekle = Buton(Metin.Al("kurulum.ekle"), () => { SatirEkle(""); Durum(); }, "buton-ikincil");
@@ -152,11 +161,27 @@ namespace TheLighter.Istemci
             turYok = Yazi("", "ipucu");
             kaydirma.Add(turYok);
 
-            kaydirma.Add(Yazi(Metin.Al("kurulum.paketler"), "alt-baslik"));
+            // Çakmak Gecesi: rol açılması, gecelik kurban, roller. Paket seçimi bu oyunda yok (öneriler suçlama sorularından).
+            geceAyarlari = new GeceAyarlari(
+                a => { ayarlar.RolAcilir = a; Durum(); },
+                k => { ayarlar.GecelikKurban = k; Durum(); },
+                r =>
+                {
+                    var yeni = GeceAyarlari.Degistir(ayarlar.KapaliRoller, r);
+                    if (OyunSecimi.Uyumlu(ayarlar, x => x.KapaliRoller = yeni)) ayarlar.KapaliRoller = yeni;
+                    Durum();
+                });
+            kaydirma.Add(geceAyarlari.Kok);
+            geceSoruNotu = Yazi(Metin.Al("gece.paket_yok"), "ipucu");
+            kaydirma.Add(geceSoruNotu);
+
+            paketBolumu = Kutu("ayar-bolumu");
+            paketBolumu.Add(Yazi(Metin.Al("kurulum.paketler"), "alt-baslik"));
             paketKutusu = Kutu("secenekler");
-            kaydirma.Add(paketKutusu);
+            paketBolumu.Add(paketKutusu);
             paketNotu = Yazi("", "ipucu");
-            kaydirma.Add(paketNotu);
+            paketBolumu.Add(paketNotu);
+            kaydirma.Add(paketBolumu);
 
             kaydirma.Add(Yazi(Metin.Al("kurulum.ceza"), "alt-baslik"));
             kaydirma.Add(Secenekler(CezaSecenekleri, c => Metin.Al("ceza.seviye." + c), c => ayarlar.CezaSeviyesi = c, cezaButonlari));
@@ -259,6 +284,12 @@ namespace TheLighter.Istemci
                 silButonlari[i].SetEnabled(kutular.Count > EnAz);
             }
             ekle.SetEnabled(kutular.Count < EnFazla);
+            kisiAciklama.text = Metin.Al("kurulum.aciklama", EnAz, EnFazla);
+            bool gece = ayarlar.Oyun == OyunTuru.CakmakGecesi;
+            geceAyarlari.Kok.EnableInClassList("gizli", !gece);
+            geceAyarlari.Ciz(ayarlar.RolAcilir, ayarlar.GecelikKurban, ayarlar.KapaliRoller);
+            geceSoruNotu.EnableInClassList("gizli", !gece);
+            paketBolumu.EnableInClassList("gizli", gece);
 
             bool temiz = ayarlar.Mod == OyunModu.Temiz;
             if (temiz && ayarlar.CezaSeviyesi == CezaSeviyesi.Cesur) ayarlar.CezaSeviyesi = CezaSeviyesi.Hafif;
@@ -466,7 +497,10 @@ namespace TheLighter.Istemci
                 isimler.Add(isim);
             }
             if (isimler.Count < EnAz) return Metin.Al("kurulum.hata_az", EnAz);
-            if (ayarlar.Mod != OyunModu.Temiz && SeciliPaketler().Count == 0) return Metin.Al("kurulum.hata_paket");
+            // Başka oyundan çok kişiyle gelindiyse (Çakmak Gecesi 18, diğerleri 10).
+            if (isimler.Count > EnFazla) return Metin.Al("kurulum.hata_cok", EnFazla);
+            if (ayarlar.Oyun != OyunTuru.CakmakGecesi && ayarlar.Mod != OyunModu.Temiz && SeciliPaketler().Count == 0)
+                return Metin.Al("kurulum.hata_paket");
             // Takımlar kural motorunun kurulumuna sorulur (herkes bir takımda, en fazla 1 kişi fark).
             if (ayarlar.Oyun == OyunTuru.Takim) return TakimDagitmaParcasi.UyariMetni(dagitim, satirIdleri);
             return null;

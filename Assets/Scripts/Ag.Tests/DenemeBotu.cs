@@ -27,6 +27,10 @@ namespace TheLighter.Testler
         /// <summary>Casus: bot casussa ilk soru sırasında "Mekânı biliyorum" desin (testte açılır).</summary>
         public bool ErkenTahminEtsin;
         public int TahminEtti { get; private set; }
+        /// <summary>true: durumları alır ama komut yollamaz (testte bir aşamada bekletmek için).</summary>
+        public bool Dursun;
+        /// <summary>Çakmak Gecesi: yaptığı gece seçimi sayısı.</summary>
+        public int GeceSecti { get; private set; }
 
         public DenemeBotu(string isim, int tohum, Func<ITasima> tasima = null)
         {
@@ -42,7 +46,7 @@ namespace TheLighter.Testler
         {
             Istemci.Guncelle(TimeSpan.FromSeconds(sn));
             var d = Istemci.SonDurum;
-            if (d == null || d.Yer != OdaYeri.Oyun || !Istemci.Sen.HasValue) return;
+            if (d == null || d.Yer != OdaYeri.Oyun || !Istemci.Sen.HasValue || Dursun) return;
             if (d.Surum == sonIsledigiSurum) return;
 
             // İnsan gibi biraz düşünsün; aynı durumda iki kez komut yollamasın.
@@ -147,6 +151,24 @@ namespace TheLighter.Testler
                     }
                     else Yolla(Cevirici.TetikCek(tur));
                     break;
+
+                case Asama.Linc:
+                    // Çakmak Gecesi: oy hakkı varsa adaylardan rastgele biri.
+                    if (!g.OyVerdin && g.Secilebilir.Count > 0) Yolla(Cevirici.LincOyu(tur, Sec(g.Secilebilir)));
+                    break;
+
+                case Asama.Gece:
+                {
+                    // Herkes bir seçim yapar; arada bir pas. Katil tarafında yetenek de (adayı varsa).
+                    bool secer = false;
+                    foreach (var id in g.Oylayanlar) if (id == ben) secer = true;
+                    if (!secer || g.OyVerdin) break;
+                    OyuncuId? hedef = g.Secilebilir.Count > 0 && rastgele.Next(5) > 0 ? Sec(g.Secilebilir) : (OyuncuId?)null;
+                    OyuncuId? ikinci = g.IkinciSecilebilir.Count > 0 ? Sec(g.IkinciSecilebilir) : (OyuncuId?)null;
+                    Yolla(Cevirici.GeceSecimi(tur, hedef, ikinci, g.Rolun == Rol.Hakem ? rastgele.Next(2) == 0 : (bool?)null));
+                    GeceSecti++;
+                    break;
+                }
 
                 case Asama.IkiyeKatla:
                 case Asama.Bedel:

@@ -373,6 +373,85 @@ namespace TheLighter.Testler
             foreach (var b in botlar) b.Istemci.Ayril();
         }
 
+        /// <summary>
+        /// Çakmak Gecesi (tasks/g2-cakmak-gecesi.md 4, 5): 8 bot, 12'den az olduğu için rol açık ve 1 kurban. İlk gece katil kanalı
+        /// sadece katillere düşer, gece genel sohbet reddedilir; oyun bir tarafın kazanmasıyla biter, özette herkesin rolü.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator SekizBot_CakmakGecesi_KatilKanaliVeSonuc()
+        {
+            var botlar = new List<DenemeBotu>();
+            for (int i = 0; i < 8; i++) botlar.Add(new DenemeBotu("Gc" + (i + 1), 6000 + i));
+            var kurucu = botlar[0];
+            var hatalar = new Dictionary<DenemeBotu, List<HataMesaji>>();
+            foreach (var b in botlar)
+            {
+                var l = new List<HataMesaji>();
+                hatalar[b] = l;
+                b.Istemci.HataGeldi += l.Add;
+            }
+            var saat = Stopwatch.StartNew();
+            double son = 0;
+
+            IEnumerator Bekle(Func<bool> kosul, double sn, string ne)
+            {
+                double bitis = saat.Elapsed.TotalSeconds + sn;
+                while (!kosul())
+                {
+                    double g = saat.Elapsed.TotalSeconds - son;
+                    son = saat.Elapsed.TotalSeconds;
+                    foreach (var b in botlar) b.Guncelle(g);
+                    if (kurucu.Istemci.Durum == BaglantiDurumu.Kapali) Assert.Ignore("Yerel sunucu çalışmıyor.");
+                    if (saat.Elapsed.TotalSeconds > bitis)
+                        Assert.Fail(ne + " olmadı: " + string.Join(", ", botlar.Select(b => b.Isim + "=" + (b.Istemci.SonDurum?.ToString() ?? "-") + " " + b.SonHata)));
+                    yield return null;
+                }
+            }
+
+            kurucu.Istemci.OdaKur(Adres, kurucu.Isim);
+            yield return Bekle(() => kurucu.Istemci.Durum == BaglantiDurumu.Odada, 10, "Oda kurma");
+            for (int i = 1; i < 8; i++) botlar[i].Istemci.Katil(Adres, kurucu.Istemci.Oda, botlar[i].Isim);
+            yield return Bekle(() => kurucu.Istemci.SonDurum?.Oyuncular.Count == 8, 10, "Katılma");
+
+            kurucu.Istemci.Gonder(Cevirici.AyarDegistir(oyun: OyunTuru.CakmakGecesi, mod: OyunModu.Normal, ceza: CezaSeviyesi.Kapali,
+                gorevler: false, kaos: false, soruSn: 10, cevapSn: 10, hamleSn: 5, miniOyun: MiniOyunTuru.Zar, rolAcilir: true, gecelikKurban: 1));
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Ayarlar?.Oyun == OyunTuru.CakmakGecesi), 10, "Çakmak Gecesi ayarı herkese");
+            kurucu.Istemci.Gonder(Cevirici.Baslat());
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Yer == OdaYeri.Oyun && b.Istemci.SonDurum.Gorunum?.Rolun != Rol.Yok), 10, "Başlama");
+
+            var katiller = botlar.Where(b => Oyun.TarafI(b.Istemci.SonDurum.Gorunum.Rolun) == Taraf.Katil).ToList();
+            Assert.That(katiller.Count, Is.EqualTo(2), "8 kişide 2 katil");
+            Assert.That(katiller.All(k => k.Istemci.SonDurum.Gorunum.Katiller.Count == 2), Is.True, "katiller birbirini bilir");
+            Assert.That(botlar.Except(katiller).All(b => b.Istemci.SonDurum.Gorunum.Katiller.Count == 0), Is.True);
+
+            // İlk gece: katil kanalı sadece katillere, genel sohbet herkese kapalı. Linç başlayınca botlar durur: linç süresi
+            // dolar (kimse gitmez), gece botlar seçim yapmadan beklerken sohbet denenir.
+            yield return Bekle(() => botlar.Any(b => b.Istemci.SonDurum?.Gorunum?.Asama == Asama.Linc) || botlar.All(b => b.OyunBitti), 300, "İlk linç");
+            foreach (var b in botlar) b.Dursun = true;
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Gorunum?.Asama == Asama.Gece) || botlar.All(b => b.OyunBitti), 120, "İlk gece");
+            if (!botlar.All(b => b.OyunBitti))
+            {
+                var katilYeri = SohbetYeri.Adli(SohbetKanali.Katil);
+                Assert.That(katiller[0].Istemci.SohbetGonder(katilYeri, "bu gece Gc1"), Is.True);
+                var masum = botlar.First(b => !katiller.Contains(b) && !b.Istemci.SonDurum.Gorunum.Oyuncular.First(o => o.Id == b.Istemci.Sen).Elendi);
+                Assert.That(masum.Istemci.SohbetGonder(null, "uyuyamıyorum"), Is.True);
+                yield return Bekle(() => katiller.All(k => k.Istemci.Sohbet.Mesajlar(katilYeri).Count == 1)
+                    && hatalar[masum].Any(h => h.Kod == "GECERSIZ_GIRDI"), 10, "Katil kanalı ve gece genel reddi");
+                Assert.That(botlar.Except(katiller).All(b => b.Istemci.Sohbet.Mesajlar(katilYeri).Count == 0), Is.True, "katil kanalı masuma düşmez");
+                Assert.That(botlar.All(b => b.Istemci.Sohbet.Mesajlar(null).Count == 0), Is.True, "gece genel sohbet kimseye gitmez");
+            }
+            foreach (var b in botlar) b.Dursun = false;
+
+            yield return Bekle(() => botlar.All(b => b.OyunBitti), 600, "Oyunun bitmesi");
+            var s = kurucu.Istemci.SonDurum.Ozet?.Gece;
+            Assert.That(s, Is.Not.Null, "özette Çakmak Gecesi");
+            Assert.That(s.Kazanan.HasValue, Is.True, "bir taraf kazandı");
+            Assert.That(s.Roller.Count, Is.EqualTo(8), "herkesin rolü özette");
+            Assert.That(botlar.Sum(b => b.GeceSecti), Is.GreaterThan(0), "geceler oynandı");
+
+            foreach (var b in botlar) b.Istemci.Ayril();
+        }
+
         [UnityTest]
         public IEnumerator UygulamayaDonunce_YenidenBaglanir_AyniIsimleOdada()
         {

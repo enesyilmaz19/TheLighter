@@ -39,6 +39,15 @@ namespace TheLighter.Istemci
             if (g.Kaos != KaosKurali.Yok) Kok.Add(Tekrar.KaosSeridi(g.Kaos));
             var rolum = Casus.RolumDugmesi(g);
             if (rolum != null) Kok.Add(rolum);
+            // Çakmak Gecesi: rol, bulgular, Kışkırtıcı'nın düğmesi (rolü uymayanda boş kutu).
+            if (Gece.Mi(g))
+            {
+                Kok.Add(Yazi(Metin.Al("gece.rolun_kisa", Gece.RolAdi(g.Rolun)), "ipucu"));
+                Kok.Add(Gece.BulguKutusu(akis, g));
+                var yetenekPerdesi = Kutu("menu-perde", "gizli");
+                Kok.Add(Gece.GunduzYetenegi(akis, g, false, yetenekPerdesi, m => hata.text = m));
+                Kok.Add(yetenekPerdesi);
+            }
 
             if (g.Fisilti || g.Soru == null)
             {

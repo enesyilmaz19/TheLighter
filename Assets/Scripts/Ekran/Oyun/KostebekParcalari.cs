@@ -152,6 +152,20 @@ namespace TheLighter.Istemci
             Kok.Add(bas);
 
             Kok.Add(Esnek());
+            // Çakmak Gecesi'nde linç de böyle başlar: telefon ortada, önce dünün ve gecenin duyuruları.
+            if (g.Asama == Asama.Linc)
+            {
+                Gece.Duyurular(Kok, akis, g, e.GeceDuyurulari);
+                Kok.Add(Yazi(Metin.Al("gece.linc_kim"), "perde-buyuk"));
+                Kok.Add(Yazi(Metin.Al("gece.linc_aciklama"), "aciklama", "orta"));
+                Kok.Add(Yazi(Metin.Al("kostebek.tartis"), "aciklama", "orta"));
+                Kok.Add(Esnek());
+                var gecL = Buton(Metin.Al("kostebek.oylamaya_gec"), akis.TartismayiBitir, "buton-birincil", "buton-buyuk");
+                GecikmeliAc(gecL);
+                Kok.Add(gecL);
+                Guncelle(e);
+                return;
+            }
             if (g.SonSuclama) Kok.Add(Yazi(Metin.Al("kostebek.son_oylama"), "banner"));
             Kok.Add(Yazi(Kostebek.OylamaMetni(g.Oyun, "kim"), "perde-buyuk"));
             Kok.Add(Yazi(e.SuclamaBaslatan.HasValue

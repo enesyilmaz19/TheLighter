@@ -57,6 +57,29 @@ namespace TheLighter.Akis
         /// perde yok, telefon casusta; online'da herkes izler, liste sadece casusta seçilir. Saat işler.
         /// </summary>
         CasusTahmini,
+
+        /// <summary>
+        /// Çakmak Gecesi, linç: telefonu tutan (online'da herkes kendi telefonunda) bir canlıyı gösterir. Suikastçı burada
+        /// suikast da yapabilir. Elden elede telefon oy verecekler arasında dolaşır, saat durur.
+        /// </summary>
+        Linc,
+
+        /// <summary>
+        /// Çakmak Gecesi, gece: telefonu tutan (online'da herkes) rolüne göre bir seçim yapar ya da pas der. Katil tarafında
+        /// kurban oyu ve (varsa) yetenek. Elden elede telefon canlılar arasında dolaşır, saat durur.
+        /// </summary>
+        Gece,
+    }
+
+    /// <summary>Oyuna göre kişi sınırı: kurallardaki sabitler (Çakmak Gecesi 6–18, diğerleri 4–10). Kurulum ekranı buna bakar.</summary>
+    public static class OyuncuSayisi
+    {
+        public static int EnAz(OyunTuru oyun) => oyun == OyunTuru.CakmakGecesi ? Oyun.GeceEnAzOyuncu : Oyun.EnAzOyuncu;
+
+        public static int EnFazla(OyunTuru oyun) => oyun == OyunTuru.CakmakGecesi ? Oyun.GeceEnFazlaOyuncu : Oyun.EnFazlaOyuncu;
+
+        /// <summary>Bütün oyunların en fazlası (kurulumda satır eklerken; seçili oyunun sınırı ayrıca denetlenir).</summary>
+        public static int HepsininEnFazlasi => Oyun.GeceEnFazlaOyuncu > Oyun.EnFazlaOyuncu ? Oyun.GeceEnFazlaOyuncu : Oyun.EnFazlaOyuncu;
     }
 
     /// <summary>Kişiye özel bilgi: ekranın kimin görünümüyle çizileceği ve oyun başında rol perdesi kimlere gideceği için.</summary>
@@ -80,6 +103,14 @@ namespace TheLighter.Akis
             g.SuclamaHakkin = false;
             g.Sirrin = null;
             g.MekanRolun = null;
+            // Çakmak Gecesi: katiller, gece bakışları, haklar, Cellat'ın hedefi, bombalar, Kulak'ın sorusu.
+            g.Katiller = System.Array.Empty<OyuncuRolu>();
+            g.KatilSecimleri = System.Array.Empty<KatilSecimi>();
+            g.Bulgularin = System.Array.Empty<Bulgu>();
+            g.KalanHakkin = null;
+            g.CellatHedefin = null;
+            g.Bombalilar = System.Array.Empty<OyuncuId>();
+            g.KulakSorusu = null;
             return g;
         }
     }
@@ -103,7 +134,26 @@ namespace TheLighter.Akis
 
         /// <summary>"Köstebek kim?" oylaması: bu kişi oy verecek.</summary>
         Suclama,
+
+        /// <summary>Çakmak Gecesi: bu kişi linç oyu verecek.</summary>
+        Linc,
+
+        /// <summary>Çakmak Gecesi: bu kişi gece seçimini yapacak.</summary>
+        Gece,
     }
+
+    /// <summary>Çakmak Gecesi'nde az önce olanlar: sabah (gece ölenler), linç ve suikast. Bir sonraki ortadaki ekranda duyurulur.</summary>
+    public sealed class GeceDuyurusu
+    {
+        public enum Turu { Sabah, Linc, Suikast }
+
+        public Turu Tur;
+        /// <summary>Sabah: gece ölenler (boşsa kimse ölmedi). Linç: elenen (yoksa boş). Suikast: ölen.</summary>
+        public IReadOnlyList<OyuncuId> Olenler = System.Array.Empty<OyuncuId>();
+    }
+
+    /// <summary>Çakmak Gecesi: düello oynanmadan bitti. Sonuç ekranında herkes görür, kimin yaptığını değil.</summary>
+    public enum DuelloNotu { Yok, HakemKarari, Sonduruldu }
 
     /// <summary>Takım Düellosu: bu turda alınan puan (düello puanı ya da ifşa bonusu). Sonuç ekranında duyurulur.</summary>
     public sealed class PuanAni
@@ -207,6 +257,12 @@ namespace TheLighter.Akis
         /// <summary>Elden ele, Rus Ruleti: az önce çekilen tetiğin sonucu (yoksa null). Perde kaldırılana kadar duyurulur.</summary>
         public TetikSonucu TetikSonucu;
 
+        /// <summary>Elden ele, Çakmak Gecesi: perdede ve tartışmada duyurulacaklar (sabah, linç, suikast). Perde kalkınca silinir.</summary>
+        public IReadOnlyList<GeceDuyurusu> GeceDuyurulari = new List<GeceDuyurusu>();
+
+        /// <summary>Elden ele, Çakmak Gecesi: bu turun düellosu Hakem kararıyla ya da sönerek bitti (Ifsa/Gume ekranında).</summary>
+        public DuelloNotu DuelloNotu;
+
         /// <summary>Elden ele, Takım Düellosu: bu turun puanları (Ifsa/Gume ekranında). Online'da olaylardan bildirim.</summary>
         public IReadOnlyList<PuanAni> PuanAnlari = new List<PuanAni>();
 
@@ -233,7 +289,7 @@ namespace TheLighter.Akis
         public bool SaatDurur =>
             Tur == EkranTuru.Perde || Tur == EkranTuru.MiniOyunPerdesi || Tur == EkranTuru.SoruToplama
             || Tur == EkranTuru.GorevGoster || Tur == EkranTuru.Oylama || CezaOnayBekliyor
-            || Tur == EkranTuru.SuclamaTartisma || Tur == EkranTuru.Suclama
+            || Tur == EkranTuru.SuclamaTartisma || Tur == EkranTuru.Suclama || Tur == EkranTuru.Linc || Tur == EkranTuru.Gece
             || (Tur == EkranTuru.Perde && PerdeNedeni == PerdeNedeni.Suclama);
     }
 }

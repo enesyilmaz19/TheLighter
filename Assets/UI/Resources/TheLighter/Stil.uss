@@ -1257,3 +1257,41 @@
     align-items: flex-start;
     margin: 8px 0;
 }
+
+/* ---------- Çakmak Gecesi ---------- */
+.rol-karti.taraf-Katil {
+    border-color: var(--kirmizi);
+}
+
+.rol-karti.taraf-Tarafsiz {
+    border-color: var(--alev);
+}
+
+/* Bulgu kutusu herkeste aynı yerde ve en az aynı boyda: kutudan rol anlaşılmasın. */
+.gece-bulgu {
+    background-color: var(--yuzey);
+    border-radius: 20px;
+    padding: 12px 20px;
+    margin: 8px 0;
+    min-height: 96px;
+}
+
+/* Gündüz yeteneği: rolü uymayanda da aynı yer kaplanır. */
+.gece-yetenek {
+    min-height: 120px;
+    margin: 8px 0;
+}
+
+.kok .banner.gece-sabah {
+    background-color: #1C2238;
+    color: #B9C6FF;
+}
+
+.gece-ayarlari .gece-taraf-baslik {
+    margin-top: 12px;
+}
+
+.gece-kulak {
+    border-width: 3px;
+    border-color: var(--alev);
+}

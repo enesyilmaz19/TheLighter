@@ -30,7 +30,18 @@ namespace TheLighter.Istemci
             if (g.SonOylama != null)
                 orta.Add(Yazi(Metin.Al("sonuc.oylama", g.SonOylama.Ifsa, g.SonOylama.Gume), "banner"));
 
+            // Çakmak Gecesi: düello oynanmadı (Hakem'in kararı ya da Söndürücü). Kimin yaptığı yok.
+            if (e.DuelloNotu != DuelloNotu.Yok)
+                orta.Add(Yazi(Metin.Al(e.DuelloNotu == DuelloNotu.HakemKarari ? "gece.hakem_karari" : "gece.sonduruldu"), "banner"));
             orta.Add(e.Tur == EkranTuru.Ifsa ? IfsaKarti(akis, g) : GumeKarti(akis, g));
+            // Kulak ve Dinleyici: güme giden soruyu sadece bu ekranda, sadece kendi görünümlerinde (online). Ana Plan 8.5'in tek istisnası.
+            if (e.Tur == EkranTuru.Gume && !string.IsNullOrEmpty(g.KulakSorusu))
+            {
+                var kulak = Kutu("okuma-alani", "gece-kulak");
+                kulak.Add(Yazi(Metin.Al("gece.duydun"), "ipucu"));
+                kulak.Add(Yazi(g.KulakSorusu, "okuma-soru"));
+                orta.Add(kulak);
+            }
 
             // Takım Düellosu: bu turun puanları ("+1 Mavi", "İfşa bonusu") ve skor. Online'da puan anı bildirimle gelir.
             foreach (var p in e.PuanAnlari) orta.Add(Takim.PuanDuyurusu(akis, p));

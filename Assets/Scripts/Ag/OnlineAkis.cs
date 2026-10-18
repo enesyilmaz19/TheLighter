@@ -217,6 +217,21 @@ namespace TheLighter.Ag
                     e.Kime = g.TetikCeken;
                     break;
 
+                case Asama.Linc:
+                case Asama.Gece:
+                {
+                    // Herkes kendi telefonunda; ölüler ve (linçte) susturulan oylayanlarda yok: izler.
+                    bool secerim = false;
+                    foreach (var id in g.Oylayanlar) if (id == ben) secerim = true;
+                    if (secerim && !g.OyVerdin)
+                    {
+                        Kur(e, g.Asama == Asama.Linc ? EkranTuru.Linc : EkranTuru.Gece, tur + "|" + g.Asama + "|" + g.Gun);
+                        e.Kime = ben;
+                    }
+                    else Bekle(e, null, g.Asama + tur + "|" + g.Gun);
+                    break;
+                }
+
                 case Asama.CasusTahmini:
                     // Casus herkese açıldı: herkes izler, liste sadece casusta seçilir (ekran Kime == Ben'e bakar).
                     Kur(e, EkranTuru.CasusTahmini, tur + "|" + g.Yakalanan);
@@ -348,6 +363,15 @@ namespace TheLighter.Ag
         public Sonuc TetikCek() => Yolla(Cevirici.TetikCek(Tur));
 
         public Sonuc TetikDevret(OyuncuId hedef) => Yolla(Cevirici.TetikDevret(Tur, hedef));
+
+        public Sonuc LincOyu(OyuncuId hedef) => Yolla(Cevirici.LincOyu(Tur, hedef));
+
+        public Sonuc Suikast(OyuncuId hedef, Rol rol) => Yolla(Cevirici.Suikast(Tur, hedef, rol));
+
+        public Sonuc GeceSecimi(OyuncuId? hedef, OyuncuId? ikinci = null, bool? ifsa = null) =>
+            Yolla(Cevirici.GeceSecimi(Tur, hedef, ikinci, ifsa));
+
+        public Sonuc GunduzYetenegi(OyuncuId? hedef = null) => Yolla(Cevirici.Yetenek(Tur, hedef));
 
         /// <summary>
         /// Casus: sadece casussam (görünümde rolüm) gider. Casus olmayan "Mekânı biliyorum"a bassa da hiçbir şey gönderilmez,

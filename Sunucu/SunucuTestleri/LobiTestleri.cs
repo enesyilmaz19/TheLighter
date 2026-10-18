@@ -97,6 +97,21 @@ namespace SunucuTestleri
         }
 
         [Test]
+        public async Task Eski_surum_GUNCELLE_alir_guncel_ve_surumsuz_girer()
+        {
+            var x = await Baglan();
+            await x.Gonder(new { t = "odaKur", isim = "Enes", surum = 0 });
+            await x.Hata("GUNCELLE");
+            await x.Gonder(new { t = "katil", oda = "ZZZZZ", isim = "Enes", anahtar = (string)null, surum = 0 });
+            await x.Hata("GUNCELLE"); // odaya bakmadan
+            await x.Gonder(new { t = "odaKur", isim = "Enes", surum = "1" });
+            await x.Hata("GECERSIZ_MESAJ");
+            await x.Gonder(new { t = "odaKur", isim = "Enes", surum = 1 });
+            await x.Bekle("hosgeldin");
+            // surum'suz giriş: OdaKur_hosgeldin_p1_ve_32_karakter_anahtar
+        }
+
+        [Test]
         public async Task Katil_olmayan_oda_ODA_YOK()
         {
             var x = await Baglan();

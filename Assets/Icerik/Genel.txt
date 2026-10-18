@@ -49,7 +49,7 @@ Grupta en kötü şakaları kim yapar?
 Grupta kim en çok kendini över?
 Grupta en dağınık kim?
 Grupta kim en çok telefona bakar?
-Grupta kim tartışmada haksız olduğunu asla kabul etmez?
+Grupta kim verdiği sözü her zaman tutar?
 Grupta kim en çok olay çıkarır?
 Grupta en cimri kim?
 Grupta en cömert kim?
@@ -72,11 +72,11 @@ Grupta kim bir iddia için her şeyi yapar?
 Grupta en kötü dansı kim eder?
 Grupta kim karaokede mikrofonu bırakmaz?
 Grupta kim en saçma şeylere para harcar?
-Grupta kim iddiada her şeyini kaybeder?
+Grupta kim sokakta düşünce "bir şey olmadı" deyip hızla uzaklaşır?
 Grupta kim yanlış kişiye mesaj atmıştır?
 Grupta kim kopya çekerken yakalanır?
 Grupta kim yemek yapmayı hiç bilmez?
-Grupta kim en çok yer?
+Grupta kim acıkınca çekilmez olur?
 
 # --- Güvendiğin kişi ---
 Zor bir sınavda grupta kimin yanına oturmak isterdin?
@@ -85,7 +85,7 @@ Grupta en iyi sırrı kim saklar?
 Grupta kimin tavsiyesine en çok güvenirsin?
 Kaybolsan seni grupta kim bulur?
 Grupta kimin müzik zevki en kötü?
-Grupta kimin giyim tarzını hiç anlamıyorsun?
+Grupta kimin esprilerini hiç anlamıyorsun?
 Grupta en iyi pazarlığı kim yapar?
 Grupta kimin annesi seni en çok sever?
 Grupta seni en iyi kim tanıyor?

@@ -478,8 +478,9 @@ namespace Cakmak.Kurallar
                         if (TarafI(roller[h.Value]) == Taraf.Masum) olenler[s.Key] = false; // masum vurdu: kendisi de (korunsa bile)
                         break;
                     case Rol.Kanunsuz when h.HasValue:
+                    case Rol.Hirsiz when h.HasValue: // öldürdüğünün rolünü sabah alır (6)
                         HakKullan(s.Key);
-                        saldirilar.Add((h.Value, Rol.Kanunsuz));
+                        saldirilar.Add((h.Value, roller[s.Key]));
                         break;
                     case Rol.Bombaci when h == s.Key:
                         foreach (var x in bombalilar) saldirilar.Add((x, Rol.Bombaci));
@@ -559,7 +560,7 @@ namespace Cakmak.Kurallar
                 Yay(new Olay { Tur = OlayTuru.Elendi, Kim = o.Key });
             }
 
-            // 6. Dönüşümler: Vampir'in ısırdığı Katil olur, Hırsız rolü çalar. Bu gece ölen ısıramaz, çalamaz.
+            // 6. Dönüşümler: Vampir'in ısırdığı Katil olur, Hırsız hedefi bu gece öldüyse rolünü alır. Bu gece ölen ısıramaz, alamaz.
             foreach (var s in secimler)
             {
                 var ik = s.Value.Ikinci;
@@ -571,7 +572,8 @@ namespace Cakmak.Kurallar
                 RolDegistir(isirilan, Rol.Katil);
             }
             foreach (var s in secimler)
-                if (roller[s.Key] == Rol.Hirsiz && s.Value.Hedef.HasValue && !Bul(s.Key).Elendi) RolCal(s.Key, s.Value.Hedef.Value);
+                if (roller[s.Key] == Rol.Hirsiz && s.Value.Hedef.HasValue && olenler.ContainsKey(s.Value.Hedef.Value) && !Bul(s.Key).Elendi)
+                    RolAl(s.Key, s.Value.Hedef.Value);
 
             Yay(new Olay { Tur = OlayTuru.GeceBitti });
             if (GeceKazananVarsaBitir()) return;
@@ -683,11 +685,8 @@ namespace Cakmak.Kurallar
             if (hak.HasValue) haklar[kim] = hak.Value;
         }
 
-        /// <summary>
-        /// Hırsız rolü çalar: rol, kalan hakları, Deli'nin sandığı ve Cellat'ın hedefi onun olur. Çalınan (yaşıyorsa) kendi tarafının
-        /// düz rolüne düşer (tarafsızsa Hayatta Kalan).
-        /// </summary>
-        void RolCal(OyuncuId hirsiz, OyuncuId hedef)
+        /// <summary>Hırsız öldürdüğünün rolünü alır: rol (ve tarafı), kalan hakları, Deli'nin sandığı ve Cellat'ın hedefi onun olur.</summary>
+        void RolAl(OyuncuId hirsiz, OyuncuId hedef)
         {
             var rol = roller[hedef];
             roller[hirsiz] = rol;
@@ -698,10 +697,12 @@ namespace Cakmak.Kurallar
             {
                 cellatHedefleri.Remove(hedef);
                 cellatHedefleri[hirsiz] = cellatHedefi;
+                if (Bul(cellatHedefi).Elendi) // hedef de bu gece öldü: Cellat'ın kuralı, Soytarı olur
+                {
+                    cellatHedefleri.Remove(hirsiz);
+                    RolDegistir(hirsiz, Rol.Soytari);
+                }
             }
-            if (Bul(hedef).Elendi) return;
-            var taraf = TarafI(rol);
-            RolDegistir(hedef, taraf == Taraf.Masum ? Rol.Masum : taraf == Taraf.Katil ? Rol.Katil : Rol.HayattaKalan);
         }
 
         // ------------------------------------------------------------ Kazanma

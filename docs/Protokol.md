@@ -24,8 +24,8 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 
 | `t` | Alanlar | Kim, ne zaman |
 |---|---|---|
-| `odaKur` | `isim` | Herkes. Yeni oda açar, gönderen `p1` ve kurucu olur |
-| `katil` | `oda`, `isim`, `anahtar` (ilk girişte `null`) | Oda lobideyse yeni oyuncu olarak girer. Oyun sürüyorsa **bekleme odasına** girer, sonraki oyunda oynar. `anahtar` doğruysa oyun başlamış olsa da **aynı kimlikle geri döner**. Oda kapasitesi (10) bekleyenler dahil |
+| `odaKur` | `isim`, `surum` | Herkes. Yeni oda açar, gönderen `p1` ve kurucu olur |
+| `katil` | `oda`, `isim`, `anahtar` (ilk girişte `null`), `surum` | Oda lobideyse yeni oyuncu olarak girer. Oyun sürüyorsa **bekleme odasına** girer, sonraki oyunda oynar. `anahtar` doğruysa oyun başlamış olsa da **aynı kimlikle geri döner**. Oda kapasitesi (10) bekleyenler dahil |
 | `ayarlar` | `oyun`, `can`, `takimlar`, `mod`, `miniOyun`, `turSayisi`, `soruSn`, `cevapSn`, `hamleSn`, `ceza`, `gorevler`, `kaos`, `paketler` (hepsi isteğe bağlı) | Kurucu, lobide. Sadece gönderilen alanlar değişir |
 | `baslat` | — | Kurucu, lobide, en az 4 oyuncu |
 | `komut` | `tur`, `komut`, + komutun alanları (aşağıda) | Oyunda |
@@ -35,6 +35,8 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 | `tekrarOyna` | — | Kurucu, `oyunSonu`'nda. Oda lobiye döner: bağlı olmayanlar düşer, bekleme odasındakiler oyuncu olur, ayarlar ve atılanların yasağı kalır |
 | `sohbet` | `kime` (`null` ya da yok = genel, `"p3"` = DM, `"takim"` / `"katil"` / `"oluler"` = kanal), `metin` | Odadaki herkes, her an (lobi, oyun, bekleme odası, oyun sonu); Çakmak Gecesi'nde kısıtlı. Aşağıda "Sohbet" |
 | `grupPaketi` | `sorular` (metin dizisi), `ilk` (isteğe bağlı, varsayılan `false`) | Kurucu, lobide. Grubun kendi paketini parça parça yükler. Aşağıda "Grup paketi" |
+
+**Sürüm:** `odaKur` ve `katil`'de istemcinin protokol sürümü, `surum` (bugün `1`). Sunucunun kabul ettiği en eskiden küçükse `GUNCELLE` (oda açılmaz, bağlantı açık kalır): "Oyunu güncelle" ekranı göster. Uyumsuz bir protokol değişikliğinde artar. Şimdilik yollamayan da kabul ediliyor; mağaza build'i mutlaka yollasın.
 
 **Metin temizliği** (isim, soru, sohbet): görünmez ve yön karakterleri atılır, her türlü boşluk tek boşluk olur, baş/son boşluk silinir (`TemizMetin`). Temizlenince boş kalan isim `ISIM_GECERSIZ`, soru ve sohbet `GECERSIZ_GIRDI`. Ekranda hep temizlenmiş hali görünür.
 
@@ -61,7 +63,7 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 - `soruSn`, `cevapSn`, `hamleSn`: `5–300`
 - `ceza`: `"kapali"` (varsayılan) · `"hafif"` · `"cesur"`. Cesur'da Kızgın Çakmak da açık. Temiz modda `"cesur"` olamaz: sonuç Temiz + Cesur olacaksa (hangi sırayla gönderilirse gönderilsin) `GECERSIZ_GIRDI`, önce cezayı düşür
 - `gorevler`, `kaos`: `true` / `false` (varsayılan `false`). "Hızlı başla" istemcide, bu alanları kendisi gönderir
-- `paketler`: paket adları dizisi, dosya adı uzantısız: `["Genel", "Okul"]`. Varsayılan: sunucudaki bütün paketler. Grup paketi yüklendiyse `"@bizim"` de seçilebilir (yüklenmeden `GECERSIZ_GIRDI`; Temiz modda seçili olsa da kullanılmaz). Boş dizi, sunucuda olmayan ya da iki kez yazılan ad `GECERSIZ_GIRDI`. Öneri çek, Curcuna'nın boşlukları ve Kör Soru sadece seçilenlerden çeker. **Çakmak Gecesi'nde paket seçimi kullanılmaz:** öneriler sunucudaki suçlama sorularından (`Assets/Icerik/GeceSorulari.csv`, 40 soru)
+- `paketler`: paket adları dizisi, dosya adı uzantısız: `["Genel", "Okul"]`. Varsayılan: sunucudaki bütün paketler. Grup paketi yüklendiyse `"@bizim"` de seçilebilir (yüklenmeden `GECERSIZ_GIRDI`; Temiz modda seçili olsa da kullanılmaz). Boş dizi, sunucuda olmayan ya da iki kez yazılan ad `GECERSIZ_GIRDI`. Öneri çek, Curcuna'nın boşlukları ve Kör Soru sadece seçilenlerden çeker. **Çakmak Gecesi'nde paket seçimi kullanılmaz:** öneriler sunucudaki suçlama sorularından (`Assets/Icerik/GeceSorulari.csv`, 48 soru)
 
 ### Komutlar
 
@@ -250,6 +252,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 | `OYUN_YOK` | Oyun başlamadan oyun komutu |
 | `ESKI_TUR` | Komuttaki `tur` güncel değil |
 | `COK_HIZLI` | Mesaj sınırı, `odaKur`/`katil` sınırı ya da sohbet sınırı aşıldı. Mesaj **hiç işlenmedi**, biraz bekleyip tekrar gönder |
+| `GUNCELLE` | `odaKur`/`katil`'deki `surum` eski: oyunu güncellemen lazım |
 | `SUNUCU_DOLU` | Sunucudaki oda sayısı sınırda, yeni oda açılamadı. Sonra tekrar dene |
 | `SIRA_SENDE_DEGIL` · `SECILEMEZ` · `YANLIS_ASAMA` · `GECERSIZ_GIRDI` · `HAK_KALMADI` · `HAVUZ_BOS` · `OYUNCU_SAYISI_GECERSIZ` | Kural motorunun `Sonuc` değerleri (`UYGUNSUZ` da öyle, yukarıda) |
 

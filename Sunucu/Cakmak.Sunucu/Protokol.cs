@@ -164,6 +164,13 @@ namespace Cakmak.Sunucu
 
         // ------------------------------------------------------------ Giden mesajlar
 
+        /// <summary>
+        /// İstemcinin `odaKur`/`katil`'de yolladığı `surum` bundan küçükse GUNCELLE. Uyumsuz bir protokol değişikliğinde istemci
+        /// sayıyı artırır, yeni build mağazaya çıkınca burası da artar.
+        /// ponytail: `surum` yollamayan kabul (bugünkü istemci ve botlar yollamıyor); mağaza build'leri hep yollayacak.
+        /// </summary>
+        public const int EnEskiSurum = 1;
+
         public static string Hata(string kod) => Yaz(new JsonObject { ["t"] = "hata", ["kod"] = kod });
 
         /// <summary>Temiz mod: metin gönderilmedi. <c>ihlal</c>: bu odada kaçıncı, <c>sinir</c>'e varınca atılır.</summary>

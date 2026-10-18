@@ -13,6 +13,10 @@ Grupta kim aynı şarkıyı bir hafta boyunca dinler?
 Grupta kim kedi videolarını herkese tek tek atar?
 Kahvaltı sofrasından en son kim kalkar?
 Grupta kim menüye bakarken en çok kararsız kalır?
+Grupta kim alışverişe bir şey almaya gidip on şeyle döner?
+Grupta kim yağmura hep şemsiyesiz yakalanır?
+Grupta kim yeni çıkan her uygulamayı ilk dener?
+Grupta kim tatilde bile sabah erkenden kalkar?
 
 # --- Evde ---
 Bulaşık sırası gelince grupta kim ortadan kaybolur?
@@ -23,6 +27,9 @@ Grupta kim bir saksı çiçeğini bir haftada kurutur?
 Grupta kim yemeğin tadına bakmadan tuz ekler?
 Grupta kim maç izlerken televizyona bağırır?
 Kalabalık sofralarda herkesi en çok kim güldürür?
+Grupta kim sofrada "doydum" deyip tatlıya yer açar?
+Grupta kim misafire en çok ikram eder?
+Grupta kim kaybolan eşyaları hep bulur?
 
 # --- Yetenekler ---
 Grupta en güzel şarkıyı kim söyler?
@@ -36,6 +43,10 @@ Grupta kim doğum günlerini hiç unutmaz?
 Grupta çayı en güzel kim demler?
 Grupta kim tavlada kimseye yenilmez?
 Grupta en güzel hediyeyi kim seçer?
+Grupta en güzel tatlıyı kim yapar?
+Grupta kim pazarda en iyi karpuzu seçer?
+Grupta kim bir oyunun kurallarını en iyi anlatır?
+Grupta kim saklambaçta en iyi saklanır?
 
 # --- Komik anlar ---
 Grupta kim "çekiniz" yazan kapıyı iter?
@@ -50,6 +61,10 @@ Grupta kim oyunda yenilince hemen "bir el daha" der?
 Grupta en çok "ben demiştim" diyen kim?
 Grupta kim örümcek görünce odayı terk eder?
 Lunaparkta en korkunç alete grupta ilk kim biner?
+Grupta kim fotoğraf çekilirken hep gözünü kırpar?
+Grupta kim şarkı sözlerini hep yanlış söyler?
+Grupta kim her şeyin cevabını biliyormuş gibi konuşur?
+Grupta kim bayramda en çok harçlık toplar?
 
 # --- Hayal et ---
 Hep beraber bir sihir okuluna gitseniz ilk gün bir şeyi kim patlatır?
@@ -73,3 +88,8 @@ Grupta en sabırlı kim?
 Grupta kim girdiği her ortamı neşelendirir?
 Grupta kim seni en iyi dinler?
 Grupta kimin kahkahası en bulaşıcı?
+Grupta kim sokaktaki her kediyi sever?
+Grupta kimden en güzel doğum günü sürprizi gelir?
+Grupta kim yolda tanımadığı biriyle en çabuk sohbete başlar?
+Grupta kim en çok soru sorar?
+Grupta kime bir sır versen kimseye söylemez?

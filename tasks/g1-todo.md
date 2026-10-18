@@ -81,7 +81,7 @@ Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hi�
 - [ ] Gizli bilgiler (Vivox anahtarı vb.) sunucuda ortam değişkeninde. Repoya ve Unity build'ine asla girmez
 - [ ] Alan adı
 - [x] **Kurulum denendi (2026-10-13):** `Sunucu/Kurulum/BENIOKU.md`'nin 2. adımı WSL Ubuntu 24.04'te (systemd) birebir uygulandı: servis kum havuzuyla açıldı, oyun, gizlilik ve Temiz filtresi geçti. Rehbere `libicu74` ve `ufw` notu eklendi
-- [ ] Mağazadan önce (S6): istemci–sunucu protokol sürümü kontrolü. Sunucu güncellenince eski build'le bağlanan anlaşılır bir "güncelle" mesajı alsın. Arkadaşlar arası testte gerek yok
+- [x] Mağazadan önce (S6): istemci–sunucu protokol sürümü kontrolü (2026-10-18: `surum`, `GUNCELLE`, `Protokol.EnEskiSurum`; istemci tarafı Arda'da, `g2-mesaj.md`). Sunucu güncellenince eski build'le bağlanan anlaşılır bir "güncelle" mesajı alsın. Arkadaşlar arası testte gerek yok
 
 ## S6 — mağaza ve yasal (mağazadan önce şart)
 

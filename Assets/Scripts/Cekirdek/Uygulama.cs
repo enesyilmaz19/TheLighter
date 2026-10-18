@@ -235,6 +235,7 @@ namespace TheLighter.Istemci
                 Can = ayarlar.Can,
                 // Takım Düellosu: kurulumda dağıtıldıysa (yoksa rastgele). Kimlikler isim sırasıyla: p1 = 1. isim.
                 TakimDagilimi = ayarlar.Oyun == OyunTuru.Takim ? ayarlar.TakimDagilimi : null,
+                Casus = ayarlar.Casus,
                 Mod = ayarlar.Mod,
                 MiniOyun = ayarlar.MiniOyun,
                 TurSayisi = ayarlar.TurSayisi,

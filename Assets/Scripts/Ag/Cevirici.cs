@@ -214,6 +214,7 @@ namespace TheLighter.Ag
             if (!a.Var) return s;
             s.Oyun = Ad<OyunTuru>(a["oyun"].Metin) ?? s.Oyun;
             s.Can = a["can"].TamsayiYa(s.Can);
+            s.Casus = Ad<CasusTuru>(a["casus"].Metin) ?? s.Casus;
             foreach (var t in a["takimlar"].Alanlar)
             {
                 var id = Id(t.Key);
@@ -288,6 +289,13 @@ namespace TheLighter.Ag
                 TetikCeken = Id(m["tetikCeken"]),
                 Final = m["final"].MantikYa(false),
                 TakimPuanlari = SayiListesi(m["takimPuanlari"]),
+
+                // Casus: sır ve mekândaki rol sadece casus olmayanda, liste ve kategori herkeste.
+                Sirrin = sana["sir"].Metin,
+                MekanRolun = sana["mekanRolu"].Metin,
+                CasusListesi = MetinListesi(m["casusListesi"]),
+                CasusKategori = m["casusKategori"].Metin,
+                Yakalanan = Id(m["yakalanan"]),
             };
             return g;
         }
@@ -345,6 +353,14 @@ namespace TheLighter.Ag
                 if (id.HasValue) liste.Add(id.Value);
             }
             return liste;
+        }
+
+        static List<string> MetinListesi(JsonDeger dizi)
+        {
+            var l = new List<string>();
+            foreach (var x in dizi.Elemanlar)
+                if (x.Metin != null) l.Add(x.Metin);
+            return l;
         }
 
         static List<int> SayiListesi(JsonDeger dizi)
@@ -469,6 +485,7 @@ namespace TheLighter.Ag
                 Takim = o["takim"].Tur == JsonTuru.Nesne
                     ? new TakimSonucu { Kazanan = o["takim"]["kazanan"].Tamsayi, Puanlar = SayiListesi(o["takim"]["puanlar"]) }
                     : null,
+                Casus = CasusCoz(o["casus"]),
                 OynananTur = o["oynananTur"].TamsayiYa(0),
                 Oyuncular = oyuncular,
                 Unvanlar = unvanlar,
@@ -476,6 +493,17 @@ namespace TheLighter.Ag
                 IfsaOlanlar = ifsalar,
                 CurcunaSorulari = curcuna,
             };
+        }
+
+        /// <summary><c>ozet.casus</c>: sadece Casus oyununda. Kim, kazanan ya da neden bozuksa null.</summary>
+        static CasusSonucu CasusCoz(JsonDeger c)
+        {
+            if (c.Tur != JsonTuru.Nesne) return null;
+            var kim = Id(c["kim"]);
+            var kazanan = Ad<CasusKazanan>(c["kazanan"].Metin);
+            var neden = Ad<CasusNedeni>(c["neden"].Metin);
+            if (!kim.HasValue || !kazanan.HasValue || !neden.HasValue) return null;
+            return new CasusSonucu { Casus = kim.Value, Kazanan = kazanan.Value, Neden = neden.Value, Sir = c["sir"].Metin, Tahmin = c["tahmin"].Metin };
         }
 
         /// <summary><c>ozet.kostebek</c>: sadece Köstebek oyununda. Kim ya da kazanan bozuksa null.</summary>
@@ -525,11 +553,12 @@ namespace TheLighter.Ag
         public static string AyarDegistir(OyunModu? mod = null, MiniOyunTuru? miniOyun = null, int? turSayisi = null,
             int? soruSn = null, int? cevapSn = null, int? hamleSn = null, CezaSeviyesi? ceza = null,
             bool? gorevler = null, bool? kaos = null, IEnumerable<string> paketler = null, OyunTuru? oyun = null, int? can = null,
-            IReadOnlyDictionary<OyuncuId, int> takimlar = null)
+            IReadOnlyDictionary<OyuncuId, int> takimlar = null, CasusTuru? casus = null)
         {
             var n = new JsonNesne().Ekle("t", "ayarlar");
             if (oyun.HasValue) n.Ekle("oyun", AdYaz(oyun.Value));
             if (can.HasValue) n.Ekle("can", can.Value);
+            if (casus.HasValue) n.Ekle("casus", AdYaz(casus.Value));
             if (takimlar != null)
             {
                 // Boş nesne: rastgele ve dengeli.
@@ -577,6 +606,8 @@ namespace TheLighter.Ag
         public static string TetikCek(int tur) => Yaz(Komut(tur, "tetikCek"));
         /// <summary>Rus Ruleti: tetiği devret (oyun boyu 1 kez).</summary>
         public static string TetikDevret(int tur, OyuncuId hedef) => Yaz(Komut(tur, "tetikDevret").Ekle("hedef", hedef.ToString()));
+        /// <summary>Casus: mekânı (ya da kelimeyi) tahmin et; listeden biri. Yakalanmadan bir kez ya da son şansta.</summary>
+        public static string CasusTahmini(int tur, string tahmin) => Yaz(Komut(tur, "casusTahmini").Ekle("tahmin", tahmin));
         public static string BedelOde(int tur) => Yaz(Komut(tur, "bedelOde"));
         public static string KarariGec(int tur) => Yaz(Komut(tur, "karariGec"));
 

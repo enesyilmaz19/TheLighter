@@ -82,6 +82,8 @@ namespace TheLighter.Ag
         public OyunTuru Oyun = OyunTuru.Cakmak;
         /// <summary>Rus Ruleti: herkesin canı (1–3).</summary>
         public int Can = 1;
+        /// <summary>Casus: mekân ya da kelime (Imposter).</summary>
+        public CasusTuru Casus = CasusTuru.Mekan;
         /// <summary>Takım Düellosu: kurucunun dağılımı (oyuncu → 0 ya da 1). Boş: rastgele ve dengeli.</summary>
         public Dictionary<OyuncuId, int> Takimlar = new Dictionary<OyuncuId, int>();
         public OyunModu Mod = OyunModu.Normal;

@@ -278,6 +278,14 @@ namespace TheLighter.Akis
             return Sonra(oyun.TetikDevret(Ekran.Kime.Value, hedef));
         }
 
+        // ---------- Casus ----------
+
+        /// <summary>
+        /// "Mekânı biliyorum" ya da son şans: <paramref name="kim"/> listeden tahmin eder. Casus değilse kural motoru
+        /// SiraSendeDegil der ve hiçbir şey değişmez (ekran bunu sessizce kapatır, kimse anlamasın).
+        /// </summary>
+        public Sonuc CasusTahmini(OyuncuId kim, string tahmin) => Sonra(oyun.CasusTahmini(kim, tahmin));
+
         public void TartismayiBitir()
         {
             if (Ekran.Tur != EkranTuru.SuclamaTartisma) return;
@@ -417,7 +425,7 @@ namespace TheLighter.Akis
             {
                 foreach (var o in oyuncular)
                 {
-                    if (goreviGorenler.Contains(o.Id) || oyun.GorunumAl(o.Id).Gorevin == null) continue;
+                    if (goreviGorenler.Contains(o.Id) || !KisiyeOzel.RolPerdesiVar(oyun.GorunumAl(o.Id))) continue;
                     e.Kime = o.Id;
                     e.PerdeNedeni = PerdeNedeni.Gorev;
                     string gp = "G|" + o.Id;
@@ -556,6 +564,20 @@ namespace TheLighter.Akis
                     break;
                 }
 
+                case Asama.CasusTahmini:
+                {
+                    // Casus herkese açıldı: perde yok, telefon onda, herkes izler. Saat işler (30 sn).
+                    var yakalanan = acik.Yakalanan;
+                    if (!yakalanan.HasValue)
+                    {
+                        Kur(e, EkranTuru.Bekleniyor, Seyirci(acik), "");
+                        break;
+                    }
+                    Kur(e, EkranTuru.CasusTahmini, GorevsizGorunum(yakalanan.Value), "|" + yakalanan.Value);
+                    e.Kime = yakalanan;
+                    break;
+                }
+
                 case Asama.IkiyeKatla:
                 case Asama.Bedel:
                 {
@@ -618,24 +640,14 @@ namespace TheLighter.Akis
                 if (o.Id != acik.A && o.Id != acik.B && o.Id != acik.C) return GorevsizGorunum(o.Id);
             foreach (var o in oyuncular)
                 if (o.Id != acik.B) return GorevsizGorunum(o.Id);
-            acik.Gorevin = null;
-            acik.Rolun = Rol.Yok;
-            acik.SuclamaHakkin = false;
-            return acik;
+            return KisiyeOzel.Temizle(acik);
         }
 
         /// <summary>
         /// Herkesin baktığı ekran için: kişiye özel olup ekranda durmaması gerekenler (görev, Köstebek'te rol ve suçlama hakkı)
         /// temizlenir. Seyirci köstebek olsa bile ortadaki ekranda bu görünmez.
         /// </summary>
-        Gorunum GorevsizGorunum(OyuncuId id)
-        {
-            var g = oyun.GorunumAl(id);
-            g.Gorevin = null;
-            g.Rolun = Rol.Yok;
-            g.SuclamaHakkin = false;
-            return g;
-        }
+        Gorunum GorevsizGorunum(OyuncuId id) => KisiyeOzel.Temizle(oyun.GorunumAl(id));
 
         /// <summary>Telefon ikisinin arasında duruyor: ekranda kullanılmayan gizli alanlar boşaltılır.</summary>
         static Gorunum Temizle(Gorunum g)
@@ -645,10 +657,7 @@ namespace TheLighter.Akis
             g.Hamlen = null;
             g.Oneri = null;
             g.AtananSoru = null;
-            g.Gorevin = null;
-            g.Rolun = Rol.Yok;
-            g.SuclamaHakkin = false;
-            return g;
+            return KisiyeOzel.Temizle(g);
         }
     }
 }

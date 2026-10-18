@@ -56,6 +56,9 @@ namespace TheLighter.Istemci
             bas.Add(sure);
             Kok.Add(bas);
             if (g.Kaos != KaosKurali.Yok) Kok.Add(Tekrar.KaosSeridi(g.Kaos));
+            // Casus: soru mekâna göre; telefon sende, rolüne dokunarak bakabilirsin.
+            var rolum = Casus.RolumDugmesi(g);
+            if (rolum != null) Kok.Add(rolum);
 
             switch (bicim)
             {

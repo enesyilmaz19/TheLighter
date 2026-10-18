@@ -81,6 +81,29 @@ namespace TheLighter.Tests
                 Assert.IsTrue(t.Var("sohbet.kanal." + k), "Eksik: sohbet.kanal." + k);
         }
 
+        /// <summary>Casus: kazanan, neden ve tür enum'larından üretilen anahtarlar.</summary>
+        [Test]
+        public void MetinTablosunda_CasusAnahtarlariVar()
+        {
+            string yol = Path.Combine("Assets", "UI", "Resources", "TheLighter", "Metinler.csv");
+            var t = MetinTablosu.CsvOku(File.ReadAllText(yol));
+            foreach (CasusKazanan k in Enum.GetValues(typeof(CasusKazanan)))
+                Assert.IsTrue(t.Var("casus.kazanan." + k), "Eksik: casus.kazanan." + k);
+            foreach (CasusNedeni n in Enum.GetValues(typeof(CasusNedeni)))
+                Assert.IsTrue(t.Var("casus.neden." + n), "Eksik: casus.neden." + n);
+            foreach (CasusTuru c in Enum.GetValues(typeof(CasusTuru)))
+            {
+                Assert.IsTrue(t.Var("casus.tur." + c), "Eksik: casus.tur." + c);
+                Assert.IsTrue(t.Var("casus.tur_aciklama." + c), "Eksik: casus.tur_aciklama." + c);
+            }
+            // Köstebek ve Casus aynı oylama ekranını kullanır: "kostebek." anahtarının "casus." karşılığı da olmalı.
+            foreach (var ad in new[] { "kim", "basladi", "sonuc_yanlis", "son_aciklama", "aralik", "oy_aciklama", "bekle" })
+            {
+                Assert.IsTrue(t.Var("kostebek." + ad), "Eksik: kostebek." + ad);
+                Assert.IsTrue(t.Var("casus." + ad), "Eksik: casus." + ad);
+            }
+        }
+
         [Test]
         public void MetinTablosu_HerMetninIngilizcesiVar()
         {

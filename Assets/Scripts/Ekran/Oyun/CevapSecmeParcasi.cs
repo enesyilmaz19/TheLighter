@@ -37,6 +37,8 @@ namespace TheLighter.Istemci
             bas.Add(sure);
             Kok.Add(bas);
             if (g.Kaos != KaosKurali.Yok) Kok.Add(Tekrar.KaosSeridi(g.Kaos));
+            var rolum = Casus.RolumDugmesi(g);
+            if (rolum != null) Kok.Add(rolum);
 
             if (g.Fisilti || g.Soru == null)
             {

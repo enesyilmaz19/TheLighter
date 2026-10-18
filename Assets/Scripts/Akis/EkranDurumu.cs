@@ -51,6 +51,37 @@ namespace TheLighter.Akis
         /// online'da herkes izler, düğmeler sadece çekecek kişide. Süre dolunca tetik kendiliğinden çekilir.
         /// </summary>
         Tetik,
+
+        /// <summary>
+        /// Casus yakalandı, son şansı: listeden mekânı (kelimeyi) seçer, 30 sn. Açık bilgi (casus herkese açıldı): elden elede
+        /// perde yok, telefon casusta; online'da herkes izler, liste sadece casusta seçilir. Saat işler.
+        /// </summary>
+        CasusTahmini,
+    }
+
+    /// <summary>Kişiye özel bilgi: ekranın kimin görünümüyle çizileceği ve oyun başında rol perdesi kimlere gideceği için.</summary>
+    public static class KisiyeOzel
+    {
+        /// <summary>
+        /// Oyun başında telefon (online'da ekran) bu kişiye bir kez rol ya da görev göstermeli mi: gizli görev (Köstebek'te herkeste),
+        /// rol (Köstebek, Casus, Çakmak Gecesi) ya da Casus'un sırrı. Hepsi kural motorunun görünümünden.
+        /// </summary>
+        public static bool RolPerdesiVar(Gorunum g) =>
+            g != null && (g.Gorevin != null || g.Rolun != Rol.Yok || g.Sirrin != null);
+
+        /// <summary>
+        /// Ortadaki (herkesin baktığı) ekran için kişiye özel alanları boşaltır: görev, rol, suçlama hakkı, Casus'un sırrı ve rolü.
+        /// Ekranı çizen görünüm köstebeğin ya da casusun olsa bile ortada bunlar durmaz.
+        /// </summary>
+        public static Gorunum Temizle(Gorunum g)
+        {
+            g.Gorevin = null;
+            g.Rolun = Rol.Yok;
+            g.SuclamaHakkin = false;
+            g.Sirrin = null;
+            g.MekanRolun = null;
+            return g;
+        }
     }
 
     public enum PerdeNedeni

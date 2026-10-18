@@ -144,8 +144,30 @@ namespace TheLighter.Istemci
             Bolum("rus.can_baslik", OyunSecimi.CanSecenekleri, KurulumEkrani.CanYazisi, a => a.Can,
                 c => Gonder(Cevirici.AyarDegistir(can: c)), yer: canBolumu);
             yenileyiciler.Add(a => canBolumu.EnableInClassList("gizli", a.Oyun != OyunTuru.RusRuleti));
+            // Casus: mekân ya da kelime.
+            var casusBolumu = Kutu("ayar-bolumu");
+            ayarKutusu.Add(casusBolumu);
+            Bolum("casus.tur_baslik", OyunSecimi.CasusSecenekleri, c => Metin.Al("casus.tur." + c), a => a.Casus,
+                c => Gonder(Cevirici.AyarDegistir(casus: c)), yer: casusBolumu);
+            var casusAciklama = Yazi("", "ipucu");
+            casusBolumu.Add(casusAciklama);
+            yenileyiciler.Add(a =>
+            {
+                casusBolumu.EnableInClassList("gizli", a.Oyun != OyunTuru.Casus);
+                casusAciklama.text = Metin.Al("casus.tur_aciklama." + a.Casus);
+            });
 
-            Bolum("kurulum.mod", ModSecenekleri, m => Metin.Al("mod.ad." + m), a => a.Mod, ModSec);
+            var modButonlari = Bolum("kurulum.mod", ModSecenekleri, m => Metin.Al("mod.ad." + m), a => a.Mod, ModSec);
+            // Oyuna uymayan mod (Casus'ta Curcuna) kapalı: kural motoruna sorulur.
+            yenileyiciler.Add(a =>
+            {
+                var ka = OyunSecimi.OdadanAyarlar(a);
+                for (int i = 0; i < ModSecenekleri.Length; i++)
+                {
+                    var m = ModSecenekleri[i];
+                    modButonlari[i].SetEnabled(m == a.Mod || OyunSecimi.Uyumlu(ka, x => x.Mod = m));
+                }
+            });
             var modAciklama = Yazi("", "ipucu");
             ayarKutusu.Add(modAciklama);
             yenileyiciler.Add(a => modAciklama.text = Metin.Al("mod.aciklama." + a.Mod));
@@ -526,6 +548,7 @@ namespace TheLighter.Istemci
                     : a.TurSayisi == 0 ? Metin.Al("kurulum.tur_sinirsiz") : Metin.Al("kurulum.tur_sayi", a.TurSayisi),
                 Metin.Al("ceza.seviye." + a.Ceza),
             };
+            if (a.Oyun == OyunTuru.Casus) parca.Insert(1, Metin.Al("casus.tur." + a.Casus));
             if (a.Gorevler || OyunSecimi.GorevlerHerkeste(a.Oyun)) parca.Add(Metin.Al("kurulum.gorevler"));
             if (a.Kaos) parca.Add(Metin.Al("kurulum.kaos"));
             if (grupPaketi > 0 && a.Mod != OyunModu.Temiz && a.Paketler.Contains(PaketBilgisi.Bizim))

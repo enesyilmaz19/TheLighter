@@ -89,7 +89,9 @@ namespace TheLighter.Istemci
                 case Asama.Oylama:
                     return Metin.Al("online.bekle.oylama");
                 case Asama.Suclama:
-                    return Metin.Al(g.SonSuclama ? "kostebek.bekle_son" : "kostebek.bekle");
+                    return g.SonSuclama ? Metin.Al("kostebek.bekle_son") : Kostebek.OylamaMetni(g.Oyun, "bekle");
+                case Asama.CasusTahmini:
+                    return Metin.Al("casus.son_sans_bekle", akis.Isim(g.Yakalanan));
                 default:
                     return Metin.Al("oyun.bekleniyor");
             }

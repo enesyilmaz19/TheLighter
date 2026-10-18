@@ -24,6 +24,9 @@ namespace TheLighter.Testler
         public bool ErkenSuclasin;
         public int OyVerdigiSuclama { get; private set; }
         public int Devretti { get; private set; }
+        /// <summary>Casus: bot casussa ilk soru sırasında "Mekânı biliyorum" desin (testte açılır).</summary>
+        public bool ErkenTahminEtsin;
+        public int TahminEtti { get; private set; }
 
         public DenemeBotu(string isim, int tohum, Func<ITasima> tasima = null)
         {
@@ -70,6 +73,21 @@ namespace TheLighter.Testler
                     foreach (var o in g.Oyuncular)
                         if (o.Id == ben && o.HavuzaEkledigi < Oyun.KisiBasiHavuzSorusu)
                             Yolla(Cevirici.HavuzaEkle(0, Isim + " soruyor: grupta en çok kim güler? (" + o.HavuzaEkledigi + ")"));
+                    break;
+
+                case Asama.SoruSorma when ErkenTahminEtsin && g.Rolun == Rol.Casus && g.CasusListesi.Count > 0 && TahminEtti == 0:
+                    // Casus: "Mekânı biliyorum" (rastgele biri; bilirse kazanır).
+                    Yolla(Cevirici.CasusTahmini(tur, g.CasusListesi[rastgele.Next(g.CasusListesi.Count)]));
+                    TahminEtti++;
+                    break;
+
+                case Asama.CasusTahmini:
+                    // Son şans: sadece casus, listeden rastgele.
+                    if (g.Rolun == Rol.Casus && g.CasusListesi.Count > 0)
+                    {
+                        Yolla(Cevirici.CasusTahmini(tur, g.CasusListesi[rastgele.Next(g.CasusListesi.Count)]));
+                        TahminEtti++;
+                    }
                     break;
 
                 case Asama.SoruSorma:

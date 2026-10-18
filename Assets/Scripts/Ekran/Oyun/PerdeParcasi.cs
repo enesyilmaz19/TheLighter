@@ -66,7 +66,7 @@ namespace TheLighter.Istemci
                     Kok.Add(Yazi(Metin.Al("perde.oy", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
                     break;
                 case PerdeNedeni.Suclama:
-                    Kok.Add(Yazi(Metin.Al("perde.suclama", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    Kok.Add(Yazi(Metin.Al(g.Oyun == OyunTuru.Casus ? "casus.perde_suclama" : "perde.suclama", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
                     break;
                 default:
                     string a = akis.Isim(g.A);

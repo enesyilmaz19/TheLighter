@@ -1213,3 +1213,47 @@
 .kok .lobi-rozet.takim-1 {
     color: var(--takim-1);
 }
+
+/* ---------- Casus ---------- */
+.casus-seridi {
+    padding: 12px 56px 0 56px;
+    align-items: center;
+}
+
+.unity-button.buton-casus {
+    background-color: var(--alev-koyu);
+    color: var(--alev-acik);
+    border-color: var(--alev);
+    border-width: 3px;
+}
+
+.casus-liste {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.unity-button.casus-oge {
+    min-height: 88px;
+    font-size: 36px;
+    margin: 6px 12px 6px 0;
+    padding: 12px 24px;
+}
+
+/* "Bu olamaz": sadece bu cihazda */
+.unity-button.casus-oge.casus-isaretli {
+    opacity: 0.35;
+    background-color: var(--arka);
+}
+
+.kok .casus-salt {
+    background-color: var(--yuzey);
+    border-radius: 20px;
+    padding: 12px 24px;
+    margin: 6px 12px 6px 0;
+    font-size: 36px;
+}
+
+.casus-rolum {
+    align-items: flex-start;
+    margin: 8px 0;
+}

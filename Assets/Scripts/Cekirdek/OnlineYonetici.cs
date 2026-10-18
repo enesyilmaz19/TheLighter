@@ -218,6 +218,7 @@ namespace TheLighter.Istemci
                 Oyun = a.Oyun,
                 Can = a.Can,
                 TakimDagilimi = a.Takimlar.Count > 0 ? new Dictionary<OyuncuId, int>(a.Takimlar) : null,
+                Casus = a.Casus,
                 Mod = a.Mod,
                 MiniOyun = a.MiniOyun,
                 TurSayisi = a.TurSayisi,

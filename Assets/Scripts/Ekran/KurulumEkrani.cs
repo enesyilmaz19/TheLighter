@@ -41,6 +41,9 @@ namespace TheLighter.Istemci
         readonly List<Button> oyunButonlari = new List<Button>();
         readonly List<Button> canButonlari = new List<Button>();
         readonly VisualElement canBolumu;
+        readonly List<Button> casusButonlari = new List<Button>();
+        readonly VisualElement casusBolumu;
+        readonly Label casusAciklama;
         readonly VisualElement turBolumu;
         readonly Label turYok;
         readonly List<Button> modButonlari = new List<Button>();
@@ -74,6 +77,7 @@ namespace TheLighter.Istemci
             {
                 Oyun = son.Oyun,
                 Can = son.Can,
+                Casus = son.Casus,
                 Mod = son.Mod,
                 MiniOyun = son.MiniOyun,
                 TurSayisi = son.TurSayisi,
@@ -109,6 +113,13 @@ namespace TheLighter.Istemci
             canBolumu.Add(Yazi(Metin.Al("rus.can_baslik"), "alt-baslik"));
             canBolumu.Add(Secenekler(OyunSecimi.CanSecenekleri, CanYazisi, c => ayarlar.Can = c, canButonlari));
             kaydirma.Add(canBolumu);
+            // Casus: mekân ya da kelime (Imposter).
+            casusBolumu = Kutu("ayar-bolumu");
+            casusBolumu.Add(Yazi(Metin.Al("casus.tur_baslik"), "alt-baslik"));
+            casusBolumu.Add(Secenekler(OyunSecimi.CasusSecenekleri, c => Metin.Al("casus.tur." + c), c => ayarlar.Casus = c, casusButonlari));
+            casusAciklama = Yazi("", "ipucu");
+            casusBolumu.Add(casusAciklama);
+            kaydirma.Add(casusBolumu);
 
             kaydirma.Add(Yazi(Metin.Al("kurulum.baslik"), "baslik"));
             kaydirma.Add(Yazi(Metin.Al("kurulum.aciklama", EnAz, EnFazla), "aciklama"));
@@ -260,6 +271,10 @@ namespace TheLighter.Istemci
             canBolumu.EnableInClassList("gizli", ayarlar.Oyun != OyunTuru.RusRuleti);
             for (int i = 0; i < OyunSecimi.CanSecenekleri.Length; i++)
                 canButonlari[i].EnableInClassList("secili", OyunSecimi.CanSecenekleri[i] == ayarlar.Can);
+            casusBolumu.EnableInClassList("gizli", ayarlar.Oyun != OyunTuru.Casus);
+            for (int i = 0; i < OyunSecimi.CasusSecenekleri.Length; i++)
+                casusButonlari[i].EnableInClassList("secili", OyunSecimi.CasusSecenekleri[i] == ayarlar.Casus);
+            casusAciklama.text = Metin.Al("casus.tur_aciklama." + ayarlar.Casus);
             bool turYokMu = OyunSecimi.TurSayisiYok(ayarlar.Oyun);
             turBolumu.EnableInClassList("gizli", turYokMu);
             turYok.EnableInClassList("gizli", !turYokMu);
@@ -267,7 +282,12 @@ namespace TheLighter.Istemci
             TakimlariCiz();
 
             for (int i = 0; i < ModSecenekleri.Length; i++)
-                modButonlari[i].EnableInClassList("secili", ModSecenekleri[i] == ayarlar.Mod);
+            {
+                var m = ModSecenekleri[i];
+                modButonlari[i].EnableInClassList("secili", m == ayarlar.Mod);
+                // Oyuna uymayan mod (Casus'ta Curcuna) kapalı: kural motoruna sorulur.
+                modButonlari[i].SetEnabled(m == ayarlar.Mod || OyunSecimi.Uyumlu(ayarlar, a => a.Mod = m));
+            }
             modAciklama.text = Metin.Al("mod.aciklama." + ayarlar.Mod);
             for (int i = 0; i < MiniSecenekleri.Length; i++)
                 miniButonlari[i].EnableInClassList("secili", MiniSecenekleri[i] == ayarlar.MiniOyun);

@@ -17,12 +17,20 @@ namespace SunucuTestleri
             ("Sinirlar:MesajSaniyede", "100000"), ("Sinirlar:MesajPatlama", "100000"), ("Sinirlar:SohbetPatlama", "100000"));
 
         [OneTimeTearDown]
-        public void Kaldir() => Fabrika?.Dispose();
+        public void Kaldir()
+        {
+            Fabrika?.Dispose();
+            if (Directory.Exists(ModerasyonKlasoru)) Directory.Delete(ModerasyonKlasoru, true);
+        }
+
+        /// <summary>Raporlar ve IP yasağı testte geçici bir klasörde (sunucunun klasörüne yazılmasın).</summary>
+        public static string ModerasyonKlasoru { get; } = Path.Combine(Path.GetTempPath(), "cakmak-test-" + Guid.NewGuid().ToString("N"));
 
         /// <summary>Verilen ayarlarla süreç içi sunucu (ayar adları: Protokol.md, "Sınırlar").</summary>
         public static WebApplicationFactory<Program> Sunucu(params (string ad, string deger)[] ayarlar) =>
             new WebApplicationFactory<Program>().WithWebHostBuilder(b =>
             {
+                b.UseSetting("Moderasyon:Klasor", ModerasyonKlasoru);
                 foreach (var (ad, deger) in ayarlar) b.UseSetting(ad, deger);
             });
     }

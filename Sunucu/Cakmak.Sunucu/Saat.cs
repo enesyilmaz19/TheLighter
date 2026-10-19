@@ -11,11 +11,13 @@ namespace Cakmak.Sunucu
     sealed class Saat : BackgroundService
     {
         readonly OdaYoneticisi odalar;
+        readonly Moderasyon moderasyon;
         readonly ILogger<Saat> log;
 
-        public Saat(OdaYoneticisi odalar, ILogger<Saat> log)
+        public Saat(OdaYoneticisi odalar, Moderasyon moderasyon, ILogger<Saat> log)
         {
             this.odalar = odalar;
+            this.moderasyon = moderasyon;
             this.log = log;
         }
 
@@ -23,12 +25,18 @@ namespace Cakmak.Sunucu
         {
             using var zamanlayici = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
             var kronometre = Stopwatch.StartNew();
+            var temizlik = Stopwatch.StartNew();
             try
             {
                 while (await zamanlayici.WaitForNextTickAsync(iptal))
                 {
                     var gecen = kronometre.Elapsed;
                     kronometre.Restart();
+                    if (temizlik.Elapsed > TimeSpan.FromHours(1))
+                    {
+                        temizlik.Restart();
+                        moderasyon.EskileriSil(DateTime.UtcNow);
+                    }
                     foreach (var oda in odalar.Odalar)
                     {
                         try

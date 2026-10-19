@@ -85,7 +85,8 @@ Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hi�
 
 ## S6 — mağaza ve yasal (mağazadan önce şart)
 
-- [ ] Google Play kullanıcı içeriği: içerik yazmadan önce kullanım şartları kabulü · şartlarda yasak içerik tanımı · uygulama içi rapor + engelleme · sürekli moderasyon (Temiz filtresi + rapor + engelleme planda var)
+- [x] **Rapor ve engelleme, sunucu (2026-10-19, Enes'in kararları):** `rapor` raporlayanın gördüğü son 50 metni (sohbet + ifşa olan sorular; güme giden hiç tutulmaz) `Moderasyon` ile `raporlar/yyyy-MM-dd.jsonl`'e yazar, 30 gün; IP yasak listesi `yasakli-ip.txt` (yeniden başlatmasız). `engelle` oda boyunca, isme bağlı, sunucu uygular. VPS: `StateDirectory=/var/lib/cakmak` (ProtectSystem=strict yüzünden şarttı). 8 sunucu testi, 15 bilerek bozmanın hepsi yakalandı. Ekran Arda'da (`g2-android.md` 6)
+- [ ] Google Play kullanıcı içeriği: içerik yazmadan önce kullanım şartları kabulü (metni Enes yazar, ekranı Arda) · şartlarda yasak içerik tanımı · raporlara düzenli bakmak (sürekli moderasyon)
 - [ ] Play formları: gizlilik politikası linki · Veri Güvenliği formu · içerik derecelendirme anketi (kullanıcı içeriği: evet). 13+ olduğu için Families programına girmiyor
 - [ ] KVKK aydınlatma metni (VERBİS'ten muaf olsa da zorunlu). Toplanan veri az: isim, IP, rapor gelirse son 50 mesaj. Kesin hüküm için bir hukukçuya danışılmalı
 

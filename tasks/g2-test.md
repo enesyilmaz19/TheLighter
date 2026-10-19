@@ -43,7 +43,7 @@ Her görev dosyasının sonundaki "Testler" ve "Bitti ölçütü" bölümleri o 
   dotnet test Sunucu/SunucuTestleri
   ```
 
-  Bugün 365 ve 192, hepsi yeşil. Sen kurallara dokunmuyorsun; kırmızı görürsen G1'e yaz.
+  Bugün 365 ve 193, hepsi yeşil. Sen kurallara dokunmuyorsun; kırmızı görürsen G1'e yaz.
 
 ## 2. Oyun denemeleri (elle)
 

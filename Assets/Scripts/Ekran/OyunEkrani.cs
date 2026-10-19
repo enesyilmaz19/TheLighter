@@ -36,6 +36,8 @@ namespace TheLighter.Istemci
         readonly SohbetPaneli sohbet;
         readonly Button sohbetDugmesi;
         readonly OyuncuSutunu oyuncuSutunu;
+        /// <summary>Casus: liste, rolüm (online), "Mekânı biliyorum". Diğer oyunlarda null.</summary>
+        readonly CasusSeridi casusSeridi;
         float bildirimKalan;
         float buradayimBekle;
         /// <summary>Online: biten "kim?" oylamasının sonucu, sonraki durum gelince duyurulur (oyun bittiyse açılış gösterir).</summary>
@@ -82,6 +84,12 @@ namespace TheLighter.Istemci
             ustCubuk.Add(Buton(Metin.Al("oyun.menu"), MenuyuAc, "buton-kucuk"));
             Kok.Add(ustCubuk);
 
+            if (akis.Ayarlar.Oyun == OyunTuru.Casus)
+            {
+                casusSeridi = new CasusSeridi(akis);
+                Kok.Add(casusSeridi.Cubuk);
+            }
+
             bildirim = Yazi("", "bildirim", "gizli");
             Kok.Add(bildirim);
 
@@ -112,6 +120,7 @@ namespace TheLighter.Istemci
             onayPerdesi = Kutu("menu-perde", "gizli");
             Kok.Add(onayPerdesi);
             if (sohbet != null) Kok.Add(sohbet.Kok);
+            if (casusSeridi != null) Kok.Add(casusSeridi.Perde);
 
             if (onlineAkis != null)
                 Kok.RegisterCallback<PointerDownEvent>(_ => { if (onlineAkis.BenAfkyim) Buradayim(); }, TrickleDown.TrickleDown);
@@ -130,8 +139,9 @@ namespace TheLighter.Istemci
             if (suclamaBitti && akis.Ekran.Gorunum != null && akis.Ekran.Gorunum.Asama != Asama.Suclama)
             {
                 // Oyun sürüyorsa suçlanan köstebek değildi; bittiyse oyun sonu açılışı söyler.
+                // Casus yakalandıysa son şans ekranı kendisi söyler.
                 suclamaBitti = false;
-                if (!akis.Bitti) Bildir(Kostebek.SonucMetni(akis, suclanan));
+                if (!akis.Bitti && akis.Ekran.Gorunum.Asama != Asama.CasusTahmini) Bildir(Kostebek.SonucMetni(akis, suclanan));
             }
             if (bildirimKalan > 0)
             {
@@ -204,7 +214,7 @@ namespace TheLighter.Istemci
             switch (o.Olay.Tur)
             {
                 case OlayTuru.SuclamaBasladi:
-                    Bildir(o.Kim.HasValue ? Metin.Al("kostebek.erken_yapti", kim) : Metin.Al("kostebek.basladi"));
+                    Bildir(o.Kim.HasValue ? Metin.Al("kostebek.erken_yapti", kim) : Kostebek.OylamaMetni(akis.Ayarlar.Oyun, "basladi"));
                     break;
                 case OlayTuru.SuclamaBitti:
                     suclamaBitti = true;
@@ -225,6 +235,9 @@ namespace TheLighter.Istemci
                     break;
                 case OlayTuru.FinalBasladi:
                     Bildir(Metin.Al("rus.final"));
+                    break;
+                case OlayTuru.CasusYakalandi:
+                    Bildir(Metin.Al("casus.yakalandi", kim));
                     break;
                 case OlayTuru.DuelloPuani:
                 case OlayTuru.IfsaBonusu:
@@ -267,6 +280,7 @@ namespace TheLighter.Istemci
             govde.Add(parca.Kok);
             parca.Guncelle(e);
 
+            casusSeridi?.Guncelle(e);
             // Elden ele mini oyunda ekranın üst yarısı ters döndüğü için üst çubuk gizlenir.
             ustCubuk.EnableInClassList("gizli", (!akis.Online && e.Tur == EkranTuru.MiniOyun) || e.Tur == EkranTuru.OyunSonu);
             var g = e.Gorunum;
@@ -305,6 +319,7 @@ namespace TheLighter.Istemci
                 case EkranTuru.SuclamaTartisma: return new SuclamaTartismaParcasi(akis, e);
                 case EkranTuru.Suclama: return new SuclamaParcasi(akis, e);
                 case EkranTuru.Tetik: return new TetikParcasi(akis, e);
+                case EkranTuru.CasusTahmini: return new CasusTahminiParcasi(akis, e);
                 case EkranTuru.Karar: return new KararParcasi(akis, e);
                 case EkranTuru.OyunSonu: return new OyunSonuParcasi(uygulama, akis, e, online);
                 default: return akis.Online ? (IOyunParcasi)new OnlineBekleParcasi(akis, e) : new BekleParcasi();
@@ -360,7 +375,7 @@ namespace TheLighter.Istemci
         }
 
         /// <summary>Köstebek'te "Oyunu bitir" önce son oylamayı açar (kural motoru): düğme bunu söyler.</summary>
-        string BitirAnahtari => akis.Ayarlar.Oyun == OyunTuru.Kostebek ? "kostebek.bitir" : "oyun.bitir";
+        string BitirAnahtari => akis.Ayarlar.Oyun == OyunTuru.Kostebek || akis.Ayarlar.Oyun == OyunTuru.Casus ? "kostebek.bitir" : "oyun.bitir";
 
         /// <summary>Online, sadece kurucu: oyun biter, oyun sonu beklenmeden herkes lobiye döner.</summary>
         void LobiyeDon()

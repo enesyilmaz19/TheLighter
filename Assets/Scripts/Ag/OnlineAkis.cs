@@ -122,8 +122,8 @@ namespace TheLighter.Ag
             e.Gorunum = g;
             string tur = "|" + g.Tur + "|" + g.A + "|" + g.B + "|" + g.C;
 
-            // Gizli görev: oyunun başında bir kez, kendi ekranında (Ana Plan 8.2). Sıra bekletmez.
-            if (g.Gorevin != null && !goreviGordum && g.Asama != Asama.OyunSonu)
+            // Gizli görev ve rol (Köstebek, Casus): oyunun başında bir kez, kendi ekranında (Ana Plan 8.2). Sıra bekletmez.
+            if (KisiyeOzel.RolPerdesiVar(g) && !goreviGordum && g.Asama != Asama.OyunSonu)
             {
                 Kur(e, EkranTuru.GorevGoster, "gorev");
                 e.Kime = ben;
@@ -215,6 +215,12 @@ namespace TheLighter.Ag
                     // Herkes izler (açık bilgi); düğmeler sadece tetiği çekecek kişide (ekran Kime == Ben'e bakar).
                     Kur(e, EkranTuru.Tetik, tur + "|" + g.TetikCeken);
                     e.Kime = g.TetikCeken;
+                    break;
+
+                case Asama.CasusTahmini:
+                    // Casus herkese açıldı: herkes izler, liste sadece casusta seçilir (ekran Kime == Ben'e bakar).
+                    Kur(e, EkranTuru.CasusTahmini, tur + "|" + g.Yakalanan);
+                    e.Kime = g.Yakalanan;
                     break;
 
                 case Asama.IkiyeKatla:
@@ -342,6 +348,18 @@ namespace TheLighter.Ag
         public Sonuc TetikCek() => Yolla(Cevirici.TetikCek(Tur));
 
         public Sonuc TetikDevret(OyuncuId hedef) => Yolla(Cevirici.TetikDevret(Tur, hedef));
+
+        /// <summary>
+        /// Casus: sadece casussam (görünümde rolüm) gider. Casus olmayan "Mekânı biliyorum"a bassa da hiçbir şey gönderilmez,
+        /// Tamam döner: ekran herkeste aynı kapanır, kimse düğmeden anlamasın.
+        /// </summary>
+        public Sonuc CasusTahmini(OyuncuId kim, string tahmin)
+        {
+            var g = durum?.Gorunum;
+            if (g == null || !istemci.Sen.HasValue || kim != istemci.Sen.Value) return Sonuc.SiraSendeDegil;
+            if (g.Rolun != Rol.Casus || g.Oyun != OyunTuru.Casus) return Sonuc.Tamam;
+            return Yolla(Cevirici.CasusTahmini(Tur, tahmin ?? ""));
+        }
 
         /// <summary>Kurucu, oyun sonunda: oda lobiye döner.</summary>
         public Sonuc TekrarOyna() => Kurucuyum ? Yolla(Cevirici.TekrarOyna()) : Sonuc.SiraSendeDegil;

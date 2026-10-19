@@ -77,6 +77,15 @@ namespace TheLighter.Akis
         /// <summary>Tetiği <paramref name="hedef"/>'e devreder (oyun boyu 1 kez).</summary>
         Sonuc TetikDevret(OyuncuId hedef);
 
+        // --- Casus (docs/Oyunlar.md, 4) ---
+
+        /// <summary>
+        /// Casusun tahmini: "Mekânı biliyorum" ya da son şans. <paramref name="kim"/>: elden elede telefonu tutan, online'da ben.
+        /// Casus olmayan da basabilir (kimse düğmeden anlamasın): o zaman hiçbir şey olmaz. Elden elede kural motoru
+        /// SiraSendeDegil döner; online'da hiç gönderilmez, Tamam döner.
+        /// </summary>
+        Sonuc CasusTahmini(OyuncuId kim, string tahmin);
+
         // --- Yardımcılar ---
 
         /// <summary>Renk numarası (renk listesindeki sıra).</summary>

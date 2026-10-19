@@ -293,6 +293,86 @@ namespace TheLighter.Testler
             foreach (var b in botlar) b.Istemci.Ayril();
         }
 
+        /// <summary>
+        /// Casus (tasks/g2-casus.md 4, 5): iki oyun. İlki mekânla, casus "Mekânı biliyorum" der; ikincisi kelimeyle, tur bitince
+        /// son oylama (yakalanırsa son şans). Hiçbir durumda casusa sır gelmez; özet ikisinde de dolu.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator DortBot_Casus_BiliyorumVeSonOylama()
+        {
+            var botlar = new List<DenemeBotu>();
+            for (int i = 0; i < 4; i++) botlar.Add(new DenemeBotu("Cs" + (i + 1), 5000 + i));
+            var kurucu = botlar[0];
+            var olaylar = new List<OlayMesaji>();
+            kurucu.Istemci.OlayGeldi += olaylar.Add;
+            int casusaSirGeldi = 0;
+            foreach (var b in botlar)
+                b.Istemci.DurumGeldi += d =>
+                {
+                    var g = d.Gorunum;
+                    if (g != null && g.Rolun == Rol.Casus && (g.Sirrin != null || g.MekanRolun != null)) casusaSirGeldi++;
+                };
+            var saat = Stopwatch.StartNew();
+            double son = 0;
+
+            IEnumerator Bekle(Func<bool> kosul, double sn, string ne)
+            {
+                double bitis = saat.Elapsed.TotalSeconds + sn;
+                while (!kosul())
+                {
+                    double g = saat.Elapsed.TotalSeconds - son;
+                    son = saat.Elapsed.TotalSeconds;
+                    foreach (var b in botlar) b.Guncelle(g);
+                    if (kurucu.Istemci.Durum == BaglantiDurumu.Kapali) Assert.Ignore("Yerel sunucu çalışmıyor.");
+                    if (saat.Elapsed.TotalSeconds > bitis)
+                        Assert.Fail(ne + " olmadı: " + string.Join(", ", botlar.Select(b => b.Isim + "=" + (b.Istemci.SonDurum?.ToString() ?? "-") + " " + b.SonHata)));
+                    yield return null;
+                }
+            }
+
+            kurucu.Istemci.OdaKur(Adres, kurucu.Isim);
+            yield return Bekle(() => kurucu.Istemci.Durum == BaglantiDurumu.Odada, 10, "Oda kurma");
+            for (int i = 1; i < 4; i++) botlar[i].Istemci.Katil(Adres, kurucu.Istemci.Oda, botlar[i].Isim);
+            yield return Bekle(() => kurucu.Istemci.SonDurum?.Oyuncular.Count == 4, 10, "Katılma");
+
+            // 1. oyun: mekân, casus ilk fırsatta "Mekânı biliyorum".
+            foreach (var b in botlar) b.ErkenTahminEtsin = true;
+            kurucu.Istemci.Gonder(Cevirici.AyarDegistir(oyun: OyunTuru.Casus, casus: CasusTuru.Mekan, mod: OyunModu.Normal,
+                ceza: CezaSeviyesi.Kapali, gorevler: false, kaos: false, soruSn: 10, cevapSn: 10, hamleSn: 5,
+                miniOyun: MiniOyunTuru.Zar, turSayisi: 4));
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Ayarlar?.Oyun == OyunTuru.Casus
+                && b.Istemci.SonDurum.Ayarlar.TurSayisi == 4), 10, "Casus ayarı herkese");
+            kurucu.Istemci.Gonder(Cevirici.Baslat());
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Yer == OdaYeri.Oyun), 10, "Başlama");
+            Assert.That(botlar.Count(b => b.Istemci.SonDurum.Gorunum.Rolun == Rol.Casus), Is.EqualTo(1), "tek casus");
+            Assert.That(botlar.All(b => b.Istemci.SonDurum.Gorunum.CasusListesi.Count > 0), Is.True, "liste herkeste");
+            yield return Bekle(() => botlar.All(b => b.OyunBitti), 120, "1. oyunun bitmesi");
+            var c1 = kurucu.Istemci.SonDurum.Ozet?.Casus;
+            Assert.That(c1, Is.Not.Null, "özette Casus");
+            Assert.That(c1.Neden, Is.EqualTo(CasusNedeni.Bildi).Or.EqualTo(CasusNedeni.YanlisTahmin), "Mekânı biliyorum ile bitti");
+            Assert.That(c1.Tahmin, Is.Not.Null);
+            Assert.That(olaylar.Any(o => o.Olay != null && o.Olay.Tur == OlayTuru.CasusTahminEtti), Is.True);
+
+            // 2. oyun: kelime, erken tahmin yok; tur bitince son oylama.
+            foreach (var b in botlar) b.ErkenTahminEtsin = false;
+            kurucu.Istemci.Gonder(Cevirici.TekrarOyna());
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Yer == OdaYeri.Lobi), 10, "Lobiye dönüş");
+            kurucu.Istemci.Gonder(Cevirici.AyarDegistir(casus: CasusTuru.Kelime));
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Ayarlar?.Casus == CasusTuru.Kelime), 10, "Kelime ayarı herkese");
+            kurucu.Istemci.Gonder(Cevirici.Baslat());
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Yer == OdaYeri.Oyun && b.Istemci.SonDurum.Gorunum != null
+                && b.Istemci.SonDurum.Gorunum.Asama != Asama.OyunSonu), 10, "2. oyunun başlaması");
+            Assert.That(botlar.All(b => b.Istemci.SonDurum.Gorunum.CasusKategori != null), Is.True, "kelimede kategori herkeste");
+            yield return Bekle(() => botlar.All(b => b.OyunBitti), 300, "2. oyunun bitmesi");
+            var c2 = kurucu.Istemci.SonDurum.Ozet?.Casus;
+            Assert.That(c2, Is.Not.Null);
+            Assert.That(c2.Neden, Is.Not.EqualTo(CasusNedeni.Bildi).And.Not.EqualTo(CasusNedeni.YanlisTahmin), "erken tahmin yoktu");
+            Assert.That(olaylar.Any(o => o.Olay != null && o.Olay.Tur == OlayTuru.SuclamaBasladi), Is.True, "son oylama oldu");
+
+            Assert.That(casusaSirGeldi, Is.EqualTo(0), "casusa sır hiçbir durumda gelmez");
+            foreach (var b in botlar) b.Istemci.Ayril();
+        }
+
         [UnityTest]
         public IEnumerator UygulamayaDonunce_YenidenBaglanir_AyniIsimleOdada()
         {

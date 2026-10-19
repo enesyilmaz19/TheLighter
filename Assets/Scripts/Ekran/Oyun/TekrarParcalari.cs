@@ -223,20 +223,30 @@ namespace TheLighter.Istemci
         public GorevParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             var g = e.Gorunum;
+            // Casus: görev yok, rol kartı (mekân ve rol, ya da "Casussun").
+            bool casus = g.Oyun == OyunTuru.Casus;
             Kok = Kutu("parca", "perde");
-            Kok.Add(Yazi(Metin.Al("gorev.baslik", akis.Isim(g.Sen)), "baslik"));
+            Kok.Add(Yazi(Metin.Al(casus ? "casus.rol_baslik" : "gorev.baslik", akis.Isim(g.Sen)), "baslik"));
             Kok.Add(Esnek());
             // Köstebek: görevle birlikte rol. Herkese aynı biçimde (köstebek olmayana "değilsin").
-            bool rollu = g.Oyun == OyunTuru.Kostebek;
-            if (rollu) Kok.Add(Kostebek.RolBasligi(g));
-            var kart = Kutu("gorev-karti");
-            if (g.Gorevin != null)
+            bool rollu = g.Oyun == OyunTuru.Kostebek || casus;
+            if (g.Oyun == OyunTuru.Kostebek) Kok.Add(Kostebek.RolBasligi(g));
+            if (casus)
             {
-                kart.Add(Yazi(Metin.Al("zorluk." + g.Gorevin.Zorluk), "gorev-zorluk"));
-                kart.Add(Yazi(Tekrar.GorevMetni(akis, g.Gorevin), "gorev-metin"));
+                Kok.Add(Casus.RolKarti(g));
+                Kok.Add(Yazi(Metin.Al("casus.rol_ipucu"), "aciklama", "orta"));
             }
-            Kok.Add(kart);
-            Kok.Add(Yazi(Metin.Al("gorev.aciklama"), "aciklama", "orta"));
+            else
+            {
+                var kart = Kutu("gorev-karti");
+                if (g.Gorevin != null)
+                {
+                    kart.Add(Yazi(Metin.Al("zorluk." + g.Gorevin.Zorluk), "gorev-zorluk"));
+                    kart.Add(Yazi(Tekrar.GorevMetni(akis, g.Gorevin), "gorev-metin"));
+                }
+                Kok.Add(kart);
+                Kok.Add(Yazi(Metin.Al("gorev.aciklama"), "aciklama", "orta"));
+            }
             Kok.Add(Esnek());
             // Online'da telefon elden ele dolaşmıyor: "telefonu ver" demez.
             var tamam = Buton(Metin.Al(akis.Online ? "gorev.gordum_online" : "gorev.gordum"), akis.GorevGordum, "buton-birincil", "buton-buyuk");

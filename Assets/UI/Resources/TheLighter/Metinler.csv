@@ -589,3 +589,59 @@ hata.GUNCELLE,Oyunun bu sürümü eski: online için güncellemen lazım.,This v
 guncelle.baslik,Oyunu güncelle,Update the game
 guncelle.aciklama,"Sunucu yeni bir sürüme geçti, bu sürümle online oynanamıyor. Oyunun son sürümünü indir. Elden ele oynamaya devam edebilirsin.","The server moved to a new version, so this one can't play online. Download the latest version of the game. You can keep playing pass-and-play."
 guncelle.elden_ele,Elden ele oyna,Play pass-and-play
+casus.kim,Casus kim?,Who's the spy?
+casus.basladi,Casus kim? Oylama başladı.,Who's the spy? The vote has started.
+casus.sonuc_yanlis,{0} suçlandı… casus değildi! Artık şüpheli.,{0} was accused… not the spy! Now a suspect.
+casus.son_aciklama,"Oyun bitiyor. Casus şimdi yakalanmazsa kazanır, yakalanırsa son bir tahmin hakkı var.","The game is ending. If the spy isn't caught now, they win; if caught, they get one last guess."
+casus.aralik,Her {0} turda bir oylama.,A vote every {0} rounds.
+casus.oy_aciklama,Casus olduğunu düşündüğün kişiyi seç. En çok oyu alan suçlanır.,Pick who you think is the spy. The one with the most votes is accused.
+casus.bekle,Casus kim? Oylar toplanıyor,Who's the spy? Collecting votes
+casus.perde_suclama,Casus oylaması: oy verme sırası {1},Spy vote: {0}'s turn to vote
+casus.rol_baslik,"{0}, rolün","{0}, your role"
+casus.rol_ipucu,Kimseye söyleme. Sorular buna göre sorulacak.,Don't tell anyone. Questions will be about this.
+casus.rol_sen,Casussun!,You're the spy!
+casus.mekani_bilmiyorsun,Mekânı bilmiyorsun.,You don't know the location.
+casus.rol_sen_aciklama,"Sorulardan mekânı anla, belli etme. İstediğin an ""Mekânı biliyorum"" de.","Figure out the location from the questions without giving yourself away. Say ""I know the location"" any time."
+casus.rol_sen_aciklama_kelime,"Sorulardan kelimeyi anla, belli etme. İstediğin an ""Kelimeyi biliyorum"" de.","Figure out the word from the questions without giving yourself away. Say ""I know the word"" any time."
+casus.kategori,Kategori: {0},Category: {0}
+casus.rolun,Rolün: {0},Your role: {0}
+casus.rol_degil_aciklama,Aranızda mekânı bilmeyen bir casus var. Onu bul ama mekânı ele verme.,There's a spy among you who doesn't know the location. Find them without giving the location away.
+casus.rol_degil_aciklama_kelime,Aranızda kelimeyi bilmeyen bir casus var. Onu bul ama kelimeyi ele verme.,There's a spy among you who doesn't know the word. Find them without giving the word away.
+casus.rolume_bak,Rolüme bak,Show my role
+casus.rolu_gizle,Rolümü gizle,Hide my role
+casus.rolum,Rolüm,My role
+casus.liste,Liste,List
+casus.liste_mekanlar,Mekânlar,Locations
+casus.liste_kategori,Kategori: {0},Category: {0}
+casus.isaret_ipucu,"Dokun: ""bu olamaz"" diye üstünü çiz. Sadece sen görürsün.","Tap to cross out: ""can't be this"". Only you see it."
+casus.biliyorum,Mekânı biliyorum,I know the location
+casus.biliyorum_kelime,Kelimeyi biliyorum,I know the word
+casus.kim_basti,Kim bastı?,Who pressed it?
+casus.kim_basti_ipucu,Basan kendi adını seçsin.,Whoever pressed it picks their own name.
+casus.hangisi,Mekân hangisi?,Which location?
+casus.hangisi_kelime,Kelime hangisi?,Which word?
+casus.emin_misin,{0}. Emin misin?,{0}. Are you sure?
+casus.emin_ipucu,Tek hakkın var: yanlışsa kaybedersin.,You only get one try: if you're wrong you lose.
+casus.emin_ipucu_kelime,Tek hakkın var: yanlışsa kaybedersin.,You only get one try: if you're wrong you lose.
+casus.evet_tahmin,"Evet, bu","Yes, this one"
+casus.yakalandi,Casus: {0}! Son şansı…,The spy: {0}! Last chance…
+casus.son_sans,{0} mekânı bilirse yine de kazanır. 30 saniyesi var.,"If {0} guesses the location, they still win. 30 seconds."
+casus.son_sans_kelime,{0} kelimeyi bilirse yine de kazanır. 30 saniyesi var.,"If {0} guesses the word, they still win. 30 seconds."
+casus.son_sans_bekle,{0} düşünüyor…,{0} is thinking…
+casus.acilis_baslik,Casus,The spy
+casus.kazanan.Grup,Grup kazandı!,The group wins!
+casus.kazanan.Casus,Casus kazandı!,The spy wins!
+casus.neden.Yakalandi,Yakalandı ve son şansında bilemedi.,Caught and missed the last guess.
+casus.neden.YanlisTahmin,Tahmin etti ama bilemedi.,Guessed and got it wrong.
+casus.neden.Kacti,Oyundan çıktı.,Left the game.
+casus.neden.Bildi,Yakalanmadan bildi.,Guessed it without getting caught.
+casus.neden.SonSanstaBildi,Yakalandı ama son şansında bildi.,Caught but nailed the last guess.
+casus.neden.Yakalanmadi,Sonuna kadar yakalanmadı.,Never got caught.
+casus.mekan_neydi,Mekân: {0},Location: {0}
+casus.kelime_neydi,Kelime: {0},Word: {0}
+casus.tahmini,Tahmini: {0},Their guess: {0}
+casus.tur_baslik,Casusun bilmediği,What the spy doesn't know
+casus.tur.Mekan,Mekân,Location
+casus.tur.Kelime,Kelime,Word
+casus.tur_aciklama.Mekan,"Herkes bir mekânı ve oradaki rolünü bilir (Uçak, sen: Hostes).","Everyone knows a location and their role there (Plane, you: Flight attendant)."
+casus.tur_aciklama.Kelime,"Herkes bir kelimeyi bilir, kategori herkese açık (Hayvanlar: Penguen). Imposter.","Everyone knows a word; the category is public (Animals: Penguin). Imposter."

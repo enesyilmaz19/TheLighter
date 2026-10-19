@@ -16,6 +16,16 @@ namespace TheLighter.Istemci
         /// <summary>Rol perdesi herkese aynı uzunlukta: "Gördüm" bu kadar sonra açılır, kimin uzun baktığından köstebek anlaşılmasın.</summary>
         public const long RolPerdesiMs = 3000;
 
+        /// <summary>
+        /// "Kim?" oylamasının metni. Köstebek ve Casus aynı oylamayı kullanır (kural motorunda da aynı kod), sadece adı farklı:
+        /// Casus'ta "casus." anahtarı ("Casus kim?"), diğerlerinde "kostebek." ("Köstebek kim?").
+        /// </summary>
+        public static string OylamaMetni(OyunTuru oyun, string ad, params object[] p) =>
+            Metin.Al((oyun == OyunTuru.Casus ? "casus." : "kostebek.") + ad, p);
+
+        /// <summary>Oylamalar arası tur sayısı (kural motorunun sabiti; ekranda "her N turda bir").</summary>
+        public static int Aralik(OyunTuru oyun) => oyun == OyunTuru.Casus ? Oyun.CasusSuclamaAraligi : Oyun.SuclamaAraligi;
+
         /// <summary>Görev perdesinin üstüne rol: köstebeğe "Köstebeksin!", diğerlerine "Köstebek değilsin". İkisi aynı biçimde.</summary>
         public static VisualElement RolBasligi(Gorunum g)
         {
@@ -81,9 +91,12 @@ namespace TheLighter.Istemci
             if (s != Sonuc.Tamam) hataYaz?.Invoke(HataMetni.Al(s));
         }
 
-        /// <summary>Biten oylamanın duyurusu. Oyun sürüyorsa suçlanan köstebek değildi (yakalansaydı oyun biterdi).</summary>
+        /// <summary>
+        /// Biten oylamanın duyurusu. Oyun sürüyorsa suçlanan köstebek (casus) değildi: yakalansaydı oyun biterdi
+        /// (Casus'ta son şansa geçilirdi, orada bu duyuru gösterilmez).
+        /// </summary>
         public static string SonucMetni(IOyunAkisi akis, OyuncuId? suclanan) =>
-            suclanan.HasValue ? Metin.Al("kostebek.sonuc_yanlis", akis.Isim(suclanan)) : Metin.Al("kostebek.sonuc_yok");
+            suclanan.HasValue ? OylamaMetni(akis.Ayarlar.Oyun, "sonuc_yanlis", akis.Isim(suclanan)) : Metin.Al("kostebek.sonuc_yok");
 
         /// <summary>Oyun sonunun en üstü: köstebek kimdi, kim kazandı, neden, köstebeğin görevi.</summary>
         public static VisualElement Acilis(IOyunAkisi akis, OyunOzeti ozet)
@@ -118,7 +131,7 @@ namespace TheLighter.Istemci
     }
 
     /// <summary>
-    /// Elden ele, "Köstebek kim?" oylamasından önce: telefon ortada, herkes tartışır. Süre istemcinin; kural motorunun saati
+    /// Elden ele, "Köstebek kim?" ("Casus kim?") oylamasından önce: telefon ortada, herkes tartışır. Süre istemcinin; kural motorunun saati
     /// durur. Süre dolunca ya da "Oylamaya geç"e basınca telefon herkese sırayla gelir.
     /// </summary>
     sealed class SuclamaTartismaParcasi : IOyunParcasi
@@ -140,10 +153,11 @@ namespace TheLighter.Istemci
 
             Kok.Add(Esnek());
             if (g.SonSuclama) Kok.Add(Yazi(Metin.Al("kostebek.son_oylama"), "banner"));
-            Kok.Add(Yazi(Metin.Al("kostebek.kim"), "perde-buyuk"));
+            Kok.Add(Yazi(Kostebek.OylamaMetni(g.Oyun, "kim"), "perde-buyuk"));
             Kok.Add(Yazi(e.SuclamaBaslatan.HasValue
                 ? Metin.Al("kostebek.erken_yapti", akis.Isim(e.SuclamaBaslatan))
-                : g.SonSuclama ? Metin.Al("kostebek.son_aciklama") : Metin.Al("kostebek.aralik", Oyun.SuclamaAraligi), "aciklama", "orta"));
+                : g.SonSuclama ? Kostebek.OylamaMetni(g.Oyun, "son_aciklama")
+                : Kostebek.OylamaMetni(g.Oyun, "aralik", Kostebek.Aralik(g.Oyun)), "aciklama", "orta"));
             if (g.Supheliler.Count > 0)
             {
                 var isimler = new List<string>();
@@ -194,8 +208,8 @@ namespace TheLighter.Istemci
             Kok.Add(bas);
 
             if (g.SonSuclama) Kok.Add(Yazi(Metin.Al("kostebek.son_oylama"), "banner"));
-            Kok.Add(Yazi(Metin.Al("kostebek.kim"), "perde-buyuk"));
-            Kok.Add(Yazi(Metin.Al("kostebek.oy_aciklama"), "aciklama", "orta"));
+            Kok.Add(Yazi(Kostebek.OylamaMetni(g.Oyun, "kim"), "perde-buyuk"));
+            Kok.Add(Yazi(Kostebek.OylamaMetni(g.Oyun, "oy_aciklama"), "aciklama", "orta"));
 
             var cipKutusu = Kutu("cipler");
             foreach (var id in Kostebek.Adaylar(g))

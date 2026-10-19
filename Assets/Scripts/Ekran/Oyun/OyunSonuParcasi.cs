@@ -47,6 +47,8 @@ namespace TheLighter.Istemci
             if (ozet != null && ozet.Kostebek != null) kaydirma.Add(Kostebek.Acilis(akis, ozet));
             // Rus Ruleti: kazanan (son kalan) ve elenme sırası.
             if (ozet != null && ozet.RusRuleti != null) kaydirma.Add(RusRuleti.Acilis(akis, ozet.RusRuleti));
+            // Casus: casus kimdi, sır, tahmin, kim kazandı.
+            if (ozet != null && ozet.Casus != null) kaydirma.Add(Casus.Acilis(akis, ozet.Casus));
             // Takım Düellosu: kazanan takım (ya da berabere), puanlar, üyeler.
             if (ozet != null && ozet.Takim != null)
                 kaydirma.Add(Takim.Acilis(akis, ozet.Takim, ozet.Oyuncular.Count > 0 ? ozet.Oyuncular : g.Oyuncular));

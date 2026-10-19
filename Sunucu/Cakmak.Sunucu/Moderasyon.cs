@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.Json.Nodes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Cakmak.Sunucu
@@ -31,11 +32,13 @@ namespace Cakmak.Sunucu
         readonly string yasakDosyasi;
         readonly TimeSpan saklama;
         readonly object kilit = new object();
+        readonly ILogger<Moderasyon> log;
         HashSet<string> yasakli = new HashSet<string>();
         DateTime yasakDosyasiZamani = DateTime.MinValue;
 
-        public Moderasyon(IOptions<ModerasyonAyarlari> secenek)
+        public Moderasyon(IOptions<ModerasyonAyarlari> secenek, ILogger<Moderasyon> log)
         {
+            this.log = log;
             var a = secenek.Value;
             var klasor = Path.GetFullPath(a.Klasor, AppContext.BaseDirectory);
             raporKlasoru = Path.Combine(klasor, "raporlar");
@@ -54,10 +57,15 @@ namespace Cakmak.Sunucu
                     Directory.CreateDirectory(raporKlasoru);
                     var dosya = Path.Combine(raporKlasoru, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + ".jsonl");
                     File.AppendAllText(dosya, rapor.ToJsonString() + "\n");
+                    // Sadece oda kodu: isim, IP ve metin günlüğe yazılmaz (Guvenlik.md 13). Enes journalctl'de yeni raporu görür.
+                    log.LogWarning("Yeni rapor (oda {Oda}): {Dosya}", (string)rapor["oda"], dosya);
                     return true;
                 }
-                catch (IOException) { return false; }
-                catch (UnauthorizedAccessException) { return false; }
+                catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+                {
+                    log.LogError("Rapor yazılamadı (oda {Oda}): {Tip}", (string)rapor["oda"], e.GetType().Name);
+                    return false;
+                }
             }
         }
 

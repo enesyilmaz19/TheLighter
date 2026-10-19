@@ -16,7 +16,7 @@ Enes `g2/cakmak-gecesi`'de (öbür 5 dalı içeriyor) bütün testleri koştu, 2
 | Test | Sonuç |
 |---|---|
 | `dotnet test Sunucu/KuralTestleri` | 365/365 |
-| `dotnet test Sunucu/SunucuTestleri` | 192/192 |
+| `dotnet test Sunucu/SunucuTestleri` | 193/193 |
 | Unity EditMode | 594 geçen, 0 kalan, 8 atlanan |
 | Unity `-testCategory "Sunucu"`, yerel sunucu açık | 8/8 (Çakmak Gecesi'nin 8 botu 147 sn) |
 

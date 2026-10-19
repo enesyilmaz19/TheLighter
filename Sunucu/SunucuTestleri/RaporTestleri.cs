@@ -166,6 +166,33 @@ namespace SunucuTestleri
             Assert.That(Raporlar(b.Oda).Single()["metinler"].AsArray(), Is.Empty);
         }
 
+        [Test]
+        public async Task Disk_yazamazsa_RAPOR_YAZILAMADI_tekrar_denenebilir()
+        {
+            // Klasörün yerinde bir dosya var: raporlar/ açılamaz.
+            var dosya = Path.GetTempFileName();
+            try
+            {
+                using var sunucu = Kurulum.Sunucu(("Moderasyon:Klasor", dosya));
+                await using var x = await TestIstemci.Baglan(sunucu);
+                await using var y = await TestIstemci.Baglan(sunucu);
+                await x.Gonder(new { t = "odaKur", isim = "Ali" });
+                await x.Bekle("hosgeldin");
+                await y.Gonder(new { t = "katil", oda = x.Oda, isim = "Veli", anahtar = (string)null });
+                await y.Bekle("hosgeldin");
+                for (int i = 0; i < 2; i++) // ikincisi "aynı kişi bir kez" diye yutulmaz
+                {
+                    await x.Gonder(new { t = "rapor", kim = y.Sen });
+                    await x.Hata("RAPOR_YAZILAMADI");
+                }
+                Assert.That(x.Hepsi.Where(m => m.Contains("raporAlindi")), Is.Empty);
+            }
+            finally
+            {
+                File.Delete(dosya);
+            }
+        }
+
         // ---------------------------------------------------- Moderasyon klasörü
 
         [Test]

@@ -35,6 +35,8 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 | `tekrarOyna` | — | Kurucu, `oyunSonu`'nda. Oda lobiye döner: bağlı olmayanlar düşer, bekleme odasındakiler oyuncu olur, ayarlar ve atılanların yasağı kalır |
 | `sohbet` | `kime` (`null` ya da yok = genel, `"p3"` = DM, `"takim"` / `"katil"` / `"oluler"` = kanal), `metin` | Odadaki herkes, her an (lobi, oyun, bekleme odası, oyun sonu); Çakmak Gecesi'nde kısıtlı. Aşağıda "Sohbet" |
 | `grupPaketi` | `sorular` (metin dizisi), `ilk` (isteğe bağlı, varsayılan `false`) | Kurucu, lobide. Grubun kendi paketini parça parça yükler. Aşağıda "Grup paketi" |
+| `rapor` | `kim` | Odadaki herkes, her an. Aşağıda "Rapor ve engelleme" |
+| `engelle` | `kim`, `engel` (isteğe bağlı, varsayılan `true`; `false` = kaldır) | Odadaki herkes, her an. Aşağıda "Rapor ve engelleme" |
 
 **Sürüm:** `odaKur` ve `katil`'de istemcinin protokol sürümü, `surum` (bugün `1`). Sunucunun kabul ettiği en eskiden küçükse `GUNCELLE` (oda açılmaz, bağlantı açık kalır): "Oyunu güncelle" ekranı göster. Uyumsuz bir protokol değişikliğinde artar. Şimdilik yollamayan da kabul ediliyor; mağaza build'i mutlaka yollasın.
 
@@ -108,6 +110,8 @@ Grup hafızası cihazda, `ozet`'ten yazılır. Grubun kendi paketini kurucu lobi
 | `olay` | Kural motoru bir olay yaydığında, herkese |
 | `sohbet` | Genel mesaj odadaki herkese (yazana da), DM sadece alana ve yazana |
 | `hata` | Bir istek yapılamadığında, sadece gönderene |
+| `raporAlindi` | `rapor`'a cevap, sadece gönderene: `{ "t": "raporAlindi", "kim": "p3" }` |
+| `engeller` | `engelle`'ye cevap ve anahtarla dönüşte (engellediğin varsa), sadece gönderene: `{ "t": "engeller", "kimler": ["p3"] }` |
 
 ### `hosgeldin`
 
@@ -253,6 +257,7 @@ Oyun sürerken katılan, oyunda değil. Sadece herkese açık bilgiyi görür: `
 | `ESKI_TUR` | Komuttaki `tur` güncel değil |
 | `COK_HIZLI` | Mesaj sınırı, `odaKur`/`katil` sınırı ya da sohbet sınırı aşıldı. Mesaj **hiç işlenmedi**, biraz bekleyip tekrar gönder |
 | `GUNCELLE` | `odaKur`/`katil`'deki `surum` eski: oyunu güncellemen lazım |
+| `RAPOR_YAZILAMADI` | Sunucu raporu diske yazamadı. Rapor alınmadı, tekrar dene |
 | `SUNUCU_DOLU` | Sunucudaki oda sayısı sınırda, yeni oda açılamadı. Sonra tekrar dene |
 | `SIRA_SENDE_DEGIL` · `SECILEMEZ` · `YANLIS_ASAMA` · `GECERSIZ_GIRDI` · `HAK_KALMADI` · `HAVUZ_BOS` · `OYUNCU_SAYISI_GECERSIZ` | Kural motorunun `Sonuc` değerleri (`UYGUNSUZ` da öyle, yukarıda) |
 
@@ -409,7 +414,27 @@ Sunucuyu kötüye kullanmaya karşı. Normal oyunda hiçbirine takılınmaz.
 - **DM** (`kime: "p3"`): sadece alana ve yazana gider. Alan odada olmalı (oyuncu ya da bekleme odasında; bağlı değilse mesaj ona hiç ulaşmaz), kendine DM `GECERSIZ_GIRDI`. İstemcide DM kanalı = karşıdaki kişi: `kimden` sensen `kime`, değilse `kimden`.
 - `metin` isim ve soruyla aynı temizlikten geçer (`TemizMetin`), temizlenince 1–200 karakter. Gelen `metin` hep temizlenmiş haldir.
 - `id`: odanın sohbet sayacı (`"m1"`, `"m2"`…). Sıra ve ileride rapor için.
-- Sunucu mesaj **saklamaz**: kopup dönen ya da sonradan gelen eski mesajları görmez.
+- Sunucu mesajı **diske yazmaz** (rapor hariç, aşağıda): kopup dönen ya da sonradan gelen eski mesajları görmez.
+- Engelleyene, engellediğinin mesajı (genel, DM, kanal) gitmez. Yazan bunu bilmez: kendi mesajı ona her zamanki gibi döner.
+
+## Rapor ve engelleme (Google Play kullanıcı içeriği şartı)
+
+**Engelleme** (`{ "t": "engelle", "kim": "p3" }`, kaldırmak için `"engel": false`):
+
+- Oda boyunca (tekrar oyna dahil); oda kapanınca biter. Hesap yok, başka odaya taşınmaz.
+- Engellenenin sohbet ve DM'leri sana gelmez; sana DM atabilir ama ulaşmaz, bunu bilmez. Sen yazmaya devam edersin, genel sohbette o seni görür.
+- Kimliğe değil isme bağlı: lobiden çıkıp aynı isimle dönen yine engelli (`p3` lobiden çıkanınkiyle yeniden kullanılır).
+- **Oyunu etkilemez:** soru, seçim, oylama aynen. Engellenen sana soru sorabilir; rahatsız ediyorsa raporla, kurucu atabilir.
+- Cevap `engeller`: engellediklerinden odada olanların tam listesi. Anahtarla geri dönünce (liste boş değilse) yine gelir; istemci listeyi bundan tutar.
+- Kendini ya da odada olmayanı engellemek `GECERSIZ_GIRDI`.
+
+**Rapor** (`{ "t": "rapor", "kim": "p3" }`):
+
+- Sunucu, **raporlayanın bu odada gördüğü son 50 metni** diske yazar: sohbet (genel, kendi DM'leri, kanalları) ve ifşa olan sorular. Başkalarının DM'leri ve **güme giden sorular hiç tutulmaz** (Ana Plan 8.5): güme giden bir soruyla rahatsız edildiysen kişiyi raporlarsın, metin rapora girmez.
+- Raporda ayrıca: zaman, oda kodu, oyun ve mod, iki tarafın kimliği, ismi ve IP'si. 30 gün tutulur, sonra sunucu siler. Raporları Enes okur; gerekirse IP'yi yasaklar (`Sunucu/Kurulum/BENIOKU.md`).
+- Raporlanan **bilmez**. Aynı kişiyi ikinci kez raporlamak yazılmaz, cevap yine `raporAlindi`.
+- Odadan atılmış ya da oyundan çıkmış biri de raporlanabilir (oyundaysa listede kalır). Lobiden çıkan raporlanamaz (`GECERSIZ_GIRDI`).
+- Rapor gelmezse metinler sadece bellektedir (odanın son 200 metni), oda kapanınca gider.
 - Saniyede 1 mesaj, arka arkaya en fazla 2 (`COK_HIZLI`).
 
 ## Temiz mod (Ana Plan 6.4)

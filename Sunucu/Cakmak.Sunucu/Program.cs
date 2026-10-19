@@ -16,6 +16,8 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<SinirAyarlari>(builder.Configuration.GetSection("Sinirlar"));
 builder.Services.AddSingleton<Sinirlar>();
+builder.Services.Configure<ModerasyonAyarlari>(builder.Configuration.GetSection("Moderasyon"));
+builder.Services.AddSingleton<Moderasyon>();
 builder.Services.AddSingleton<OdaYoneticisi>();
 builder.Services.AddHostedService<Saat>();
 // Caddy aynı makinede, istemcinin gerçek IP'sini X-Forwarded-For ile yollar. Varsayılan olarak sadece
@@ -37,7 +39,7 @@ app.UseWebSockets(new WebSocketOptions
     KeepAliveTimeout = TimeSpan.FromSeconds(20),
 });
 app.MapGet("/", () => "TheLighter sunucusu");
-app.Map("/ws", async (HttpContext ctx, OdaYoneticisi odalar, Sinirlar sinirlar) =>
+app.Map("/ws", async (HttpContext ctx, OdaYoneticisi odalar, Sinirlar sinirlar, Moderasyon moderasyon) =>
 {
     if (!ctx.WebSockets.IsWebSocketRequest)
     {
@@ -53,6 +55,12 @@ app.Map("/ws", async (HttpContext ctx, OdaYoneticisi odalar, Sinirlar sinirlar) 
     }
 
     var ip = Sinirlar.IpAnahtari(ctx.Connection.RemoteIpAddress);
+    // Enes'in raporlara bakıp yasakladığı IP (Moderasyon: yasakli-ip.txt).
+    if (moderasyon.Yasakli(ip))
+    {
+        ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return;
+    }
     using var izin = sinirlar.BaglantiIzni(ip);
     if (!izin.IsAcquired)
     {

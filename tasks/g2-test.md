@@ -17,7 +17,8 @@ Her görev dosyasının sonundaki "Testler" ve "Bitti ölçütü" bölümleri o 
 4. `tasks/g2-takim.md`
 5. `tasks/g2-casus.md`
 6. `tasks/g2-cakmak-gecesi.md` (eski Vampir Köylü; en büyüğü, 41 rol)
-7. Bu dosyanın 2. ve 3. bölümleri: bütün oyunların son test turu, sonra `tasks/g2-pc.md` 3.3 (çok bilgisayarlı test)
+7. `tasks/g2-android.md` (2026-10-19: önce Android, Steam sonra)
+8. Bu dosyanın 2. ve 3. bölümleri, **telefonda**: bütün oyunların son test turu, sonra çok telefonla deneme (`g2-android.md` 4; `g2-pc.md` 3.3 Steam'e kaldı)
 
 `tasks/g2-pc.md` 3.4 (VPS) şimdilik yok: VPS'i Enes oyun bitince kuracak.
 
@@ -42,7 +43,7 @@ Her görev dosyasının sonundaki "Testler" ve "Bitti ölçütü" bölümleri o 
   dotnet test Sunucu/SunucuTestleri
   ```
 
-  Bugün 365 ve 184, hepsi yeşil. Sen kurallara dokunmuyorsun; kırmızı görürsen G1'e yaz.
+  Bugün 365 ve 193, hepsi yeşil. Sen kurallara dokunmuyorsun; kırmızı görürsen G1'e yaz.
 
 ## 2. Oyun denemeleri (elle)
 

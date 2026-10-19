@@ -201,6 +201,16 @@ namespace Cakmak.Sunucu
             return null;
         }
 
+        public static string RaporAlindi(OyuncuId kim) => Yaz(new JsonObject { ["t"] = "raporAlindi", ["kim"] = Id(kim) });
+
+        /// <summary>Gönderenin engelledikleri, odada olanlar (her engelle/kaldır'da ve anahtarla dönüşte tam liste).</summary>
+        public static string Engeller(IEnumerable<OyuncuId> kimler)
+        {
+            var liste = new JsonArray();
+            foreach (var k in kimler) liste.Add(Id(k));
+            return Yaz(new JsonObject { ["t"] = "engeller", ["kimler"] = liste });
+        }
+
         public static string Hosgeldin(OyuncuId sen, string anahtar, string oda) =>
             Yaz(new JsonObject { ["t"] = "hosgeldin", ["sen"] = Id(sen), ["anahtar"] = anahtar, ["oda"] = oda });
 

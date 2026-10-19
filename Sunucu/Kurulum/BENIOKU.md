@@ -54,3 +54,14 @@ Uygulama dosyaları root'un: uygulama kendi dosyalarını değiştiremez. Gizli 
 ## Ayarlar
 
 Sınırlar (`docs/Protokol.md`, "Sınırlar") ortam değişkeniyle değişir, `cakmak.service` içine ya da `/etc/cakmak/ortam`'a: `Sinirlar__IpBasinaBaglanti=50`.
+
+## Raporlar ve IP yasağı
+
+Sunucunun yazabildiği tek yer `/var/lib/cakmak` (`cakmak.service`: `StateDirectory`). Yayın klasörü (`/opt/cakmak`) yeni sürümle değişse de raporlar kalır.
+
+- **Raporlar:** `/var/lib/cakmak/raporlar/yyyy-MM-dd.jsonl`, satır başına bir rapor (`docs/Protokol.md`, "Rapor ve engelleme"). 30 gün sonra sunucu kendisi siler. Okumak: `sudo cat /var/lib/cakmak/raporlar/*.jsonl`.
+- **IP yasağı:** rapordaki `ip`'yi `/var/lib/cakmak/yasakli-ip.txt`'ye bir satır olarak ekle (`#` ile başlayan satır not). Sunucuyu yeniden başlatmak gerekmez; o IP'den yeni bağlantı açılmaz. Aynı Wi-Fi'daki herkes aynı IP'dir: yasak bütün evi/kafeyi keser.
+
+```bash
+echo "203.0.113.5" | sudo tee -a /var/lib/cakmak/yasakli-ip.txt
+```

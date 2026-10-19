@@ -104,6 +104,7 @@ namespace TheLighter.Ag
         {
             var kimler = m["kimler"];
             if (kimler.Tur != JsonTuru.Dizi) return null;
+            if (kimler.Elemanlar.Count == 0) return null;
             var e = new EngellerMesaji();
             foreach (var k in kimler.Elemanlar)
             {

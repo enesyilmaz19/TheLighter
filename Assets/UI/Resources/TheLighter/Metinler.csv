@@ -871,7 +871,6 @@ sartlar.yakinda,{0} (yakında),{0} (coming soon)
 sartlar.baslik,Hoş geldin!,Welcome!
 sartlar.metin,"Oyunda yazdıklarından sen sorumlusun. Zorbalık, nefret, tehdit, cinsel içerik ve başkasının bilgilerini ifşa etmek yasak; kuralları çiğneyen odadan atılır ya da engellenir. Rahatsız olursan oyuncuyu engelleyebilir ya da raporlayabilirsin.","You're responsible for what you write in the game. Bullying, hate, threats, sexual content and exposing other people's information are not allowed; anyone who breaks the rules gets kicked from the room or blocked. If someone bothers you, you can block or report them."
 sartlar.devam,Devam ederek Kullanım Şartları'nı kabul etmiş ve Gizlilik Politikası'nı okumuş olursun. 13 yaş ve üstü içindir.,"By continuing, you accept the Terms of Use and confirm you've read the Privacy Policy. For ages 13 and up."
-sartlar.kabul,Kabul ediyorum,I accept
 lobi.cik_soru,Odadan ayrılsın mı?,Leave the room?
 lobi.cik_ipucu,Aynı kodla yeniden katılabilirsin.,You can join again with the same code.
 lobi.cik_evet,"Evet, ayrıl","Yes, leave"
@@ -889,7 +888,6 @@ rapor.gidiyor,Gönderiliyor…,Sending…
 rapor.alindi,"Rapor alındı, teşekkürler.","Report received, thank you."
 rapor.engellemek_ister_misin,Engellemek ister misin?,Do you want to block them?
 rapor.gonderilemedi,"Rapor gönderilemedi, tekrar dene.","Couldn't send the report, try again."
-rapor.tekrar,Tekrar dene,Try again
 rapor.engelli_etiket,engelli,blocked
 rapor.liste_ipucu,Engellemek ya da raporlamak için oyuncunun yanındaki … düğmesine bas.,"To block or report, tap … next to a player."
 kart.paylas,Paylaş,Share

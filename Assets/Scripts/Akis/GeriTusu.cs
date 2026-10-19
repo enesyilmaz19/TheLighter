@@ -45,7 +45,6 @@ namespace TheLighter.Akis
             if (acikKatman) return GeriEylemi.KatmaniKapat;
             switch (ekran)
             {
-                case GeriEkrani.Kurulum:
                 case GeriEkrani.OnlineMenu:
                 case GeriEkrani.Guncelle:
                     return GeriEylemi.AnaMenuyeDon;
@@ -65,6 +64,6 @@ namespace TheLighter.Akis
         public const int Surum = 1;
 
         /// <param name="kabulEdilen">Cihazda kayıtlı kabul edilen sürüm (hiç yoksa 0).</param>
-        public static bool KabulGerekli(int kabulEdilen) => kabulEdilen < Surum;
+        public static bool KabulGerekli(int kabulEdilen) => kabulEdilen <= Surum;
     }
 }

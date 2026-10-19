@@ -187,7 +187,6 @@ namespace TheLighter.Ag
             SonDurum = null;
             sira.Clear();
             Sohbet.Temizle();
-            EngelleriTemizle();
             bekleyenIlkMesaj = null;
             Yaz("çıkış: " + neden);
             if (onceki != BaglantiDurumu.Kapali) Ayrildi?.Invoke(neden);
@@ -454,7 +453,6 @@ namespace TheLighter.Ag
                         var kim = bekleyenRapor.Value;
                         bekleyenRapor = null;
                         RaporCevabi?.Invoke(kim, false);
-                        return;
                     }
                     break;
                 case "COK_HIZLI":

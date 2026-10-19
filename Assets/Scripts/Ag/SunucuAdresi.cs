@@ -29,7 +29,6 @@ namespace TheLighter.Ag
         /// <param name="kayitli">"Sunucu" alanından cihazda saklanan adres (yoksa null).</param>
         public static string Sec(bool gelistirme, string kayitli)
         {
-            if (!gelistirme) return Yayin;
             if (Gecerli(kayitli, out _)) return kayitli.Trim();
             return Yerel;
         }

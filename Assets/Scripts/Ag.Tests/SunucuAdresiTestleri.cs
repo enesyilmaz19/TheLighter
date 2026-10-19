@@ -33,8 +33,10 @@ namespace TheLighter.Testler
         public void YayinAdresi_BosYaDaWss()
         {
             // VPS gelene kadar boş; gelince düz ws:// değil, wss:// (HTTPS'i Caddy veriyor).
-            Assert.That(SunucuAdresi.Yayin == "" || SunucuAdresi.Yayin.StartsWith("wss://"), Is.True, SunucuAdresi.Yayin);
-            if (SunucuAdresi.Yayin != "") Assert.That(SunucuAdresi.Gecerli(SunucuAdresi.Yayin, out _), Is.True);
+            string yayin = SunucuAdresi.Yayin;
+            if (yayin.Length == 0) return;
+            Assert.That(yayin.StartsWith("wss://"), Is.True, yayin);
+            Assert.That(SunucuAdresi.Gecerli(yayin, out _), Is.True);
         }
 
         [Test]

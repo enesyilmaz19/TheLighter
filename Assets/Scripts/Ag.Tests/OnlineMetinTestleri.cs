@@ -48,5 +48,17 @@ namespace TheLighter.Testler
                          "lobi.bizim_yukleniyor", "lobi.bizim_hata", "kurulum.bizim_paket", "hata.Uygunsuz" })
                 Assert.IsTrue(t.Var(k), "Eksik: " + k);
         }
+
+        /// <summary>Rapor ve engelleme ekranı, sunucu adresi yokken online menüsü (tasks/g2-android.md 1, 6).</summary>
+        [Test]
+        public void RaporEngelMetinleriVar()
+        {
+            var t = Tablo();
+            foreach (var k in new[] { "rapor.engelle", "rapor.engeli_kaldir", "rapor.engel_ipucu", "rapor.engelli_ipucu", "rapor.raporla",
+                         "rapor.onay", "rapor.gidiyor", "rapor.alindi", "rapor.engellemek_ister_misin", "rapor.gonderilemedi",
+                         "rapor.tekrar", "rapor.engelli_etiket", "rapor.liste_ipucu", "online.sunucu_yok", "lobi.cik_soru",
+                         "lobi.cik_ipucu", "lobi.cik_evet", "oyun.geri_soru", "oyun.geri_ipucu_online", "oyun.geri_evet" })
+                Assert.IsTrue(t.Var(k), "Eksik: " + k);
+        }
     }
 }

@@ -1,3 +1,4 @@
+using TheLighter.Akis;
 using UnityEngine.UIElements;
 using static TheLighter.Istemci.Arayuz;
 
@@ -7,7 +8,7 @@ namespace TheLighter.Istemci
     /// Sunucu bu sürümü kabul etmedi (<c>GUNCELLE</c>, docs/Protokol.md "Sürüm"): online için oyunun güncellenmesi lazım.
     /// Elden ele ağsız, oynanmaya devam eder.
     /// </summary>
-    public sealed class GuncelleEkrani : IEkran
+    public sealed class GuncelleEkrani : IEkran, IGeriTusu
     {
         public VisualElement Kok { get; }
 
@@ -25,5 +26,9 @@ namespace TheLighter.Istemci
         public void Guncelle(float gecenSn) { }
 
         public void ArkaPlanaGecti() { }
+
+        public GeriEkrani GeriTuru => GeriEkrani.Guncelle;
+
+        public void CikisSor() { }
     }
 }

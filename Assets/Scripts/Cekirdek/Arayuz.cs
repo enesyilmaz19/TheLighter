@@ -74,6 +74,44 @@ namespace TheLighter.Istemci
         }
 
         /// <summary>
+        /// Katman (menu-perde) geri tuşuyla kapatılınca sadece gizlenmesin, bu çalışsın (ör. oyun menüsü süreyi yeniden başlatır).
+        /// </summary>
+        public static void Kapaninca(VisualElement katman, Action kapat) => katman.userData = kapat;
+
+        /// <summary>Geri tuşu bu katmanı kapatmaz (AFK, "oyuncu bekleniyor": durumdan açılıp kapanırlar).</summary>
+        public static void Kapanmaz(VisualElement katman) => katman.AddToClassList("kapanmaz");
+
+        /// <summary>
+        /// Uzun basınca (yarım saniye, parmak kaymadan): sohbet satırında ve oyuncu listesinde "Engelle / Raporla" için.
+        /// Kısa dokunuş öğenin kendi işini yapar.
+        /// </summary>
+        public static void UzunBas(VisualElement e, Action eylem, long ms = 500)
+        {
+            IVisualElementScheduledItem bekleyen = null;
+            Vector2 baslangic = default;
+            e.RegisterCallback<PointerDownEvent>(ev =>
+            {
+                // Satırdaki bir düğmeye basılıyorsa (at, …) o düğmenin işi: uzun basma sayılmaz.
+                if (ev.target is VisualElement hedef && hedef != e && hedef.GetFirstOfType<Button>() != null) return;
+                baslangic = ev.position;
+                bekleyen?.Pause();
+                bekleyen = e.schedule.Execute(() => { bekleyen = null; eylem(); }).StartingIn(ms);
+            });
+            e.RegisterCallback<PointerMoveEvent>(ev =>
+            {
+                if (bekleyen != null && ((Vector2)ev.position - baslangic).sqrMagnitude > 40f * 40f)
+                {
+                    bekleyen.Pause();
+                    bekleyen = null;
+                }
+            });
+            EventCallback<PointerUpEvent> birak = _ => { bekleyen?.Pause(); bekleyen = null; };
+            e.RegisterCallback(birak);
+            e.RegisterCallback<PointerLeaveEvent>(_ => { bekleyen?.Pause(); bekleyen = null; });
+            e.RegisterCallback<PointerCancelEvent>(_ => { bekleyen?.Pause(); bekleyen = null; });
+        }
+
+        /// <summary>
         /// Butonu kısa bir süre kapalı tutar. Önceki ekranda art arda basılan bir parmak
         /// perdeyi yanlışlıkla kaldırmasın diye.
         /// </summary>

@@ -5,6 +5,7 @@ using System.IO;
 using Cakmak.Kurallar;
 using TheLighter.Akis;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace TheLighter.Istemci
@@ -38,6 +39,7 @@ namespace TheLighter.Istemci
         Rect sonGuvenliAlan;
         int sonGenislik;
         int sonYukseklik;
+        float klavyeKaymasi;
 
         /// <summary>"Tekrar oyna" ve kurulum ekranı için son kullanılan isimler ve ayarlar.</summary>
         public List<string> SonIsimler { get; private set; } = new List<string>();
@@ -80,6 +82,15 @@ namespace TheLighter.Istemci
             PaketleriYukle();
             ArayuzuKur();
             Online = new OnlineYonetici(this);
+            // Kullanım şartları ilk açılışta bir kez (ve şartların sürümü artınca): kabul edilmeden oyun yok.
+            if (Sartlar.KabulGerekli(Tercihler.KabulEdilenSartlar)) Goster(new KabulEkrani(this));
+            else AnaMenu();
+        }
+
+        /// <summary>Kabul ekranı: kabul cihazda saklanır, ana menüye geçilir.</summary>
+        public void SartlariKabulEt()
+        {
+            Tercihler.KabulEdilenSartlar = Sartlar.Surum;
             AnaMenu();
         }
 
@@ -127,6 +138,99 @@ namespace TheLighter.Istemci
             // Önce ağ: gelen durumlar bu karede ekrana yansısın (ekran değişebilir).
             Online.Guncelle(Time.unscaledDeltaTime);
             if (ekran != null) ekran.Guncelle(Time.deltaTime);
+            var klavye = Keyboard.current;
+            if (klavye != null && klavye.escapeKey.wasPressedThisFrame) Geri();
+            KlavyeKaydir();
+        }
+
+        // ---------- Geri tuşu ----------
+
+        /// <summary>
+        /// Android geri tuşu (PC'de Esc). <see cref="GeriTusu"/> karar verir: açık katmanı kapat, ana menüye dön ya da
+        /// "çıkılsın mı?" diye sor. Uygulama hiçbir yerde habersiz kapanmaz.
+        /// </summary>
+        void Geri()
+        {
+            if (!(ekran is IGeriTusu g)) return;
+            var katman = UstKatman(ekran.Kok);
+            bool baglaniyorAcik = baglaniyor != null && !baglaniyor.ClassListContains("gizli");
+            switch (GeriTusu.Ne(g.GeriTuru, katman != null, baglaniyorAcik))
+            {
+                case GeriEylemi.KatmaniKapat:
+                    if (katman.userData is Action kapat) kapat();
+                    else katman.AddToClassList("gizli");
+                    break;
+                case GeriEylemi.AnaMenuyeDon:
+                    // Online menüsünde bağlanırken basıldıysa bağlantı da bırakılır (menünün "Geri" düğmesi gibi).
+                    if (Online.Istemci.Durum != TheLighter.Ag.BaglantiDurumu.Kapali) Online.Istemci.Ayril();
+                    AnaMenu();
+                    break;
+                case GeriEylemi.CikisSor:
+                    g.CikisSor();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Ekranda en üstte çizilen açık katman: görünür bir "menu-perde" (ağaçta sonra gelen üstte çizilir).
+        /// Durumdan açılıp kapananlar ("kapanmaz": AFK, oyuncu bekleniyor) sayılmaz.
+        /// </summary>
+        static VisualElement UstKatman(VisualElement kok)
+        {
+            VisualElement ust = null;
+            kok.Query(className: "menu-perde").ForEach(v =>
+            {
+                if (!v.ClassListContains("kapanmaz") && Gorunur(v, kok)) ust = v;
+            });
+            return ust;
+        }
+
+        static bool Gorunur(VisualElement v, VisualElement kok)
+        {
+            for (var e = v; e != null; e = e.parent)
+            {
+                if (e.ClassListContains("gizli") || e.resolvedStyle.display == DisplayStyle.None) return false;
+                if (e == kok) return true;
+            }
+            return false;
+        }
+
+        // ---------- Klavye ----------
+
+        /// <summary>
+        /// Mobilde klavye ekranın altını kaplar (Ana Plan 6.2). Odaktaki yazı kutusu klavyenin altında kalacaksa
+        /// bütün ekran klavye kadar yukarı kayar (soru yazma, isimler, oda kodu...). Sohbet paneli kendi alt boşluğunu ayarlar.
+        /// </summary>
+        void KlavyeKaydir()
+        {
+            float hedef = 0f;
+            if (TouchScreenKeyboard.isSupported && TouchScreenKeyboard.visible && Screen.height > 0)
+            {
+                var kokPanel = belge.rootVisualElement;
+                var odak = kokPanel.panel?.focusController?.focusedElement as VisualElement;
+                var alan = odak?.GetFirstOfType<TextField>();
+                float yukseklik = kokPanel.worldBound.height;
+                if (alan != null && !SohbetIcinde(alan) && !float.IsNaN(yukseklik) && yukseklik > 0)
+                {
+                    float klavye = TouchScreenKeyboard.area.height / Screen.height * yukseklik;
+                    float klavyeUstu = yukseklik - klavye;
+                    // Kaydırmadan önceki yeri: şu an kaymışsa geri ekle.
+                    float alt = alan.worldBound.yMax + klavyeKaymasi;
+                    const float pay = 24f;
+                    if (alt + pay > klavyeUstu) hedef = Mathf.Min(alt + pay - klavyeUstu, klavye);
+                }
+            }
+            if (Mathf.Abs(hedef - klavyeKaymasi) < 0.5f) return;
+            klavyeKaymasi = hedef;
+            kok.style.translate = new Translate(0, -hedef);
+        }
+
+        /// <summary>Sohbet paneli klavyeye kendisi yer açıyor (alt boşluk): orada ekran kaydırılmaz.</summary>
+        static bool SohbetIcinde(VisualElement e)
+        {
+            for (; e != null; e = e.parent)
+                if (e.ClassListContains("sohbet")) return true;
+            return false;
         }
 
         void OnApplicationPause(bool duraklatildi)

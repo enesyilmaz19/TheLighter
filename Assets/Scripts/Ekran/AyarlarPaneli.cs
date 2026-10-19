@@ -34,6 +34,10 @@ namespace TheLighter.Istemci
             kutu.Add(diller);
             kutu.Add(Yazi(Metin.Al("ayarlar.dil_ipucu"), "ipucu"));
 
+            // Kullanım Şartları ve Gizlilik Politikası (Play şartı; adresler yayınlanınca gelir).
+            kutu.Add(Yazi(Metin.Al("ayarlar.yasal"), "alt-baslik"));
+            kutu.Add(YasalBaglantilar());
+
             kutu.Add(Buton(Metin.Al("genel.kapat"), Kapat, "buton-birincil"));
             Kok.Add(kutu);
             DilleriCiz();
@@ -57,6 +61,23 @@ namespace TheLighter.Istemci
             });
             bolum.Add(k);
             return bolum;
+        }
+
+        /// <summary>Kullanım Şartları ve Gizlilik Politikası düğmeleri. Adres yoksa "(yakında)" ve basılmaz. Kabul ekranında da.</summary>
+        public static VisualElement YasalBaglantilar()
+        {
+            var satir = Kutu("secenekler");
+            satir.Add(BaglantiDugmesi("sartlar.kullanim", Baglantilar.KullanimSartlari));
+            satir.Add(BaglantiDugmesi("sartlar.gizlilik", Baglantilar.Gizlilik));
+            return satir;
+        }
+
+        static Button BaglantiDugmesi(string ad, string adres)
+        {
+            bool acik = Baglantilar.Var(adres);
+            var b = Buton(acik ? Metin.Al(ad) : Metin.Al("sartlar.yakinda", Metin.Al(ad)), () => Baglantilar.Ac(adres), "secenek");
+            b.SetEnabled(acik);
+            return b;
         }
 
         static string Yuzde(float v) => UnityEngine.Mathf.RoundToInt(v * 100f) + "%";

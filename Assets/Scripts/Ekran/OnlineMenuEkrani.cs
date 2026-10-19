@@ -1,4 +1,5 @@
 using TheLighter.Ag;
+using TheLighter.Akis;
 using UnityEngine.UIElements;
 using static TheLighter.Istemci.Arayuz;
 
@@ -7,9 +8,9 @@ namespace TheLighter.Istemci
     /// <summary>
     /// Online giriş: isim, "Oda kur" ya da 5 harflik kodla "Katıl". Uygulama kapanıp açıldıysa "Kaldığın odaya dön".
     /// Bağlantı burada değil, oda kurarken/katılırken açılır (sunucu odasız bağlantıyı 120 sn'de keser).
-    /// Sunucu adresi koda yazılmaz: "Sunucu" alanından girilir, cihazda saklanır.
+    /// Sunucu adresi yayında sabit (<see cref="SunucuAdresi"/>); "Sunucu" alanı sadece editörde ve geliştirme build'inde.
     /// </summary>
-    public sealed class OnlineMenuEkrani : IEkran
+    public sealed class OnlineMenuEkrani : IEkran, IGeriTusu
     {
         const int IsimUzunlugu = 20;   // sunucunun sınırı
         const int KodUzunlugu = 5;
@@ -35,7 +36,8 @@ namespace TheLighter.Istemci
             var ust = Kutu("satir");
             ust.Add(Buton(Metin.Al("genel.geri"), () => { online.Ayril(); uygulama.AnaMenu(); }, "buton-kucuk"));
             ust.Add(Esnek());
-            ust.Add(Buton(Metin.Al("online.sunucu"), () => sunucuKutusu.ToggleInClassList("gizli"), "buton-kucuk"));
+            if (SunucuAdresi.AlanGorunur(OnlineYonetici.Gelistirme))
+                ust.Add(Buton(Metin.Al("online.sunucu"), () => sunucuKutusu.ToggleInClassList("gizli"), "buton-kucuk"));
             Kok.Add(ust);
 
             var kaydirma = new ScrollView(ScrollViewMode.Vertical);
@@ -44,7 +46,7 @@ namespace TheLighter.Istemci
 
             sunucuKutusu = Kutu("hafiza-karti", "gizli");
             sunucuKutusu.Add(Yazi(Metin.Al("online.sunucu_baslik"), "alt-baslik"));
-            adres = new TextField { maxLength = 200, value = online.SunucuAdresi };
+            adres = new TextField { maxLength = 200, value = online.Adres };
             adres.AddToClassList("isim-kutusu");
             sunucuKutusu.Add(adres);
             sunucuKutusu.Add(Yazi(Metin.Al("online.sunucu_ipucu"), "ipucu"));
@@ -86,7 +88,8 @@ namespace TheLighter.Istemci
 
             durum = Yazi("", "aciklama", "orta");
             Kok.Add(durum);
-            hata = Yazi(OnlineYonetici.NedenMetni(neden), "hata");
+            // Yayın build'inde sunucu adresi henüz yoksa (VPS gelmeden): online kapalı, neden yazılı.
+            hata = Yazi(online.SunucuVar ? OnlineYonetici.NedenMetni(neden) : Metin.Al("online.sunucu_yok"), "hata");
             Kok.Add(hata);
             Durum();
         }
@@ -97,9 +100,10 @@ namespace TheLighter.Istemci
         void Durum()
         {
             bool giriyor = online.Istemci.Durum != BaglantiDurumu.Kapali;
-            kur.SetEnabled(!giriyor && Isim.Length > 0);
-            katil.SetEnabled(!giriyor && Isim.Length > 0 && Kod.Length == KodUzunlugu);
-            don.SetEnabled(!giriyor);
+            bool sunucu = online.SunucuVar;
+            kur.SetEnabled(sunucu && !giriyor && Isim.Length > 0);
+            katil.SetEnabled(sunucu && !giriyor && Isim.Length > 0 && Kod.Length == KodUzunlugu);
+            don.SetEnabled(sunucu && !giriyor);
             durum.text = giriyor ? Metin.Al("online.baglaniyor") : "";
         }
 
@@ -128,7 +132,7 @@ namespace TheLighter.Istemci
 
         void AdresKaydet()
         {
-            if (online.SunucuAdresiKaydet(adres.value))
+            if (online.AdresKaydet(adres.value))
             {
                 hata.text = "";
                 sunucuKutusu.AddToClassList("gizli");
@@ -139,5 +143,9 @@ namespace TheLighter.Istemci
         public void Guncelle(float gecenSn) => Durum();
 
         public void ArkaPlanaGecti() { }
+
+        public GeriEkrani GeriTuru => GeriEkrani.OnlineMenu;
+
+        public void CikisSor() { }
     }
 }

@@ -21,7 +21,7 @@ namespace TheLighter.Istemci
     /// (EkranDurumu.Anahtar) ilgili parçayı baştan kurar, değişmediyse sadece süreleri günceller.
     /// Online'da ayrıca: kısa bildirimler (sıra atlandı, AFK...), "Buradayım" düğmesi, "oyuncular bekleniyor" katmanı.
     /// </summary>
-    public sealed class OyunEkrani : IEkran, IOnlineEkran, IYanliEkran, IYenidenKurulur
+    public sealed class OyunEkrani : IEkran, IOnlineEkran, IYanliEkran, IYenidenKurulur, IGeriTusu
     {
         const float BildirimSn = 3.5f;
 
@@ -36,6 +36,11 @@ namespace TheLighter.Istemci
         readonly SohbetPaneli sohbet;
         readonly Button sohbetDugmesi;
         readonly OyuncuSutunu oyuncuSutunu;
+        /// <summary>Online, telefonda: oyun menüsündeki "Oyuncular" katmanı (PC'de sol sütun hep açık).</summary>
+        readonly VisualElement oyuncuPerdesi;
+        readonly OyuncuSutunu telefonSutunu;
+        /// <summary>Online: engelle / raporla (oyuncu listesinde ve sohbette uzun bas).</summary>
+        readonly OyuncuIslemleri islemler;
         /// <summary>Casus: liste, rolüm (online), "Mekânı biliyorum". Diğer oyunlarda null.</summary>
         readonly CasusSeridi casusSeridi;
         /// <summary>Online, Çakmak Gecesi: "Rolüm" (rol kartı ve bütün bulgular).</summary>
@@ -80,13 +85,27 @@ namespace TheLighter.Istemci
             ustCubuk.Add(Esnek());
             durumYazisi = Yazi("", "ust-cubuk-yazi", "ust-cubuk-durum");
             ustCubuk.Add(durumYazisi);
+            if (online != null) islemler = new OyuncuIslemleri(online.Istemci);
             if (online != null && OnlineYonetici.SohbetVar)
             {
-                sohbet = online.SohbetPaneliKur();
+                sohbet = online.SohbetPaneliKur(islemler.Ac);
                 sohbetDugmesi = Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk");
                 ustCubuk.Add(sohbetDugmesi);
             }
-            if (online != null) oyuncuSutunu = new OyuncuSutunu(online.Istemci);
+            if (online != null)
+            {
+                oyuncuSutunu = new OyuncuSutunu(online.Istemci, islemler.Ac);
+                telefonSutunu = new OyuncuSutunu(online.Istemci, islemler.Ac);
+                oyuncuPerdesi = Kutu("menu-perde", "gizli");
+                var oyuncuKutu = Kutu("menu-kutu");
+                var oyuncuKaydirma = new ScrollView(ScrollViewMode.Vertical);
+                oyuncuKaydirma.AddToClassList("kaydirma");
+                oyuncuKaydirma.Add(telefonSutunu.Kok);
+                oyuncuKutu.Add(oyuncuKaydirma);
+                oyuncuKutu.Add(Yazi(Metin.Al("rapor.liste_ipucu"), "ipucu"));
+                oyuncuKutu.Add(Buton(Metin.Al("genel.kapat"), () => oyuncuPerdesi.AddToClassList("gizli"), "buton-birincil"));
+                oyuncuPerdesi.Add(oyuncuKutu);
+            }
             if (online != null && akis.Ayarlar.Oyun == OyunTuru.CakmakGecesi)
             {
                 rolPerdesi = Kutu("menu-perde", "gizli");
@@ -114,6 +133,7 @@ namespace TheLighter.Istemci
             afkKutu.Add(Yazi(Metin.Al("online.afk_aciklama"), "aciklama"));
             afkKutu.Add(Buton(Metin.Al("online.buradayim"), Buradayim, "buton-birincil", "buton-buyuk"));
             afkKatmani.Add(afkKutu);
+            Kapanmaz(afkKatmani);
             Kok.Add(afkKatmani);
 
             beklemeKatmani = Kutu("menu-perde", "gizli");
@@ -122,17 +142,22 @@ namespace TheLighter.Istemci
             beklemeYazisi = Yazi("", "aciklama");
             bekKutu.Add(beklemeYazisi);
             beklemeKatmani.Add(bekKutu);
+            Kapanmaz(beklemeKatmani);
             Kok.Add(beklemeKatmani);
 
             ayarlar = new AyarlarPaneli(uygulama);
             menu = MenuKur();
+            // Geri tuşu menüyü kapatınca elden elede süre yeniden işlesin.
+            Kapaninca(menu, MenuyuKapat);
             Kok.Add(menu);
             Kok.Add(ayarlar.Kok);
-            onayPerdesi = Kutu("menu-perde", "gizli");
-            Kok.Add(onayPerdesi);
+            if (oyuncuPerdesi != null) Kok.Add(oyuncuPerdesi);
             if (sohbet != null) Kok.Add(sohbet.Kok);
             if (casusSeridi != null) Kok.Add(casusSeridi.Perde);
             if (rolPerdesi != null) Kok.Add(rolPerdesi);
+            if (islemler != null) Kok.Add(islemler.Kok);
+            onayPerdesi = Kutu("menu-perde", "gizli");
+            Kok.Add(onayPerdesi);
 
             if (onlineAkis != null)
                 Kok.RegisterCallback<PointerDownEvent>(_ => { if (onlineAkis.BenAfkyim) Buradayim(); }, TrickleDown.TrickleDown);
@@ -148,6 +173,8 @@ namespace TheLighter.Istemci
 
             sohbet?.Guncelle(gecenSn);
             oyuncuSutunu?.Guncelle();
+            telefonSutunu?.Guncelle();
+            islemler?.Guncelle();
             // Online, Çakmak Gecesi: sabah/linç/suikast duyurusu, olaydan sonraki durum gelince (açılan roller onda).
             if (bekleyenDuyurular.Count > 0 && (online?.Istemci.SonDurum?.Surum ?? -1) != duyuruSurumu)
             {
@@ -441,6 +468,8 @@ namespace TheLighter.Istemci
                     LobiyeDon), "buton-ikincil");
                 lobi.AddToClassList("menu-kurucu");
                 kaydirma.Add(lobi);
+                // Telefonda oyuncu listesi (engelle / raporla buradan); PC'de sol sütunda hep açık.
+                kaydirma.Add(Buton(Metin.Al("lobi.oyuncular"), OyunculariAc, "buton-ikincil"));
                 kaydirma.Add(Buton(Metin.Al("online.ayril"), () => online?.Ayril(), "buton-ikincil"));
                 kaydirma.Add(Buton(Metin.Al("menu.cikis"), () => Onayla("oyun.cikis_soru", "oyun.cikis_ipucu_online", "oyun.cikis_evet",
                     uygulama.OyundanCik), "buton-ikincil"));
@@ -474,6 +503,32 @@ namespace TheLighter.Istemci
             kutu.Add(Buton(Metin.Al("genel.geri"), () => onayPerdesi.AddToClassList("gizli"), "buton-ikincil"));
             onayPerdesi.Add(kutu);
             onayPerdesi.RemoveFromClassList("gizli");
+            onayPerdesi.BringToFront();
+        }
+
+        void OyunculariAc()
+        {
+            if (oyuncuPerdesi == null) return;
+            MenuyuKapat();
+            oyuncuPerdesi.RemoveFromClassList("gizli");
+            oyuncuPerdesi.BringToFront();
+        }
+
+        public GeriEkrani GeriTuru => GeriEkrani.Oyun;
+
+        /// <summary>
+        /// Geri tuşu oyunda (açık katman yokken): "Oyundan çıkılsın mı?". Elden elede menü de açılır, süre durur;
+        /// soru geri tuşuyla kapanırsa menü kalır, bir daha basınca o da kapanır ve süre işler.
+        /// Online'da evet: odadan ayrılır.
+        /// </summary>
+        public void CikisSor()
+        {
+            if (!akis.Online)
+            {
+                MenuyuAc();
+                Onayla("oyun.geri_soru", "oyun.geri_ipucu_elden", "oyun.geri_evet", uygulama.AnaMenu);
+            }
+            else Onayla("oyun.geri_soru", "oyun.geri_ipucu_online", "oyun.geri_evet", () => online?.Ayril());
         }
 
         void MenuyuAc()

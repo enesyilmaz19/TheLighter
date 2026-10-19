@@ -862,3 +862,38 @@ sohbet.yazamaz.gece,"Gece: herkes uyuyor, genel sohbet kapalı.","Night: everyon
 sohbet.yazamaz.olu,"Öldün: buraya yazamazsın, okursun. Ölüler sekmesinde yazabilirsin.",You're dead: you can read but not write here. Use the Dead tab.
 sohbet.yazamaz.susturuldu,Susturuldun: bugün yazamazsın.,You've been silenced: no chatting today.
 sohbet.yazamaz.katil,Katil kanalına sadece gece yazılır.,The killers' channel is open only at night.
+hata.RAPOR_YAZILAMADI,"Rapor gönderilemedi, tekrar dene.","Couldn't send the report, try again."
+online.sunucu_yok,Online oyun yakında: sunucu henüz hazır değil. Elden ele oynayabilirsin.,Online play is coming soon: the server isn't ready yet. You can play pass-and-play.
+ayarlar.yasal,Yasal,Legal
+sartlar.kullanim,Kullanım Şartları,Terms of Use
+sartlar.gizlilik,Gizlilik Politikası,Privacy Policy
+sartlar.yakinda,{0} (yakında),{0} (coming soon)
+sartlar.baslik,Hoş geldin!,Welcome!
+sartlar.metin,"Oyunda yazdıklarından sen sorumlusun. Zorbalık, nefret, tehdit, cinsel içerik ve başkasının bilgilerini ifşa etmek yasak; kuralları çiğneyen odadan atılır ya da engellenir. Rahatsız olursan oyuncuyu engelleyebilir ya da raporlayabilirsin.","You're responsible for what you write in the game. Bullying, hate, threats, sexual content and exposing other people's information are not allowed; anyone who breaks the rules gets kicked from the room or blocked. If someone bothers you, you can block or report them."
+sartlar.devam,Devam ederek Kullanım Şartları'nı kabul etmiş ve Gizlilik Politikası'nı okumuş olursun. 13 yaş ve üstü içindir.,"By continuing, you accept the Terms of Use and confirm you've read the Privacy Policy. For ages 13 and up."
+sartlar.kabul,Kabul ediyorum,I accept
+lobi.cik_soru,Odadan ayrılsın mı?,Leave the room?
+lobi.cik_ipucu,Aynı kodla yeniden katılabilirsin.,You can join again with the same code.
+lobi.cik_evet,"Evet, ayrıl","Yes, leave"
+oyun.geri_soru,Oyundan çıkılsın mı?,Leave the game?
+oyun.geri_ipucu_elden,"Oyun biter, ana menüye dönersiniz.",The game ends and you go back to the main menu.
+oyun.geri_ipucu_online,"Odadan ayrılırsın, bu oyuna geri dönemezsin.",You'll leave the room and can't come back to this game.
+oyun.geri_evet,"Evet, çık","Yes, leave"
+rapor.engelle,Engelle,Block
+rapor.engeli_kaldir,Engeli kaldır,Unblock
+rapor.engel_ipucu,"Mesajlarını görmeyeceksin, oyun aynen sürer.",You won't see their messages; the game goes on as usual.
+rapor.engelli_ipucu,"Engelledin: mesajlarını görmüyorsun, oyun aynen sürüyor.",Blocked: you don't see their messages; the game goes on as usual.
+rapor.raporla,Raporla,Report
+rapor.onay,Bu odada gördüğün son mesajlar incelenmek üzere kaydedilecek. Raporladığın kişi bunu bilmeyecek.,The last messages you saw in this room will be saved for review. The person you report won't know.
+rapor.gidiyor,Gönderiliyor…,Sending…
+rapor.alindi,"Rapor alındı, teşekkürler.","Report received, thank you."
+rapor.engellemek_ister_misin,Engellemek ister misin?,Do you want to block them?
+rapor.gonderilemedi,"Rapor gönderilemedi, tekrar dene.","Couldn't send the report, try again."
+rapor.tekrar,Tekrar dene,Try again
+rapor.engelli_etiket,engelli,blocked
+rapor.liste_ipucu,Engellemek ya da raporlamak için oyuncunun yanındaki … düğmesine bas.,"To block or report, tap … next to a player."
+kart.paylas,Paylaş,Share
+kart.paylas_baslik,Kartı paylaş,Share the card
+kart.paylas_metin,{0} · gizli sorulu parti oyunu: {1},{0} · the secret question party game: {1}
+kart.paylasilamadi,Paylaşılamadı.,Couldn't share.
+kart.play,Google Play'de: {0},On Google Play: {0}

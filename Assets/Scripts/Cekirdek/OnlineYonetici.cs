@@ -62,10 +62,10 @@ namespace TheLighter.Istemci
     public sealed class OnlineYonetici
     {
         /// <summary>
-        /// Yerel deneme adresi (Sunucu/Cakmak.Sunucu, dotnet run). Yayındaki adres koda yazılmaz:
-        /// online menüsündeki "Sunucu" alanından girilir ve cihazda saklanır.
+        /// Editör ya da geliştirme build'i: online menüsünde "Sunucu" alanı görünür, girilen adres cihazda saklanır.
+        /// Yayın build'inde adres hep <see cref="SunucuAdresi.Yayin"/> (karar 29).
         /// </summary>
-        public const string YerelAdres = "ws://localhost:5000/ws";
+        public static bool Gelistirme => Application.isEditor || Debug.isDebugBuild;
         const string KayitSunucu = "online.sunucu";
         const string KayitSonIsim = "online.son_isim";
 
@@ -110,8 +110,10 @@ namespace TheLighter.Istemci
         }
 
         /// <summary>Lobi, bekleme odası ya da oyun ekranına eklenecek sohbet paneli.</summary>
-        public SohbetPaneli SohbetPaneliKur() =>
-            new SohbetPaneli(Sohbet, SohbetGonder, SohbetKisileri, () => Istemci.Sen, AdliKanallar, YazamazNedeni);
+        /// <param name="kisiIslem">Mesaja uzun basınca: engelle / raporla (<see cref="OyuncuIslemleri.Ac"/>).</param>
+        public SohbetPaneli SohbetPaneliKur(Action<OyuncuId, string> kisiIslem = null) =>
+            new SohbetPaneli(Sohbet, SohbetGonder, SohbetKisileri, () => Istemci.Sen, AdliKanallar, YazamazNedeni,
+                kisiIslem, Istemci.EngelliMi, () => Istemci.EngelSurumu);
 
         /// <summary>Lobide son görülen ayarlar (oyun ekranı mod ve öneriler için kullanır).</summary>
         public OdaAyarlari SonAyarlar => sonAyarlar;
@@ -127,29 +129,18 @@ namespace TheLighter.Istemci
             Istemci.OlayGeldi += o => (uygulama.Ekran as IOnlineEkran)?.OlayGeldi(o);
         }
 
-        public string SunucuAdresi
-        {
-            get
-            {
-                var s = kalici.Oku(KayitSunucu);
-                return string.IsNullOrWhiteSpace(s) ? YerelAdres : s;
-            }
-        }
+        /// <summary>Bağlanılacak adres: yayında sabit, geliştirmede "Sunucu" alanındaki (yoksa yerel sunucu).</summary>
+        public string Adres => SunucuAdresi.Sec(Gelistirme, kalici.Oku(KayitSunucu));
 
-        /// <summary>ws:// ya da wss:// adresi kaydeder. Bozuksa false.</summary>
-        public bool SunucuAdresiKaydet(string adres)
+        /// <summary>Bağlanılacak bir sunucu var mı. Yayın adresi boşken (VPS gelmeden) yayın build'inde yok.</summary>
+        public bool SunucuVar => SunucuAdresi.Gecerli(Adres, out _);
+
+        /// <summary>Geliştirmede: ws:// ya da wss:// adresi kaydeder. Bozuksa ya da yayın build'iyse false.</summary>
+        public bool AdresKaydet(string adres)
         {
-            if (!AdresGecerli(adres, out _)) return false;
+            if (!Gelistirme || !SunucuAdresi.Gecerli(adres, out _)) return false;
             kalici.Yaz(KayitSunucu, adres.Trim());
             return true;
-        }
-
-        public static bool AdresGecerli(string adres, out Uri uri)
-        {
-            uri = null;
-            if (string.IsNullOrWhiteSpace(adres)) return false;
-            if (!Uri.TryCreate(adres.Trim(), UriKind.Absolute, out uri)) return false;
-            return uri.Scheme == "ws" || uri.Scheme == "wss";
         }
 
         public string SonIsim
@@ -160,14 +151,14 @@ namespace TheLighter.Istemci
 
         public void OdaKur(string isim)
         {
-            if (!AdresGecerli(SunucuAdresi, out var uri)) return;
+            if (!SunucuAdresi.Gecerli(Adres, out var uri)) return;
             SonIsim = isim;
             Istemci.OdaKur(uri, isim);
         }
 
         public void Katil(string kod, string isim)
         {
-            if (!AdresGecerli(SunucuAdresi, out var uri)) return;
+            if (!SunucuAdresi.Gecerli(Adres, out var uri)) return;
             SonIsim = isim;
             Istemci.Katil(uri, kod, isim);
         }

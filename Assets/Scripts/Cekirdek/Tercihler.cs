@@ -51,6 +51,21 @@ namespace TheLighter.Istemci
             }
         }
 
+        /// <summary>
+        /// Kabul edilen kullanım şartlarının sürümü (hiç kabul edilmediyse 0). <see cref="TheLighter.Akis.Sartlar"/>.
+        /// </summary>
+        public static int KabulEdilenSartlar
+        {
+            get => PlayerPrefs.GetInt(KayitSartlar, 0);
+            set
+            {
+                PlayerPrefs.SetInt(KayitSartlar, value);
+                PlayerPrefs.Save();
+            }
+        }
+
+        const string KayitSartlar = "sartlar.kabul";
+
         /// <summary>Açılışta ve ses değişince: genel ses seviyesi.</summary>
         public static void Uygula() => AudioListener.volume = SesSeviyesi;
     }

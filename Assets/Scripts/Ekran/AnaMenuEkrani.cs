@@ -1,14 +1,16 @@
+using TheLighter.Akis;
 using UnityEngine.UIElements;
 using static TheLighter.Istemci.Arayuz;
 
 namespace TheLighter.Istemci
 {
     /// <summary>Ana menü: elden ele, online, nasıl oynanır, ayarlar (ses, müzik, dil), oyundan çık.</summary>
-    public sealed class AnaMenuEkrani : IEkran, IYenidenKurulur
+    public sealed class AnaMenuEkrani : IEkran, IYenidenKurulur, IGeriTusu
     {
         readonly Uygulama uygulama;
         readonly VisualElement nasil;
         readonly AyarlarPaneli ayarlar;
+        readonly OnayPerdesi onay = new OnayPerdesi();
 
         public VisualElement Kok { get; }
 
@@ -43,7 +45,13 @@ namespace TheLighter.Istemci
             nasil.Add(kutu);
             Kok.Add(nasil);
             Kok.Add(ayarlar.Kok);
+            Kok.Add(onay.Kok);
         }
+
+        public GeriEkrani GeriTuru => GeriEkrani.AnaMenu;
+
+        /// <summary>Geri tuşu ana menüde: uygulamadan çıkılsın mı? (habersiz kapanmaz).</summary>
+        public void CikisSor() => onay.Sor("oyun.cikis_soru", "oyun.cikis_ipucu", "oyun.cikis_evet", uygulama.OyundanCik);
 
         public IEkran YenidenKur()
         {

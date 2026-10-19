@@ -12,7 +12,7 @@ namespace TheLighter.Istemci
     /// grubun hafızası ve "Bizim paket" görünür. Temiz modda sadece Aile Dostu ve en fazla Hafif ceza.
     /// Takım Düellosu'nda isimlerin altında takım dağıtma (dokun: takım değiştir, boşsa rastgele).
     /// </summary>
-    public sealed class KurulumEkrani : IEkran
+    public sealed class KurulumEkrani : IEkran, IGeriTusu
     {
         // Oyuncu sınırları kural motorundan. İsim uzunluğu sadece ekrana sığsın diye.
         // Çakmak Gecesi 6–18, diğer oyunlar 4–10 (kural motorunun sabitleri).
@@ -552,5 +552,9 @@ namespace TheLighter.Istemci
         public void Guncelle(float gecenSn) { }
 
         public void ArkaPlanaGecti() { }
+
+        public GeriEkrani GeriTuru => GeriEkrani.Kurulum;
+
+        public void CikisSor() { }
     }
 }

@@ -222,12 +222,29 @@ namespace TheLighter.Istemci
             var durum = Yazi("", "ipucu");
             butonlar.Add(Buton(Metin.Al("genel.geri"), () => kartPerdesi.AddToClassList("gizli"), "buton-ikincil"));
             butonlar.Add(Esnek());
-            butonlar.Add(Buton(Metin.Al("kart.kaydet"), () =>
+            if (Paylasim.Var)
             {
-                durum.text = "";
-                uygulama.EkranGoruntusuKaydet(butonlar, yol =>
-                    durum.text = yol != null ? Metin.Al("kart.kaydedildi", yol) : Metin.Al("kart.kaydedilemedi"));
-            }, "buton-birincil"));
+                // Telefonda: kartın görüntüsü telefonun paylaşma menüsüyle (Instagram, WhatsApp) gider (Ana Plan 8.6).
+                butonlar.Add(Buton(Metin.Al("kart.paylas"), () =>
+                {
+                    durum.text = "";
+                    uygulama.EkranGoruntusuKaydet(butonlar, yol =>
+                    {
+                        string metin = Metin.Al("kart.paylas_metin", Metin.Al("menu.baslik"), Baglantilar.PlaySayfasi);
+                        if (yol == null || !Paylasim.ResimPaylas(yol, metin, Metin.Al("kart.paylas_baslik")))
+                            durum.text = Metin.Al("kart.paylasilamadi");
+                    });
+                }, "buton-birincil"));
+            }
+            else
+            {
+                butonlar.Add(Buton(Metin.Al("kart.kaydet"), () =>
+                {
+                    durum.text = "";
+                    uygulama.EkranGoruntusuKaydet(butonlar, yol =>
+                        durum.text = yol != null ? Metin.Al("kart.kaydedildi", yol) : Metin.Al("kart.kaydedilemedi"));
+                }, "buton-birincil"));
+            }
             kartPerdesi.Add(butonlar);
             kartPerdesi.Add(durum);
             kartPerdesi.RemoveFromClassList("gizli");
@@ -260,6 +277,8 @@ namespace TheLighter.Istemci
 
             kart.Add(Esnek());
             kart.Add(Yazi(Metin.Al("kart.alt"), "ipucu", "orta"));
+            // Oyunu bulmak isteyen için (Steam linki yerine Play; mağaza sayfası açılınca çalışır).
+            kart.Add(Yazi(Metin.Al("kart.play", Metin.Al("menu.baslik")), "ipucu", "orta"));
             return kart;
         }
     }

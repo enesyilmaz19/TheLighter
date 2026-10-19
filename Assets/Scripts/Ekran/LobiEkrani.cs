@@ -17,7 +17,7 @@ namespace TheLighter.Istemci
     /// PC'de geniş pencerede oyuncular solda, sohbet sağda (Ana Plan 6.2).
     /// Takım Düellosu'nda takımlar herkese görünür; kurucu dokunarak dağıtır, "Rastgele" dağılımı siler.
     /// </summary>
-    public sealed class LobiEkrani : IEkran, IOnlineEkran, IYanliEkran, IYenidenKurulur
+    public sealed class LobiEkrani : IEkran, IOnlineEkran, IYanliEkran, IYenidenKurulur, IGeriTusu
     {
         static readonly OyunModu[] ModSecenekleri = { OyunModu.Normal, OyunModu.Temiz, OyunModu.Curcuna };
         static readonly MiniOyunTuru[] MiniSecenekleri = { MiniOyunTuru.Tkm, MiniOyunTuru.TekCift, MiniOyunTuru.Zar, MiniOyunTuru.Karisik };
@@ -46,6 +46,9 @@ namespace TheLighter.Istemci
         readonly AyarlarPaneli ayarlar;
         readonly VisualElement oyuncuBolumu;
         readonly VisualElement oyuncuYeri;
+        readonly OyuncuIslemleri islemler;
+        readonly OnayPerdesi onay = new OnayPerdesi();
+        int sonEngel = -1;
         Button bizimButon;      // AyarlariKur kurar
         Label bizimDurum;
         GrupDosyasi grup;
@@ -72,9 +75,10 @@ namespace TheLighter.Istemci
             ust.Add(Esnek());
             ayarlar = new AyarlarPaneli(uygulama);
             ust.Add(Buton(Metin.Al("menu.ayarlar"), ayarlar.Ac, "buton-kucuk"));
+            islemler = new OyuncuIslemleri(online.Istemci);
             if (OnlineYonetici.SohbetVar)
             {
-                sohbet = online.SohbetPaneliKur();
+                sohbet = online.SohbetPaneliKur(islemler.Ac);
                 sohbetDugmesi = Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk");
                 ust.Add(sohbetDugmesi);
             }
@@ -125,6 +129,8 @@ namespace TheLighter.Istemci
             Kok.Add(atPerdesi);
             Kok.Add(ayarlar.Kok);
             if (sohbet != null) Kok.Add(sohbet.Kok);
+            Kok.Add(islemler.Kok);
+            Kok.Add(onay.Kok);
 
             Yenile();
         }
@@ -467,6 +473,8 @@ namespace TheLighter.Istemci
                 satir.Add(Esnek());
                 if (Kurucu && o.Id != Istemci.Sen)
                     satir.Add(Buton(Metin.Al("lobi.at"), () => AtSor(oyuncu), "buton-kucuk"));
+                // Engelle / Raporla: "…" ya da uzun bas (kendinde yok).
+                OyuncuIslemleri.SatiraEkle(satir, Istemci, o.Id, o.Isim, islemler.Ac);
                 oyuncuListesi.Add(satir);
             }
         }
@@ -495,6 +503,7 @@ namespace TheLighter.Istemci
             var d = D;
             if (d == null || d.Yer != OdaYeri.Lobi || d.Ayarlar == null) return;
             sonSurum = d.Surum;
+            sonEngel = Istemci.EngelSurumu;
 
             kodYazisi.text = d.Oda ?? Istemci.Oda ?? "";
             GrubuBul(d);
@@ -596,6 +605,8 @@ namespace TheLighter.Istemci
                 yukleyici?.DurumGeldi(D.Surum);
                 Yenile();
             }
+            else if (Istemci.EngelSurumu != sonEngel) Yenile();
+            islemler.Guncelle();
             if (yukleyici != null)
             {
                 yukleyici.Ilerle(gecenSn);
@@ -605,6 +616,11 @@ namespace TheLighter.Istemci
         }
 
         public void ArkaPlanaGecti() { }
+
+        public GeriEkrani GeriTuru => GeriEkrani.Lobi;
+
+        /// <summary>Geri tuşu lobide: odadan ayrılsın mı? (kodla yeniden katılınabilir).</summary>
+        public void CikisSor() => onay.Sor("lobi.cik_soru", "lobi.cik_ipucu", "lobi.cik_evet", online.Ayril);
 
         public void HataGeldi(HataMesaji h)
         {

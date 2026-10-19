@@ -597,5 +597,83 @@ namespace TheLighter.Testler
 
             a.Istemci.Ayril();
         }
+
+        /// <summary>
+        /// Rapor ve engelleme gerçek sunucuyla (tasks/g2-android.md 6): engellenenin genel mesajı ve DM'i gelmez, o yine seni görür;
+        /// rapor <c>raporAlindi</c> ile döner; engel kaldırılınca mesajlar yine gelir.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Rapor_Engelleme()
+        {
+            var a = new DenemeBotu("Engelleyen", 1);
+            var b = new DenemeBotu("Engellenen", 2);
+            var saat = Stopwatch.StartNew();
+            double son = 0;
+            var raporlar = new List<KeyValuePair<OyuncuId, bool>>();
+            a.Istemci.RaporCevabi += (kim, alindi) => raporlar.Add(new KeyValuePair<OyuncuId, bool>(kim, alindi));
+
+            IEnumerator Bekle(Func<bool> kosul, string ne, double sn = 10)
+            {
+                double bitis = saat.Elapsed.TotalSeconds + sn;
+                while (!kosul())
+                {
+                    double g = saat.Elapsed.TotalSeconds - son;
+                    son = saat.Elapsed.TotalSeconds;
+                    a.Guncelle(g);
+                    b.Guncelle(g);
+                    if (a.Istemci.Durum == BaglantiDurumu.Kapali) Assert.Ignore("Yerel sunucu çalışmıyor.");
+                    if (saat.Elapsed.TotalSeconds > bitis) Assert.Fail(ne + " olmadı. a:" + a.SonHata + " b:" + b.SonHata);
+                    yield return null;
+                }
+            }
+
+            IEnumerator Dur(double sn)
+            {
+                double bitis = saat.Elapsed.TotalSeconds + sn;
+                yield return Bekle(() => saat.Elapsed.TotalSeconds >= bitis, "Bekleme", sn + 5);
+            }
+
+            a.Istemci.OdaKur(Adres, a.Isim);
+            yield return Bekle(() => a.Istemci.Durum == BaglantiDurumu.Odada, "Oda kurma");
+            b.Istemci.Katil(Adres, a.Istemci.Oda, b.Isim);
+            yield return Bekle(() => b.Istemci.Durum == BaglantiDurumu.Odada && a.Istemci.SonDurum?.Oyuncular.Count == 2, "Katılma");
+            var aId = a.Istemci.Sen.Value;
+            var bId = b.Istemci.Sen.Value;
+
+            // a, b'yi engeller: liste sunucudan döner.
+            Assert.That(a.Istemci.Engelle(bId), Is.True);
+            yield return Bekle(() => a.Istemci.EngelliMi(bId), "Engel listesi");
+
+            // b'nin genel mesajı ve DM'i a'ya gelmez (b kendi mesajını görür: sunucu yazana yollar).
+            Assert.That(b.Istemci.SohbetGonder(null, "beni görüyor musun"), Is.True);
+            yield return Bekle(() => b.Istemci.Sohbet.Mesajlar(null).Count == 1, "Engellenenin kendi mesajı");
+            yield return Dur(1.2);
+            Assert.That(b.Istemci.SohbetGonder(aId, "dm de gitmez"), Is.True);
+            yield return Bekle(() => b.Istemci.Sohbet.Mesajlar(aId).Count == 1, "Engellenenin kendi DM'i");
+            yield return Dur(1.0);
+            Assert.That(a.Istemci.Sohbet.Mesajlar(null), Is.Empty, "engellenenin genel mesajı gelmez");
+            Assert.That(a.Istemci.Sohbet.Mesajlar(bId), Is.Empty, "engellenenin DM'i gelmez");
+
+            // Engelleyen yazmaya devam eder, engellenen onu görür.
+            Assert.That(a.Istemci.SohbetGonder(null, "ben yazarım"), Is.True);
+            yield return Bekle(() => b.Istemci.Sohbet.Mesajlar(null).Count == 2, "Engelleyenin mesajı engellenene");
+
+            // Rapor: raporAlindi döner (sunucu diske yazamazsa RAPOR_YAZILAMADI: o zaman sunucunun günlüğüne bak).
+            Assert.That(a.Istemci.Raporla(bId), Is.True);
+            yield return Bekle(() => raporlar.Count == 1, "Rapor cevabı");
+            Assert.That(raporlar[0].Key, Is.EqualTo(bId));
+            Assert.That(raporlar[0].Value, Is.True, "RAPOR_YAZILAMADI: sunucu raporu diske yazamadı");
+
+            // Engel kalkınca mesajlar yine gelir.
+            yield return Dur(1.2);
+            Assert.That(a.Istemci.Engelle(bId, engel: false), Is.True);
+            yield return Bekle(() => a.Istemci.Engellenenler.Count == 0, "Engelin kalkması");
+            yield return Dur(1.2);
+            Assert.That(b.Istemci.SohbetGonder(null, "şimdi?"), Is.True);
+            yield return Bekle(() => a.Istemci.Sohbet.Mesajlar(null).Any(m => m.Kim == bId), "Engel kalkınca mesaj");
+
+            a.Istemci.Ayril();
+            b.Istemci.Ayril();
+        }
     }
 }

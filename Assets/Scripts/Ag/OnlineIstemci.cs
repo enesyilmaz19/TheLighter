@@ -85,6 +85,23 @@ namespace TheLighter.Ag
         /// <summary>Son kabul edilen durum. Odadan çıkınca null.</summary>
         public DurumMesaji SonDurum { get; private set; }
 
+        readonly List<OyuncuId> engellenenler = new List<OyuncuId>();
+        OyuncuId? bekleyenRapor;
+
+        /// <summary>
+        /// Bu odada engellediklerin: sunucunun son <c>engeller</c> listesi. Oda boyunca (kopup dönünce de) kalır,
+        /// odadan çıkınca boşalır. Engellenenin mesajları sunucudan zaten gelmez.
+        /// </summary>
+        public IReadOnlyList<OyuncuId> Engellenenler => engellenenler;
+
+        /// <summary>Engel listesi her değiştiğinde artar: ekran yeniden çizilsin diye.</summary>
+        public int EngelSurumu { get; private set; }
+
+        public bool EngelliMi(OyuncuId kim) => engellenenler.Contains(kim);
+
+        /// <summary>Raporun cevabı: true <c>raporAlindi</c>, false <c>RAPOR_YAZILAMADI</c> (tekrar denenebilir).</summary>
+        public event Action<OyuncuId, bool> RaporCevabi;
+
         public event Action<DurumMesaji> DurumGeldi;
         public event Action<OlayMesaji> OlayGeldi;
         /// <summary>Sohbet mesajı geldi (<see cref="Sohbet"/>'e eklendikten sonra).</summary>
@@ -150,6 +167,7 @@ namespace TheLighter.Ag
             SonDurum = null;
             sira.Clear();
             Sohbet.Temizle();
+            EngelleriTemizle();
             SonGidenSohbet = false;
             denemeSayisi = 0;
             Durum = BaglantiDurumu.Giriyor;
@@ -169,9 +187,19 @@ namespace TheLighter.Ag
             SonDurum = null;
             sira.Clear();
             Sohbet.Temizle();
+            EngelleriTemizle();
             bekleyenIlkMesaj = null;
             Yaz("çıkış: " + neden);
             if (onceki != BaglantiDurumu.Kapali) Ayrildi?.Invoke(neden);
+        }
+
+        /// <summary>Engeller oda boyunca: başka odaya taşınmaz (hesap yok).</summary>
+        void EngelleriTemizle()
+        {
+            bekleyenRapor = null;
+            if (engellenenler.Count == 0) return;
+            engellenenler.Clear();
+            EngelSurumu++;
         }
 
         void Unut()
@@ -203,6 +231,20 @@ namespace TheLighter.Ag
         {
             if (!Gonder(Cevirici.Sohbet(yer, metin))) return false;
             SonGidenSohbet = true;
+            return true;
+        }
+
+        /// <summary>
+        /// Engelle (onaysız, hemen) ya da engeli kaldır. Liste sunucunun <c>engeller</c> cevabıyla güncellenir.
+        /// Kendin ya da odada olmayan: sunucu GECERSIZ_GIRDI der. Odada değilse false.
+        /// </summary>
+        public bool Engelle(OyuncuId kim, bool engel = true) => Gonder(Cevirici.Engelle(kim, engel));
+
+        /// <summary>Raporla. Cevap <see cref="RaporCevabi"/> ile gelir. Odada değilse false.</summary>
+        public bool Raporla(OyuncuId kim)
+        {
+            if (!Gonder(Cevirici.Rapor(kim))) return false;
+            bekleyenRapor = kim;
             return true;
         }
 
@@ -356,6 +398,19 @@ namespace TheLighter.Ag
                     Sohbet.Ekle(sm);
                     SohbetGeldi?.Invoke(sm);
                     break;
+
+                case RaporAlindi r:
+                    if (Durum != BaglantiDurumu.Odada) return;
+                    bekleyenRapor = null;
+                    RaporCevabi?.Invoke(r.Kim, true);
+                    break;
+
+                case EngellerMesaji e:
+                    if (Durum != BaglantiDurumu.Odada) return;
+                    engellenenler.Clear();
+                    engellenenler.AddRange(e.Kimler);
+                    EngelSurumu++;
+                    break;
             }
         }
 
@@ -392,6 +447,16 @@ namespace TheLighter.Ag
                     // Sürüm eski: yeniden denemek işe yaramaz, oyun güncellenene kadar online yok.
                     Cik(NedenGuncelle, unut: false);
                     return;
+                case "RAPOR_YAZILAMADI":
+                    // Raporlama ekranı kendisi söyler ("tekrar dene"); bekleyen yoksa genel hata gibi.
+                    if (bekleyenRapor.HasValue)
+                    {
+                        var kim = bekleyenRapor.Value;
+                        bekleyenRapor = null;
+                        RaporCevabi?.Invoke(kim, false);
+                        return;
+                    }
+                    break;
                 case "COK_HIZLI":
                     // Mesaj hiç işlenmedi. Giriş sırasındaysa biraz sonra yeniden denenir.
                     if (Durum == BaglantiDurumu.Giriyor || Durum == BaglantiDurumu.YenidenBaglaniyor)

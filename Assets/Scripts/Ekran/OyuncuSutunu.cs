@@ -1,3 +1,4 @@
+using System;
 using Cakmak.Kurallar;
 using TheLighter.Ag;
 using UnityEngine.UIElements;
@@ -8,20 +9,25 @@ namespace TheLighter.Istemci
     /// <summary>
     /// PC'de oyun ekranının sol sütunu (Ana Plan 6.2): oyuncular (renk, kurucu, bağlantı, AFK, çıktı) ve
     /// bekleme odasındakiler. Sadece herkese açık alanlar: durum'un oyuncu listeleri. Kural hesaplamaz.
+    /// Telefonda oyun menüsündeki "Oyuncular" katmanında. Her satırda engelle / raporla ("…" ya da uzun bas).
     /// </summary>
     public sealed class OyuncuSutunu
     {
         readonly OnlineIstemci istemci;
+        readonly Action<OyuncuId, string> islem;
         readonly VisualElement liste;
         readonly VisualElement bekleyenBaslik;
         readonly VisualElement bekleyenler;
         int sonSurum = -1;
+        int sonEngel = -1;
 
         public VisualElement Kok { get; }
 
-        public OyuncuSutunu(OnlineIstemci istemci)
+        /// <param name="islem">Engelle / raporla katmanını açar (<see cref="OyuncuIslemleri.Ac"/>). null: yok.</param>
+        public OyuncuSutunu(OnlineIstemci istemci, Action<OyuncuId, string> islem = null)
         {
             this.istemci = istemci;
+            this.islem = islem;
             Kok = Kutu("menu-kutu", "oyuncu-sutunu");
             Kok.Add(Yazi(Metin.Al("lobi.oyuncular"), "alt-baslik"));
             liste = Kutu("isim-listesi");
@@ -36,8 +42,9 @@ namespace TheLighter.Istemci
         public void Guncelle()
         {
             var d = istemci.SonDurum;
-            if (d == null || d.Surum == sonSurum) return;
+            if (d == null || (d.Surum == sonSurum && istemci.EngelSurumu == sonEngel)) return;
             sonSurum = d.Surum;
+            sonEngel = istemci.EngelSurumu;
 
             liste.Clear();
             foreach (var o in d.Oyuncular) liste.Add(Satir(d, o, d.Gorunum));
@@ -74,6 +81,8 @@ namespace TheLighter.Istemci
                 foreach (var sp in g.Supheliler)
                     if (sp == o.Id) { satir.Add(Yazi(Metin.Al("kostebek.supheli_etiket"), "lobi-rozet")); break; }
             satir.EnableInClassList("soluk", (od != null && od.Cikti) || !o.Bagli);
+            satir.Add(Esnek());
+            OyuncuIslemleri.SatiraEkle(satir, istemci, o.Id, o.Isim, islem);
             return satir;
         }
     }

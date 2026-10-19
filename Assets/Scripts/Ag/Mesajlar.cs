@@ -34,6 +34,25 @@ namespace TheLighter.Ag
         public override string ToString() => "hata " + Kod;
     }
 
+    /// <summary><c>raporAlindi</c>: raporun sunucuya yazıldı (aynı kişiyi ikinci kez raporlayınca da gelir). Sadece raporlayana.</summary>
+    public sealed class RaporAlindi : GelenMesaj
+    {
+        public OyuncuId Kim;
+
+        public override string ToString() => "raporAlindi " + Kim;
+    }
+
+    /// <summary>
+    /// <c>engeller</c>: bu odada engellediklerin, tam liste (engelle'ye cevap ve anahtarla dönüşte). Sadece sana.
+    /// Engellenenin sohbet ve DM'leri sunucudan hiç gelmez; oyun aynen sürer.
+    /// </summary>
+    public sealed class EngellerMesaji : GelenMesaj
+    {
+        public List<OyuncuId> Kimler = new List<OyuncuId>();
+
+        public override string ToString() => "engeller " + Kimler.Count;
+    }
+
     /// <summary><c>olay</c>: sadece animasyon ve ses için. Ekran her zaman durum'dan çizilir.</summary>
     public sealed class OlayMesaji : GelenMesaj
     {

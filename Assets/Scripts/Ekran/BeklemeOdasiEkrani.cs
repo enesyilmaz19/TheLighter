@@ -1,4 +1,5 @@
 using TheLighter.Ag;
+using TheLighter.Akis;
 using UnityEngine.UIElements;
 using static TheLighter.Istemci.Arayuz;
 
@@ -9,7 +10,7 @@ namespace TheLighter.Istemci
     /// (oyuncular, tur); soru, görev, seçim hiçbir şey yok. Oyun bitince kurucunun "Tekrar oyna"sını bekler.
     /// Sohbete yazabilir ve DM alabilir (docs/Protokol.md, "Sohbet"). PC'de listeler solda, sohbet sağda.
     /// </summary>
-    public sealed class BeklemeOdasiEkrani : IEkran, IOnlineEkran, IYanliEkran
+    public sealed class BeklemeOdasiEkrani : IEkran, IOnlineEkran, IYanliEkran, IGeriTusu
     {
         readonly OnlineYonetici online;
         readonly Label baslik;
@@ -21,7 +22,10 @@ namespace TheLighter.Istemci
         readonly Button sohbetDugmesi;
         readonly VisualElement listeler;
         readonly VisualElement listeYeri;
+        readonly OyuncuIslemleri islemler;
+        readonly OnayPerdesi onay = new OnayPerdesi();
         int sonSurum = -1;
+        int sonEngel = -1;
 
         public VisualElement Kok { get; }
 
@@ -33,9 +37,10 @@ namespace TheLighter.Istemci
             var ust = Kutu("satir");
             ust.Add(Buton(Metin.Al("lobi.ayril"), online.Ayril, "buton-kucuk"));
             ust.Add(Esnek());
+            islemler = new OyuncuIslemleri(online.Istemci);
             if (OnlineYonetici.SohbetVar)
             {
-                sohbet = online.SohbetPaneliKur();
+                sohbet = online.SohbetPaneliKur(islemler.Ac);
                 sohbetDugmesi = Buton(Metin.Al("sohbet.ac"), sohbet.Ac, "buton-kucuk");
                 ust.Add(sohbetDugmesi);
             }
@@ -64,6 +69,8 @@ namespace TheLighter.Istemci
             hata = Yazi("", "hata");
             Kok.Add(hata);
             if (sohbet != null) Kok.Add(sohbet.Kok);
+            Kok.Add(islemler.Kok);
+            Kok.Add(onay.Kok);
             Yenile();
         }
 
@@ -72,6 +79,7 @@ namespace TheLighter.Istemci
             var d = online.Istemci.SonDurum;
             if (d == null || d.Yer != OdaYeri.BeklemeOdasi) return;
             sonSurum = d.Surum;
+            sonEngel = online.Istemci.EngelSurumu;
 
             if (d.OyunBitti)
             {
@@ -102,6 +110,8 @@ namespace TheLighter.Istemci
                 satir.Add(Yazi(ad, "lobi-isim"));
                 if (d.Kurucu == o.Id) satir.Add(Yazi(Metin.Al("lobi.kurucu"), "lobi-rozet"));
                 if (!o.Bagli) satir.Add(Yazi(Metin.Al("online.baglaniyor_kisa"), "lobi-rozet", "soluk"));
+                satir.Add(Esnek());
+                OyuncuIslemleri.SatiraEkle(satir, online.Istemci, o.Id, o.Isim, islemler.Ac);
                 kutu.Add(satir);
             }
         }
@@ -109,11 +119,17 @@ namespace TheLighter.Istemci
         public void Guncelle(float gecenSn)
         {
             var d = online.Istemci.SonDurum;
-            if (d != null && d.Surum != sonSurum) Yenile();
+            if (d != null && (d.Surum != sonSurum || online.Istemci.EngelSurumu != sonEngel)) Yenile();
             sohbet?.Guncelle(gecenSn);
+            islemler.Guncelle();
         }
 
         public void ArkaPlanaGecti() { }
+
+        public GeriEkrani GeriTuru => GeriEkrani.BeklemeOdasi;
+
+        /// <summary>Geri tuşu bekleme odasında: odadan ayrılsın mı?</summary>
+        public void CikisSor() => onay.Sor("lobi.cik_soru", "lobi.cik_ipucu", "lobi.cik_evet", online.Ayril);
 
         public void HataGeldi(HataMesaji h)
         {

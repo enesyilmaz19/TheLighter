@@ -22,6 +22,9 @@ namespace TheLighter.Istemci
         readonly Func<OyuncuId?> ben;
         readonly Func<IReadOnlyList<SohbetKanali>> adliKanallar;
         readonly Func<SohbetYeri, string> yazamazNedeni;
+        readonly Action<OyuncuId, string> kisiIslem;
+        readonly Func<OyuncuId, bool> engelli;
+        readonly Func<int> engelSurumu;
         readonly Label yazamaz;
         readonly VisualElement sekmeler;
         readonly ScrollView liste;
@@ -48,9 +51,13 @@ namespace TheLighter.Istemci
         /// <param name="yazamazNedeni">
         /// Bu yere şimdi yazılamıyorsa nedeni (Çakmak Gecesi: gece, ölü, susturuldu), yoksa null. Kutu kapanır, neden yazılır.
         /// </param>
+        /// <param name="kisiIslem">Bir mesaja uzun basınca: yazanı engelle / raporla katmanı. null: yok.</param>
+        /// <param name="engelli">Engellediğin biri mi: önceden gelmiş mesajları da gizlenir (yenileri sunucudan gelmez).</param>
+        /// <param name="engelSurumu">Engel listesi değişince artar: liste yeniden çizilir.</param>
         public SohbetPaneli(SohbetDefteri defter, Func<SohbetYeri, string, bool> gonder,
             Func<IReadOnlyList<OdaOyuncusu>> oyuncular, Func<OyuncuId?> ben, Func<IReadOnlyList<SohbetKanali>> adliKanallar = null,
-            Func<SohbetYeri, string> yazamazNedeni = null)
+            Func<SohbetYeri, string> yazamazNedeni = null, Action<OyuncuId, string> kisiIslem = null,
+            Func<OyuncuId, bool> engelli = null, Func<int> engelSurumu = null)
         {
             this.defter = defter;
             this.gonder = gonder;
@@ -58,6 +65,9 @@ namespace TheLighter.Istemci
             this.ben = ben;
             this.adliKanallar = adliKanallar;
             this.yazamazNedeni = yazamazNedeni;
+            this.kisiIslem = kisiIslem;
+            this.engelli = engelli;
+            this.engelSurumu = engelSurumu;
 
             Kok = Kutu("menu-perde", "sohbet", "gizli");
             var kutuKap = Kutu("menu-kutu", "sohbet-kutu");
@@ -171,6 +181,7 @@ namespace TheLighter.Istemci
             foreach (var k in Kanallar()) sb.Append(k).Append(defter.Okunmamis(SohbetYeri.Adli(k))).Append('|');
             foreach (var d in defter.DmKanallari) sb.Append(d).Append(defter.Okunmamis(SohbetYeri.DmIle(d))).Append('|');
             sb.Append(defter.Okunmamis(SohbetYeri.Genel));
+            if (engelSurumu != null) sb.Append('|').Append(engelSurumu());
             return sb.ToString();
         }
 
@@ -209,10 +220,17 @@ namespace TheLighter.Istemci
             cizilenMesaj = mesajlar.Count;
             foreach (var m in mesajlar)
             {
+                // Engellediğinin önceden gelmiş mesajları da görünmez.
+                if (!m.Benim && engelli != null && engelli(m.Kim)) continue;
                 var satir = Kutu("satir", "sohbet-satir");
                 satir.Add(RenkNoktasi(Renk(m.Kim)));
                 var yazi = Yazi(Isim(m.Kim) + ": " + m.Metin, "sohbet-yazi");
                 satir.Add(yazi);
+                if (!m.Benim && kisiIslem != null)
+                {
+                    var kim = m.Kim;
+                    UzunBas(satir, () => kisiIslem(kim, Isim(kim)));
+                }
                 liste.Add(satir);
             }
             liste.schedule.Execute(() => liste.scrollOffset = new Vector2(0, float.MaxValue));

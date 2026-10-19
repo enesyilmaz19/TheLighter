@@ -70,6 +70,7 @@ namespace TheLighter.Ag
         {
             "GECERSIZ_MESAJ", "ODA_YOK", "ODA_DOLU", "OYUN_BASLADI", "ISIM_GECERSIZ", "ODADA_DEGILSIN", "ZATEN_ODADASIN",
             "KURUCU_DEGILSIN", "OYUN_YOK", "ESKI_TUR", "COK_HIZLI", "SUNUCU_DOLU", "ATILDIN", "OYUNDA_DEGILSIN", "GUNCELLE",
+            "RAPOR_YAZILAMADI",
         };
 
         // ------------------------------------------------------------ Gelen
@@ -86,8 +87,30 @@ namespace TheLighter.Ag
                 case "olay": return OlayCoz(m);
                 case "durum": return DurumCoz(m, sen);
                 case "sohbet": return SohbetCoz(m);
+                case "raporAlindi": return RaporAlindiCoz(m);
+                case "engeller": return EngellerCoz(m);
                 default: return null;
             }
+        }
+
+        static GelenMesaj RaporAlindiCoz(JsonDeger m)
+        {
+            var kim = Id(m["kim"]);
+            return kim.HasValue ? new RaporAlindi { Kim = kim.Value } : null;
+        }
+
+        /// <summary>Liste zorunlu (boş olabilir). Bozuk kimlik atlanır, liste düşmez.</summary>
+        static GelenMesaj EngellerCoz(JsonDeger m)
+        {
+            var kimler = m["kimler"];
+            if (kimler.Tur != JsonTuru.Dizi) return null;
+            var e = new EngellerMesaji();
+            foreach (var k in kimler.Elemanlar)
+            {
+                var id = Id(k);
+                if (id.HasValue && !e.Kimler.Contains(id.Value)) e.Kimler.Add(id.Value);
+            }
+            return e;
         }
 
         static GelenMesaj HosgeldinCoz(JsonDeger m)
@@ -667,6 +690,17 @@ namespace TheLighter.Ag
         public static string Buradayim() => Tip("buradayim");
         public static string TekrarOyna() => Tip("tekrarOyna");
         public static string At(OyuncuId kim) => Yaz(new JsonNesne().Ekle("t", "at").Ekle("kim", kim.ToString()));
+
+        /// <summary>Raporla (docs/Protokol.md, "Rapor ve engelleme"). Cevap <c>raporAlindi</c> ya da <c>RAPOR_YAZILAMADI</c>.</summary>
+        public static string Rapor(OyuncuId kim) => Yaz(new JsonNesne().Ekle("t", "rapor").Ekle("kim", kim.ToString()));
+
+        /// <summary>Engelle ya da (<paramref name="engel"/> false) engeli kaldır. Cevap <c>engeller</c>: tam liste.</summary>
+        public static string Engelle(OyuncuId kim, bool engel = true)
+        {
+            var n = new JsonNesne().Ekle("t", "engelle").Ekle("kim", kim.ToString());
+            if (!engel) n.Ekle("engel", false);
+            return Yaz(n);
+        }
 
         static string Tip(string t) => Yaz(new JsonNesne().Ekle("t", t));
 

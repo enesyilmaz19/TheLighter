@@ -132,6 +132,19 @@ namespace TheLighter.Tests
             }
         }
 
+        /// <summary>Kullanım şartları kabul ekranı, geri tuşu soruları, paylaşma (tasks/g2-android.md 3, 6).</summary>
+        [Test]
+        public void MetinTablosunda_TelefonAnahtarlariVar()
+        {
+            string yol = Path.Combine("Assets", "UI", "Resources", "TheLighter", "Metinler.csv");
+            var t = MetinTablosu.CsvOku(File.ReadAllText(yol));
+            foreach (var k in new[] { "sartlar.baslik", "sartlar.metin", "sartlar.devam", "sartlar.kabul", "sartlar.kullanim",
+                         "sartlar.gizlilik", "sartlar.yakinda", "ayarlar.yasal", "oyun.geri_soru", "oyun.geri_ipucu_elden",
+                         "oyun.geri_evet", "oyun.cikis_soru", "oyun.cikis_ipucu", "oyun.cikis_evet", "kart.paylas",
+                         "kart.paylas_baslik", "kart.paylas_metin", "kart.paylasilamadi", "kart.play" })
+                Assert.IsTrue(t.Var(k), "Eksik: " + k);
+        }
+
         [Test]
         public void MetinTablosu_HerMetninIngilizcesiVar()
         {

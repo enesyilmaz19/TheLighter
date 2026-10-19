@@ -118,7 +118,8 @@
     border-radius: 28px;
     padding: 24px 40px;
     margin: 10px 0;
-    min-height: 120px;
+    /* Dokunma alanı: telefonda ~48 dp (genişlik 1080 birim ≈ 360–412 dp). */
+    min-height: 132px;
     font-size: 44px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
@@ -164,7 +165,8 @@
 }
 
 .unity-button.buton-kucuk {
-    min-height: 0;
+    /* Küçük görünür ama parmak için yeterince yüksek (~40 dp). */
+    min-height: 112px;
     padding: 16px 32px;
     margin: 0;
     font-size: 34px;
@@ -241,7 +243,7 @@
 }
 
 .unity-button.secenek {
-    min-height: 100px;
+    min-height: 116px;
     margin: 8px 16px 8px 0;
     padding: 16px 32px;
     font-size: 38px;
@@ -294,7 +296,7 @@
     border-radius: 60px;
     padding: 16px 32px;
     margin: 8px 16px 8px 0;
-    min-height: 0;
+    min-height: 112px;
 }
 
 .unity-button.cip.secili {
@@ -419,6 +421,17 @@
 .ayrac {
     height: 8px;
     background-color: var(--alev);
+}
+
+/* Bölünmüş ekranda iki kişinin parmağı birbirine değmesin: ortada boşluk (~25 dp her yanda). */
+.bolunmus > .ayrac {
+    margin: 40px 0;
+}
+
+/* Oyuncu satırındaki "…" (engelle / raporla). */
+.unity-button.islem-dugmesi {
+    min-width: 112px;
+    margin-left: 12px;
 }
 
 .kok .yari-isim {

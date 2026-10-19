@@ -95,7 +95,7 @@ Protokol: `docs/Protokol.md`, "Rapor ve engelleme". Kısaca: `rapor` ve `engelle
 - **Engelle:** onaysız, hemen; geri alınabilir ("Engeli kaldır"). Engellediklerin `engeller`'den: listede yanında 🚫, sohbette mesajları zaten gelmiyor (sunucu yollamıyor). Oyun aynen sürer; bunu ekranda bir cümleyle söyle ("Mesajlarını görmeyeceksin, oyun aynen sürer").
 - **Raporla:** onay perdesi: "Bu odada gördüğün son mesajlar incelenmek üzere kaydedilecek. Raporladığın kişi bunu bilmeyecek." → `rapor`. `raporAlindi` gelince "Rapor alındı, teşekkürler" ve "Engellemek ister misin?" kısayolu. `RAPOR_YAZILAMADI`'da "Rapor gönderilemedi, tekrar dene".
 - **Elden ele:** sohbet ve kimlik yok, rapor da yok.
-- **Kullanım şartları:** Play, kullanıcı içerik yazmadan önce şartların kabul edilmesini istiyor. Metni Enes yazacak; ekran ilk açılışta bir kez (kabul cihazda saklanır), metin gelene kadar yer tutucu.
+- **Kullanım şartları:** Play, kullanıcı içerik yazmadan önce şartların kabul edilmesini istiyor. Ekranın metni `docs/yasal/KullanimSartlari.md`'nin sonunda ("Uygulama içindeki kabul ekranı"); ilk açılışta bir kez, kabul cihazda saklanır. İki bağlantı (Kullanım Şartları, Gizlilik Politikası): adresler yayınlanınca gelecek, o zamana kadar yer tutucu. Ayarlar menüsünde de iki bağlantı dursun.
 - **Test:** `Cevirici`'de `raporAlindi` ve `engeller`; `SunucuIleOyunTesti`'ne bir adım (bir bot ötekini engeller, mesajı gelmez; raporlar, `raporAlindi` gelir).
 
 ## 7. Bitti ölçütü

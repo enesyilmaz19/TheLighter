@@ -88,7 +88,13 @@ Arda'nın Claude'unun listesinden (2026-10-10). Elden ele (Playtest 1) için hi�
 - [x] **Rapor ve engelleme, sunucu (2026-10-19, Enes'in kararları):** `rapor` raporlayanın gördüğü son 50 metni (sohbet + ifşa olan sorular; güme giden hiç tutulmaz) `Moderasyon` ile `raporlar/yyyy-MM-dd.jsonl`'e yazar, 30 gün; IP yasak listesi `yasakli-ip.txt` (yeniden başlatmasız). `engelle` oda boyunca, isme bağlı, sunucu uygular. VPS: `StateDirectory=/var/lib/cakmak` (ProtectSystem=strict yüzünden şarttı). 9 sunucu testi, 17 bilerek bozmanın hepsi yakalandı; yeni rapor sunucu günlüğüne (sadece oda kodu) düşer. Ekran Arda'da (`g2-android.md` 6)
 - [ ] Google Play kullanıcı içeriği: içerik yazmadan önce kullanım şartları kabulü (metni Enes yazar, ekranı Arda) · şartlarda yasak içerik tanımı · raporlara düzenli bakmak (sürekli moderasyon)
 - [ ] Play formları: gizlilik politikası linki · Veri Güvenliği formu · içerik derecelendirme anketi (kullanıcı içeriği: evet). 13+ olduğu için Families programına girmiyor
-- [ ] KVKK aydınlatma metni (VERBİS'ten muaf olsa da zorunlu). Toplanan veri az: isim, IP, rapor gelirse son 50 mesaj. Kesin hüküm için bir hukukçuya danışılmalı
+- [x] **Yasal metin taslakları (2026-10-19):** `docs/yasal/KullanimSartlari.md` (yasak içerik tanımı, rapor/engelleme/yaptırım, 13+, uygulama içi kabul ekranının metni) ve `docs/yasal/Gizlilik.md` (gizlilik politikası + KVKK aydınlatma metni; koddaki gerçek veri envanteriyle: cihazda, sunucu belleğinde, rapor 30 gün, IP yasak listesi, günlük)
+- [ ] **Yasal metinler, yayından önce:**
+  - Köşeli parantezler: veri sorumlusu (Play hesabı kimin adına: aranızdaki yazılı anlaşma), adres, iletişim için ayrı bir e-posta, tarihler, sunucu günlüğünün saklama süresi (journald `MaxRetentionSec`, ör. 14 gün), barındırma sağlayıcısı ve ülkesi
+  - **Hukukçuya sorulacaklar:** (1) Sunucu yurt dışındaysa (Hetzner: Almanya/Finlandiya) KVKK m. 9 yurt dışına aktarım: standart sözleşme + Kurul'a 5 iş günü içinde bildirim mi, yoksa Türkiye'de bir sağlayıcı mı? (2) 5651 sayılı Kanun: oyun sunucusu "yer sağlayıcı" sayılır mı, trafik bilgisi saklama yükümlülüğü doğar mı? (Bugün IP sadece rapor gelirse saklanıyor.) (3) VERBİS muafiyeti. (4) Satış modeli gelince tüketici hukuku (cayma hakkı, dijital içerik)
+  - Herkese açık adres: Play gizlilik politikası için URL istiyor. Öneri: VPS'in alan adında Caddy'den `/gizlilik` ve `/kullanim-sartlari` (statik sayfa); ya da GitHub Pages
+  - Play Veri Güvenliği formu bu metinden doldurulur: toplanan veri isim, IP, kullanıcı içeriği (mesajlar); amaç uygulama işlevi + dolandırıcılık önleme/güvenlik; paylaşım yok; aktarımda şifreli; silme talebi e-postayla
+  - Sesli sohbet, satın alma ya da analitik eklenirse iki metin de güncellenir
 
 ## S3 — Tekrar oynatma (kurallar G1'de bitti, 2026-10-10)
 

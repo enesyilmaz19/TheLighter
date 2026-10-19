@@ -54,6 +54,12 @@ namespace Cakmak.Sunucu
                 var oda = b.Oda;
                 var t = Protokol.Metin(m, "t");
                 if ((t == "odaKur" || t == "katil") && !sinirlar.GirisIzni(b.Ip)) { b.Yolla(Protokol.Hata("COK_HIZLI")); return; }
+                // surum yoksa null: karşılaştırma false, kabul
+                if ((t == "odaKur" || t == "katil") && Protokol.Sayi(m, "surum", false) < Protokol.EnEskiSurum)
+                {
+                    b.Yolla(Protokol.Hata("GUNCELLE"));
+                    return;
+                }
                 switch (t)
                 {
                     case "odaKur":

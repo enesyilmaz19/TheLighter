@@ -159,7 +159,7 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 - **Roller herkese ayrı:** her mekânda en az 9 rol (10 kişide casus dışında 9 kişi).
 - **Casus oyundan çıkarsa** grup kazanır; oyun zorla biterse (az kişi) casus yakalanmamış sayılır.
 - **Ceza açılabilir;** görev, kaos ve Curcuna kapalı. Temiz'de oynanır: bütün içerik Temiz filtresinden geçiyor (test var).
-- **İçerik taslağı** `Assets/Kurallar/CasusIcerik.cs`: 30 mekân × 9 rol, 5 kategori × 20 kelime. **Enes gözden geçirecek.**
+- **İçerik taslağı** `Assets/Kurallar/CasusIcerik.cs`: 30 mekân × 9 rol, 8 kategori × 20 kelime. Gözden geçirildi (2026-10-17): Şehirler, Ülkeler, Taşıtlar eklendi.
 
 ## 5. Çakmak Gecesi (eski adı Vampir Köylü)
 
@@ -214,7 +214,7 @@ Karar (Enes): bunlar mevcut oyunun ek modları değil, **kendi amacı ve kazanan
 | Seri Katil | Her gece birini öldürür, öldürdüğünün rolü açılmaz. Katillerin ilk saldırısından kurtulur (oyunda 1 kez). Son kalırsa kazanır |
 | Cellat | Başta gizli bir hedefi var (masum tarafından). Hedef linç edilirse kazanır, oyun biter. Hedef başka yoldan ölürse Soytarı olur |
 | Hayatta Kalan | Oyun bitince hayattaysa, kim kazanırsa kazansın o da kazanır |
-| Hırsız | Oyunda 1 kez gece birinin rolünü çalar: o rol (ve tarafı) sabah onun olur, çalınan kendi tarafının düz rolüne düşer (Masum, Katil; tarafsızsa Hayatta Kalan). Çalmadan oyun biterse kaybeder |
+| Hırsız | Oyunda 1 kez gece birini öldürür, sabah onun rolü (ve tarafı) Hırsız'ın olur: kalan hakları, Cellat'ın hedefi, Deli'nin sandığı dahil. Korunan ölmez, hak yine gider; o gece kendisi ölürse rolü alamaz. Rol almadan oyun biterse kaybeder (Enes, 2026-10-18) |
 | Bombacı | Gece birine gizlice bomba koyar ya da (kendini seçerek) patlatır: bombalı herkes ölür. Son kalırsa kazanır (ToS Arsonist) |
 
 ### Çakmağa özel roller (Enes, 2026-10-15)
@@ -275,10 +275,10 @@ Yetenekleri gündüz turuna bağlı: kim kime sordu (A → B), kim kimi gösterd
 
 1. Seçimler toplanır. Tuzakçı işaretler, Susturucu susturur, Palyaço kandırır (ertesi gün için).
 2. Koruyucu korur, Kollayıcı gündüz sorduklarını korur. Fitneci'nin turlarında gösterilenler işaretlenir.
-3. Saldırılar: katillerin kurbanları, Seri Katil, Şerif, Kanunsuz, Bombacı'nın patlatması, Kibritçi, Kundakçı. Korunan ölmez. Seri Katil katillerin ilk saldırısından kurtulur. Siper o gün C olduysa bütün saldırılardan kurtulur. Şerif vurduğu masumsa kendisi de ölür (vurduğu korunsa bile).
+3. Saldırılar: katillerin kurbanları, Seri Katil, Şerif, Kanunsuz, Hırsız, Bombacı'nın patlatması, Kibritçi, Kundakçı. Korunan ölmez. Seri Katil katillerin ilk saldırısından kurtulur. Siper o gün C olduysa bütün saldırılardan kurtulur. Şerif vurduğu masumsa kendisi de ölür (vurduğu korunsa bile).
 4. Bakışlar gecenin başındaki rollere göre: Dedektif, Casus, Bekçi (o gece hedefe yeteneğini kullanan herkes; katillerden sadece kurbanına oy verenler), Falcı, Deli'nin sahte sonuçları; gündüzden bekleyen şüphe bakışları (Sezgici, Sınayıcı, Söndürücü).
 5. Ölümler: Temizlikçi'nin ve Seri Katil'in kurbanının rolü gizli. Cellat'ın hedefi öldüyse Cellat Soytarı olur.
-6. Vampir'in ısırdığı (yaşıyorsa ve masumsa) Katil olur, Hırsız çaldığı rolü alır.
+6. Vampir'in ısırdığı (yaşıyorsa ve masumsa) Katil olur, Hırsız, öldürdüğünün rolünü alır (hedefi bu gece öldüyse; aldığı Cellat'ın hedefi de öldüyse Soytarı olur).
 7. Yeni gün: dünün kayıtları silinir, bu gecenin Hakem ve Söndürücü seçimleri yarına hazırlanır (kullanılmazsa o gün biter).
 
 ### Kazanma (her ölümde ve oyundan çıkışta bakılır)
@@ -307,7 +307,7 @@ Gece telefon herkese tek tek gider, herkes bir seçim yapar; linç Grup Kararı 
 
 ### İçerik
 
-`Assets/Icerik/GeceSorulari.csv` (40 suçlama sorusu): paket değil; bu oyunda öneriler sadece buradan.
+`Assets/Icerik/GeceSorulari.csv` (48 suçlama sorusu): paket değil; bu oyunda öneriler sadece buradan.
 
 ---
 

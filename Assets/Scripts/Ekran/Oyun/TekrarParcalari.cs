@@ -43,7 +43,7 @@ namespace TheLighter.Istemci
         }
 
         /// <summary>
-        /// İsim + herkese açık etiketleri: palyaço cezası; online'da Bağlanıyor…, AFK, Ayrıldı.
+        /// İsim + herkese açık etiketleri: palyaço cezası, şüpheli, can, takım; online'da Bağlanıyor…, AFK, Ayrıldı.
         /// </summary>
         public static string IsimEtiketi(IOyunAkisi akis, Gorunum g, OyuncuId id)
         {
@@ -58,6 +58,8 @@ namespace TheLighter.Istemci
                     if (s == id) { isim += " · " + Metin.Al("kostebek.supheli_etiket"); break; }
                 var can = RusRuleti.CanEtiketi(g, o);
                 if (can != null) isim += " · " + can;
+                var takim = Takim.Etiket(o);
+                if (takim != null) isim += " · " + takim;
                 if (o.Cikti) return isim + " · " + Metin.Al("online.etiket.ayrildi");
                 if (akis is TheLighter.Ag.OnlineAkis online && !online.Bagli(id)) return isim + " · " + Metin.Al("online.etiket.baglaniyor");
                 if (o.Afk) return isim + " · " + Metin.Al("online.etiket.afk");

@@ -98,11 +98,15 @@ namespace TheLighter.Istemci
             }
 
             Kok.Add(Yazi(Metin.Al("soru.kime"), "alt-baslik"));
+            // Takım Düellosu: rakibe mi soracaksın, takım arkadaşına mı? Herkesin takımı çipte.
+            var takimim = Takim.SeninTakimin(g);
+            if (takimim != null) Kok.Add(takimim);
             var cipKutusu = Kutu("cipler");
             foreach (var id in g.Secilebilir)
             {
                 var secim = id;
                 var cip = OyuncuCipi(Tekrar.IsimEtiketi(akis, g, id), akis.Sira(id), () => { secili = secim; Durum(); });
+                Takim.Boya(cip, g, id);
                 ciptekiler.Add(id);
                 cipler.Add(cip);
                 cipKutusu.Add(cip);

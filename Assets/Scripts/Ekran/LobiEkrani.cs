@@ -15,6 +15,7 @@ namespace TheLighter.Istemci
     /// Kurucu olmayan ayarların özetini görür. "Başlat" en az 4 kişiyle. Reaksiyon online'da yok.
     /// Grubu tanınan kurucu "Bizim paket"i seçebilir: önce sunucuya parça parça yüklenir (Temiz modda yok).
     /// PC'de geniş pencerede oyuncular solda, sohbet sağda (Ana Plan 6.2).
+    /// Takım Düellosu'nda takımlar herkese görünür; kurucu dokunarak dağıtır, "Rastgele" dağılımı siler.
     /// </summary>
     public sealed class LobiEkrani : IEkran, IOnlineEkran, IYanliEkran, IYenidenKurulur
     {
@@ -33,6 +34,7 @@ namespace TheLighter.Istemci
         readonly VisualElement ayarKutusu;
         readonly Label ozet;
         readonly Label oyunTarifi;
+        readonly TakimDagitmaParcasi takimParcasi;
         readonly Label hata;
         readonly Button basla;
         readonly Label baslaIpucu;
@@ -104,6 +106,9 @@ namespace TheLighter.Istemci
             // Seçili oyunun kısa tarifi herkese (kurucu olmayan da ne oynayacağını bilsin).
             oyunTarifi = Yazi("", "ipucu");
             kaydirma.Add(oyunTarifi);
+            // Takım Düellosu: takımlar herkese açık (kurucu olmayan da görür), sadece kurucu değiştirir.
+            takimParcasi = new TakimDagitmaParcasi();
+            kaydirma.Add(takimParcasi.Kok);
 
             ayarKutusu = Kutu("lobi-ayarlar");
             kaydirma.Add(ayarKutusu);
@@ -458,12 +463,48 @@ namespace TheLighter.Istemci
             oyunTarifi.text = Metin.Al("oyun.aciklama." + a.Oyun);
             ozet.EnableInClassList("gizli", Kurucu);
 
+            string takimUyarisi = TakimlariCiz(d);
+
             int kisi = d.Oyuncular.Count;
             basla.EnableInClassList("gizli", !Kurucu);
-            basla.SetEnabled(kisi >= Oyun.EnAzOyuncu);
+            basla.SetEnabled(kisi >= Oyun.EnAzOyuncu && takimUyarisi == null);
             baslaIpucu.text = !Kurucu ? Metin.Al("lobi.kurucu_bekleniyor", Isim(d.Kurucu))
                 : kisi < Oyun.EnAzOyuncu ? Metin.Al("lobi.en_az", kisi, Oyun.EnAzOyuncu)
-                : "";
+                : takimUyarisi ?? "";
+        }
+
+        // ---------- Takımlar (Takım Düellosu) ----------
+
+        static List<OyuncuId> Kisiler(DurumMesaji d)
+        {
+            var l = new List<OyuncuId>();
+            foreach (var o in d.Oyuncular) l.Add(o.Id);
+            return l;
+        }
+
+        /// <summary>Sunucunun dağılımı (lobiden çıkan zaten düşmüş). Takım oyunu değilse gizli. Geçersizse uyarı metni.</summary>
+        string TakimlariCiz(DurumMesaji d)
+        {
+            bool takimli = d.Ayarlar.Oyun == OyunTuru.Takim;
+            takimParcasi.Kok.EnableInClassList("gizli", !takimli);
+            if (!takimli) return null;
+            var kisiler = Kisiler(d);
+            var dag = new TakimDagitimi(d.Ayarlar.Takimlar);
+            dag.Esitle(kisiler);
+            return takimParcasi.Ciz(dag, kisiler, id => Isim(id), id => D.Bul(id)?.Renk ?? 0,
+                Kurucu ? TakimDokun : (Action<OyuncuId>)null,
+                Kurucu ? () => Gonder(Cevirici.AyarDegistir(takimlar: new Dictionary<OyuncuId, int>())) : (Action)null);
+        }
+
+        /// <summary>Dokunulanın takımı değişir; dağılımın tamamı gider (sunucu baştan yazar), ekran gelen durumu çizer.</summary>
+        void TakimDokun(OyuncuId id)
+        {
+            var d = D;
+            if (d?.Ayarlar == null) return;
+            var dag = new TakimDagitimi(d.Ayarlar.Takimlar);
+            dag.Esitle(Kisiler(d));
+            dag.Dokun(id);
+            Gonder(Cevirici.AyarDegistir(takimlar: dag.Dagilim));
         }
 
         string Isim(OyuncuId? id)

@@ -1055,3 +1055,161 @@
 .ayar-bolumu {
     margin: 0;
 }
+
+/* ---------- Takım Düellosu ---------- */
+/* Motor sadece 0 ve 1 bilir; ad ve renk istemcide: 0 Kırmızı, 1 Mavi. */
+:root {
+    --takim-0: #FF5A5F;
+    --takim-0-koyu: #3A1618;
+    --takim-1: #4EA8FF;
+    --takim-1-koyu: #142A44;
+}
+
+.takim-tabela {
+    justify-content: center;
+    align-items: center;
+    margin: 12px 0;
+}
+
+.takim-skor {
+    align-items: center;
+    min-width: 240px;
+    padding: 16px 28px;
+    margin: 0 16px;
+    border-radius: 28px;
+    border-width: 4px;
+}
+
+.takim-skor.takim-0,
+.takim-sutun.takim-0,
+.kostebek-acilis.takim-0 {
+    background-color: var(--takim-0-koyu);
+    border-color: var(--takim-0);
+}
+
+.takim-skor.takim-1,
+.takim-sutun.takim-1,
+.kostebek-acilis.takim-1 {
+    background-color: var(--takim-1-koyu);
+    border-color: var(--takim-1);
+}
+
+.kok .takim-ad {
+    font-size: 36px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin: 0 0 8px 0;
+}
+
+.kok .takim-puan {
+    font-size: 96px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.kok .takim-avans {
+    font-size: 30px;
+    color: var(--yazi-soluk);
+    -unity-text-align: middle-center;
+}
+
+.kok .takim-hedef {
+    -unity-text-align: middle-center;
+}
+
+.kok .takim-0 .takim-ad,
+.kok .takim-0 .takim-puan,
+.kok .takim-ust-puan.takim-0 {
+    color: var(--takim-0);
+}
+
+.kok .takim-1 .takim-ad,
+.kok .takim-1 .takim-puan,
+.kok .takim-ust-puan.takim-1 {
+    color: var(--takim-1);
+}
+
+/* Üst çubuktaki küçük skor */
+.takim-ust {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 24px;
+}
+
+.kok .takim-ust-puan {
+    font-size: 36px;
+    -unity-font-style: bold;
+    margin: 0 8px;
+}
+
+/* Puan anı: "+1 Mavi" */
+.kok .banner.takim-0 {
+    background-color: var(--takim-0-koyu);
+    color: var(--takim-0);
+}
+
+.kok .banner.takim-1 {
+    background-color: var(--takim-1-koyu);
+    color: var(--takim-1);
+}
+
+.puan-ani {
+    transition-property: scale;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-out-back;
+}
+
+.puan-ani-bas {
+    scale: 1.35 1.35;
+}
+
+/* Seçim çipleri: kenar takım renginde; seçili olan yine alev */
+.unity-button.cip.takim-cip.takim-0 {
+    border-color: var(--takim-0);
+}
+
+.unity-button.cip.takim-cip.takim-1 {
+    border-color: var(--takim-1);
+}
+
+.unity-button.cip.takim-cip.secili {
+    border-color: var(--alev);
+}
+
+/* Dağıtma: iki sütun */
+.takim-sutunlar {
+    align-items: flex-start;
+    margin: 8px 0;
+}
+
+.takim-sutun {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-height: 160px;
+    margin: 0 8px;
+    padding: 16px;
+    border-radius: 28px;
+    border-width: 4px;
+}
+
+.takim-takimsiz {
+    margin: 8px 0;
+}
+
+.kok .bildirim.takim-0 {
+    border-color: var(--takim-0);
+    color: var(--takim-0);
+}
+
+.kok .bildirim.takim-1 {
+    border-color: var(--takim-1);
+    color: var(--takim-1);
+}
+
+.kok .lobi-rozet.takim-0 {
+    color: var(--takim-0);
+}
+
+.kok .lobi-rozet.takim-1 {
+    color: var(--takim-1);
+}

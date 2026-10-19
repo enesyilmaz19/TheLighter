@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cakmak.Kurallar;
+using TheLighter.Akis;
 using UnityEngine.UIElements;
 using static TheLighter.Istemci.Arayuz;
 
@@ -9,6 +10,7 @@ namespace TheLighter.Istemci
     /// Elden ele lobisi (Ana Plan 8.8): isimler, mod, mini oyun, tur, paketler, ceza seviyesi,
     /// gizli görevler, kaos turları. En üstte "Hızlı başla". Bugünkü oyuncular kayıtlı bir grupsa
     /// grubun hafızası ve "Bizim paket" görünür. Temiz modda sadece Aile Dostu ve en fazla Hafif ceza.
+    /// Takım Düellosu'nda isimlerin altında takım dağıtma (dokun: takım değiştir, boşsa rastgele).
     /// </summary>
     public sealed class KurulumEkrani : IEkran
     {
@@ -31,6 +33,11 @@ namespace TheLighter.Istemci
         readonly List<TextField> kutular = new List<TextField>();
         readonly List<VisualElement> satirlar = new List<VisualElement>();
         readonly List<Button> silButonlari = new List<Button>();
+        /// <summary>Her satırın kalıcı kimliği (satır silinince diğerlerinin takımı kaymasın). Oyunda p1 = 1. satır.</summary>
+        readonly List<OyuncuId> satirIdleri = new List<OyuncuId>();
+        int sonSatirNo;
+        readonly TakimDagitimi dagitim = new TakimDagitimi();
+        readonly TakimDagitmaParcasi takimParcasi;
         readonly List<Button> oyunButonlari = new List<Button>();
         readonly List<Button> canButonlari = new List<Button>();
         readonly VisualElement canBolumu;
@@ -109,6 +116,9 @@ namespace TheLighter.Istemci
             kaydirma.Add(liste);
             ekle = Buton(Metin.Al("kurulum.ekle"), () => { SatirEkle(""); Durum(); }, "buton-ikincil");
             kaydirma.Add(ekle);
+            // Takım Düellosu: isimlerin hemen altında takımlar.
+            takimParcasi = new TakimDagitmaParcasi();
+            kaydirma.Add(takimParcasi.Kok);
 
             hafizaKutusu = Kutu("hafiza-karti", "gizli");
             kaydirma.Add(hafizaKutusu);
@@ -165,6 +175,10 @@ namespace TheLighter.Istemci
             var isimler = uygulama.SonIsimler;
             for (int i = 0; i < isimler.Count && i < EnFazla; i++) SatirEkle(isimler[i]);
             while (kutular.Count < EnAz) SatirEkle("");
+            // Lobiye dönüldüyse son oyunun takımları (isimler aynı sırada geri geldi).
+            if (son.Oyun == OyunTuru.Takim && son.TakimDagilimi != null)
+                for (int i = 0; i < satirIdleri.Count; i++)
+                    if (son.TakimDagilimi.TryGetValue(new OyuncuId(i + 1), out var takimNo)) dagitim.Koy(satirIdleri[i], takimNo);
             Durum();
         }
 
@@ -199,6 +213,7 @@ namespace TheLighter.Istemci
             satirlar.Add(satir);
             kutular.Add(kutu);
             silButonlari.Add(sil);
+            satirIdleri.Add(new OyuncuId(++sonSatirNo));
         }
 
         void SatirSil(VisualElement satir)
@@ -209,6 +224,8 @@ namespace TheLighter.Istemci
             satirlar.RemoveAt(i);
             kutular.RemoveAt(i);
             silButonlari.RemoveAt(i);
+            satirIdleri.RemoveAt(i);
+            dagitim.Esitle(satirIdleri);
             Durum();
         }
 
@@ -247,6 +264,7 @@ namespace TheLighter.Istemci
             turBolumu.EnableInClassList("gizli", turYokMu);
             turYok.EnableInClassList("gizli", !turYokMu);
             turYok.text = turYokMu ? Metin.Al("kurulum.tur_yok." + ayarlar.Oyun) : "";
+            TakimlariCiz();
 
             for (int i = 0; i < ModSecenekleri.Length; i++)
                 modButonlari[i].EnableInClassList("secili", ModSecenekleri[i] == ayarlar.Mod);
@@ -288,6 +306,41 @@ namespace TheLighter.Istemci
 
             List<string> isimler;
             hata.text = baslaDenendi ? (Dogrula(out isimler) ?? "") : "";
+        }
+
+        // ---------- Takımlar (Takım Düellosu) ----------
+
+        void TakimlariCiz()
+        {
+            bool takimli = ayarlar.Oyun == OyunTuru.Takim;
+            takimParcasi.Kok.EnableInClassList("gizli", !takimli);
+            if (!takimli) return;
+            takimParcasi.Ciz(dagitim, satirIdleri, SatirIsmi, SatirRengi,
+                id => { dagitim.Dokun(id); Durum(); },
+                () => { dagitim.Temizle(); Durum(); });
+        }
+
+        string SatirIsmi(OyuncuId id)
+        {
+            int i = satirIdleri.IndexOf(id);
+            string isim = i >= 0 ? (kutular[i].value ?? "").Trim() : "";
+            return isim.Length > 0 ? isim : Metin.Al("kurulum.isimsiz", i + 1);
+        }
+
+        /// <summary>Oyundaki rengi: elden elede renk sırası satır sırası.</summary>
+        int SatirRengi(OyuncuId id) => System.Math.Max(0, satirIdleri.IndexOf(id));
+
+        /// <summary>Kurulacak oyunun dağılımı: satır sırasıyla p1, p2... Rastgeleyse null.</summary>
+        Dictionary<OyuncuId, int> TakimHaritasi()
+        {
+            if (ayarlar.Oyun != OyunTuru.Takim || dagitim.Rastgele) return null;
+            var m = new Dictionary<OyuncuId, int>();
+            for (int i = 0; i < satirIdleri.Count; i++)
+            {
+                var t = dagitim.Takimi(satirIdleri[i]);
+                if (t.HasValue) m[new OyuncuId(i + 1)] = t.Value;
+            }
+            return m;
         }
 
         // ---------- Paketler ----------
@@ -394,6 +447,8 @@ namespace TheLighter.Istemci
             }
             if (isimler.Count < EnAz) return Metin.Al("kurulum.hata_az", EnAz);
             if (ayarlar.Mod != OyunModu.Temiz && SeciliPaketler().Count == 0) return Metin.Al("kurulum.hata_paket");
+            // Takımlar kural motorunun kurulumuna sorulur (herkes bir takımda, en fazla 1 kişi fark).
+            if (ayarlar.Oyun == OyunTuru.Takim) return TakimDagitmaParcasi.UyariMetni(dagitim, satirIdleri);
             return null;
         }
 
@@ -431,6 +486,7 @@ namespace TheLighter.Istemci
             string h = Dogrula(out isimler);
             hata.text = h ?? "";
             if (h != null) return;
+            ayarlar.TakimDagilimi = TakimHaritasi();
             var s = uygulama.OyunuBaslat(isimler, ayarlar, SeciliPaketler());
             if (s != Sonuc.Tamam) hata.text = HataMetni.Al(s);
         }

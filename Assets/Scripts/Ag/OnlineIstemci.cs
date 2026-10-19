@@ -194,9 +194,12 @@ namespace TheLighter.Ag
         }
 
         /// <summary>Sohbet mesajı yollar (kanal null: genel). Ekrana sunucu geri yollayınca düşer.</summary>
-        public bool SohbetGonder(OyuncuId? kime, string metin)
+        public bool SohbetGonder(OyuncuId? kime, string metin) => SohbetGonder(SohbetYeri.Kimden(kime), metin);
+
+        /// <summary>Genel, DM ya da adlı kanala (takım, katil, ölüler) yollar.</summary>
+        public bool SohbetGonder(SohbetYeri yer, string metin)
         {
-            if (!Gonder(Cevirici.Sohbet(kime, metin))) return false;
+            if (!Gonder(Cevirici.Sohbet(yer, metin))) return false;
             SonGidenSohbet = true;
             return true;
         }
@@ -363,7 +366,7 @@ namespace TheLighter.Ag
             bool benim = sen.HasValue && g.Kimden == sen.Value;
             OyuncuId? kanal = null;
             if (g.Kime.HasValue) kanal = benim ? g.Kime : g.Kimden;
-            return new SohbetMesaji { Kanal = kanal, Kim = g.Kimden, Metin = g.Metin, Benim = benim };
+            return new SohbetMesaji { Kanal = kanal, OzelKanal = g.Kanal, Kim = g.Kimden, Metin = g.Metin, Benim = benim };
         }
 
         /// <summary>ATILDIN'in çıkış nedeni: "ATILDIN.kurucu", "ATILDIN.temiz" ya da (yasaklı geri giriş) "ATILDIN".</summary>

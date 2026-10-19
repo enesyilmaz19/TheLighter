@@ -20,6 +20,7 @@ G1 tarafı bitti: altı oyunun hepsinin kuralları ve sunucusu main'de, testleri
 - **Vampir Köylü yok, yerine Çakmak Gecesi var** (protokolde `oyun: "cakmakGecesi"`). Sana `g2-vampir.md` diye bir dosya gittiyse onu boş ver, yerine `g2-cakmak-gecesi.md`.
 - **Oda 18 kişilik.** Çakmak Gecesi 6–18 kişi, diğer oyunlar 10'da kaldı: 10'dan fazlayla başlatırsan `OYUNCU_SAYISI_GECERSIZ`. Elden ele kurulum ekranı Çakmak Gecesi'nde 18'e izin vermeli (`Oyun.GeceEnFazlaOyuncu`).
 - **Sohbet kuralları kural motorunda** (`Oyun.SohbeteYazabilir`, `Oyun.KanalAlicilari`). Takım sohbeti dahil. Protokol aynı (`kime: "takim"`), yeni kanallar `"katil"` ve `"oluler"`.
+- **Sürüm kontrolü (yeni):** `odaKur` ve `katil`'e `surum: 1` ekle. Sunucu eski sürüme `GUNCELLE` hatası döner: "Oyunu güncelle" ekranı göster. Şimdilik yollamasan da girersin, mağaza build'inde şart (`docs/Protokol.md`, "Sürüm").
 - **Yeni komutlar:** `sucla`, `suclamaOyu`, `tetikCek`, `tetikDevret`, `casusTahmini`, `lincOyu`, `geceSecimi`, `suikast`, `yetenek`. Hepsi `docs/Protokol.md`'de.
 - **Tasarım ve kesin kurallar** `docs/Oyunlar.md`'de. Ekran metinlerini rol tablolarından yaz.
 
@@ -27,9 +28,9 @@ G1 tarafı bitti: altı oyunun hepsinin kuralları ve sunucusu main'de, testleri
 
 | Test | Sonuç |
 |---|---|
-| `dotnet test Sunucu/KuralTestleri` | 342/342 |
-| `dotnet test Sunucu/SunucuTestleri` | 183/183 |
-| Unity EditMode | 466 geçen, 0 kalan, 2 atlanan (atlananlar senin botların; yerel sunucuyla 2/2 geçiyor) |
+| `dotnet test Sunucu/KuralTestleri` | 365/365 |
+| `dotnet test Sunucu/SunucuTestleri` | 184/184 |
+| Unity EditMode | 489 geçen, 0 kalan, 2 atlanan (atlananlar senin botların; yerel sunucuyla 2/2 geçiyor) |
 
 Senin `SunucuIleOyunTesti`'nde ara sıra kırmızı veren bir satır var (71. satır, yarış). Düzeltmesi `g2-takim.md` 0. bölümde.
 

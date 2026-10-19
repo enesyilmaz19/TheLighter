@@ -4,13 +4,47 @@ using Cakmak.Kurallar;
 
 namespace TheLighter.Ag
 {
-    /// <summary>Bir sohbet mesajı. <see cref="Kanal"/> null ise genel sohbet, doluysa o kişiyle DM.</summary>
+    /// <summary>
+    /// Sohbetin bir yeri: genel, bir kişiyle DM ya da adlı kanal (takım, katil, ölüler; kim yazıp okur kural motorunda).
+    /// </summary>
+    public readonly struct SohbetYeri : IEquatable<SohbetYeri>
+    {
+        /// <summary>DM: karşıdaki kişi. Genel ve adlı kanalda null.</summary>
+        public readonly OyuncuId? Dm;
+        /// <summary>Adlı kanal (takım, katil, ölüler). Genel ve DM'de null.</summary>
+        public readonly SohbetKanali? Kanal;
+
+        SohbetYeri(OyuncuId? dm, SohbetKanali? kanal) { Dm = dm; Kanal = kanal; }
+
+        public static SohbetYeri Genel => default;
+        public static SohbetYeri DmIle(OyuncuId kim) => new SohbetYeri(kim, null);
+        public static SohbetYeri Adli(SohbetKanali kanal) => new SohbetYeri(null, kanal);
+        /// <summary>Eski biçim: null genel, dolu DM.</summary>
+        public static SohbetYeri Kimden(OyuncuId? dm) => dm.HasValue ? DmIle(dm.Value) : Genel;
+
+        public bool GenelMi => !Dm.HasValue && !Kanal.HasValue;
+
+        /// <summary>Defterdeki anahtar ve protokoldeki <c>kime</c> (genelde "genel"): "p3", "takim", "katil", "oluler".</summary>
+        public string Anahtar => Dm.HasValue ? Dm.Value.ToString() : Kanal.HasValue ? Cevirici.AdYaz(Kanal.Value) : "genel";
+
+        public bool Equals(SohbetYeri d) => Dm == d.Dm && Kanal == d.Kanal;
+        public override bool Equals(object o) => o is SohbetYeri d && Equals(d);
+        public override int GetHashCode() => Anahtar.GetHashCode();
+        public static bool operator ==(SohbetYeri a, SohbetYeri b) => a.Equals(b);
+        public static bool operator !=(SohbetYeri a, SohbetYeri b) => !a.Equals(b);
+        public override string ToString() => Anahtar;
+    }
+
+    /// <summary>Bir sohbet mesajı. <see cref="Kanal"/> doluysa o kişiyle DM, <see cref="OzelKanal"/> doluysa adlı kanal, ikisi de boşsa genel.</summary>
     public sealed class SohbetMesaji
     {
         public OyuncuId? Kanal;
+        public SohbetKanali? OzelKanal;
         public OyuncuId Kim;
         public string Metin;
         public bool Benim;
+
+        public SohbetYeri Yer => OzelKanal.HasValue ? SohbetYeri.Adli(OzelKanal.Value) : SohbetYeri.Kimden(Kanal);
     }
 
     /// <summary>
@@ -32,15 +66,17 @@ namespace TheLighter.Ag
         readonly List<OyuncuId> dmSirasi = new List<OyuncuId>();
         double sonGonderimdenBeri = double.MaxValue;
 
-        static string Anahtar(OyuncuId? kanal) => kanal.HasValue ? kanal.Value.ToString() : "genel";
-
         /// <summary>DM açılmış kişiler, ilk mesaj sırasıyla (sekmeler için).</summary>
         public IReadOnlyList<OyuncuId> DmKanallari => dmSirasi;
 
-        public IReadOnlyList<SohbetMesaji> Mesajlar(OyuncuId? kanal) =>
-            kanallar.TryGetValue(Anahtar(kanal), out var l) ? (IReadOnlyList<SohbetMesaji>)l : Array.Empty<SohbetMesaji>();
+        public IReadOnlyList<SohbetMesaji> Mesajlar(OyuncuId? kanal) => Mesajlar(SohbetYeri.Kimden(kanal));
 
-        public int Okunmamis(OyuncuId? kanal) => okunmamis.TryGetValue(Anahtar(kanal), out int n) ? n : 0;
+        public IReadOnlyList<SohbetMesaji> Mesajlar(SohbetYeri yer) =>
+            kanallar.TryGetValue(yer.Anahtar, out var l) ? (IReadOnlyList<SohbetMesaji>)l : Array.Empty<SohbetMesaji>();
+
+        public int Okunmamis(OyuncuId? kanal) => Okunmamis(SohbetYeri.Kimden(kanal));
+
+        public int Okunmamis(SohbetYeri yer) => okunmamis.TryGetValue(yer.Anahtar, out int n) ? n : 0;
 
         public int ToplamOkunmamis
         {
@@ -52,7 +88,9 @@ namespace TheLighter.Ag
             }
         }
 
-        public void Okundu(OyuncuId? kanal) => okunmamis[Anahtar(kanal)] = 0;
+        public void Okundu(OyuncuId? kanal) => Okundu(SohbetYeri.Kimden(kanal));
+
+        public void Okundu(SohbetYeri yer) => okunmamis[yer.Anahtar] = 0;
 
         /// <summary>DM sekmesini mesaj gelmeden açar (bir oyuncuya "DM at").</summary>
         public void DmAc(OyuncuId kim)
@@ -64,12 +102,13 @@ namespace TheLighter.Ag
         public void Ekle(SohbetMesaji m)
         {
             if (m == null || string.IsNullOrEmpty(m.Metin)) return;
-            string a = Anahtar(m.Kanal);
+            var yer = m.Yer;
+            string a = yer.Anahtar;
             if (!kanallar.TryGetValue(a, out var l)) kanallar[a] = l = new List<SohbetMesaji>();
             l.Add(m);
             if (l.Count > KanalBasinaMesaj) l.RemoveAt(0);
-            if (m.Kanal.HasValue) DmAc(m.Kanal.Value);
-            if (!m.Benim) okunmamis[a] = Okunmamis(m.Kanal) + 1;
+            if (yer.Dm.HasValue) DmAc(yer.Dm.Value);
+            if (!m.Benim) okunmamis[a] = Okunmamis(yer) + 1;
         }
 
         /// <summary>Yazılanı gönderilecek hale getirir: baş/son boşluk atılır, boşsa ya da çok uzunsa null.</summary>

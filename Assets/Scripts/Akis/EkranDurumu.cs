@@ -74,6 +74,15 @@ namespace TheLighter.Akis
         Suclama,
     }
 
+    /// <summary>Takım Düellosu: bu turda alınan puan (düello puanı ya da ifşa bonusu). Sonuç ekranında duyurulur.</summary>
+    public sealed class PuanAni
+    {
+        /// <summary>true: ifşa bonusu (Kim = A); false: düello puanı (Kim = düelloyu kazanan).</summary>
+        public bool IfsaBonusu;
+        public OyuncuId? Kim;
+        public int Takim;
+    }
+
     /// <summary>Rus Ruleti: az önce çekilen tetiğin sonucu. Bir sonraki ekranda duyurulur ("Tık…", "BAM!", "Elendi").</summary>
     public sealed class TetikSonucu
     {
@@ -166,6 +175,9 @@ namespace TheLighter.Akis
 
         /// <summary>Elden ele, Rus Ruleti: az önce çekilen tetiğin sonucu (yoksa null). Perde kaldırılana kadar duyurulur.</summary>
         public TetikSonucu TetikSonucu;
+
+        /// <summary>Elden ele, Takım Düellosu: bu turun puanları (Ifsa/Gume ekranında). Online'da olaylardan bildirim.</summary>
+        public IReadOnlyList<PuanAni> PuanAnlari = new List<PuanAni>();
 
         /// <summary>Elden ele, Rus Ruleti: final başladı, ilk final perdesinde bir kez "FİNAL! Son 3 kişi".</summary>
         public bool FinalDuyurusu;

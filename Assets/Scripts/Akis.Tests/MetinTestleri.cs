@@ -69,6 +69,18 @@ namespace TheLighter.Tests
         }
 
         /// <summary>İngilizce: Türkçesi olan her metnin İngilizcesi de var; boş kalan Türkçeye düşer.</summary>
+        /// <summary>Takım adları (motor 0 ve 1 bilir) ve sohbetin adlı kanalları ("sohbet.kanal." + kanal).</summary>
+        [Test]
+        public void MetinTablosunda_TakimVeKanalAnahtarlariVar()
+        {
+            string yol = Path.Combine("Assets", "UI", "Resources", "TheLighter", "Metinler.csv");
+            var t = MetinTablosu.CsvOku(File.ReadAllText(yol));
+            for (int i = 0; i < Oyun.TakimSayisi; i++)
+                Assert.IsTrue(t.Var("takim.ad." + i), "Eksik: takim.ad." + i);
+            foreach (SohbetKanali k in Enum.GetValues(typeof(SohbetKanali)))
+                Assert.IsTrue(t.Var("sohbet.kanal." + k), "Eksik: sohbet.kanal." + k);
+        }
+
         [Test]
         public void MetinTablosu_HerMetninIngilizcesiVar()
         {

@@ -17,9 +17,10 @@ namespace TheLighter.Istemci
     public sealed class SohbetPaneli
     {
         readonly SohbetDefteri defter;
-        readonly Func<OyuncuId?, string, bool> gonder;
+        readonly Func<SohbetYeri, string, bool> gonder;
         readonly Func<IReadOnlyList<OdaOyuncusu>> oyuncular;
         readonly Func<OyuncuId?> ben;
+        readonly Func<IReadOnlyList<SohbetKanali>> adliKanallar;
         readonly VisualElement sekmeler;
         readonly ScrollView liste;
         readonly VisualElement dmSecici;
@@ -29,21 +30,27 @@ namespace TheLighter.Istemci
         readonly Label hata;
         readonly Button kapat;
         bool yan;
-        OyuncuId? kanal;
+        SohbetYeri kanal;
         int cizilenMesaj = -1;
         string cizilenKanal;
+        string cizilenSekmeler;
 
         public VisualElement Kok { get; }
 
         public bool Acik => !Kok.ClassListContains("gizli");
 
-        public SohbetPaneli(SohbetDefteri defter, Func<OyuncuId?, string, bool> gonder,
-            Func<IReadOnlyList<OdaOyuncusu>> oyuncular, Func<OyuncuId?> ben)
+        /// <param name="adliKanallar">
+        /// Şu an yazılabilen adlı kanallar (Takım Düellosu'nda takım, Çakmak Gecesi'nde katil ve ölüler). Kural motorunun
+        /// görünümünden; kim gerçekten yazabilir sunucu denetler. null: hiç yok.
+        /// </param>
+        public SohbetPaneli(SohbetDefteri defter, Func<SohbetYeri, string, bool> gonder,
+            Func<IReadOnlyList<OdaOyuncusu>> oyuncular, Func<OyuncuId?> ben, Func<IReadOnlyList<SohbetKanali>> adliKanallar = null)
         {
             this.defter = defter;
             this.gonder = gonder;
             this.oyuncular = oyuncular;
             this.ben = ben;
+            this.adliKanallar = adliKanallar;
 
             Kok = Kutu("menu-perde", "sohbet", "gizli");
             var kutuKap = Kutu("menu-kutu", "sohbet-kutu");
@@ -130,12 +137,28 @@ namespace TheLighter.Istemci
         {
             defter.Ilerle(TimeSpan.FromSeconds(gecenSn));
             if (!Acik) return;
-            if (defter.Mesajlar(kanal).Count != cizilenMesaj || Anahtar(kanal) != cizilenKanal) Ciz();
+            if (defter.Mesajlar(kanal).Count != cizilenMesaj || kanal.Anahtar != cizilenKanal || SekmeAnahtari() != cizilenSekmeler) Ciz();
             KlavyeBoslugu();
             yolla.SetEnabled(SohbetDefteri.Hazirla(kutu.value) != null && defter.GonderebilirMi);
         }
 
-        static string Anahtar(OyuncuId? k) => k.HasValue ? k.Value.ToString() : "genel";
+        IReadOnlyList<SohbetKanali> Kanallar() => adliKanallar?.Invoke() ?? Array.Empty<SohbetKanali>();
+
+        bool KanalAcik(SohbetKanali k)
+        {
+            foreach (var x in Kanallar()) if (x == k) return true;
+            return false;
+        }
+
+        /// <summary>Sekmeler değişti mi (kanal açıldı/kapandı, okunmamış arttı): değiştiyse yeniden çizilir.</summary>
+        string SekmeAnahtari()
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var k in Kanallar()) sb.Append(k).Append(defter.Okunmamis(SohbetYeri.Adli(k))).Append('|');
+            foreach (var d in defter.DmKanallari) sb.Append(d).Append(defter.Okunmamis(SohbetYeri.DmIle(d))).Append('|');
+            sb.Append(defter.Okunmamis(SohbetYeri.Genel));
+            return sb.ToString();
+        }
 
         /// <summary>
         /// Mobilde klavye ekranın altını kaplar: panelin altına klavye yüksekliği kadar boşluk (panel biriminde).
@@ -154,12 +177,17 @@ namespace TheLighter.Istemci
 
         void Ciz()
         {
-            cizilenKanal = Anahtar(kanal);
+            // Kapanan adlı kanaldaysan (takım oyunu bitti) genele dön.
+            if (kanal.Kanal.HasValue && !KanalAcik(kanal.Kanal.Value) && defter.Mesajlar(kanal).Count == 0)
+                kanal = SohbetYeri.Genel;
+            cizilenKanal = kanal.Anahtar;
             defter.Okundu(kanal);
+            cizilenSekmeler = SekmeAnahtari();
 
             sekmeler.Clear();
-            sekmeler.Add(Sekme(null, Metin.Al("sohbet.genel")));
-            foreach (var dm in defter.DmKanallari) sekmeler.Add(Sekme(dm, Isim(dm)));
+            sekmeler.Add(Sekme(SohbetYeri.Genel, Metin.Al("sohbet.genel")));
+            foreach (var k in Kanallar()) sekmeler.Add(Sekme(SohbetYeri.Adli(k), Metin.Al("sohbet.kanal." + k)));
+            foreach (var dm in defter.DmKanallari) sekmeler.Add(Sekme(SohbetYeri.DmIle(dm), Isim(dm)));
             sekmeler.Add(Buton(Metin.Al("sohbet.dm_ac"), DmSeciciAcKapa, "secenek"));
 
             liste.Clear();
@@ -176,11 +204,11 @@ namespace TheLighter.Istemci
             liste.schedule.Execute(() => liste.scrollOffset = new Vector2(0, float.MaxValue));
         }
 
-        Button Sekme(OyuncuId? k, string ad)
+        Button Sekme(SohbetYeri k, string ad)
         {
             int n = defter.Okunmamis(k);
             var b = Buton(n > 0 ? Metin.Al("sohbet.sekme_okunmamis", ad, n) : ad, () => { kanal = k; dmSecici.AddToClassList("gizli"); Ciz(); }, "secenek");
-            b.EnableInClassList("secili", Anahtar(k) == Anahtar(kanal));
+            b.EnableInClassList("secili", k == kanal);
             return b;
         }
 
@@ -194,7 +222,7 @@ namespace TheLighter.Istemci
                 dmSecici.Add(OyuncuCipi(o.Isim, o.Renk, () =>
                 {
                     defter.DmAc(kim);
-                    kanal = kim;
+                    kanal = SohbetYeri.DmIle(kim);
                     dmSecici.AddToClassList("gizli");
                     Ciz();
                 }));

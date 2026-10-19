@@ -291,6 +291,40 @@ namespace TheLighter.Testler
         }
 
         [Test]
+        public void SurumEski_Guncelle_AyrilirYenidenDenemez()
+        {
+            istemci.OdaKur(Adres, "Enes");
+            T.Acil();
+            Kare();
+            Assert.That(T.Son["surum"].Tamsayi, Is.EqualTo(Cevirici.ProtokolSurumu));
+            T.Mesaj(Hata("GUNCELLE"));
+            Kare();
+            Assert.That(ayrilmalar, Is.EqualTo(new[] { OnlineIstemci.NedenGuncelle }));
+            Assert.That(istemci.Durum, Is.EqualTo(BaglantiDurumu.Kapali));
+            int n = tasimalar.Count;
+            for (int i = 0; i < 10; i++) Kare(2);
+            Assert.That(tasimalar.Count, Is.EqualTo(n), "güncellenmeden yeniden denemek işe yaramaz");
+            Assert.That(hatalar, Is.Empty, "ekrana hata satırı değil, güncelle ekranı");
+        }
+
+        [Test]
+        public void GeriDonerkenGuncelle_AnahtarUnutulmaz()
+        {
+            OdayaGir();
+            T.Kop();
+            Kare();
+            Kare(1.1);
+            T.Acil();
+            Kare();
+            Assert.That(T.Son["t"].Metin, Is.EqualTo("katil"));
+            Assert.That(T.Son["surum"].Tamsayi, Is.EqualTo(Cevirici.ProtokolSurumu));
+            T.Mesaj(Hata("GUNCELLE"));
+            Kare();
+            Assert.That(ayrilmalar, Is.EqualTo(new[] { OnlineIstemci.NedenGuncelle }));
+            Assert.That(kalici.Oku(OnlineIstemci.KayitAnahtar), Is.EqualTo("GIZLI-ANAHTAR-123"), "güncelleyince aynı kimlikle dönebilsin");
+        }
+
+        [Test]
         public void GeriDonerkenOdaYok_AnaMenuyeNedeniyle()
         {
             OdayaGir();

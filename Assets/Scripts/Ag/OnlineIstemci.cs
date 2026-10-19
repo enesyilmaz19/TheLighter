@@ -39,6 +39,8 @@ namespace TheLighter.Ag
         /// <summary>Odadan çıkış nedenleri (metin anahtarı: "online.cikis.&lt;neden&gt;"; sunucu kodları "hata.&lt;KOD&gt;").</summary>
         public const string NedenBaglanamadi = "baglanamadi";
         public const string NedenAyrildin = "ayrildin";
+        /// <summary>Sunucu bu istemcinin protokol sürümünü kabul etmiyor: "Oyunu güncelle" ekranı.</summary>
+        public const string NedenGuncelle = "GUNCELLE";
 
         /// <summary>Yeniden bağlanma beklemesi: 1, 2, 4, 8 sn, sonra hep bu kadar.</summary>
         static readonly double[] Beklemeler = { 1, 2, 4, 8, 10 };
@@ -385,6 +387,10 @@ namespace TheLighter.Ag
                 case "ODA_YOK":
                     // Oda kapanmış (ya da kod yanlış). Saklı anahtar artık işe yaramaz.
                     Cik(h.Kod, unut: true);
+                    return;
+                case NedenGuncelle:
+                    // Sürüm eski: yeniden denemek işe yaramaz, oyun güncellenene kadar online yok.
+                    Cik(NedenGuncelle, unut: false);
                     return;
                 case "COK_HIZLI":
                     // Mesaj hiç işlenmedi. Giriş sırasındaysa biraz sonra yeniden denenir.

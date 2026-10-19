@@ -69,7 +69,7 @@ namespace TheLighter.Ag
         public static readonly string[] SunucuKodlari =
         {
             "GECERSIZ_MESAJ", "ODA_YOK", "ODA_DOLU", "OYUN_BASLADI", "ISIM_GECERSIZ", "ODADA_DEGILSIN", "ZATEN_ODADASIN",
-            "KURUCU_DEGILSIN", "OYUN_YOK", "ESKI_TUR", "COK_HIZLI", "SUNUCU_DOLU", "ATILDIN", "OYUNDA_DEGILSIN",
+            "KURUCU_DEGILSIN", "OYUN_YOK", "ESKI_TUR", "COK_HIZLI", "SUNUCU_DOLU", "ATILDIN", "OYUNDA_DEGILSIN", "GUNCELLE",
         };
 
         // ------------------------------------------------------------ Gelen
@@ -507,11 +507,19 @@ namespace TheLighter.Ag
 
         static string Yaz(JsonNesne n) => n.ToString();
 
-        public static string OdaKur(string isim) => Yaz(new JsonNesne().Ekle("t", "odaKur").Ekle("isim", isim));
+        /// <summary>
+        /// Bu istemcinin protokol sürümü: <c>odaKur</c> ve <c>katil</c>'de gider (docs/Protokol.md, "Sürüm"). Sunucunun kabul
+        /// ettiği en eskiden küçükse <c>GUNCELLE</c> gelir. Uyumsuz bir protokol değişikliğinde artar.
+        /// </summary>
+        public const int ProtokolSurumu = 1;
+
+        public static string OdaKur(string isim) =>
+            Yaz(new JsonNesne().Ekle("t", "odaKur").Ekle("isim", isim).Ekle("surum", ProtokolSurumu));
 
         /// <param name="anahtar">İlk girişte null. Geri dönüşte saklanan anahtar + aynı isim.</param>
         public static string Katil(string oda, string isim, string anahtar) =>
-            Yaz(new JsonNesne().Ekle("t", "katil").Ekle("oda", oda).Ekle("isim", isim).Ekle("anahtar", anahtar));
+            Yaz(new JsonNesne().Ekle("t", "katil").Ekle("oda", oda).Ekle("isim", isim).Ekle("anahtar", anahtar)
+                .Ekle("surum", ProtokolSurumu));
 
         /// <summary>Sadece değişen alanlar gönderilir; null olanlar yazılmaz.</summary>
         public static string AyarDegistir(OyunModu? mod = null, MiniOyunTuru? miniOyun = null, int? turSayisi = null,

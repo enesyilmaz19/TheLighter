@@ -3,6 +3,8 @@
 Bu dosya Arda'nın yapay zekâsı için bir görev tanımı. Kullanım: "`tasks/g2-pc.md`'yi oku ve 1'den başla."
 Yazan: G1 (Enes), 2026-10-13.
 
+**Güncelleme (2026-10-19):** önce Android çıkıyor, Steam sonra. Bu dosyanın kalanı (3.3, 3.4) Steam'e kaldı; sıradaki iş `tasks/g2-android.md`.
+
 **Enes'in kararı:** ilk testler bilgisayarda. Öncelik PC; PC bitince Android'e geçilecek (o zaman ayrı görev gelecek). S6 (Vivox, Steam, mağaza, rapor/engelleme) şimdilik başlamıyor, ikimiz de PC'yi bitiriyoruz.
 
 **Güncelleme (2026-10-13):** önce oyun tamamen bitecek, testler sonra. Sıra: bu dosyanın 1 ve 2. maddeleri → `tasks/g2-kostebek.md` (yeni oyunların ilki) → sonraki oyunlar. 3.3 ve 3.4 (çok bilgisayarlı ve VPS testleri) oyun bitince; 3.1 ve 3.2 geliştirirken kendi denemen olarak sürsün.

@@ -20,6 +20,9 @@ namespace TheLighter.Testler
         /// <summary>Son hata kodu (testte göstermek için).</summary>
         public string SonHata { get; private set; }
         public int YolladigiKomut { get; private set; }
+        /// <summary>Köstebek: bot ilk soru sırasında erken suçlama hakkını kullansın (testte bir bota açılır).</summary>
+        public bool ErkenSuclasin;
+        public int OyVerdigiSuclama { get; private set; }
 
         public DenemeBotu(string isim, int tohum, Func<ITasima> tasima = null)
         {
@@ -69,6 +72,12 @@ namespace TheLighter.Testler
                     break;
 
                 case Asama.SoruSorma:
+                    // Hak bitene kadar dener: A soruyu önce sorarsa sunucu YANLIS_ASAMA der, sonraki turda yine.
+                    if (ErkenSuclasin && g.SuclamaHakkin)
+                    {
+                        Yolla(Cevirici.Sucla(tur));
+                        break;
+                    }
                     if (g.A == ben && g.Secilebilir.Count > 0)
                         Yolla(Cevirici.SoruSor(tur, Sec(g.Secilebilir), Isim + " soruyor: grupta en geç kim uyur?"));
                     break;
@@ -87,6 +96,19 @@ namespace TheLighter.Testler
                 case Asama.Oylama:
                     foreach (var id in g.Oylayanlar)
                         if (id == ben && !g.OyVerdin) Yolla(Cevirici.Oy(tur, rastgele.Next(2) == 0));
+                    break;
+
+                case Asama.Suclama:
+                    // "Köstebek kim?": kendisi ve oyundan çıkan dışında rastgele biri (sunucu da denetler).
+                    foreach (var id in g.Oylayanlar)
+                    {
+                        if (id != ben || g.OyVerdin) continue;
+                        var adaylar = new System.Collections.Generic.List<OyuncuId>();
+                        foreach (var o in g.Oyuncular) if (o.Id != ben && !o.Cikti) adaylar.Add(o.Id);
+                        if (adaylar.Count == 0) break;
+                        Yolla(Cevirici.SuclamaOyu(tur, Sec(adaylar)));
+                        OyVerdigiSuclama++;
+                    }
                     break;
 
                 case Asama.IkiyeKatla:

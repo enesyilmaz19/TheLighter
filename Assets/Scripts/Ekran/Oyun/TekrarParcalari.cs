@@ -52,6 +52,8 @@ namespace TheLighter.Istemci
                 if (o.Id != id) continue;
                 foreach (var k in o.Kisitlamalar)
                     if (k.Tur == CezaTuru.Palyaco) { isim += " · " + Metin.Al("palyaco.etiket"); break; }
+                foreach (var s in g.Supheliler)
+                    if (s == id) { isim += " · " + Metin.Al("kostebek.supheli_etiket"); break; }
                 if (o.Cikti) return isim + " · " + Metin.Al("online.etiket.ayrildi");
                 if (akis is TheLighter.Ag.OnlineAkis online && !online.Bagli(id)) return isim + " · " + Metin.Al("online.etiket.baglaniyor");
                 if (o.Afk) return isim + " · " + Metin.Al("online.etiket.afk");
@@ -218,6 +220,9 @@ namespace TheLighter.Istemci
             Kok = Kutu("parca", "perde");
             Kok.Add(Yazi(Metin.Al("gorev.baslik", akis.Isim(g.Sen)), "baslik"));
             Kok.Add(Esnek());
+            // Köstebek: görevle birlikte rol. Herkese aynı biçimde (köstebek olmayana "değilsin").
+            bool rollu = g.Oyun == OyunTuru.Kostebek;
+            if (rollu) Kok.Add(Kostebek.RolBasligi(g));
             var kart = Kutu("gorev-karti");
             if (g.Gorevin != null)
             {
@@ -229,7 +234,8 @@ namespace TheLighter.Istemci
             Kok.Add(Esnek());
             // Online'da telefon elden ele dolaşmıyor: "telefonu ver" demez.
             var tamam = Buton(Metin.Al(akis.Online ? "gorev.gordum_online" : "gorev.gordum"), akis.GorevGordum, "buton-birincil", "buton-buyuk");
-            GecikmeliAc(tamam);
+            // Rollü oyunda herkes aynı süre bekler: kimin uzun baktığından rolü anlaşılmasın.
+            GecikmeliAc(tamam, rollu ? Kostebek.RolPerdesiMs : 800);
             Kok.Add(tamam);
         }
 

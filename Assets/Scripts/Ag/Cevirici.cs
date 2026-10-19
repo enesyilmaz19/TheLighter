@@ -209,6 +209,7 @@ namespace TheLighter.Ag
         {
             var s = new OdaAyarlari();
             if (!a.Var) return s;
+            s.Oyun = Ad<OyunTuru>(a["oyun"].Metin) ?? s.Oyun;
             s.Mod = Ad<OyunModu>(a["mod"].Metin) ?? s.Mod;
             s.MiniOyun = Ad<MiniOyunTuru>(a["miniOyun"].Metin) ?? s.MiniOyun;
             s.TurSayisi = a["turSayisi"].TamsayiYa(s.TurSayisi);
@@ -267,6 +268,13 @@ namespace TheLighter.Ag
                     : null,
                 BedelOdendi = m["bedelOdendi"].MantikYa(false),
                 TurCezalari = TurCezalari(m["turCezalari"]),
+
+                // Yeni oyunlar (docs/Oyunlar.md). Tanınmayan oyun adı Çakmak sayılır.
+                Oyun = Ad<OyunTuru>(m["oyun"].Metin) ?? OyunTuru.Cakmak,
+                Supheliler = IdListesi(m["supheliler"]),
+                SonSuclama = m["sonSuclama"].MantikYa(false),
+                Rolun = Ad<Rol>(sana["rol"].Metin) ?? Rol.Yok,
+                SuclamaHakkin = sana["suclamaHakki"].MantikYa(false),
             };
             return g;
         }
@@ -429,12 +437,28 @@ namespace TheLighter.Ag
 
             return new OyunOzeti
             {
+                Kostebek = KostebekCoz(o["kostebek"]),
                 OynananTur = o["oynananTur"].TamsayiYa(0),
                 Oyuncular = oyuncular,
                 Unvanlar = unvanlar,
                 Gorevler = gorevler,
                 IfsaOlanlar = ifsalar,
                 CurcunaSorulari = curcuna,
+            };
+        }
+
+        /// <summary><c>ozet.kostebek</c>: sadece Köstebek oyununda. Kim ya da kazanan bozuksa null.</summary>
+        static KostebekSonucu KostebekCoz(JsonDeger k)
+        {
+            if (k.Tur != JsonTuru.Nesne) return null;
+            var kim = Id(k["kim"]);
+            var kazanan = Ad<KostebekKazanan>(k["kazanan"].Metin);
+            if (!kim.HasValue || !kazanan.HasValue) return null;
+            return new KostebekSonucu
+            {
+                Kostebek = kim.Value,
+                Kazanan = kazanan.Value,
+                Neden = Ad<KostebekNedeni>(k["neden"].Metin) ?? KostebekNedeni.Yakalanmadi,
             };
         }
 
@@ -454,9 +478,10 @@ namespace TheLighter.Ag
         /// <summary>Sadece değişen alanlar gönderilir; null olanlar yazılmaz.</summary>
         public static string AyarDegistir(OyunModu? mod = null, MiniOyunTuru? miniOyun = null, int? turSayisi = null,
             int? soruSn = null, int? cevapSn = null, int? hamleSn = null, CezaSeviyesi? ceza = null,
-            bool? gorevler = null, bool? kaos = null, IEnumerable<string> paketler = null)
+            bool? gorevler = null, bool? kaos = null, IEnumerable<string> paketler = null, OyunTuru? oyun = null)
         {
             var n = new JsonNesne().Ekle("t", "ayarlar");
+            if (oyun.HasValue) n.Ekle("oyun", AdYaz(oyun.Value));
             if (mod.HasValue) n.Ekle("mod", AdYaz(mod.Value));
             if (miniOyun.HasValue) n.Ekle("miniOyun", AdYaz(miniOyun.Value));
             if (turSayisi.HasValue) n.Ekle("turSayisi", turSayisi.Value);
@@ -489,6 +514,10 @@ namespace TheLighter.Ag
         public static string CevapSec(int tur, OyuncuId hedef) => Yaz(Komut(tur, "cevapSec").Ekle("hedef", hedef.ToString()));
         public static string Oy(int tur, bool ifsa) => Yaz(Komut(tur, "oy").Ekle("ifsa", ifsa));
         public static string IkiyeKatla(int tur) => Yaz(Komut(tur, "ikiyeKatla"));
+        /// <summary>Köstebek: erken suçlama (herkesin oyun boyu 1 hakkı, sadece soruSorma'da).</summary>
+        public static string Sucla(int tur) => Yaz(Komut(tur, "sucla"));
+        /// <summary>Köstebek, Casus: "kim?" oylamasında oy.</summary>
+        public static string SuclamaOyu(int tur, OyuncuId hedef) => Yaz(Komut(tur, "suclamaOyu").Ekle("hedef", hedef.ToString()));
         public static string BedelOde(int tur) => Yaz(Komut(tur, "bedelOde"));
         public static string KarariGec(int tur) => Yaz(Komut(tur, "karariGec"));
 

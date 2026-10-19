@@ -76,6 +76,8 @@ namespace TheLighter.Ag
     /// <summary>Lobideki ayarlar (kurucu değiştirir, herkes görür).</summary>
     public sealed class OdaAyarlari
     {
+        /// <summary>Hangi oyun (docs/Oyunlar.md). Mod her oyunda ayrı seçilir.</summary>
+        public OyunTuru Oyun = OyunTuru.Cakmak;
         public OyunModu Mod = OyunModu.Normal;
         public MiniOyunTuru MiniOyun = MiniOyunTuru.Tkm;
         public int TurSayisi = 15;

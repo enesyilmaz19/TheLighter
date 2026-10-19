@@ -61,6 +61,13 @@ namespace TheLighter.Istemci
             Kok.Add(Esnek());
 
             Kok.Add(Durumlar(akis, g, online));
+            // Köstebek: soru sorulmadan önce herkes kendi telefonundan erken suçlayabilir.
+            if (g.Asama == Asama.SoruSorma)
+            {
+                var hata = Yazi("", "hata");
+                Kok.Add(Kostebek.SuclamaDugmesi(akis, Kok, m => hata.text = m));
+                Kok.Add(hata);
+            }
             Guncelle(e);
         }
 
@@ -81,6 +88,8 @@ namespace TheLighter.Istemci
                     return Metin.Al("online.bekle.mini", b, c, Metin.Al("mini.ad." + g.MiniOyun));
                 case Asama.Oylama:
                     return Metin.Al("online.bekle.oylama");
+                case Asama.Suclama:
+                    return Metin.Al(g.SonSuclama ? "kostebek.bekle_son" : "kostebek.bekle");
                 default:
                     return Metin.Al("oyun.bekleniyor");
             }
@@ -106,7 +115,7 @@ namespace TheLighter.Istemci
         {
             var g = e.Gorunum;
             SureyiYaz(sure, g.KalanMs, 5000);
-            if (g.Asama == Asama.Oylama)
+            if (g.Asama == Asama.Oylama || g.Asama == Asama.Suclama)
                 oy.text = Metin.Al("online.bekle.oy_sayisi", g.OyKullanan, g.Oylayanlar.Count)
                     + (g.OyVerdin ? "  " + Metin.Al("online.bekle.oy_verdin") : "");
             else if (g.Asama == Asama.SoruToplama)

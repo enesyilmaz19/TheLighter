@@ -46,6 +46,13 @@ namespace TheLighter.Akis
         BerabereEl sonBerabere;
         OyunOzeti ozet;
 
+        // Köstebek: "kim?" oylaması. Tartışma istemcinin sayacıyla, kural motorunun saati oylama boyunca durur.
+        int suclamaNo;
+        OyuncuId? suclamaBaslatan;
+        double tartismaKalanMs;
+        bool tartismaBitti = true;
+        SuclamaSonucu suclamaSonucu;
+
         public EldenEleAkisi(Oyun oyun, IReadOnlyList<Oyuncu> oyuncular, Ayarlar ayarlar)
         {
             if (oyun == null) throw new ArgumentNullException(nameof(oyun));
@@ -86,6 +93,11 @@ namespace TheLighter.Akis
         public void Ilerle(TimeSpan gecen)
         {
             if (!Duraklatildi && !Ekran.SaatDurur) oyun.Ilerle(gecen);
+            if (!Duraklatildi && Ekran.Tur == EkranTuru.SuclamaTartisma)
+            {
+                tartismaKalanMs -= Math.Max(0, gecen.TotalMilliseconds);
+                if (tartismaKalanMs <= 0) tartismaBitti = true;
+            }
             Yenile();
         }
 
@@ -98,6 +110,7 @@ namespace TheLighter.Akis
             kaldirilanPerde = Ekran.PerdeAnahtari;
             suresiDolan = null;
             suresiDolanBydi = false;
+            suclamaSonucu = null;
             Yenile();
         }
 
@@ -209,10 +222,44 @@ namespace TheLighter.Akis
             Yenile();
         }
 
+        /// <summary>Köstebek'te önce son oylamayı açar (kural motoru); oylama sürerken YanlisAsama.</summary>
         public Sonuc OyunuBitir()
         {
             Duraklatildi = false;
             return Sonra(oyun.OyunuBitir());
+        }
+
+        // ---------- Köstebek ----------
+
+        public IReadOnlyList<OyuncuId> SuclamaHakkiOlanlar
+        {
+            get
+            {
+                var l = new List<OyuncuId>();
+                foreach (var o in oyuncular)
+                    if (oyun.GorunumAl(o.Id).SuclamaHakkin) l.Add(o.Id);
+                return l;
+            }
+        }
+
+        /// <summary>Telefon A'dayken: "Kim suçluyor?" sorusunda seçilen kişi hakkını kullanır.</summary>
+        public Sonuc Sucla(OyuncuId kim)
+        {
+            if (Ekran.Tur != EkranTuru.SoruSorma) return Sonuc.YanlisAsama;
+            return Sonra(oyun.Sucla(kim));
+        }
+
+        public Sonuc SuclamaOyu(OyuncuId hedef)
+        {
+            if (Ekran.Tur != EkranTuru.Suclama || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.SuclamaOyu(Ekran.Kime.Value, hedef));
+        }
+
+        public void TartismayiBitir()
+        {
+            if (Ekran.Tur != EkranTuru.SuclamaTartisma) return;
+            tartismaBitti = true;
+            Yenile();
         }
 
         Sonuc Sonra(Sonuc s)
@@ -281,6 +328,18 @@ namespace TheLighter.Akis
                     cBuEl = null;
                     break;
 
+                case OlayTuru.SuclamaBasladi:
+                    suclamaNo++;
+                    suclamaBaslatan = o.Kim;
+                    tartismaKalanMs = Ayarlar.SuclamaSuresiSn * 1000.0;
+                    tartismaBitti = false;
+                    suclamaSonucu = null;
+                    break;
+
+                case OlayTuru.SuclamaBitti:
+                    suclamaSonucu = new SuclamaSonucu { Suclanan = o.Kim };
+                    break;
+
                 case OlayTuru.CevapSecildi:
                 case OlayTuru.TurBasladi:
                 case OlayTuru.IkiyeKatlandi:
@@ -301,12 +360,13 @@ namespace TheLighter.Akis
             var acik = Acik();
             var e = new EkranDurumu();
 
-            // Gizli görevler açıksa oyun başında telefon herkese sırayla gider (Ana Plan 8.2).
-            if (Ayarlar.GizliGorevler && acik.Asama != Asama.OyunSonu)
+            // Gizli görevi (Köstebek'te rolü de) olan herkese oyun başında telefon sırayla gider (Ana Plan 8.2).
+            // Kimin görevi olduğu kural motorundan: Köstebek'te ayar kapalı olsa da herkesin görevi var.
+            if (acik.Asama != Asama.OyunSonu)
             {
                 foreach (var o in oyuncular)
                 {
-                    if (goreviGorenler.Contains(o.Id)) continue;
+                    if (goreviGorenler.Contains(o.Id) || oyun.GorunumAl(o.Id).Gorevin == null) continue;
                     e.Kime = o.Id;
                     e.PerdeNedeni = PerdeNedeni.Gorev;
                     string gp = "G|" + o.Id;
@@ -343,7 +403,9 @@ namespace TheLighter.Akis
                     e.PerdeNedeni = PerdeNedeni.SoruSirasi;
                     e.SuresiDolan = suresiDolan;
                     e.SuresiDolanBydi = suresiDolanBydi;
-                    string sp = "S|" + acik.Tur + "|" + acik.A;
+                    e.SuclamaSonucu = suclamaSonucu;
+                    // Oylamadan sonra telefon A'ya geri döner: perde yeniden (anahtarda oylamanın numarası).
+                    string sp = "S|" + acik.Tur + "|" + acik.A + "|" + suclamaNo;
                     if (sp != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, sp);
                     else Kur(e, EkranTuru.SoruSorma, oyun.GorunumAl(acik.A.Value), "");
                     break;
@@ -396,6 +458,32 @@ namespace TheLighter.Akis
                     string op = "O|" + acik.Tur + "|" + oylayan.Value;
                     if (op != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, op);
                     else Kur(e, EkranTuru.Oylama, GorevsizGorunum(oylayan.Value), "|" + oylayan.Value);
+                    break;
+                }
+
+                case Asama.Suclama:
+                {
+                    // Önce telefon ortada tartışma (istemcinin sayacı), sonra telefon oy verecekler arasında dolaşır.
+                    if (!tartismaBitti)
+                    {
+                        Kur(e, EkranTuru.SuclamaTartisma, Seyirci(acik), "|" + suclamaNo);
+                        e.SuclamaBaslatan = suclamaBaslatan;
+                        e.TartismaKalanMs = (int)Math.Max(0, tartismaKalanMs);
+                        break;
+                    }
+                    OyuncuId? oylayan = null;
+                    foreach (var id in acik.Oylayanlar)
+                        if (!oyun.GorunumAl(id).OyVerdin) { oylayan = id; break; }
+                    if (!oylayan.HasValue)
+                    {
+                        Kur(e, EkranTuru.Bekleniyor, Seyirci(acik), "");
+                        break;
+                    }
+                    e.Kime = oylayan;
+                    e.PerdeNedeni = PerdeNedeni.Suclama;
+                    string yp = "Y|" + suclamaNo + "|" + oylayan.Value;
+                    if (yp != kaldirilanPerde) PerdeKur(e, EkranTuru.Perde, yp);
+                    else Kur(e, EkranTuru.Suclama, GorevsizGorunum(oylayan.Value), "|" + suclamaNo + "|" + oylayan.Value);
                     break;
                 }
 
@@ -461,13 +549,21 @@ namespace TheLighter.Akis
             foreach (var o in oyuncular)
                 if (o.Id != acik.B) return GorevsizGorunum(o.Id);
             acik.Gorevin = null;
+            acik.Rolun = Rol.Yok;
+            acik.SuclamaHakkin = false;
             return acik;
         }
 
+        /// <summary>
+        /// Herkesin baktığı ekran için: kişiye özel olup ekranda durmaması gerekenler (görev, Köstebek'te rol ve suçlama hakkı)
+        /// temizlenir. Seyirci köstebek olsa bile ortadaki ekranda bu görünmez.
+        /// </summary>
         Gorunum GorevsizGorunum(OyuncuId id)
         {
             var g = oyun.GorunumAl(id);
             g.Gorevin = null;
+            g.Rolun = Rol.Yok;
+            g.SuclamaHakkin = false;
             return g;
         }
 
@@ -480,6 +576,8 @@ namespace TheLighter.Akis
             g.Oneri = null;
             g.AtananSoru = null;
             g.Gorevin = null;
+            g.Rolun = Rol.Yok;
+            g.SuclamaHakkin = false;
             return g;
         }
     }

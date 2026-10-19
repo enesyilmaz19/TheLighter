@@ -477,3 +477,55 @@ oyun.cikis_soru,Oyundan çıkmak istiyor musun?,Quit the game?
 oyun.cikis_ipucu,Oyun kapanır.,The game will close.
 oyun.cikis_ipucu_online,"Oyun kapanır, odadan da ayrılırsın.",The game will close and you'll leave the room.
 oyun.cikis_evet,"Evet, çık","Yes, quit"
+kurulum.oyun,Oyun,Game
+kurulum.herkeste,herkeste,everyone
+oyun.ad.Cakmak,Çakmak,The Lighter
+oyun.ad.Kostebek,Köstebek,Mole
+oyun.ad.RusRuleti,Rus Ruleti,Russian Roulette
+oyun.ad.Takim,Takım Düellosu,Team Duel
+oyun.ad.Casus,Casus,Spy
+oyun.ad.CakmakGecesi,Çakmak Gecesi,Lighter Night
+oyun.aciklama.Cakmak,"Sırası gelen gizli bir soru sorar, soruyu alan çakmağı cevaba verir. Düelloyu çakmağı alan kazanırsa soru herkese açılır.","Ask a secret question; the one asked hands the lighter to the answer. If the lighter's receiver wins the duel, the question is revealed."
+oyun.aciklama.Kostebek,"Aranızda gizli görevli bir köstebek var. Her 5 turda bir ""Köstebek kim?"" oylaması; herkesin bir erken suçlama hakkı var. Köstebek görevini bitirir ya da yakalanmazsa kazanır.","There's a Mole with a secret task among you. A ""Who's the Mole?"" vote every 5 rounds; everyone gets one early accusation. The Mole wins by finishing their task or never getting caught."
+oyun.aciklama.RusRuleti,"Düelloyu kaybeden tetiği çeker. Canı biten elenir, son kalan kazanır.",The duel's loser pulls the trigger. Out of lives means out; the last one standing wins.
+oyun.aciklama.Takim,"İki takım. Düellolar ve ifşalar takıma puan getirir, 7 puana ulaşan kazanır.",Two teams. Duels and reveals score points; first to 7 wins.
+oyun.aciklama.Casus,"Herkes gizli bir mekânı bilir, casus bilmez. Casusu yakalayın ya da casus mekânı bilsin.","Everyone knows a secret location except the spy. Catch the spy, or the spy guesses the location."
+oyun.aciklama.CakmakGecesi,"Gizli roller, gündüz çakmak ve linç, gece seçimler. Masumlar, katiller ve tarafsızlar.","Secret roles, lighter and lynch by day, choices by night. Innocents, killers and neutrals."
+kostebek.rol_sen,Köstebeksin!,You're the Mole!
+kostebek.rol_sen_aciklama,Görevini bitir ya da sonuna kadar yakalanma. Kimseye belli etme.,Finish your task or don't get caught until the end. Don't give yourself away.
+kostebek.rol_degil,Köstebek değilsin.,You're not the Mole.
+kostebek.rol_degil_aciklama,"Aranızda gizli görevli bir köstebek var. Görevini yap, köstebeği bul.","There's a Mole with a secret task among you. Do your task, find the Mole."
+kostebek.erken_sucla,Erken suçla,Accuse now
+kostebek.erken_sucla_ipucu,"Herkesin oyun boyu 1 hakkı var: ""Köstebek kim?"" oylaması hemen başlar.","Everyone gets one per game: the ""Who's the Mole?"" vote starts right away."
+kostebek.erken_soru_online,Erken suçlama yapılsın mı?,Accuse now?
+kostebek.erken_ipucu_online,Tek hakkını kullanırsın. Herkes oylamaya geçer.,You use your only chance. Everyone moves to the vote.
+kostebek.erken_evet,"Evet, suçla","Yes, accuse"
+kostebek.erken_kim,Kim suçluyor?,Who's accusing?
+kostebek.erken_ipucu,Hakkı olanlar listede. Suçlayan kendi adını seçsin; hakkı biter.,Players with a chance left are listed. The accuser picks their own name; their chance is used up.
+kostebek.erken_yapti,{0} erken suçlama yaptı: Köstebek kim?,{0} made an accusation: who's the Mole?
+kostebek.basladi,Köstebek kim? Oylama başladı.,Who's the Mole? The vote has started.
+kostebek.sonuc_yanlis,{0} suçlandı… köstebek değildi! Artık şüpheli.,{0} was accused… not the Mole! Now a suspect.
+kostebek.sonuc_yok,Oylar eşit: kimse suçlanmadı.,Tie: nobody was accused.
+kostebek.acilis_baslik,Köstebek,The Mole
+kostebek.kazanan.Grup,Grup kazandı!,The group wins!
+kostebek.kazanan.Kostebek,Köstebek kazandı!,The Mole wins!
+kostebek.neden.Yakalandi,Oylamada yakalandı.,Caught in the vote.
+kostebek.neden.GorevBitti,Gizli görevini bitirdi.,Finished their secret task.
+kostebek.neden.Yakalanmadi,Sonuna kadar yakalanmadı.,Never got caught.
+kostebek.neden.Kacti,Oyundan çıktı.,Left the game.
+kostebek.gorevi,Görevi: {0},Task: {0}
+kostebek.son_oylama,Son oylama!,Final vote!
+kostebek.kim,Köstebek kim?,Who's the Mole?
+kostebek.aralik,Her {0} turda bir oylama.,A vote every {0} rounds.
+kostebek.son_aciklama,Oyun bitiyor. Köstebek şimdi yakalanmazsa kazanır.,"The game is ending. If the Mole isn't caught now, they win."
+kostebek.supheliler,Şüpheliler: {0},Suspects: {0}
+kostebek.tartis,"Telefonu ortaya koyun ve tartışın. Sonra telefon herkese sırayla gelecek, oyunu gizlice vereceksin.",Put the phone in the middle and discuss. Then the phone goes around and you'll vote in secret.
+kostebek.oylamaya_gec,Oylamaya geç,Start voting
+kostebek.oy_baslik,"{0}, oyun","{0}, your vote"
+kostebek.oy_aciklama,Köstebek olduğunu düşündüğün kişiyi seç. En çok oyu alan suçlanır.,Pick who you think is the Mole. The one with the most votes is accused.
+kostebek.oy_ver,Oyumu ver,Cast my vote
+kostebek.bekle,Köstebek kim? Oylar toplanıyor,Who's the Mole? Collecting votes
+kostebek.bekle_son,Son oylama: oylar toplanıyor,Final vote: collecting votes
+kostebek.supheli_etiket,şüpheli,suspect
+kostebek.bitir,Son oylamayı başlat,Start the final vote
+perde.suclama,Köstebek oylaması: oy verme sırası {1},Mole vote: {0}'s turn to vote

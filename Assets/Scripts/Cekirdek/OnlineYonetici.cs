@@ -194,6 +194,7 @@ namespace TheLighter.Istemci
             var a = sonAyarlar ?? new OdaAyarlari();
             return new Ayarlar
             {
+                Oyun = a.Oyun,
                 Mod = a.Mod,
                 MiniOyun = a.MiniOyun,
                 TurSayisi = a.TurSayisi,

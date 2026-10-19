@@ -51,6 +51,23 @@ namespace TheLighter.Tests
             Assert.AreEqual("İREM'e", TurkceEk.Yonelme("İREM"));
         }
 
+        /// <summary>Yeni oyunlar: oyun adı ve tarifi, Köstebek'in kazananı ve nedeni (docs/Oyunlar.md).</summary>
+        [Test]
+        public void MetinTablosunda_OyunVeKostebekAnahtarlariVar()
+        {
+            string yol = Path.Combine("Assets", "UI", "Resources", "TheLighter", "Metinler.csv");
+            var t = MetinTablosu.CsvOku(File.ReadAllText(yol));
+            foreach (OyunTuru o in Enum.GetValues(typeof(OyunTuru)))
+            {
+                Assert.IsTrue(t.Var("oyun.ad." + o), "Eksik: oyun.ad." + o);
+                Assert.IsTrue(t.Var("oyun.aciklama." + o), "Eksik: oyun.aciklama." + o);
+            }
+            foreach (KostebekKazanan k in Enum.GetValues(typeof(KostebekKazanan)))
+                Assert.IsTrue(t.Var("kostebek.kazanan." + k), "Eksik: kostebek.kazanan." + k);
+            foreach (KostebekNedeni n in Enum.GetValues(typeof(KostebekNedeni)))
+                Assert.IsTrue(t.Var("kostebek.neden." + n), "Eksik: kostebek.neden." + n);
+        }
+
         /// <summary>İngilizce: Türkçesi olan her metnin İngilizcesi de var; boş kalan Türkçeye düşer.</summary>
         [Test]
         public void MetinTablosu_HerMetninIngilizcesiVar()

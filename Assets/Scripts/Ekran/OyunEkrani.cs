@@ -38,6 +38,9 @@ namespace TheLighter.Istemci
         readonly OyuncuSutunu oyuncuSutunu;
         float bildirimKalan;
         float buradayimBekle;
+        /// <summary>Online: biten "kim?" oylamasının sonucu, sonraki durum gelince duyurulur (oyun bittiyse açılış gösterir).</summary>
+        bool suclamaBitti;
+        OyuncuId? suclanan;
         readonly VisualElement ustCubuk;
         readonly Label turYazisi;
         readonly Label durumYazisi;
@@ -120,6 +123,12 @@ namespace TheLighter.Istemci
 
             sohbet?.Guncelle(gecenSn);
             oyuncuSutunu?.Guncelle();
+            if (suclamaBitti && akis.Ekran.Gorunum != null && akis.Ekran.Gorunum.Asama != Asama.Suclama)
+            {
+                // Oyun sürüyorsa suçlanan köstebek değildi; bittiyse oyun sonu açılışı söyler.
+                suclamaBitti = false;
+                if (!akis.Bitti) Bildir(Kostebek.SonucMetni(akis, suclanan));
+            }
             if (bildirimKalan > 0)
             {
                 bildirimKalan -= gecenSn;
@@ -188,6 +197,13 @@ namespace TheLighter.Istemci
             }
             switch (o.Olay.Tur)
             {
+                case OlayTuru.SuclamaBasladi:
+                    Bildir(o.Kim.HasValue ? Metin.Al("kostebek.erken_yapti", kim) : Metin.Al("kostebek.basladi"));
+                    break;
+                case OlayTuru.SuclamaBitti:
+                    suclamaBitti = true;
+                    suclanan = o.Kim;
+                    break;
                 case OlayTuru.SiraAtlandi: Bildir(Metin.Al("online.olay.sira_atlandi", kim, TurkceEk.Ilgi(kim))); break;
                 case OlayTuru.Afk: Bildir(Metin.Al("online.olay.afk", kim)); break;
                 case OlayTuru.AfkBitti: Bildir(Metin.Al("online.olay.afk_bitti", kim)); break;
@@ -250,6 +266,8 @@ namespace TheLighter.Istemci
                 case EkranTuru.SoruToplama: return new SoruToplamaParcasi(akis, e);
                 case EkranTuru.GorevGoster: return new GorevParcasi(akis, e);
                 case EkranTuru.Oylama: return new OylamaParcasi(akis, e);
+                case EkranTuru.SuclamaTartisma: return new SuclamaTartismaParcasi(akis, e);
+                case EkranTuru.Suclama: return new SuclamaParcasi(akis, e);
                 case EkranTuru.Karar: return new KararParcasi(akis, e);
                 case EkranTuru.OyunSonu: return new OyunSonuParcasi(uygulama, akis, e, online);
                 default: return akis.Online ? (IOyunParcasi)new OnlineBekleParcasi(akis, e) : new BekleParcasi();
@@ -273,7 +291,7 @@ namespace TheLighter.Istemci
                 kaydirma.Add(Yazi(Metin.Al("oyun.menu_baslik"), "baslik"));
                 kaydirma.Add(Buton(Metin.Al("oyun.devam"), MenuyuKapat, "buton-birincil"));
                 kaydirma.Add(Buton(Metin.Al("menu.ayarlar"), ayarlar.Ac, "buton-ikincil"));
-                kaydirma.Add(Buton(Metin.Al("oyun.bitir"), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil"));
+                kaydirma.Add(Buton(Metin.Al(BitirAnahtari), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil"));
                 kaydirma.Add(Buton(Metin.Al("oyun.lobiye_don"), () => Onayla("oyun.lobiye_soru", "oyun.lobiye_ipucu_elden", "oyun.lobiye_evet",
                     uygulama.Kurulum), "buton-ikincil"));
                 kaydirma.Add(Buton(Metin.Al("oyun.ana_menu"), uygulama.AnaMenu, "buton-ikincil"));
@@ -287,7 +305,7 @@ namespace TheLighter.Istemci
                 kaydirma.Add(Yazi(Metin.Al("online.menu_baslik", online?.Istemci.Oda ?? ""), "baslik"));
                 kaydirma.Add(Buton(Metin.Al("oyun.devam"), MenuyuKapat, "buton-birincil"));
                 kaydirma.Add(Buton(Metin.Al("menu.ayarlar"), ayarlar.Ac, "buton-ikincil"));
-                var bitir = Buton(Metin.Al("oyun.bitir"), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil");
+                var bitir = Buton(Metin.Al(BitirAnahtari), () => { akis.OyunuBitir(); MenuyuKapat(); }, "buton-ikincil");
                 bitir.AddToClassList("menu-kurucu");
                 kaydirma.Add(bitir);
                 var lobi = Buton(Metin.Al("oyun.lobiye_don"), () => Onayla("oyun.lobiye_soru", "oyun.lobiye_ipucu", "oyun.lobiye_evet",
@@ -303,6 +321,9 @@ namespace TheLighter.Istemci
             m.Add(kutu);
             return m;
         }
+
+        /// <summary>Köstebek'te "Oyunu bitir" önce son oylamayı açar (kural motoru): düğme bunu söyler.</summary>
+        string BitirAnahtari => akis.Ayarlar.Oyun == OyunTuru.Kostebek ? "kostebek.bitir" : "oyun.bitir";
 
         /// <summary>Online, sadece kurucu: oyun biter, oyun sonu beklenmeden herkes lobiye döner.</summary>
         void LobiyeDon()

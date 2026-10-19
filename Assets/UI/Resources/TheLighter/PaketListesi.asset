@@ -18,3 +18,4 @@ MonoBehaviour:
   - {fileID: 4900000, guid: 4dfa3274e47cd644db28e1a7ccc3c73f, type: 3}
   - {fileID: 4900000, guid: 5260eace9ee76cc42ab32f061c98ef45, type: 3}
   SesliCezalar: {fileID: 4900000, guid: a578ff9d91dd2eb4ab781b5a97961aec, type: 3}
+  GeceSorulari: {fileID: 4900000, guid: 4746f961954be504f9cad2869c23576e, type: 3}

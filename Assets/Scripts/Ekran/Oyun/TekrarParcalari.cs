@@ -60,6 +60,8 @@ namespace TheLighter.Istemci
                 if (can != null) isim += " · " + can;
                 var takim = Takim.Etiket(o);
                 if (takim != null) isim += " · " + takim;
+                var gece = Gece.Etiket(g, o);
+                if (gece != null) isim += " · " + gece;
                 if (o.Cikti) return isim + " · " + Metin.Al("online.etiket.ayrildi");
                 if (akis is TheLighter.Ag.OnlineAkis online && !online.Bagli(id)) return isim + " · " + Metin.Al("online.etiket.baglaniyor");
                 if (o.Afk) return isim + " · " + Metin.Al("online.etiket.afk");
@@ -223,18 +225,24 @@ namespace TheLighter.Istemci
         public GorevParcasi(IOyunAkisi akis, EkranDurumu e)
         {
             var g = e.Gorunum;
-            // Casus: görev yok, rol kartı (mekân ve rol, ya da "Casussun").
+            // Casus: görev yok, rol kartı (mekân ve rol, ya da "Casussun"). Çakmak Gecesi: rol kartı (taraf, ne yaptığı).
             bool casus = g.Oyun == OyunTuru.Casus;
+            bool gece = g.Oyun == OyunTuru.CakmakGecesi;
             Kok = Kutu("parca", "perde");
-            Kok.Add(Yazi(Metin.Al(casus ? "casus.rol_baslik" : "gorev.baslik", akis.Isim(g.Sen)), "baslik"));
+            Kok.Add(Yazi(Metin.Al(casus || gece ? "casus.rol_baslik" : "gorev.baslik", akis.Isim(g.Sen)), "baslik"));
             Kok.Add(Esnek());
             // Köstebek: görevle birlikte rol. Herkese aynı biçimde (köstebek olmayana "değilsin").
-            bool rollu = g.Oyun == OyunTuru.Kostebek || casus;
+            bool rollu = g.Oyun == OyunTuru.Kostebek || casus || gece;
             if (g.Oyun == OyunTuru.Kostebek) Kok.Add(Kostebek.RolBasligi(g));
             if (casus)
             {
                 Kok.Add(Casus.RolKarti(g));
                 Kok.Add(Yazi(Metin.Al("casus.rol_ipucu"), "aciklama", "orta"));
+            }
+            else if (gece)
+            {
+                Kok.Add(Gece.RolKarti(akis, g));
+                Kok.Add(Yazi(Metin.Al("gece.rol_ipucu"), "aciklama", "orta"));
             }
             else
             {

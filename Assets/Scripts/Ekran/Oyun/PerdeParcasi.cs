@@ -36,6 +36,8 @@ namespace TheLighter.Istemci
             // Rus Ruleti: az önce çekilen tetik.
             if (e.TetikSonucu != null) Kok.Add(RusRuleti.TetikDuyurusu(akis, e.TetikSonucu));
             if (g.Oyun == OyunTuru.RusRuleti) Kok.Add(RusRuleti.CanListesi(akis, g));
+            // Çakmak Gecesi: sabah (gece ölenler), linç ve suikast.
+            Gece.Duyurular(Kok, akis, g, e.GeceDuyurulari);
             // Takım Düellosu: tur başında skor tabelası.
             if (g.Oyun == OyunTuru.Takim && e.PerdeNedeni == PerdeNedeni.SoruSirasi) Kok.Add(Takim.Tabela(g));
 
@@ -60,13 +62,21 @@ namespace TheLighter.Istemci
                     Kok.Add(Yazi(Metin.Al("perde.soru_yazma", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
                     break;
                 case PerdeNedeni.Gorev:
-                    Kok.Add(Yazi(Metin.Al("perde.gorev", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    // Casus ve Çakmak Gecesi'nde bakılan şey görev değil, gizli rol.
+                    bool rol = g.Oyun == OyunTuru.Casus || g.Oyun == OyunTuru.CakmakGecesi;
+                    Kok.Add(Yazi(Metin.Al(rol ? "perde.rol" : "perde.gorev", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
                     break;
                 case PerdeNedeni.Oy:
                     Kok.Add(Yazi(Metin.Al("perde.oy", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
                     break;
                 case PerdeNedeni.Suclama:
                     Kok.Add(Yazi(Metin.Al(g.Oyun == OyunTuru.Casus ? "casus.perde_suclama" : "perde.suclama", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    break;
+                case PerdeNedeni.Linc:
+                    Kok.Add(Yazi(Metin.Al("gece.perde_linc", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
+                    break;
+                case PerdeNedeni.Gece:
+                    Kok.Add(Yazi(Metin.Al("gece.perde_gece", isim, TurkceEk.Bulunma(isim)), "perde-ust"));
                     break;
                 default:
                     string a = akis.Isim(g.A);

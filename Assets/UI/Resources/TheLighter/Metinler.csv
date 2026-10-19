@@ -177,6 +177,7 @@ hafiza.efsaneler_ipucu,Bu grubun ifşa olan soruları.,This group's revealed que
 hafiza.kapat,Kapat,Close
 perde.soru_yazma,Soru yazma sırası {1},{0}'s turn to write questions
 perde.gorev,Gizli görevine bakma sırası {1},{0}'s turn to see their secret task
+perde.rol,Gizli rolüne bakma sırası {1},{0}'s turn to see their secret role
 perde.oy,Grup Kararı: oy verme sırası {1},Group Vote: {0}'s turn to vote
 perde.kaos_baslik,KAOS TURU,CHAOS ROUND
 kaos.ad.Yok,,
@@ -645,3 +646,219 @@ casus.tur.Mekan,Mekân,Location
 casus.tur.Kelime,Kelime,Word
 casus.tur_aciklama.Mekan,"Herkes bir mekânı ve oradaki rolünü bilir (Uçak, sen: Hostes).","Everyone knows a location and their role there (Plane, you: Flight attendant)."
 casus.tur_aciklama.Kelime,"Herkes bir kelimeyi bilir, kategori herkese açık (Hayvanlar: Penguen). Imposter.","Everyone knows a word; the category is public (Animals: Penguin). Imposter."
+gece.rol.Yok,—,—
+gece.rol.Masum,Masum,Innocent
+gece.rol_aciklama.Masum,"Yeteneğin yok. Konuş, dinle, linçte doğru kişiyi göster.","No ability. Talk, listen and point at the right person in the lynch."
+gece.rol.Koruyucu,Koruyucu,Guardian
+gece.rol_aciklama.Koruyucu,Gece birini korursun: bütün saldırılardan kurtulur. Kendini oyunda 1 kez koruyabilirsin.,At night you protect someone from every attack. You can protect yourself once per game.
+gece.rol.Dedektif,Dedektif,Detective
+gece.rol_aciklama.Dedektif,"Gece birine bakarsın, sabah şüpheli mi öğrenirsin. Katiller, Seri Katil, Bombacı ve Kibritçi şüpheli; Patron temiz görünür, işaretlenen şüpheli.","At night you check someone and learn by morning if they're suspicious. Killers, the Serial Killer, Bomber and Match Seller are suspicious; the Boss looks clean, the framed look suspicious."
+gece.rol.Serif,Şerif,Sheriff
+gece.rol_aciklama.Serif,Gece birini vurabilirsin. Vurduğun masum tarafındansa sen de ölürsün.,"At night you may shoot someone. If they're on the innocent side, you die too."
+gece.rol.Kanunsuz,Kanunsuz,Vigilante
+gece.rol_aciklama.Kanunsuz,Oyunda 1 kurşunun var: gece birini cezasız vurursun.,"You have one bullet per game: shoot someone at night, no penalty."
+gece.rol.Bekci,Bekçi,Lookout
+gece.rol_aciklama.Bekci,Gece birini izlersin; sabah o gece ona kimlerin uğradığını öğrenirsin.,At night you watch someone; by morning you learn who visited them that night.
+gece.rol.Kulak,Kulak,Eavesdropper
+gece.rol_aciklama.Kulak,Güme giden soruyu güme ekranında duyarsın (kimin sorduğunu değil).,"You hear a question that stays hidden, on the hidden-question screen (not who asked it)."
+gece.rol.Falci,Falcı,Psychic
+gece.rol_aciklama.Falci,"Oyunda 2 kez (12+ kişide 3): gece birini seçersin; sabah onunla rastgele başkalarından bir grup görür, grupta kötü var mı öğrenirsin.","Twice per game (3 times with 12+): pick someone at night; by morning you see a group with them and random others, and learn if anyone in it is evil."
+gece.rol.Deli,Deli,Lunatic
+gece.rol_aciklama.Deli,"Kendini başka bir masum rolü sanırsın, sonuçların rastgele. Masum tarafında kazanırsın.",You think you're another innocent role; your results are random. You win with the innocents.
+gece.rol.Katil,Katil,Killer
+gece.rol_aciklama.Katil,Gece öbür katillerle kurban seçersin.,At night you pick a victim with the other killers.
+gece.rol.Patron,Patron,Boss
+gece.rol_aciklama.Patron,Dedektif'e temiz görünürsün. Gece katillerle kurban seçersin.,You look clean to the Detective. At night you pick a victim with the killers.
+gece.rol.Casus,Casus,Spy
+gece.rol_aciklama.Casus,Gece birinin tam rolünü öğrenirsin. Katillerle kurban da seçersin.,At night you learn someone's exact role. You also pick a victim with the killers.
+gece.rol.Susturucu,Susturucu,Silencer
+gece.rol_aciklama.Susturucu,"Gece birini susturursun: ertesi gün yazamaz, linçte oy veremez.",At night you silence someone: next day they can't chat or vote in the lynch.
+gece.rol.Tuzakci,Tuzakçı,Framer
+gece.rol_aciklama.Tuzakci,Gece birini işaretlersin: o gece Dedektif ona bakarsa şüpheli görür.,"At night you frame someone: if the Detective checks them that night, they look suspicious."
+gece.rol.Temizlikci,Temizlikçi,Janitor
+gece.rol_aciklama.Temizlikci,Oyunda 2 kez: gece seçtiğin kişi o gece ölürse rolü açılmaz.,"Twice per game: if the person you pick dies that night, their role stays hidden."
+gece.rol.Suikastci,Suikastçı,Assassin
+gece.rol_aciklama.Suikastci,"Linçte oyunda 1 kez birinin rolünü tahmin edersin. Bilirsen o, bilemezsen sen hemen ölürsün.","Once per game during the lynch, guess someone's role. Right: they die; wrong: you die."
+gece.rol.Palyaco,Palyaço,Clown
+gece.rol_aciklama.Palyaco,Gece birini kandırırsın: ertesi günkü linç oyu senin oy verdiğin kişiye sayılır.,At night you trick someone: their lynch vote next day counts for whoever you vote for.
+gece.rol.Vampir,Vampir,Vampire
+gece.rol_aciklama.Vampir,Oyunda 1 kez ısırırsın: ısırdığın masumsa ve o gece ölmezse sabah Katil olur.,"Once per game you bite: if they're innocent and survive the night, they wake up a Killer."
+gece.rol.Soytari,Soytarı,Jester
+gece.rol_aciklama.Soytari,"Linç edilirsen kazanırsın, oyun biter.",If you get lynched you win and the game ends.
+gece.rol.SeriKatil,Seri Katil,Serial Killer
+gece.rol_aciklama.SeriKatil,"Her gece birini öldürürsün, kurbanının rolü açılmaz. Katillerin ilk saldırısından kurtulursun. Son kalırsan kazanırsın.",Every night you kill someone; their role stays hidden. You survive the killers' first attack. Win by being the last one standing.
+gece.rol.Cellat,Cellat,Executioner
+gece.rol_aciklama.Cellat,Gizli bir hedefin var. Hedefin linç edilirse kazanırsın. Başka yoldan ölürse Soytarı olursun.,"You have a secret target. If they get lynched you win. If they die another way, you become the Jester."
+gece.rol.HayattaKalan,Hayatta Kalan,Survivor
+gece.rol_aciklama.HayattaKalan,"Oyun bitince hayattaysan, kim kazanırsa kazansın sen de kazanırsın.","If you're alive when the game ends, you win too, whoever wins."
+gece.rol.Hirsiz,Hırsız,Thief
+gece.rol_aciklama.Hirsiz,Oyunda 1 kez gece birini öldürürsün; sabah onun rolü ve tarafı senin olur. Rol almadan oyun biterse kaybedersin.,"Once per game you kill someone at night; by morning their role and side are yours. If the game ends before you take one, you lose."
+gece.rol.Bombaci,Bombacı,Bomber
+gece.rol_aciklama.Bombaci,Gece birine gizlice bomba koyarsın ya da kendini seçip patlatırsın: bombalı herkes ölür. Son kalırsan kazanırsın.,"At night you secretly plant a bomb on someone, or pick yourself to detonate: everyone with a bomb dies. Win by being the last one standing."
+gece.rol.Sorgucu,Sorgucu,Interrogator
+gece.rol_aciklama.Sorgucu,"Oyunda 1 kez (12+ kişide 2), A iken: soruyu mühürlersin, düello ne olursa olsun soru ifşa olur.","Once per game (twice with 12+), when you're A: you seal the question; it's revealed whatever the duel."
+gece.rol.Hakem,Hakem,Referee
+gece.rol_aciklama.Hakem,"Oyunda 2 kez: gece birini ve bir karar (ifşa / güme) seçersin. Ertesi gün onun ilk düellosu oynanmaz, senin kararınla biter.",Twice per game: at night pick someone and a ruling (reveal / hide). Next day their first duel isn't played; it ends with your ruling.
+gece.rol.Kollayici,Kollayıcı,Shepherd
+gece.rol_aciklama.Kollayici,O gün A iken soru sorduğun herkes o gece korunur.,Everyone you asked as A that day is protected that night.
+gece.rol.Yuzlesmeci,Yüzleşmeci,Confronter
+gece.rol_aciklama.Yuzlesmeci,"C olarak gösterildiğin düelloyu kazanırsan, seni gösteren B'nin şüpheli olup olmadığını hemen öğrenirsin.","If you win a duel you were picked as C for, you instantly learn if the B who picked you is suspicious."
+gece.rol.Sezgici,Sezgici,Intuit
+gece.rol_aciklama.Sezgici,B iken gösterdiğin C'nin şüpheli olup olmadığını sabah öğrenirsin.,"When you're B, you learn by morning if the C you picked is suspicious."
+gece.rol.Sinayici,Sınayıcı,Examiner
+gece.rol_aciklama.Sinayici,"Oyunda 2 kez, A iken: sorduğun B'nin şüpheli olup olmadığını sabah öğrenirsin.","Twice per game, when you're A: you learn by morning if the B you asked is suspicious."
+gece.rol.Siper,Siper,Shield
+gece.rol_aciklama.Siper,"Oyunda 2 kez, kendiliğinden: o gün C olarak gösterildiysen o gecenin bütün saldırılarından kurtulursun.","Twice per game, automatically: if you were picked as C that day, you survive every attack that night."
+gece.rol.Sondurucu,Söndürücü,Extinguisher
+gece.rol_aciklama.Sondurucu,"Oyunda 1 kez: gece birini seçersin. Ertesi gün onun ilk düellosu söner, soru güme gider; o turun A'sı şüpheli mi sabah öğrenirsin.",Once per game: pick someone at night. Next day their first duel is snuffed out and the question stays hidden; by morning you learn if that round's A is suspicious.
+gece.rol.Kundakci,Kundakçı,Arsonist
+gece.rol_aciklama.Kundakci,"Oyunda 1 kez: gece, o gün seni C olarak gösteren B'lerden birini yakarsın.","Once per game at night, you burn one of the Bs who picked you as C that day."
+gece.rol.Dinleyici,Dinleyici,Listener
+gece.rol_aciklama.Dinleyici,Katillerin Kulak'ı: güme giden soruyu güme ekranında duyarsın.,The killers' Eavesdropper: you hear a hidden question on the hidden-question screen.
+gece.rol.Fitneci,Fitneci,Schemer
+gece.rol_aciklama.Fitneci,"A olduğun turlarda gösterilen C, o gece Dedektif'e şüpheli görünür.","In rounds where you're A, the C who gets picked looks suspicious to the Detective that night."
+gece.rol.Kuklaci,Kuklacı,Puppeteer
+gece.rol_aciklama.Kuklaci,"Oyunda 1 kez, A iken: C'yi B'nin yerine sen seçersin.","Once per game, when you're A: you pick C instead of B."
+gece.rol.Kiskirtici,Kışkırtıcı,Provocateur
+gece.rol_aciklama.Kiskirtici,"Oyunda 1 kez, B iken: gösterdiğin C o günün linçine 2 oyla başlar.","Once per game, when you're B: the C you pick starts that day's lynch with 2 votes."
+gece.rol.Kibritci,Kibritçi,Match Seller
+gece.rol_aciklama.Kibritci,"Gece, o gün A iken soru sorduğun birini yakarsın. Son kalırsan kazanırsın.",At night you burn someone you asked as A that day. Win by being the last one standing.
+gece.rol.Gozde,Gözde,Favorite
+gece.rol_aciklama.Gozde,"4 kez (12+ kişide 5) C olarak gösterilirsen kazananlara eklenirsin, ölsen bile.","Get picked as C 4 times (5 with 12+) and you join the winners, even if you're dead."
+gece.rol.Duellocu,Düellocu,Duelist
+gece.rol_aciklama.Duellocu,"3 düello kazanırsan kazananlara eklenirsin, ölsen bile.","Win 3 duels and you join the winners, even if you're dead."
+gece.rol.SirKupu,Sır Küpü,Vault
+gece.rol_aciklama.SirKupu,"En az 3 kez B olup hiçbiri ifşa olmazsa kazananlara eklenirsin, ölsen bile.","Be B at least 3 times with none revealed and you join the winners, even if you're dead."
+gece.taraf.Masum,Masumlar,Innocents
+gece.taraf.Katil,Katiller,Killers
+gece.taraf.Tarafsiz,Tarafsızlar,Neutrals
+gece.taraf_satir,Taraf: {0},Side: {0}
+gece.talimat.Koruyucu,Kimi koruyorsun?,Who are you protecting?
+gece.talimat.Dedektif,Kime bakıyorsun?,Who are you checking?
+gece.talimat.Serif,Kimi vuruyorsun? Masumsa sen de ölürsün.,"Who are you shooting? If they're innocent, you die too."
+gece.talimat.Kanunsuz,Kurşununu kime sıkıyorsun?,Who gets your bullet?
+gece.talimat.Bekci,Kimi izliyorsun?,Who are you watching?
+gece.talimat.Falci,Kimin falına bakıyorsun?,Whose fortune are you reading?
+gece.talimat.SeriKatil,Bu gece kimi öldürüyorsun?,Who are you killing tonight?
+gece.talimat.Hirsiz,Kimi öldürüp rolünü alıyorsun?,Whose role are you killing for?
+gece.talimat.Bombaci,Bomba koy ya da kendini seçip patlat,"Plant a bomb, or pick yourself to detonate"
+gece.talimat.Kibritci,Bugün soru sorduğun kimi yakıyorsun?,Who that you asked today are you burning?
+gece.talimat.Hakem,Yarın kimin düellosunu yönetiyorsun?,Whose duel are you refereeing tomorrow?
+gece.talimat.Sondurucu,Yarın kimin düellosunu söndürüyorsun?,Whose duel are you snuffing out tomorrow?
+gece.talimat_katil,Kurbanına oy ver,Vote for your victim
+gece.talimat_yok,Birini düşün,Think of someone
+gece.ikinci.Casus,Rolünü öğren,Learn their role
+gece.ikinci.Susturucu,Sustur,Silence
+gece.ikinci.Tuzakci,İşaretle,Frame
+gece.ikinci.Temizlikci,Ölürse rolünü temizle,Clean their role if they die
+gece.ikinci.Palyaco,Kandır,Trick
+gece.ikinci.Vampir,Isır,Bite
+gece.ikinci.Kundakci,Seni gösterenlerden birini yak,Burn one who picked you
+gece.yetenek.Sorgucu,Soruyu mühürle,Seal the question
+gece.yetenek_ipucu.Sorgucu,Düello ne olursa olsun soru ifşa olur.,The question is revealed whatever the duel.
+gece.yetenek.Sinayici,B'yi sına,Examine B
+gece.yetenek_ipucu.Sinayici,Sorduğun kişinin şüpheli olup olmadığını sabah öğrenirsin.,You learn by morning if the person you asked is suspicious.
+gece.yetenek.Kuklaci,C'yi ben seçeyim,I'll pick C
+gece.yetenek_ipucu.Kuklaci,Soruyu göndermeden önce seçersen soru gidince işler.,"If you pick before sending, it works once the question goes."
+gece.yetenek.Kiskirtici,Kışkırt,Provoke
+gece.yetenek_ipucu.Kiskirtici,Seçeceğin kişi bugünün linçine 2 oyla başlar.,The person you pick starts today's lynch with 2 votes.
+gece.kazanan.Masumlar,Masumlar kazandı!,The innocents win!
+gece.kazanan.Katiller,Katiller kazandı!,The killers win!
+gece.kazanan.SeriKatil,Seri Katil kazandı!,The Serial Killer wins!
+gece.kazanan.Bombaci,Bombacı kazandı!,The Bomber wins!
+gece.kazanan.Soytari,Soytarı kazandı!,The Jester wins!
+gece.kazanan.Cellat,Cellat kazandı!,The Executioner wins!
+gece.kazanan.Berabere,Berabere!,It's a draw!
+gece.kazanan.Kibritci,Kibritçi kazandı!,The Match Seller wins!
+gece.kalan_hak,Kalan hak: {0},Uses left: {0}
+gece.sayac.Gozde,C olarak gösterildin: {0},Picked as C: {0}
+gece.sayac.Duellocu,Kazandığın düello: {0}/{1},Duels won: {0}/{1}
+gece.sayac.SirKupu,B oldun: {0}/{1} · {2},Times as B: {0}/{1} · {2}
+gece.sayac.ifsa_yok,hiçbiri ifşa olmadı,none revealed
+gece.sayac.ifsa_var,biri ifşa oldu,one was revealed
+gece.diger_katiller,Öbür katiller: {0},The other killers: {0}
+gece.tek_katil,Tek katil sensin.,You're the only killer.
+gece.cellat_hedefin,Hedefin: {0},Your target: {0}
+gece.bombalilar,Bombalılar: {0},Bombed: {0}
+gece.ust_gece,Gece {0},Night {0}
+gece.ust_linc,Gün {0} · Linç,Day {0} · Lynch
+gece.ust_gun,Gün {0} · linçe {1} tur,Day {0} · {1} round(s) to the lynch
+gece.olu_rol,öldü · {0},dead · {0}
+gece.olu,öldü,dead
+gece.susturuldu,🤐 susturuldu,🤐 silenced
+gece.rol_bilinmiyor,rolü bilinmiyor,role unknown
+gece.sabah_yok,Sabah oldu: bu gece kimse ölmedi.,Morning: nobody died tonight.
+gece.sabah_olenler,Sabah oldu. Gece ölenler: {0},Morning. Died in the night: {0}
+gece.linc_yok,"Linç: oylar eşit, kimse gitmedi.","Lynch: tie, nobody goes."
+gece.linc_elendi,Linç edildi: {0},Lynched: {0}
+gece.suikast,Suikast! Ölen: {0},Assassination! Dead: {0}
+gece.bulgu.supheli,{0}: şüpheli,{0}: suspicious
+gece.bulgu.temiz,{0}: şüpheli değil,{0}: not suspicious
+gece.bulgu.rol,{0}: {1},{0}: {1}
+gece.bulgu.kotu_var,{0} ile grup ({1}): grupta kötü var,Group with {0} ({1}): someone evil
+gece.bulgu.kotu_yok,{0} ile grup ({1}): grupta kötü yok,Group with {0} ({1}): nobody evil
+gece.bulgu.ziyaret,{1} uğrayanlar: {2},Visited {0}: {2}
+gece.bulgu.ziyaret_yok,{1} kimse uğramadı,Nobody visited {0}
+gece.bulgu_baslik_ilk,Bulguların,Your findings
+gece.bulgu_baslik,Son gece,Last night
+gece.bulgu_yok,Yeni bir şey öğrenmedin.,Nothing new.
+gece.bulgular_hepsi,Bütün bulguların,All your findings
+gece.bulgu_gun,Gün {0}: {1},Day {0}: {1}
+gece.kulak_notu,Bu oyunda güme giden soruyu Kulak ya da Dinleyici duyabilir.,"In this game, the Eavesdropper or the Listener can hear a hidden question."
+gece.hak_kisa,({0} hak),({0} left)
+gece.yetenek_kullanildi,Kullanıldı,Used
+gece.kukla_baslik,C'yi sen seç,You pick C
+gece.kukla_ipucu,Çakmak B'nin yerine bu kişiye gider. B'nin kendisi olamaz.,The lighter goes to this person instead of B's choice. It can't be B.
+gece.kazanan_yok,Oyun bitirildi: kazanan yok.,Game ended: no winner.
+gece.kazananlar,Kazananlar: {0},Winners: {0}
+gece.roller_baslik,Roller,Roles
+gece.rol_satir,{0}: {1} ({2}),{0}: {1} ({2})
+gece.kazandi_etiket,kazandı,won
+gece.linc_baslik,"{0}, linç oyun","{0}, your lynch vote"
+gece.rolun_kisa,Rolün: {0},Your role: {0}
+gece.linc_kim,Linç: kim gitsin?,Lynch: who goes?
+gece.linc_aciklama,En çok oyu alan elenir; eşitlikte kimse.,"Most votes is out; on a tie, nobody."
+gece.suikast_dugme,Suikast,Assassinate
+gece.linc_ver,Oyumu ver,Cast my vote
+gece.suikast_kim,Kime suikast?,Assassinate who?
+gece.suikast_ipucu,"Rolünü bilirsen o, bilemezsen sen ölürsün. Oyunda 1 kez.",Guess their role right and they die; wrong and you die. Once per game.
+gece.suikast_rol,{0} ne?,What is {0}?
+gece.suikast_emin,{0}: {1}. Emin misin?,{0}: {1}. Are you sure?
+gece.suikast_uyari,Yanlışsa hemen ölürsün.,If you're wrong you die right away.
+gece.suikast_evet,"Evet, vur","Yes, strike"
+gece.gece_baslik,Gece {0} · {1},Night {0} · {1}
+gece.patlat,💥 Patlat,💥 Detonate
+gece.hakem_ifsa,Karar: ifşa,Ruling: reveal
+gece.hakem_gume,Karar: güme,Ruling: hide
+gece.sec,Seç,Choose
+gece.sec_bos,Kimseyi seçmeden geç,Skip without choosing
+gece.katil_oy_yok,Öbür katiller henüz oy vermedi.,The other killers haven't voted yet.
+gece.katil_oy,{0} → {1},{0} → {1}
+gece.en_az,{0}–{1} kişi.,{0}–{1} players.
+gece.ayar_rol_acilir,Ölenin rolü,Role of the dead
+gece.ayar_rol_acik,Rol açılır,Roles revealed
+gece.ayar_rol_gizli,Rol gizli,Roles hidden
+gece.ayar_kurban,Gecelik kurban,Victims per night
+gece.ayar_kurban_sayi,{0} kurban,{0} victim(s)
+gece.ayar_kurban_ipucu,En fazla canlı katil sayısı kadar.,At most as many as living killers.
+gece.ayar_roller,Roller,Roles
+gece.ayar_roller_ipucu,Seçili roller oyunda olabilir; dokun: kapat / aç. Masum ve Katil hep var. Kişi sayısına göre dağılır.,Selected roles can appear; tap to turn off / on. Innocent and Killer are always in. Roles are dealt by player count.
+gece.rol_ipucu,Kimseye söyleme. Rolün gece ve gündüz ne yapacağını belirler.,Don't tell anyone. Your role decides what you do by day and night.
+gece.perde_linc,Linç oyu: sıra {1},Lynch vote: {0}'s turn
+gece.perde_gece,Gece: seçim sırası {1},Night: {0}'s turn to choose
+gece.bekle_olu,Öldün: izliyorsun. Ölüler sekmesinden yazabilirsin.,You're dead: watching. You can chat in the Dead tab.
+gece.bekle_linc,Linç: oylar toplanıyor,Lynch: collecting votes
+gece.bekle_gece,Gece: herkes seçimini yapıyor,Night: everyone is choosing
+gece.hakem_karari,Hakem kararı: düello oynanmadı.,Referee's ruling: the duel wasn't played.
+gece.sonduruldu,Düello söndü 🧯 Soru güme gitti.,The duel was snuffed out 🧯 The question stays hidden.
+gece.duydun,Duydun:,You overheard:
+gece.linc_basladi,Linç zamanı: kim gitsin?,Lynch time: who goes?
+gece.gece_basladi,Gece oldu: herkes seçimini yapsın.,Night falls: everyone makes a choice.
+gece.paket_yok,Bu oyunda soru paketi seçilmez: öneriler Çakmak Gecesi'nin suçlama sorularından.,No question packs in this game: suggestions come from Lighter Night's accusation questions.
+gece.ozet_kapali,{0} rol kapalı,{0} role(s) off
+kurulum.hata_cok,Bu oyunda en fazla {0} kişi.,At most {0} players in this game.
+lobi.en_fazla,Bu oyunda en fazla {1} kişi ({0}/{1}).,At most {1} players in this game ({0}/{1}).
+sohbet.yazamaz.gece,"Gece: herkes uyuyor, genel sohbet kapalı.","Night: everyone's asleep, chat is closed."
+sohbet.yazamaz.olu,"Öldün: buraya yazamazsın, okursun. Ölüler sekmesinde yazabilirsin.",You're dead: you can read but not write here. Use the Dead tab.
+sohbet.yazamaz.susturuldu,Susturuldun: bugün yazamazsın.,You've been silenced: no chatting today.
+sohbet.yazamaz.katil,Katil kanalına sadece gece yazılır.,The killers' channel is open only at night.

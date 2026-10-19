@@ -215,6 +215,13 @@ namespace TheLighter.Ag
             s.Oyun = Ad<OyunTuru>(a["oyun"].Metin) ?? s.Oyun;
             s.Can = a["can"].TamsayiYa(s.Can);
             s.Casus = Ad<CasusTuru>(a["casus"].Metin) ?? s.Casus;
+            s.RolAcilir = a["rolAcilir"].MantikYa(s.RolAcilir);
+            s.GecelikKurban = a["gecelikKurban"].TamsayiYa(s.GecelikKurban);
+            foreach (var r in a["kapaliRoller"].Elemanlar)
+            {
+                var rol = Ad<Rol>(r.Metin);
+                if (rol.HasValue && !s.KapaliRoller.Contains(rol.Value)) s.KapaliRoller.Add(rol.Value);
+            }
             foreach (var t in a["takimlar"].Alanlar)
             {
                 var id = Id(t.Key);
@@ -296,6 +303,18 @@ namespace TheLighter.Ag
                 CasusListesi = MetinListesi(m["casusListesi"]),
                 CasusKategori = m["casusKategori"].Metin,
                 Yakalanan = Id(m["yakalanan"]),
+
+                // Çakmak Gecesi: gün herkese; katiller, bulgular, haklar, Cellat'ın hedefi, bombalar, Kulak'ın sorusu sadece sana.
+                Gun = m["gun"].TamsayiYa(0),
+                KalanGunduzTuru = m["kalanGunduzTuru"].TamsayiYa(0),
+                IkinciSecilebilir = IdListesi(m["ikinciSecilebilir"]),
+                Katiller = RolListesi(sana["katiller"]),
+                KatilSecimleri = KatilSecimleri(sana["katilSecimleri"]),
+                Bulgularin = Bulgular(sana["bulgularin"]),
+                KalanHakkin = sana["kalanHakkin"].Tamsayi,
+                CellatHedefin = Id(sana["cellatHedefin"]),
+                Bombalilar = IdListesi(sana["bombalilar"]),
+                KulakSorusu = sana["kulakSorusu"].Metin,
             };
             return g;
         }
@@ -353,6 +372,53 @@ namespace TheLighter.Ag
                 if (id.HasValue) liste.Add(id.Value);
             }
             return liste;
+        }
+
+        /// <summary><c>[ { "kim", "rol" } ]</c>: katiller (sana) ve oyun sonunda herkesin rolü. Bozuk öğe atlanır.</summary>
+        static List<OyuncuRolu> RolListesi(JsonDeger dizi)
+        {
+            var l = new List<OyuncuRolu>();
+            foreach (var x in dizi.Elemanlar)
+            {
+                var kim = Id(x["kim"]);
+                var rol = Ad<Rol>(x["rol"].Metin);
+                if (kim.HasValue && rol.HasValue) l.Add(new OyuncuRolu { Kim = kim.Value, Rol = rol.Value });
+            }
+            return l;
+        }
+
+        static List<KatilSecimi> KatilSecimleri(JsonDeger dizi)
+        {
+            var l = new List<KatilSecimi>();
+            foreach (var x in dizi.Elemanlar)
+            {
+                var kim = Id(x["kim"]);
+                var hedef = Id(x["hedef"]);
+                if (kim.HasValue && hedef.HasValue) l.Add(new KatilSecimi { Kim = kim.Value, Hedef = hedef.Value });
+            }
+            return l;
+        }
+
+        /// <summary><c>sana.bulgularin</c>: gece bakışlarının sonuçları; sadece rolün doldurduğu alanlar dolu.</summary>
+        static List<Bulgu> Bulgular(JsonDeger dizi)
+        {
+            var l = new List<Bulgu>();
+            foreach (var x in dizi.Elemanlar)
+            {
+                var kim = Id(x["kim"]);
+                if (!kim.HasValue) continue;
+                l.Add(new Bulgu
+                {
+                    Gun = x["gun"].TamsayiYa(0),
+                    Kim = kim.Value,
+                    Supheli = x["supheli"].Tur == JsonTuru.Mantik ? x["supheli"].MantikYa(false) : (bool?)null,
+                    Rol = Ad<Rol>(x["rol"].Metin),
+                    Ziyaretciler = IdListesi(x["ziyaretciler"]),
+                    Grup = IdListesi(x["grup"]),
+                    KotuVar = x["kotuVar"].Tur == JsonTuru.Mantik ? x["kotuVar"].MantikYa(false) : (bool?)null,
+                });
+            }
+            return l;
         }
 
         static List<string> MetinListesi(JsonDeger dizi)
@@ -486,6 +552,14 @@ namespace TheLighter.Ag
                     ? new TakimSonucu { Kazanan = o["takim"]["kazanan"].Tamsayi, Puanlar = SayiListesi(o["takim"]["puanlar"]) }
                     : null,
                 Casus = CasusCoz(o["casus"]),
+                Gece = o["gece"].Tur == JsonTuru.Nesne
+                    ? new CakmakGecesiSonucu
+                    {
+                        Kazanan = Ad<GeceKazanan>(o["gece"]["kazanan"].Metin),
+                        Kazananlar = IdListesi(o["gece"]["kazananlar"]),
+                        Roller = RolListesi(o["gece"]["roller"]),
+                    }
+                    : null,
                 OynananTur = o["oynananTur"].TamsayiYa(0),
                 Oyuncular = oyuncular,
                 Unvanlar = unvanlar,
@@ -553,12 +627,21 @@ namespace TheLighter.Ag
         public static string AyarDegistir(OyunModu? mod = null, MiniOyunTuru? miniOyun = null, int? turSayisi = null,
             int? soruSn = null, int? cevapSn = null, int? hamleSn = null, CezaSeviyesi? ceza = null,
             bool? gorevler = null, bool? kaos = null, IEnumerable<string> paketler = null, OyunTuru? oyun = null, int? can = null,
-            IReadOnlyDictionary<OyuncuId, int> takimlar = null, CasusTuru? casus = null)
+            IReadOnlyDictionary<OyuncuId, int> takimlar = null, CasusTuru? casus = null,
+            bool? rolAcilir = null, int? gecelikKurban = null, IEnumerable<Rol> kapaliRoller = null)
         {
             var n = new JsonNesne().Ekle("t", "ayarlar");
             if (oyun.HasValue) n.Ekle("oyun", AdYaz(oyun.Value));
             if (can.HasValue) n.Ekle("can", can.Value);
             if (casus.HasValue) n.Ekle("casus", AdYaz(casus.Value));
+            if (rolAcilir.HasValue) n.Ekle("rolAcilir", rolAcilir.Value);
+            if (gecelikKurban.HasValue) n.Ekle("gecelikKurban", gecelikKurban.Value);
+            if (kapaliRoller != null)
+            {
+                var d = new List<string>();
+                foreach (var r in kapaliRoller) d.Add(AdYaz(r));
+                n.Ekle("kapaliRoller", d);
+            }
             if (takimlar != null)
             {
                 // Boş nesne: rastgele ve dengeli.
@@ -606,6 +689,34 @@ namespace TheLighter.Ag
         public static string TetikCek(int tur) => Yaz(Komut(tur, "tetikCek"));
         /// <summary>Rus Ruleti: tetiği devret (oyun boyu 1 kez).</summary>
         public static string TetikDevret(int tur, OyuncuId hedef) => Yaz(Komut(tur, "tetikDevret").Ekle("hedef", hedef.ToString()));
+        /// <summary>Çakmak Gecesi: linç oyu.</summary>
+        public static string LincOyu(int tur, OyuncuId hedef) => Yaz(Komut(tur, "lincOyu").Ekle("hedef", hedef.ToString()));
+
+        /// <summary>
+        /// Çakmak Gecesi: gece seçimi. <paramref name="hedef"/> null = pas; <paramref name="ikinci"/> katillerin yeteneği;
+        /// <paramref name="ifsa"/> Hakem'in kararı. Boş alanlar gitmez.
+        /// </summary>
+        public static string GeceSecimi(int tur, OyuncuId? hedef, OyuncuId? ikinci = null, bool? ifsa = null)
+        {
+            var n = Komut(tur, "geceSecimi");
+            if (hedef.HasValue) n.Ekle("hedef", hedef.Value.ToString());
+            if (ikinci.HasValue) n.Ekle("ikinci", ikinci.Value.ToString());
+            if (ifsa.HasValue) n.Ekle("ifsa", ifsa.Value);
+            return Yaz(n);
+        }
+
+        /// <summary>Çakmak Gecesi: gündüz yeteneği (Sorgucu, Sınayıcı, Kuklacı: hedef = C, Kışkırtıcı).</summary>
+        public static string Yetenek(int tur, OyuncuId? hedef = null)
+        {
+            var n = Komut(tur, "yetenek");
+            if (hedef.HasValue) n.Ekle("hedef", hedef.Value.ToString());
+            return Yaz(n);
+        }
+
+        /// <summary>Çakmak Gecesi: Suikastçı linçte birinin rolünü tahmin eder.</summary>
+        public static string Suikast(int tur, OyuncuId hedef, Rol rol) =>
+            Yaz(Komut(tur, "suikast").Ekle("hedef", hedef.ToString()).Ekle("rol", AdYaz(rol)));
+
         /// <summary>Casus: mekânı (ya da kelimeyi) tahmin et; listeden biri. Yakalanmadan bir kez ya da son şansta.</summary>
         public static string CasusTahmini(int tur, string tahmin) => Yaz(Komut(tur, "casusTahmini").Ekle("tahmin", tahmin));
         public static string BedelOde(int tur) => Yaz(Komut(tur, "bedelOde"));

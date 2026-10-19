@@ -81,6 +81,32 @@ namespace TheLighter.Tests
                 Assert.IsTrue(t.Var("sohbet.kanal." + k), "Eksik: sohbet.kanal." + k);
         }
 
+        /// <summary>Çakmak Gecesi: her rolün adı ve ne yaptığı, taraflar, kazananlar, yetenek düğmeleri, sohbet kısıtları.</summary>
+        [Test]
+        public void MetinTablosunda_GeceAnahtarlariVar()
+        {
+            string yol = Path.Combine("Assets", "UI", "Resources", "TheLighter", "Metinler.csv");
+            var t = MetinTablosu.CsvOku(File.ReadAllText(yol));
+            foreach (var r in Oyun.GeceRolleri)
+            {
+                Assert.IsTrue(t.Var("gece.rol." + r), "Eksik: gece.rol." + r);
+                Assert.IsTrue(t.Var("gece.rol_aciklama." + r), "Eksik: gece.rol_aciklama." + r);
+            }
+            foreach (Taraf x in Enum.GetValues(typeof(Taraf)))
+                Assert.IsTrue(t.Var("gece.taraf." + x), "Eksik: gece.taraf." + x);
+            foreach (GeceKazanan k in Enum.GetValues(typeof(GeceKazanan)))
+                Assert.IsTrue(t.Var("gece.kazanan." + k), "Eksik: gece.kazanan." + k);
+            foreach (var r in new[] { Rol.Casus, Rol.Susturucu, Rol.Tuzakci, Rol.Temizlikci, Rol.Palyaco, Rol.Vampir, Rol.Kundakci })
+                Assert.IsTrue(t.Var("gece.ikinci." + r), "Eksik: gece.ikinci." + r);
+            foreach (var r in new[] { Rol.Sorgucu, Rol.Sinayici, Rol.Kuklaci, Rol.Kiskirtici })
+            {
+                Assert.IsTrue(t.Var("gece.yetenek." + r), "Eksik: gece.yetenek." + r);
+                Assert.IsTrue(t.Var("gece.yetenek_ipucu." + r), "Eksik: gece.yetenek_ipucu." + r);
+            }
+            foreach (var k in new[] { "gece", "olu", "susturuldu", "katil" })
+                Assert.IsTrue(t.Var("sohbet.yazamaz." + k), "Eksik: sohbet.yazamaz." + k);
+        }
+
         /// <summary>Casus: kazanan, neden ve tür enum'larından üretilen anahtarlar.</summary>
         [Test]
         public void MetinTablosunda_CasusAnahtarlariVar()
@@ -96,6 +122,8 @@ namespace TheLighter.Tests
                 Assert.IsTrue(t.Var("casus.tur." + c), "Eksik: casus.tur." + c);
                 Assert.IsTrue(t.Var("casus.tur_aciklama." + c), "Eksik: casus.tur_aciklama." + c);
             }
+            // Casus ve Çakmak Gecesi'nde rol perdesi "gizli görev" değil "gizli rol" der.
+            Assert.IsTrue(t.Var("perde.rol"), "Eksik: perde.rol");
             // Köstebek ve Casus aynı oylama ekranını kullanır: "kostebek." anahtarının "casus." karşılığı da olmalı.
             foreach (var ad in new[] { "kim", "basladi", "sonuc_yanlis", "son_aciklama", "aralik", "oy_aciklama", "bekle" })
             {

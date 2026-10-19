@@ -60,6 +60,12 @@ namespace TheLighter.Akis
         // Takım Düellosu: bu turun puanları, sonuç ekranında.
         readonly List<PuanAni> puanAnlari = new List<PuanAni>();
 
+        // Çakmak Gecesi: gece ölenler (sabah duyurusu), linç ve suikast duyuruları; bu turun düello notu.
+        readonly List<OyuncuId> geceOlenler = new List<OyuncuId>();
+        readonly List<GeceDuyurusu> geceDuyurulari = new List<GeceDuyurusu>();
+        bool geceSuruyor;
+        DuelloNotu duelloNotu;
+
         public EldenEleAkisi(Oyun oyun, IReadOnlyList<Oyuncu> oyuncular, Ayarlar ayarlar)
         {
             if (oyun == null) throw new ArgumentNullException(nameof(oyun));
@@ -120,6 +126,7 @@ namespace TheLighter.Akis
             suclamaSonucu = null;
             tetikSonucu = null;
             finalDuyurusu = false;
+            geceDuyurulari.Clear();
             Yenile();
         }
 
@@ -290,7 +297,38 @@ namespace TheLighter.Akis
         {
             if (Ekran.Tur != EkranTuru.SuclamaTartisma) return;
             tartismaBitti = true;
+            geceDuyurulari.Clear();
             Yenile();
+        }
+
+        // ---------- Çakmak Gecesi ----------
+
+        /// <summary>Linç oyu: telefonu tutan bir canlıyı gösterir.</summary>
+        public Sonuc LincOyu(OyuncuId hedef)
+        {
+            if (Ekran.Tur != EkranTuru.Linc || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.LincOyu(Ekran.Kime.Value, hedef));
+        }
+
+        /// <summary>Suikastçı, kendi linç ekranında: <paramref name="hedef"/>'in rolünü tahmin eder.</summary>
+        public Sonuc Suikast(OyuncuId hedef, Rol rol)
+        {
+            if (Ekran.Tur != EkranTuru.Linc || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.Suikast(Ekran.Kime.Value, hedef, rol));
+        }
+
+        /// <summary>Gece seçimi: telefonu tutan. <paramref name="hedef"/> null = pas.</summary>
+        public Sonuc GeceSecimi(OyuncuId? hedef, OyuncuId? ikinci = null, bool? ifsa = null)
+        {
+            if (Ekran.Tur != EkranTuru.Gece || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.GeceSecimi(Ekran.Kime.Value, hedef, ikinci, ifsa));
+        }
+
+        /// <summary>Gündüz yeteneği: telefonu tutan A (soru yazarken) ya da B (cevap seçerken).</summary>
+        public Sonuc GunduzYetenegi(OyuncuId? hedef = null)
+        {
+            if ((Ekran.Tur != EkranTuru.SoruSorma && Ekran.Tur != EkranTuru.CevapSecme) || !Ekran.Kime.HasValue) return Sonuc.YanlisAsama;
+            return Sonra(oyun.GunduzYetenegi(Ekran.Kime.Value, hedef));
         }
 
         Sonuc Sonra(Sonuc s)
@@ -381,6 +419,48 @@ namespace TheLighter.Akis
 
                 case OlayTuru.Elendi:
                     if (tetikSonucu != null && o.Kim == tetikSonucu.Kim) tetikSonucu.Elendi = true;
+                    if (geceSuruyor && o.Kim.HasValue) geceOlenler.Add(o.Kim.Value);
+                    break;
+
+                // ---- Çakmak Gecesi ----
+                case OlayTuru.LincBasladi:
+                    // Linç de "kim?" oylaması gibi: önce telefon ortada tartışma, sonra telefon dolaşır.
+                    suclamaNo++;
+                    suclamaBaslatan = null;
+                    tartismaKalanMs = Ayarlar.SuclamaSuresiSn * 1000.0;
+                    tartismaBitti = false;
+                    break;
+
+                case OlayTuru.LincBitti:
+                    geceDuyurulari.Add(new GeceDuyurusu
+                    {
+                        Tur = GeceDuyurusu.Turu.Linc,
+                        Olenler = o.Kim.HasValue ? new List<OyuncuId> { o.Kim.Value } : new List<OyuncuId>(),
+                    });
+                    break;
+
+                case OlayTuru.Suikast:
+                    if (o.Kim.HasValue)
+                        geceDuyurulari.Add(new GeceDuyurusu { Tur = GeceDuyurusu.Turu.Suikast, Olenler = new List<OyuncuId> { o.Kim.Value } });
+                    break;
+
+                case OlayTuru.GeceBasladi:
+                    suclamaNo++;
+                    geceSuruyor = true;
+                    geceOlenler.Clear();
+                    break;
+
+                case OlayTuru.GeceBitti:
+                    geceSuruyor = false;
+                    geceDuyurulari.Add(new GeceDuyurusu { Tur = GeceDuyurusu.Turu.Sabah, Olenler = new List<OyuncuId>(geceOlenler) });
+                    break;
+
+                case OlayTuru.HakemKarari:
+                    duelloNotu = DuelloNotu.HakemKarari;
+                    break;
+
+                case OlayTuru.DuelloSonduruldu:
+                    duelloNotu = DuelloNotu.Sonduruldu;
                     break;
 
                 case OlayTuru.FinalBasladi:
@@ -395,6 +475,7 @@ namespace TheLighter.Akis
 
                 case OlayTuru.TurBasladi:
                     puanAnlari.Clear();
+                    duelloNotu = DuelloNotu.Yok;
                     bBuEl = null;
                     cBuEl = null;
                     sonBerabere = null;
@@ -460,6 +541,7 @@ namespace TheLighter.Akis
                 {
                     e.Kime = acik.A;
                     e.PerdeNedeni = PerdeNedeni.SoruSirasi;
+                    e.GeceDuyurulari = new List<GeceDuyurusu>(geceDuyurulari);
                     e.SuresiDolan = suresiDolan;
                     e.SuresiDolanBydi = suresiDolanBydi;
                     e.SuclamaSonucu = suclamaSonucu;
@@ -550,6 +632,39 @@ namespace TheLighter.Akis
                     break;
                 }
 
+                case Asama.Linc:
+                case Asama.Gece:
+                {
+                    bool linc = acik.Asama == Asama.Linc;
+                    // Linç önce telefon ortada tartışma; gece doğrudan dolaşır.
+                    if (linc && !tartismaBitti)
+                    {
+                        Kur(e, EkranTuru.SuclamaTartisma, Seyirci(acik), "|L|" + suclamaNo);
+                        e.TartismaKalanMs = (int)Math.Max(0, tartismaKalanMs);
+                        e.GeceDuyurulari = new List<GeceDuyurusu>(geceDuyurulari);
+                        break;
+                    }
+                    OyuncuId? secen = null;
+                    foreach (var id in acik.Oylayanlar)
+                        if (!oyun.GorunumAl(id).OyVerdin) { secen = id; break; }
+                    if (!secen.HasValue)
+                    {
+                        Kur(e, EkranTuru.Bekleniyor, Seyirci(acik), "");
+                        break;
+                    }
+                    e.Kime = secen;
+                    e.PerdeNedeni = linc ? PerdeNedeni.Linc : PerdeNedeni.Gece;
+                    string np = (linc ? "L|" : "N|") + suclamaNo + "|" + secen.Value;
+                    if (np != kaldirilanPerde)
+                    {
+                        PerdeKur(e, EkranTuru.Perde, np);
+                        e.GeceDuyurulari = new List<GeceDuyurusu>(geceDuyurulari);
+                    }
+                    // Kendi ekranı: rolü, bulguları, adaylar. Elden elede telefon onda.
+                    else Kur(e, linc ? EkranTuru.Linc : EkranTuru.Gece, oyun.GorunumAl(secen.Value), "|" + suclamaNo + "|" + secen.Value);
+                    break;
+                }
+
                 case Asama.Tetik:
                 {
                     // Açık bilgi, perde yok: telefon kaybedende, herkes ekrana bakar. Saat işler (süre dolunca çekilir).
@@ -595,6 +710,7 @@ namespace TheLighter.Akis
                     Kur(e, acik.Asama == Asama.Ifsa ? EkranTuru.Ifsa : EkranTuru.Gume, g, bekliyor ? "|ceza" : "");
                     e.CezaOnayBekliyor = bekliyor;
                     e.PuanAnlari = new List<PuanAni>(puanAnlari);
+                    e.DuelloNotu = duelloNotu;
                     break;
                 }
 

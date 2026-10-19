@@ -92,9 +92,19 @@ namespace TheLighter.Istemci
                     return g.SonSuclama ? Metin.Al("kostebek.bekle_son") : Kostebek.OylamaMetni(g.Oyun, "bekle");
                 case Asama.CasusTahmini:
                     return Metin.Al("casus.son_sans_bekle", akis.Isim(g.Yakalanan));
+                case Asama.Linc:
+                    return Metin.Al(BenOlum(g) ? "gece.bekle_olu" : "gece.bekle_linc");
+                case Asama.Gece:
+                    return Metin.Al(BenOlum(g) ? "gece.bekle_olu" : "gece.bekle_gece");
                 default:
                     return Metin.Al("oyun.bekleniyor");
             }
+        }
+
+        static bool BenOlum(Gorunum g)
+        {
+            foreach (var o in g.Oyuncular) if (o.Id == g.Sen) return o.Elendi;
+            return false;
         }
 
         /// <summary>Oyuncuların bağlantı durumu: herkese açık (durum'un oyuncular listesinden).</summary>
@@ -117,7 +127,7 @@ namespace TheLighter.Istemci
         {
             var g = e.Gorunum;
             SureyiYaz(sure, g.KalanMs, 5000);
-            if (g.Asama == Asama.Oylama || g.Asama == Asama.Suclama)
+            if (g.Asama == Asama.Oylama || g.Asama == Asama.Suclama || g.Asama == Asama.Linc || g.Asama == Asama.Gece)
                 oy.text = Metin.Al("online.bekle.oy_sayisi", g.OyKullanan, g.Oylayanlar.Count)
                     + (g.OyVerdin ? "  " + Metin.Al("online.bekle.oy_verdin") : "");
             else if (g.Asama == Asama.SoruToplama)

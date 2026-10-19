@@ -86,6 +86,20 @@ namespace TheLighter.Akis
         /// </summary>
         Sonuc CasusTahmini(OyuncuId kim, string tahmin);
 
+        // --- Çakmak Gecesi (docs/Oyunlar.md, 5) ---
+
+        /// <summary>Linç oyu (elden elede telefonu tutan, online'da ben).</summary>
+        Sonuc LincOyu(OyuncuId hedef);
+
+        /// <summary>Suikastçı, linç sırasında: <paramref name="hedef"/>'in rolünü tahmin eder (oyunda 1 kez).</summary>
+        Sonuc Suikast(OyuncuId hedef, Rol rol);
+
+        /// <summary>Gece seçimi. <paramref name="hedef"/> null = pas; <paramref name="ikinci"/> katillerin yeteneği; <paramref name="ifsa"/> Hakem'in kararı.</summary>
+        Sonuc GeceSecimi(OyuncuId? hedef, OyuncuId? ikinci = null, bool? ifsa = null);
+
+        /// <summary>Gündüz yeteneği: Sorgucu, Sınayıcı, Kuklacı (A iken; Kuklacı'da hedef = C), Kışkırtıcı (B iken).</summary>
+        Sonuc GunduzYetenegi(OyuncuId? hedef = null);
+
         // --- Yardımcılar ---
 
         /// <summary>Renk numarası (renk listesindeki sıra).</summary>

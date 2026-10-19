@@ -189,7 +189,31 @@ namespace TheLighter.Istemci
                 turYok.text = yok ? Metin.Al("kurulum.tur_yok." + a.Oyun) : "";
             });
 
-            ayarKutusu.Add(Yazi(Metin.Al("kurulum.paketler"), "alt-baslik"));
+            // Çakmak Gecesi: rol açılması, gecelik kurban, roller. Bu oyunda paket seçimi yok (öneriler sunucunun suçlama sorularından).
+            var geceAyarlari = new GeceAyarlari(
+                a => Gonder(Cevirici.AyarDegistir(rolAcilir: a)),
+                k => Gonder(Cevirici.AyarDegistir(gecelikKurban: k)),
+                r =>
+                {
+                    var yeni = GeceAyarlari.Degistir(D.Ayarlar.KapaliRoller, r);
+                    if (OyunSecimi.Uyumlu(OyunSecimi.OdadanAyarlar(D.Ayarlar), x => x.KapaliRoller = yeni))
+                        Gonder(Cevirici.AyarDegistir(kapaliRoller: yeni));
+                });
+            ayarKutusu.Add(geceAyarlari.Kok);
+            var geceSoruNotu = Yazi(Metin.Al("gece.paket_yok"), "ipucu");
+            ayarKutusu.Add(geceSoruNotu);
+            yenileyiciler.Add(a =>
+            {
+                bool gece = a.Oyun == OyunTuru.CakmakGecesi;
+                geceAyarlari.Kok.EnableInClassList("gizli", !gece);
+                geceSoruNotu.EnableInClassList("gizli", !gece);
+                geceAyarlari.Ciz(a.RolAcilir, a.GecelikKurban, a.KapaliRoller);
+            });
+
+            var paketBolumu = Kutu("ayar-bolumu");
+            ayarKutusu.Add(paketBolumu);
+            yenileyiciler.Add(a => paketBolumu.EnableInClassList("gizli", a.Oyun == OyunTuru.CakmakGecesi));
+            paketBolumu.Add(Yazi(Metin.Al("kurulum.paketler"), "alt-baslik"));
             var paketKutusu = Kutu("secenekler");
             foreach (var p in uygulama.Paketler)
             {
@@ -200,11 +224,11 @@ namespace TheLighter.Istemci
             }
             bizimButon = Buton("", BizimPaketDegistir, "secenek", "gizli");
             paketKutusu.Add(bizimButon);
-            ayarKutusu.Add(paketKutusu);
+            paketBolumu.Add(paketKutusu);
             bizimDurum = Yazi("", "ipucu");
-            ayarKutusu.Add(bizimDurum);
+            paketBolumu.Add(bizimDurum);
             var paketNotu = Yazi("", "ipucu");
-            ayarKutusu.Add(paketNotu);
+            paketBolumu.Add(paketNotu);
             yenileyiciler.Add(a =>
             {
                 bool temiz = a.Mod == OyunModu.Temiz;
@@ -489,9 +513,12 @@ namespace TheLighter.Istemci
 
             int kisi = d.Oyuncular.Count;
             basla.EnableInClassList("gizli", !Kurucu);
-            basla.SetEnabled(kisi >= Oyun.EnAzOyuncu && takimUyarisi == null);
+            // Çakmak Gecesi 6–18, diğer oyunlar 4–10 (oda 18 kişilik).
+            int enAz = OyuncuSayisi.EnAz(a.Oyun), enFazla = OyuncuSayisi.EnFazla(a.Oyun);
+            basla.SetEnabled(kisi >= enAz && kisi <= enFazla && takimUyarisi == null);
             baslaIpucu.text = !Kurucu ? Metin.Al("lobi.kurucu_bekleniyor", Isim(d.Kurucu))
-                : kisi < Oyun.EnAzOyuncu ? Metin.Al("lobi.en_az", kisi, Oyun.EnAzOyuncu)
+                : kisi < enAz ? Metin.Al("lobi.en_az", kisi, enAz)
+                : kisi > enFazla ? Metin.Al("lobi.en_fazla", kisi, enFazla)
                 : takimUyarisi ?? "";
         }
 
@@ -549,6 +576,12 @@ namespace TheLighter.Istemci
                 Metin.Al("ceza.seviye." + a.Ceza),
             };
             if (a.Oyun == OyunTuru.Casus) parca.Insert(1, Metin.Al("casus.tur." + a.Casus));
+            if (a.Oyun == OyunTuru.CakmakGecesi)
+            {
+                parca.Insert(1, Metin.Al(a.RolAcilir ? "gece.ayar_rol_acik" : "gece.ayar_rol_gizli"));
+                parca.Insert(2, Metin.Al("gece.ayar_kurban_sayi", a.GecelikKurban));
+                if (a.KapaliRoller.Count > 0) parca.Add(Metin.Al("gece.ozet_kapali", a.KapaliRoller.Count));
+            }
             if (a.Gorevler || OyunSecimi.GorevlerHerkeste(a.Oyun)) parca.Add(Metin.Al("kurulum.gorevler"));
             if (a.Kaos) parca.Add(Metin.Al("kurulum.kaos"));
             if (grupPaketi > 0 && a.Mod != OyunModu.Temiz && a.Paketler.Contains(PaketBilgisi.Bizim))

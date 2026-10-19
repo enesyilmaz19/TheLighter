@@ -21,6 +21,8 @@ namespace TheLighter.Istemci
         readonly Func<IReadOnlyList<OdaOyuncusu>> oyuncular;
         readonly Func<OyuncuId?> ben;
         readonly Func<IReadOnlyList<SohbetKanali>> adliKanallar;
+        readonly Func<SohbetYeri, string> yazamazNedeni;
+        readonly Label yazamaz;
         readonly VisualElement sekmeler;
         readonly ScrollView liste;
         readonly VisualElement dmSecici;
@@ -43,14 +45,19 @@ namespace TheLighter.Istemci
         /// Şu an yazılabilen adlı kanallar (Takım Düellosu'nda takım, Çakmak Gecesi'nde katil ve ölüler). Kural motorunun
         /// görünümünden; kim gerçekten yazabilir sunucu denetler. null: hiç yok.
         /// </param>
+        /// <param name="yazamazNedeni">
+        /// Bu yere şimdi yazılamıyorsa nedeni (Çakmak Gecesi: gece, ölü, susturuldu), yoksa null. Kutu kapanır, neden yazılır.
+        /// </param>
         public SohbetPaneli(SohbetDefteri defter, Func<SohbetYeri, string, bool> gonder,
-            Func<IReadOnlyList<OdaOyuncusu>> oyuncular, Func<OyuncuId?> ben, Func<IReadOnlyList<SohbetKanali>> adliKanallar = null)
+            Func<IReadOnlyList<OdaOyuncusu>> oyuncular, Func<OyuncuId?> ben, Func<IReadOnlyList<SohbetKanali>> adliKanallar = null,
+            Func<SohbetYeri, string> yazamazNedeni = null)
         {
             this.defter = defter;
             this.gonder = gonder;
             this.oyuncular = oyuncular;
             this.ben = ben;
             this.adliKanallar = adliKanallar;
+            this.yazamazNedeni = yazamazNedeni;
 
             Kok = Kutu("menu-perde", "sohbet", "gizli");
             var kutuKap = Kutu("menu-kutu", "sohbet-kutu");
@@ -75,6 +82,8 @@ namespace TheLighter.Istemci
 
             hata = Yazi("", "hata");
             kutuKap.Add(hata);
+            yazamaz = Yazi("", "ipucu", "orta", "gizli");
+            kutuKap.Add(yazamaz);
 
             var alt = Kutu("satir", "sohbet-alt");
             kutu = new TextField { maxLength = SohbetDefteri.EnFazlaKarakter };
@@ -139,7 +148,12 @@ namespace TheLighter.Istemci
             if (!Acik) return;
             if (defter.Mesajlar(kanal).Count != cizilenMesaj || kanal.Anahtar != cizilenKanal || SekmeAnahtari() != cizilenSekmeler) Ciz();
             KlavyeBoslugu();
-            yolla.SetEnabled(SohbetDefteri.Hazirla(kutu.value) != null && defter.GonderebilirMi);
+            // Çakmak Gecesi: gece, ölü ya da susturulan genele yazamaz; kutu kapanır, nedeni yazılır.
+            string neden = yazamazNedeni?.Invoke(kanal);
+            yazamaz.text = neden ?? "";
+            yazamaz.EnableInClassList("gizli", neden == null);
+            kutu.SetEnabled(neden == null);
+            yolla.SetEnabled(neden == null && SohbetDefteri.Hazirla(kutu.value) != null && defter.GonderebilirMi);
         }
 
         IReadOnlyList<SohbetKanali> Kanallar() => adliKanallar?.Invoke() ?? Array.Empty<SohbetKanali>();
@@ -240,7 +254,7 @@ namespace TheLighter.Istemci
         void Yolla()
         {
             string metin = SohbetDefteri.Hazirla(kutu.value);
-            if (metin == null) return;
+            if (metin == null || yazamazNedeni?.Invoke(kanal) != null) return;
             if (!defter.GonderebilirMi)
             {
                 hata.text = Metin.Al("sohbet.cok_hizli");

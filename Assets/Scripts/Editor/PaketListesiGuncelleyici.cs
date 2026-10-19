@@ -5,7 +5,8 @@ using UnityEngine;
 namespace TheLighter.Istemci.Duzenleyici
 {
     /// <summary>
-    /// Assets/Icerik altındaki .txt paketlerini ve sesli ceza dosyasını (Cezalar.csv) <see cref="PaketListesi"/>'ne yazar.
+    /// Assets/Icerik altındaki .txt paketlerini, sesli ceza dosyasını (Cezalar.csv) ve Çakmak Gecesi sorularını (GeceSorulari.csv)
+    /// <see cref="PaketListesi"/>'ne yazar.
     /// Editör açılınca ve Icerik'e paket eklenince, silinince ya da taşınınca kendiliğinden çalışır.
     /// Enes'in klasörüne dokunmaz, sadece okur. Elle çalıştırmak için: menü → TheLighter → Soru paketlerini güncelle.
     /// </summary>
@@ -56,6 +57,7 @@ namespace TheLighter.Istemci.Duzenleyici
             }
             paketler.Sort((x, y) => string.CompareOrdinal(x.name, y.name));
             var sesli = AssetDatabase.LoadAssetAtPath<TextAsset>(PaketListesi.SesliCezaYolu);
+            var gece = AssetDatabase.LoadAssetAtPath<TextAsset>(PaketListesi.GeceSorulariYolu);
 
             var liste = AssetDatabase.LoadAssetAtPath<PaketListesi>(PaketListesi.AssetYolu);
             if (liste == null && System.IO.File.Exists(PaketListesi.AssetYolu))
@@ -71,14 +73,16 @@ namespace TheLighter.Istemci.Duzenleyici
                 liste = ScriptableObject.CreateInstance<PaketListesi>();
                 liste.Paketler = paketler;
                 liste.SesliCezalar = sesli;
+                liste.GeceSorulari = gece;
                 AssetDatabase.CreateAsset(liste, PaketListesi.AssetYolu);
             }
             else
             {
                 // Değişmediyse dosyaya yazma, git'te boşuna değişiklik çıkmasın.
-                if (Ayni(liste.Paketler, paketler) && liste.SesliCezalar == sesli) return;
+                if (Ayni(liste.Paketler, paketler) && liste.SesliCezalar == sesli && liste.GeceSorulari == gece) return;
                 liste.Paketler = paketler;
                 liste.SesliCezalar = sesli;
+                liste.GeceSorulari = gece;
                 EditorUtility.SetDirty(liste);
             }
             AssetDatabase.SaveAssets();

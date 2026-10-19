@@ -88,25 +88,14 @@ namespace TheLighter.Istemci
         /// </summary>
         public bool SohbetGonder(SohbetYeri yer, string metin) => SohbetVar && Istemci.SohbetGonder(yer, metin);
 
-        /// <summary>
-        /// Görünümden: Takım Düellosu sürerken takım kanalı; Çakmak Gecesi'nde katillere katil kanalı, ölülere ölüler kanalı.
-        /// Kim gerçekten yazıp okur kural motorunda (sunucu dağıtır); burada sadece sekme gösterilir.
-        /// </summary>
-        IReadOnlyList<SohbetKanali> AdliKanallar()
+        /// <summary>Görünen adlı kanallar (takım, katil, ölüler): <see cref="SohbetIzni.AdliKanallar"/>.</summary>
+        IReadOnlyList<SohbetKanali> AdliKanallar() => SohbetIzni.AdliKanallar(Istemci.SonDurum, Istemci.Sen);
+
+        /// <summary>Bu yere şimdi yazılamıyorsa nedeni (metin), yazılabiliyorsa null.</summary>
+        string YazamazNedeni(SohbetYeri yer)
         {
-            var l = new List<SohbetKanali>();
-            var g = Istemci.SonDurum?.Gorunum;
-            // Adlı kanallar oyun sürerken: lobide, bekleme odasında ve oyun sonunda yok (sunucu GECERSIZ_GIRDI der).
-            if (g == null || !Istemci.Sen.HasValue || g.Asama == Asama.OyunSonu || Istemci.SonDurum.Yer != OdaYeri.Oyun) return l;
-            OyuncuDurumu ben = null;
-            foreach (var o in g.Oyuncular) if (o.Id == Istemci.Sen.Value) ben = o;
-            if (g.Oyun == OyunTuru.Takim && ben?.Takim != null) l.Add(SohbetKanali.Takim);
-            if (g.Oyun == OyunTuru.CakmakGecesi)
-            {
-                if (g.Katiller.Count > 0) l.Add(SohbetKanali.Katil);
-                if (ben != null && ben.Elendi) l.Add(SohbetKanali.Oluler);
-            }
-            return l;
+            var k = SohbetIzni.YazamazNedeni(Istemci.SonDurum, Istemci.Sen, yer);
+            return k == null ? null : Metin.Al(k);
         }
 
         /// <summary>Sohbette görünen kişiler: oyuncular ve bekleme odasındakiler (onlar da yazar, DM alır).</summary>
@@ -121,7 +110,8 @@ namespace TheLighter.Istemci
         }
 
         /// <summary>Lobi, bekleme odası ya da oyun ekranına eklenecek sohbet paneli.</summary>
-        public SohbetPaneli SohbetPaneliKur() => new SohbetPaneli(Sohbet, SohbetGonder, SohbetKisileri, () => Istemci.Sen, AdliKanallar);
+        public SohbetPaneli SohbetPaneliKur() =>
+            new SohbetPaneli(Sohbet, SohbetGonder, SohbetKisileri, () => Istemci.Sen, AdliKanallar, YazamazNedeni);
 
         /// <summary>Lobide son görülen ayarlar (oyun ekranı mod ve öneriler için kullanır).</summary>
         public OdaAyarlari SonAyarlar => sonAyarlar;
@@ -219,6 +209,9 @@ namespace TheLighter.Istemci
                 Can = a.Can,
                 TakimDagilimi = a.Takimlar.Count > 0 ? new Dictionary<OyuncuId, int>(a.Takimlar) : null,
                 Casus = a.Casus,
+                RolAcilir = a.RolAcilir,
+                GecelikKurban = a.GecelikKurban,
+                KapaliRoller = new List<Rol>(a.KapaliRoller),
                 Mod = a.Mod,
                 MiniOyun = a.MiniOyun,
                 TurSayisi = a.TurSayisi,

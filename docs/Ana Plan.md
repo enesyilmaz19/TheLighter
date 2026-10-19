@@ -355,7 +355,7 @@ Mikrofon izni olduğu için Play Store gizlilik metni istiyor.
 5. Tekrarları indir (`sııık`→`sik`), tek harflik parçaları birleştir (`s i k`→`sik`).
 6. Kara liste kelime başında eşleşir, sonra **izin listesi** kontrol edilir (götürmek, sikke, musiki, amaç...).
 
-**Her modda:** atılan kişi aynı odaya aynı `anahtar`la dönemez. Engelleme ve rapor S6'da gelir. **Mağazalar bunlar olmadan uygulamayı kabul etmiyor** (Google Play ve Apple, kullanıcı içeriği olan uygulamada uygulama içi rapor + engelleme istiyor).
+**Her modda:** atılan kişi aynı odaya aynı `anahtar`la dönemez. Engelleme ve rapor 2026-10-19'da geldi (sunucu; ekranı Arda'da, `docs/Protokol.md`). **Mağazalar bunlar olmadan uygulamayı kabul etmiyor** (Google Play ve Apple, kullanıcı içeriği olan uygulamada uygulama içi rapor + engelleme istiyor).
 
 ### 6.5 Mini oyunlar ve gecikme
 
@@ -380,7 +380,7 @@ Mikrofon izni olduğu için Play Store gizlilik metni istiyor.
 | **Bekleyenler** | 8 kişilik odada 6 kişi mini oyunu izliyor | Gizli görevler bunu kısmen çözüyor, herkes kendi hedefini izliyor. Sonra Tribün modu (7. bölüm) |
 | **Dil** | EN/DE sonra gelecek | Metinler ilk günden tabloda |
 | **Steam görselleri** | "Yakında" sayfası kapsül görseli istiyor. Skinler de sanat istiyor | Sanatçı yok. S5'te bütçe ya da çevreden biri |
-| **Gizlilik** | Mikrofon ve sohbet var | Hesap yok, mesaj saklanmıyor. Rapor gelince odanın son 50 mesajı 30 gün tutulur. Gizlilik metnine yazılır |
+| **Gizlilik** | Mikrofon ve sohbet var | Hesap yok, mesaj saklanmıyor. Rapor gelince raporlayanın gördüğü son 50 metin (sohbet + ifşa olan sorular, güme giden asla) 30 gün tutulur. Taslak: `docs/yasal/Gizlilik.md` |
 
 ---
 

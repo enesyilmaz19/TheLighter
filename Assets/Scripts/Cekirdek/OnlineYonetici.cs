@@ -195,6 +195,7 @@ namespace TheLighter.Istemci
             return new Ayarlar
             {
                 Oyun = a.Oyun,
+                Can = a.Can,
                 Mod = a.Mod,
                 MiniOyun = a.MiniOyun,
                 TurSayisi = a.TurSayisi,

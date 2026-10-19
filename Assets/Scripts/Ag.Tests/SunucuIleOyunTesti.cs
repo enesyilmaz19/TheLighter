@@ -153,6 +153,59 @@ namespace TheLighter.Testler
             foreach (var b in botlar) b.Istemci.Ayril();
         }
 
+        /// <summary>
+        /// Rus Ruleti gerçek sunucuyla (tasks/g2-rus-ruleti.md 5): 4 bot, can 1. Düelloyu kaybeden tetiği çeker ya da devreder,
+        /// 3 kişide final, son kalan kazanır; özet kazananı ve elenme sırasını getirir.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator DortBot_RusRuleti_SonKalanKazanir()
+        {
+            var botlar = new List<DenemeBotu>();
+            for (int i = 0; i < 4; i++) botlar.Add(new DenemeBotu("Rr" + (i + 1), 3000 + i));
+            var kurucu = botlar[0];
+            var olaylar = new List<OlayMesaji>();
+            kurucu.Istemci.OlayGeldi += olaylar.Add;
+            var saat = Stopwatch.StartNew();
+            double son = 0;
+
+            IEnumerator Bekle(Func<bool> kosul, double sn, string ne)
+            {
+                double bitis = saat.Elapsed.TotalSeconds + sn;
+                while (!kosul())
+                {
+                    double g = saat.Elapsed.TotalSeconds - son;
+                    son = saat.Elapsed.TotalSeconds;
+                    foreach (var b in botlar) b.Guncelle(g);
+                    if (kurucu.Istemci.Durum == BaglantiDurumu.Kapali) Assert.Ignore("Yerel sunucu çalışmıyor.");
+                    if (saat.Elapsed.TotalSeconds > bitis)
+                        Assert.Fail(ne + " olmadı: " + string.Join(", ", botlar.Select(b => b.Isim + "=" + (b.Istemci.SonDurum?.ToString() ?? "-") + " " + b.SonHata)));
+                    yield return null;
+                }
+            }
+
+            kurucu.Istemci.OdaKur(Adres, kurucu.Isim);
+            yield return Bekle(() => kurucu.Istemci.Durum == BaglantiDurumu.Odada, 10, "Oda kurma");
+            for (int i = 1; i < 4; i++) botlar[i].Istemci.Katil(Adres, kurucu.Istemci.Oda, botlar[i].Isim);
+            yield return Bekle(() => kurucu.Istemci.SonDurum?.Oyuncular.Count == 4, 10, "Katılma");
+
+            kurucu.Istemci.Gonder(Cevirici.AyarDegistir(oyun: OyunTuru.RusRuleti, can: 1, ceza: CezaSeviyesi.Kapali, gorevler: false, kaos: false,
+                soruSn: 10, cevapSn: 10, hamleSn: 5, miniOyun: MiniOyunTuru.Zar));
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Ayarlar?.Oyun == OyunTuru.RusRuleti), 10, "Rus Ruleti ayarı");
+            kurucu.Istemci.Gonder(Cevirici.Baslat());
+            yield return Bekle(() => botlar.All(b => b.Istemci.SonDurum?.Yer == OdaYeri.Oyun), 10, "Başlama");
+
+            yield return Bekle(() => botlar.All(b => b.OyunBitti), 400, "Oyunun bitmesi");
+
+            var r = kurucu.Istemci.SonDurum.Ozet?.RusRuleti;
+            Assert.That(r, Is.Not.Null, "özette Rus Ruleti");
+            Assert.That(r.Kazanan.HasValue, Is.True, "son kalan kazanır");
+            Assert.That(r.ElenmeSirasi.Count, Is.EqualTo(3));
+            Assert.That(olaylar.Any(o => o.Olay != null && o.Olay.Tur == OlayTuru.FinalBasladi), Is.True, "3 kişide final");
+            Assert.That(olaylar.Count(o => o.Olay != null && o.Olay.Tur == OlayTuru.TetikPatladi), Is.EqualTo(3), "can 1: her patlama bir eleme");
+
+            foreach (var b in botlar) b.Istemci.Ayril();
+        }
+
         [UnityTest]
         public IEnumerator UygulamayaDonunce_YenidenBaglanir_AyniIsimleOdada()
         {

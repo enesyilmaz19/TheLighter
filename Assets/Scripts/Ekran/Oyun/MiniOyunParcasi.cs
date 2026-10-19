@@ -88,6 +88,7 @@ namespace TheLighter.Istemci
             kap.Add(bas);
             string rol = bMi ? "mini.rol_b" : "mini.rol_c";
             if (g.Kaos == KaosKurali.TersDunya) rol += "_ters";
+            if (g.Final) rol = "rus.rol_final"; // Rus Ruleti finali: soru yok, kaybeden tetiğe
             kap.Add(Yazi(Metin.Al(rol), "yari-rol"));
             return kap;
         }

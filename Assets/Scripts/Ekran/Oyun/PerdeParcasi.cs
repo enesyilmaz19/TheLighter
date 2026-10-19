@@ -33,6 +33,9 @@ namespace TheLighter.Istemci
             // Köstebek: az önce biten "kim?" oylamasının sonucu, telefon A'ya dönerken herkes görsün.
             if (e.SuclamaSonucu != null)
                 Kok.Add(Yazi(Kostebek.SonucMetni(akis, e.SuclamaSonucu.Suclanan), "banner"));
+            // Rus Ruleti: az önce çekilen tetik.
+            if (e.TetikSonucu != null) Kok.Add(RusRuleti.TetikDuyurusu(akis, e.TetikSonucu));
+            if (g.Oyun == OyunTuru.RusRuleti) Kok.Add(RusRuleti.CanListesi(akis, g));
 
             Kok.Add(Esnek());
 
@@ -95,6 +98,10 @@ namespace TheLighter.Istemci
 
             Kok = Kutu("parca", "perde");
 
+            // Rus Ruleti: son tetik, final duyurusu (bir kez) ve canlar.
+            if (e.TetikSonucu != null) Kok.Add(RusRuleti.TetikDuyurusu(akis, e.TetikSonucu));
+            if (e.FinalDuyurusu) Kok.Add(Yazi(Metin.Al("rus.final"), "banner", "tetik-bam"));
+
             // Kızgın Çakmak: bu devirde çakmak C'nin elinde yandıysa kartları burada (perde, saat durur).
             var yanma = Tekrar.Filtrele(g.TurCezalari, true);
             if (yanma.Count > 0)
@@ -105,12 +112,14 @@ namespace TheLighter.Istemci
             if (g.Kaos != KaosKurali.Yok) Kok.Add(Tekrar.KaosSeridi(g.Kaos));
 
             Kok.Add(Esnek());
-            Kok.Add(Yazi(Metin.Al("mini.perde_verdi", b, c, TurkceEk.Yonelme(c)), "perde-ust"));
+            // Rus Ruleti finali: soru yok, sorusuz ikili düello.
+            Kok.Add(Yazi(g.Final ? Metin.Al("rus.final_duello", b, c) : Metin.Al("mini.perde_verdi", b, c, TurkceEk.Yonelme(c)), "perde-ust"));
             Kok.Add(Yazi(Metin.Al("mini.ad." + tur), "perde-buyuk"));
             Kok.Add(Yazi(Metin.Al("mini.kural." + tur), "aciklama", "orta"));
             // Ters Dünya'da kim kazanırsa ne olacağı tersine döner (kural motorunda; burada sadece yazı).
             string anlam = g.Kaos == KaosKurali.TersDunya ? "mini.perde_anlam_ters" : "mini.perde_anlam";
-            Kok.Add(Yazi(Metin.Al(anlam, b, c), "aciklama", "orta"));
+            if (!g.Final) Kok.Add(Yazi(Metin.Al(anlam, b, c), "aciklama", "orta"));
+            if (g.Oyun == OyunTuru.RusRuleti) Kok.Add(Yazi(Metin.Al("rus.kaybeden_tetik"), "aciklama", "orta"));
             Kok.Add(Esnek());
             Kok.Add(Yazi(Metin.Al("mini.perde_yerlesim", b, c), "perde-alt"));
 

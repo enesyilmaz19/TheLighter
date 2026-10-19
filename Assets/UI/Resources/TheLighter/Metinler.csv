@@ -529,3 +529,35 @@ kostebek.bekle_son,Son oylama: oylar toplanıyor,Final vote: collecting votes
 kostebek.supheli_etiket,şüpheli,suspect
 kostebek.bitir,Son oylamayı başlat,Start the final vote
 perde.suclama,Köstebek oylaması: oy verme sırası {1},Mole vote: {0}'s turn to vote
+rus.can_baslik,Can,Lives
+rus.can_sayi,{0} can,lives: {0}
+rus.can_son_cakmak,{0} can (Son Çakmak),lives: {0} (Last Lighter)
+rus.elendi_etiket,elendi,out
+rus.devret_etiket,devret hakkı,can pass
+kurulum.tur_yok.RusRuleti,Tur sayısı yok: son kalan kazanır.,No round limit: last one standing wins.
+kurulum.tur_yok.CakmakGecesi,Tur sayısı yok: bir taraf kazanana kadar sürer.,No round limit: plays until one side wins.
+rus.isi_etiket,Tabanca: {0},Gun: {0}
+rus.isi_ipucu,"Tabanca ısınıyor. Kızgınken patlama yakın olabilir, ama kesin değil.","The gun is heating up. Burning means a shot may be close, but not for sure."
+rus.final_etiket,FİNAL,FINAL
+rus.final,FİNAL! Son 3 kişi,FINAL! Last 3 standing
+rus.final_duello,Final düellosu: {0} ile {1},Final duel: {0} vs {1}
+rus.kaybeden_tetik,Düelloyu kaybeden tetiği çeker.,The duel's loser pulls the trigger.
+rus.rol_final,Kaybedersen tetiği çekersin.,"If you lose, you pull the trigger."
+rus.tik,Tık… {0} için boş çıktı.,Click… empty for {0}.
+rus.bam,BAM! {0} bir can kaybetti.,BANG! {0} lost a life.
+rus.elendi,BAM! {0} elendi.,BANG! {0} is out.
+rus.devretti,{0} tetiği devretti: şimdi {1} çekecek.,{0} passed the trigger: now {1} pulls.
+rus.kaybetti,{0} düelloyu kaybetti.,{0} lost the duel.
+rus.devralan,"{1} tetiği devretti, şimdi {0} çekecek.",{1} passed the trigger; now {0} pulls.
+rus.tetik_sende,"Tetik sende, {0}","Your trigger, {0}"
+rus.tetik_onda,{0} tetiği çekecek,{0} pulls the trigger
+rus.tetik_ipucu,"6 hazne, 1 mermi. Süre dolunca tetik kendiliğinden çekilir.","6 chambers, 1 bullet. When time runs out the trigger pulls itself."
+rus.tetigi_cek,Tetiği çek,Pull the trigger
+rus.devret,Devret →,Pass it →
+rus.devret_ipucu,Oyun boyu bir kez: tetiği başkası çeker.,Once per game: someone else pulls.
+rus.izle,Herkes izliyor.,Everyone's watching.
+rus.kazanan_baslik,Kazanan,Winner
+rus.son_kalan,Son kalan!,Last one standing!
+rus.kazanan_yok,Kazanan yok: canlar eşit.,No winner: lives are tied.
+rus.elenme_sirasi,Elenme sırası,Elimination order
+rus.elenen_satir,{0}. elenen: {1},Out #{0}: {1}

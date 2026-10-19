@@ -45,6 +45,8 @@ namespace TheLighter.Istemci
 
             // Köstebek: önce köstebek açılışı (kim, kim kazandı, neden).
             if (ozet != null && ozet.Kostebek != null) kaydirma.Add(Kostebek.Acilis(akis, ozet));
+            // Rus Ruleti: kazanan (son kalan) ve elenme sırası.
+            if (ozet != null && ozet.RusRuleti != null) kaydirma.Add(RusRuleti.Acilis(akis, ozet.RusRuleti));
 
             grupKutusu = Kutu("grup-kutusu");
             kaydirma.Add(grupKutusu);

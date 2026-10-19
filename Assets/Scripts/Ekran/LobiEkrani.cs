@@ -133,6 +133,12 @@ namespace TheLighter.Istemci
 
             // Oyun ve mod iki ayrı eksen (docs/Oyunlar.md 0).
             Bolum("kurulum.oyun", OyunSecimi.Secenekler, o => Metin.Al("oyun.ad." + o), a => a.Oyun, OyunSec);
+            // Rus Ruleti: herkesin canı.
+            var canBolumu = Kutu("ayar-bolumu");
+            ayarKutusu.Add(canBolumu);
+            Bolum("rus.can_baslik", OyunSecimi.CanSecenekleri, KurulumEkrani.CanYazisi, a => a.Can,
+                c => Gonder(Cevirici.AyarDegistir(can: c)), yer: canBolumu);
+            yenileyiciler.Add(a => canBolumu.EnableInClassList("gizli", a.Oyun != OyunTuru.RusRuleti));
 
             Bolum("kurulum.mod", ModSecenekleri, m => Metin.Al("mod.ad." + m), a => a.Mod, ModSec);
             var modAciklama = Yazi("", "ipucu");
@@ -141,9 +147,20 @@ namespace TheLighter.Istemci
 
             Bolum("kurulum.mini_oyun", MiniSecenekleri, m => Metin.Al("mini.ad." + m), a => a.MiniOyun,
                 m => Gonder(Cevirici.AyarDegistir(miniOyun: m)));
+            var turBolumu = Kutu("ayar-bolumu");
+            ayarKutusu.Add(turBolumu);
             Bolum("kurulum.tur", TurSecenekleri,
                 t => t == 0 ? Metin.Al("kurulum.tur_sinirsiz") : Metin.Al("kurulum.tur_sayi", t), a => a.TurSayisi,
-                t => Gonder(Cevirici.AyarDegistir(turSayisi: t)));
+                t => Gonder(Cevirici.AyarDegistir(turSayisi: t)), yer: turBolumu);
+            var turYok = Yazi("", "ipucu");
+            ayarKutusu.Add(turYok);
+            yenileyiciler.Add(a =>
+            {
+                bool yok = OyunSecimi.TurSayisiYok(a.Oyun);
+                turBolumu.EnableInClassList("gizli", yok);
+                turYok.EnableInClassList("gizli", !yok);
+                turYok.text = yok ? Metin.Al("kurulum.tur_yok." + a.Oyun) : "";
+            });
 
             ayarKutusu.Add(Yazi(Metin.Al("kurulum.paketler"), "alt-baslik"));
             var paketKutusu = Kutu("secenekler");
@@ -180,8 +197,12 @@ namespace TheLighter.Istemci
             yenileyiciler.Add(a =>
             {
                 bool temiz = a.Mod == OyunModu.Temiz;
+                var ka = OyunSecimi.OdadanAyarlar(a);
                 for (int i = 0; i < CezaSecenekleri.Length; i++)
-                    cezaButonlari[i].SetEnabled(!temiz || CezaSecenekleri[i] != CezaSeviyesi.Cesur);
+                {
+                    var c = CezaSecenekleri[i];
+                    cezaButonlari[i].SetEnabled(c == a.Ceza || OyunSecimi.Uyumlu(ka, x => x.CezaSeviyesi = c));
+                }
                 cezaAciklama.text = Metin.Al("ceza.seviye_aciklama." + a.Ceza) + (temiz ? "  " + Metin.Al("kurulum.ceza_temiz") : "");
             });
 
@@ -215,9 +236,11 @@ namespace TheLighter.Istemci
         }
 
         /// <summary>Bir ayar satırı: başlık + seçenek butonları. Seçili olan sunucunun durumundan.</summary>
-        List<Button> Bolum<T>(string baslik, T[] secenekler, Func<T, string> yazi, Func<OdaAyarlari, T> secili, Action<T> sec, bool altBaslik = true)
+        List<Button> Bolum<T>(string baslik, T[] secenekler, Func<T, string> yazi, Func<OdaAyarlari, T> secili, Action<T> sec,
+            bool altBaslik = true, VisualElement yer = null)
         {
-            ayarKutusu.Add(Yazi(Metin.Al(baslik), altBaslik ? "alt-baslik" : "ipucu"));
+            yer = yer ?? ayarKutusu;
+            yer.Add(Yazi(Metin.Al(baslik), altBaslik ? "alt-baslik" : "ipucu"));
             var satir = Kutu("secenekler");
             var butonlar = new List<Button>();
             foreach (var s in secenekler)
@@ -227,7 +250,7 @@ namespace TheLighter.Istemci
                 butonlar.Add(b);
                 satir.Add(b);
             }
-            ayarKutusu.Add(satir);
+            yer.Add(satir);
             yenileyiciler.Add(a =>
             {
                 var su = secili(a);
@@ -457,7 +480,9 @@ namespace TheLighter.Istemci
                 Metin.Al("oyun.ad." + a.Oyun),
                 Metin.Al("mod.ad." + a.Mod),
                 Metin.Al("mini.ad." + a.MiniOyun),
-                a.TurSayisi == 0 ? Metin.Al("kurulum.tur_sinirsiz") : Metin.Al("kurulum.tur_sayi", a.TurSayisi),
+                a.Oyun == OyunTuru.RusRuleti ? KurulumEkrani.CanYazisi(a.Can)
+                    : OyunSecimi.TurSayisiYok(a.Oyun) ? Metin.Al("kurulum.tur_yok." + a.Oyun)
+                    : a.TurSayisi == 0 ? Metin.Al("kurulum.tur_sinirsiz") : Metin.Al("kurulum.tur_sayi", a.TurSayisi),
                 Metin.Al("ceza.seviye." + a.Ceza),
             };
             if (a.Gorevler || OyunSecimi.GorevlerHerkeste(a.Oyun)) parca.Add(Metin.Al("kurulum.gorevler"));

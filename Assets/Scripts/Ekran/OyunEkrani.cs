@@ -204,6 +204,22 @@ namespace TheLighter.Istemci
                     suclamaBitti = true;
                     suclanan = o.Kim;
                     break;
+                case OlayTuru.TetikBos:
+                    if (o.Kim.HasValue) Bildir(RusRuleti.TetikMetni(akis, new TetikSonucu { Kim = o.Kim.Value }));
+                    break;
+                case OlayTuru.TetikPatladi:
+                    if (o.Kim.HasValue) Bildir(RusRuleti.TetikMetni(akis, new TetikSonucu { Kim = o.Kim.Value, Patladi = true }));
+                    break;
+                case OlayTuru.Elendi:
+                    if (o.Kim.HasValue && akis.Ayarlar.Oyun == OyunTuru.RusRuleti)
+                        Bildir(RusRuleti.TetikMetni(akis, new TetikSonucu { Kim = o.Kim.Value, Patladi = true, Elendi = true }));
+                    break;
+                case OlayTuru.TetikDevredildi:
+                    Bildir(Metin.Al("rus.devretti", kim, akis.Isim(o.Olay.Hedef)));
+                    break;
+                case OlayTuru.FinalBasladi:
+                    Bildir(Metin.Al("rus.final"));
+                    break;
                 case OlayTuru.SiraAtlandi: Bildir(Metin.Al("online.olay.sira_atlandi", kim, TurkceEk.Ilgi(kim))); break;
                 case OlayTuru.Afk: Bildir(Metin.Al("online.olay.afk", kim)); break;
                 case OlayTuru.AfkBitti: Bildir(Metin.Al("online.olay.afk_bitti", kim)); break;
@@ -245,7 +261,9 @@ namespace TheLighter.Istemci
             // Kaos turu ve Kızgın Çakmak'ın ısısı herkese açık: üst çubukta.
             var parcalar = new System.Collections.Generic.List<string>();
             if (g.Kaos != KaosKurali.Yok) parcalar.Add(Metin.Al("oyun.kaos_etiket", Tekrar.KaosAdi(g.Kaos)));
-            if (g.Isi.HasValue) parcalar.Add(Metin.Al("isi.etiket", Tekrar.IsiYazisi(g.Isi.Value)));
+            if (g.Isi.HasValue)
+                parcalar.Add(Metin.Al(g.Oyun == OyunTuru.RusRuleti ? "rus.isi_etiket" : "isi.etiket", Tekrar.IsiYazisi(g.Isi.Value)));
+            if (g.Final) parcalar.Add(Metin.Al("rus.final_etiket"));
             durumYazisi.text = string.Join("  ·  ", parcalar);
         }
 
@@ -268,6 +286,7 @@ namespace TheLighter.Istemci
                 case EkranTuru.Oylama: return new OylamaParcasi(akis, e);
                 case EkranTuru.SuclamaTartisma: return new SuclamaTartismaParcasi(akis, e);
                 case EkranTuru.Suclama: return new SuclamaParcasi(akis, e);
+                case EkranTuru.Tetik: return new TetikParcasi(akis, e);
                 case EkranTuru.Karar: return new KararParcasi(akis, e);
                 case EkranTuru.OyunSonu: return new OyunSonuParcasi(uygulama, akis, e, online);
                 default: return akis.Online ? (IOyunParcasi)new OnlineBekleParcasi(akis, e) : new BekleParcasi();

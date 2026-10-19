@@ -232,6 +232,7 @@ namespace TheLighter.Istemci
             {
                 Oyun = ayarlar.Oyun,
                 SuclamaSuresiSn = ayarlar.SuclamaSuresiSn,
+                Can = ayarlar.Can,
                 Mod = ayarlar.Mod,
                 MiniOyun = ayarlar.MiniOyun,
                 TurSayisi = ayarlar.TurSayisi,

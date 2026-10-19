@@ -23,6 +23,7 @@ namespace TheLighter.Testler
         /// <summary>Köstebek: bot ilk soru sırasında erken suçlama hakkını kullansın (testte bir bota açılır).</summary>
         public bool ErkenSuclasin;
         public int OyVerdigiSuclama { get; private set; }
+        public int Devretti { get; private set; }
 
         public DenemeBotu(string isim, int tohum, Func<ITasima> tasima = null)
         {
@@ -109,6 +110,24 @@ namespace TheLighter.Testler
                         Yolla(Cevirici.SuclamaOyu(tur, Sec(adaylar)));
                         OyVerdigiSuclama++;
                     }
+                    break;
+
+                case Asama.Tetik:
+                    // Rus Ruleti: arada bir devreder (hakkı varsa), yoksa çeker.
+                    if (g.TetikCeken != ben) break;
+                    OyuncuDurumu benim = null;
+                    var adaylar2 = new System.Collections.Generic.List<OyuncuId>();
+                    foreach (var o in g.Oyuncular)
+                    {
+                        if (o.Id == ben) benim = o;
+                        else if (!o.Elendi && !o.Cikti && !o.Afk) adaylar2.Add(o.Id);
+                    }
+                    if (benim != null && benim.DevretmeHakki && adaylar2.Count > 0 && rastgele.Next(4) == 0)
+                    {
+                        Yolla(Cevirici.TetikDevret(tur, Sec(adaylar2)));
+                        Devretti++;
+                    }
+                    else Yolla(Cevirici.TetikCek(tur));
                     break;
 
                 case Asama.IkiyeKatla:

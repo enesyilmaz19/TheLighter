@@ -211,6 +211,12 @@ namespace TheLighter.Ag
                     break;
                 }
 
+                case Asama.Tetik:
+                    // Herkes izler (açık bilgi); düğmeler sadece tetiği çekecek kişide (ekran Kime == Ben'e bakar).
+                    Kur(e, EkranTuru.Tetik, tur + "|" + g.TetikCeken);
+                    e.Kime = g.TetikCeken;
+                    break;
+
                 case Asama.IkiyeKatla:
                 case Asama.Bedel:
                     Kur(e, EkranTuru.Karar, tur + "|" + g.Asama);
@@ -330,6 +336,12 @@ namespace TheLighter.Ag
 
         /// <summary>Online'da tartışma ekranı yok: süre sunucuda.</summary>
         public void TartismayiBitir() { }
+
+        // ------------------------------------------------------------ Rus Ruleti
+
+        public Sonuc TetikCek() => Yolla(Cevirici.TetikCek(Tur));
+
+        public Sonuc TetikDevret(OyuncuId hedef) => Yolla(Cevirici.TetikDevret(Tur, hedef));
 
         /// <summary>Kurucu, oyun sonunda: oda lobiye döner.</summary>
         public Sonuc TekrarOyna() => Kurucuyum ? Yolla(Cevirici.TekrarOyna()) : Sonuc.SiraSendeDegil;

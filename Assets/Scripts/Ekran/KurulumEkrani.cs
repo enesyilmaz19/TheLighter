@@ -32,6 +32,10 @@ namespace TheLighter.Istemci
         readonly List<VisualElement> satirlar = new List<VisualElement>();
         readonly List<Button> silButonlari = new List<Button>();
         readonly List<Button> oyunButonlari = new List<Button>();
+        readonly List<Button> canButonlari = new List<Button>();
+        readonly VisualElement canBolumu;
+        readonly VisualElement turBolumu;
+        readonly Label turYok;
         readonly List<Button> modButonlari = new List<Button>();
         readonly List<Button> miniButonlari = new List<Button>();
         readonly List<Button> turButonlari = new List<Button>();
@@ -62,6 +66,7 @@ namespace TheLighter.Istemci
             ayarlar = new Ayarlar
             {
                 Oyun = son.Oyun,
+                Can = son.Can,
                 Mod = son.Mod,
                 MiniOyun = son.MiniOyun,
                 TurSayisi = son.TurSayisi,
@@ -92,6 +97,11 @@ namespace TheLighter.Istemci
             kaydirma.Add(Secenekler(OyunSecimi.Secenekler, o => Metin.Al("oyun.ad." + o), o => ayarlar.Oyun = o, oyunButonlari));
             oyunAciklama = Yazi("", "ipucu");
             kaydirma.Add(oyunAciklama);
+            // Rus Ruleti: herkesin canı (3 = Son Çakmak).
+            canBolumu = Kutu("ayar-bolumu");
+            canBolumu.Add(Yazi(Metin.Al("rus.can_baslik"), "alt-baslik"));
+            canBolumu.Add(Secenekler(OyunSecimi.CanSecenekleri, CanYazisi, c => ayarlar.Can = c, canButonlari));
+            kaydirma.Add(canBolumu);
 
             kaydirma.Add(Yazi(Metin.Al("kurulum.baslik"), "baslik"));
             kaydirma.Add(Yazi(Metin.Al("kurulum.aciklama", EnAz, EnFazla), "aciklama"));
@@ -111,10 +121,15 @@ namespace TheLighter.Istemci
             kaydirma.Add(Yazi(Metin.Al("kurulum.mini_oyun"), "alt-baslik"));
             kaydirma.Add(Secenekler(MiniSecenekleri, m => Metin.Al("mini.ad." + m), m => ayarlar.MiniOyun = m, miniButonlari));
 
-            kaydirma.Add(Yazi(Metin.Al("kurulum.tur"), "alt-baslik"));
-            kaydirma.Add(Secenekler(TurSecenekleri,
+            turBolumu = Kutu("ayar-bolumu");
+            turBolumu.Add(Yazi(Metin.Al("kurulum.tur"), "alt-baslik"));
+            turBolumu.Add(Secenekler(TurSecenekleri,
                 t => t == 0 ? Metin.Al("kurulum.tur_sinirsiz") : Metin.Al("kurulum.tur_sayi", t),
                 t => ayarlar.TurSayisi = t, turButonlari));
+            kaydirma.Add(turBolumu);
+            // Rus Ruleti'nde tur sayısı yok: son kalan kazanır.
+            turYok = Yazi("", "ipucu");
+            kaydirma.Add(turYok);
 
             kaydirma.Add(Yazi(Metin.Al("kurulum.paketler"), "alt-baslik"));
             paketKutusu = Kutu("secenekler");
@@ -225,6 +240,13 @@ namespace TheLighter.Istemci
             for (int i = 0; i < OyunSecimi.Secenekler.Length; i++)
                 oyunButonlari[i].EnableInClassList("secili", OyunSecimi.Secenekler[i] == ayarlar.Oyun);
             oyunAciklama.text = Metin.Al("oyun.aciklama." + ayarlar.Oyun);
+            canBolumu.EnableInClassList("gizli", ayarlar.Oyun != OyunTuru.RusRuleti);
+            for (int i = 0; i < OyunSecimi.CanSecenekleri.Length; i++)
+                canButonlari[i].EnableInClassList("secili", OyunSecimi.CanSecenekleri[i] == ayarlar.Can);
+            bool turYokMu = OyunSecimi.TurSayisiYok(ayarlar.Oyun);
+            turBolumu.EnableInClassList("gizli", turYokMu);
+            turYok.EnableInClassList("gizli", !turYokMu);
+            turYok.text = turYokMu ? Metin.Al("kurulum.tur_yok." + ayarlar.Oyun) : "";
 
             for (int i = 0; i < ModSecenekleri.Length; i++)
                 modButonlari[i].EnableInClassList("secili", ModSecenekleri[i] == ayarlar.Mod);
@@ -236,7 +258,9 @@ namespace TheLighter.Istemci
             for (int i = 0; i < CezaSecenekleri.Length; i++)
             {
                 cezaButonlari[i].EnableInClassList("secili", CezaSecenekleri[i] == ayarlar.CezaSeviyesi);
-                cezaButonlari[i].SetEnabled(!temiz || CezaSecenekleri[i] != CezaSeviyesi.Cesur);
+                var c = CezaSecenekleri[i];
+                // Uymayan ceza seviyesi (Temiz'de Cesur, Rus Ruleti'nde hepsi) kural motoruna sorulur.
+                cezaButonlari[i].SetEnabled(c == ayarlar.CezaSeviyesi || OyunSecimi.Uyumlu(ayarlar, a => a.CezaSeviyesi = c));
             }
             cezaAciklama.text = Metin.Al("ceza.seviye_aciklama." + ayarlar.CezaSeviyesi)
                 + (temiz ? "  " + Metin.Al("kurulum.ceza_temiz") : "");
@@ -410,6 +434,10 @@ namespace TheLighter.Istemci
             var s = uygulama.OyunuBaslat(isimler, ayarlar, SeciliPaketler());
             if (s != Sonuc.Tamam) hata.text = HataMetni.Al(s);
         }
+
+        /// <summary>"1 can", "2 can", "3 can (Son Çakmak)".</summary>
+        public static string CanYazisi(int can) =>
+            can == Oyun.EnFazlaCan ? Metin.Al("rus.can_son_cakmak", can) : Metin.Al("rus.can_sayi", can);
 
         public void Guncelle(float gecenSn) { }
 

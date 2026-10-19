@@ -65,6 +65,8 @@ namespace TheLighter.Istemci
                 : od != null && od.Afk ? Metin.Al("online.etiket.afk")
                 : null;
             if (rozet != null) satir.Add(Yazi(rozet, "lobi-rozet", "soluk"));
+            var can = RusRuleti.CanEtiketi(g, od);
+            if (can != null) satir.Add(Yazi(can, "lobi-rozet"));
             if (g != null)
                 foreach (var sp in g.Supheliler)
                     if (sp == o.Id) { satir.Add(Yazi(Metin.Al("kostebek.supheli_etiket"), "lobi-rozet")); break; }

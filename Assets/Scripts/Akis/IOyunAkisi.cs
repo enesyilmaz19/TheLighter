@@ -69,6 +69,14 @@ namespace TheLighter.Akis
         /// <summary>Elden ele: tartışma bitti, telefon oylamaya dolaşsın. Online'da bir şey yapmaz.</summary>
         void TartismayiBitir();
 
+        // --- Rus Ruleti (docs/Oyunlar.md, 2) ---
+
+        /// <summary>Tetiği çekecek kişi (elden elede telefonu tutan, online'da ben) tetiği çeker.</summary>
+        Sonuc TetikCek();
+
+        /// <summary>Tetiği <paramref name="hedef"/>'e devreder (oyun boyu 1 kez).</summary>
+        Sonuc TetikDevret(OyuncuId hedef);
+
         // --- Yardımcılar ---
 
         /// <summary>Renk numarası (renk listesindeki sıra).</summary>

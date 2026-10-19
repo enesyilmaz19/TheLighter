@@ -45,6 +45,12 @@ namespace TheLighter.Akis
 
         /// <summary>"Köstebek kim?": telefonu tutan kişi (online'da herkes kendi telefonunda) gizlice birini gösterir.</summary>
         Suclama,
+
+        /// <summary>
+        /// Rus Ruleti: düelloyu kaybeden tetiği çeker ya da devreder. Açık bilgi: elden elede perde yok, telefon kaybedende;
+        /// online'da herkes izler, düğmeler sadece çekecek kişide. Süre dolunca tetik kendiliğinden çekilir.
+        /// </summary>
+        Tetik,
     }
 
     public enum PerdeNedeni
@@ -66,6 +72,14 @@ namespace TheLighter.Akis
 
         /// <summary>"Köstebek kim?" oylaması: bu kişi oy verecek.</summary>
         Suclama,
+    }
+
+    /// <summary>Rus Ruleti: az önce çekilen tetiğin sonucu. Bir sonraki ekranda duyurulur ("Tık…", "BAM!", "Elendi").</summary>
+    public sealed class TetikSonucu
+    {
+        public OyuncuId Kim;
+        public bool Patladi;
+        public bool Elendi;
     }
 
     /// <summary>Biten "kim?" oylamasının sonucu: en çok oyu alan, eşitlikte null. Bir sonraki ekranda duyurulur.</summary>
@@ -149,6 +163,12 @@ namespace TheLighter.Akis
         /// "Ali suçlandı… köstebek değildi" ya da "Kimse suçlanmadı".
         /// </summary>
         public SuclamaSonucu SuclamaSonucu;
+
+        /// <summary>Elden ele, Rus Ruleti: az önce çekilen tetiğin sonucu (yoksa null). Perde kaldırılana kadar duyurulur.</summary>
+        public TetikSonucu TetikSonucu;
+
+        /// <summary>Elden ele, Rus Ruleti: final başladı, ilk final perdesinde bir kez "FİNAL! Son 3 kişi".</summary>
+        public bool FinalDuyurusu;
 
         /// <summary>SuclamaTartisma: oylamayı erken suçlamayla başlatan (aralıkla ya da son oylamada null).</summary>
         public OyuncuId? SuclamaBaslatan;

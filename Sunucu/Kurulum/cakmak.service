@@ -16,6 +16,10 @@ Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
 # Gizli bilgiler (ileride Vivox anahtarı vb.) burada, repoda değil. Dosya: root:cakmak, 0640.
 EnvironmentFile=-/etc/cakmak/ortam
+# Raporlar ve IP yasak listesi: tek yazılabilir yer (ProtectSystem=strict). Kişisel veri: sadece cakmak kullanıcısı (0700).
+StateDirectory=cakmak
+StateDirectoryMode=0700
+Environment=Moderasyon__Klasor=/var/lib/cakmak
 Restart=always
 RestartSec=5
 

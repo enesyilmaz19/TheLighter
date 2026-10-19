@@ -22,10 +22,12 @@ namespace Cakmak.Sunucu
         readonly IReadOnlyList<string> sesliCezalar = Array.Empty<string>();
         readonly IReadOnlyList<string> geceSorulari = Array.Empty<string>();
         readonly Sinirlar sinirlar;
+        readonly Moderasyon moderasyon;
 
-        public OdaYoneticisi(ILogger<OdaYoneticisi> log, Sinirlar sinirlar)
+        public OdaYoneticisi(ILogger<OdaYoneticisi> log, Sinirlar sinirlar, Moderasyon moderasyon)
         {
             this.sinirlar = sinirlar;
+            this.moderasyon = moderasyon;
             var klasor = Path.Combine(AppContext.BaseDirectory, "Icerik");
             if (Directory.Exists(klasor))
             {
@@ -87,6 +89,8 @@ namespace Cakmak.Sunucu
                     case "tekrarOyna": OdadaysaYap(b, o => o.TekrarOyna(b)); return;
                     case "sohbet": OdadaysaYap(b, o => o.Sohbet(b, m)); return;
                     case "grupPaketi": OdadaysaYap(b, o => o.GrupPaketi(b, m)); return;
+                    case "rapor": OdadaysaYap(b, o => o.Rapor(b, m)); return;
+                    case "engelle": OdadaysaYap(b, o => o.Engelle(b, m)); return;
 
                     default: throw new GecersizMesaj();
                 }
@@ -123,7 +127,7 @@ namespace Cakmak.Sunucu
             while (true)
             {
                 var kod = RandomNumberGenerator.GetString(KodHarfleri, KodUzunlugu);
-                var oda = new Oda(kod, paketler, sesliCezalar, geceSorulari, sinirlar);
+                var oda = new Oda(kod, paketler, sesliCezalar, geceSorulari, sinirlar, moderasyon);
                 if (odalar.TryAdd(kod, oda)) return oda;
             }
         }

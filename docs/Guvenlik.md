@@ -30,8 +30,8 @@
 | 11 | **Sunucu sıkılaştırma** | Gerekli | **Bu adımda dosyalar hazır** (`Sunucu/Kurulum/`): SSH sadece anahtar, güvenlik duvarı 22/80/443, otomatik güncelleme, fail2ban, root olmayan kullanıcı, systemd kum havuzu, uygulama sadece localhost'u dinler |
 | 12 | **Bağımlılık taraması** | Gerekli | `dotnet list package --vulnerable --include-transitive`: temiz (2026-10-12). Her sürümden önce tekrar |
 | 13 | **Günlük kaydı** | Gerekli | Var: oyuncu metni, soru ve IP günlüğe yazılmaz (AGENTS.md), hatada sadece hata tipi |
-| 14 | **Kişisel veri (KVKK)** | Gerekli | Sunucuda kalıcı veri yok; grup kaydı oyuncunun cihazında. Aydınlatma metni S6 |
-| 15 | **Sohbet ve moderasyon** | Gerekli: herkese açık oda yok ama oyuncular birbirine yazıyor | Var (S5): sohbet `TemizMetin`'den geçer, 200 karakter, saniyede 1; DM sadece iki kişiye; sunucu mesaj saklamaz. Temiz modda filtre (`TemizFiltre`), 3. ihlalde atma; her modda kurucu atabilir, atılan o odaya dönemez. Rapor + engelleme S6 |
+| 14 | **Kişisel veri (KVKK)** | Gerekli | Sunucuda kalıcı veri sadece raporlar (iki tarafın ismi, IP'si, raporlayanın gördüğü son 50 metin; 30 gün) ve IP yasak listesi; grup kaydı oyuncunun cihazında. Aydınlatma metni S6 |
+| 15 | **Sohbet ve moderasyon** | Gerekli: herkese açık oda yok ama oyuncular birbirine yazıyor | Var (S5): sohbet `TemizMetin`'den geçer, 200 karakter, saniyede 1; DM sadece iki kişiye; sunucu mesajı diske yazmaz. Temiz modda filtre (`TemizFiltre`), 3. ihlalde atma; her modda kurucu atabilir, atılan o odaya dönemez. Rapor + engelleme (2026-10-19): rapor raporlayanın gördüğü son 50 metni 30 gün `/var/lib/cakmak`'ta tutar (0700), IP yasak listesi; engelleme oda boyunca |
 
 ## Gerekmeyenler (şimdilik)
 
@@ -46,7 +46,6 @@
 
 ## Sonra gelecekler
 
-- **Rapor ve engelleme (S6):** Google Play şartı.
 - **Vivox ses (S6):** erişim anahtarı sunucuda imzalanır; gizli anahtar istemciye ve repoya girmez.
 - Yeni bağlantı açma hızı sınırı; oyun sonunda açık kalan odaya zaman aşımı.
 

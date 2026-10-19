@@ -21,6 +21,10 @@ namespace Cakmak.Sunucu
         const int SohbetEnFazla = 200;
         /// <summary>Temiz modda bu kadar ihlalde (soru ya da sohbet) odadan atılır (Ana Plan 6.4).</summary>
         const int IhlalSiniri = 3;
+        /// <summary>Rapora raporlayanın gördüğü son bu kadar metin girer (Ana Plan: son 50 mesaj).</summary>
+        const int RaporMetni = 50;
+        /// <summary>Bellekte odanın son bu kadar metni (herkesinki); rapor gelmezse diske hiç yazılmaz.</summary>
+        const int BellektekiMetin = 200;
 
         sealed class OdaOyuncusu
         {
@@ -33,6 +37,25 @@ namespace Cakmak.Sunucu
             public bool Cikti;
             /// <summary>Oyun sürerken geldi: bekleme odasında, oyunda değil. Kurucu "tekrar oyna" deyince oyuncu olur.</summary>
             public bool Bekliyor;
+            /// <summary>Son bağlandığı IP (rapora girer).</summary>
+            public string Ip;
+            /// <summary>
+            /// Engelledikleri ve raporladıkları, isim anahtarıyla: kimlik (p3) lobiden çıkanınkiyle yeniden kullanılır, isim odada
+            /// tektir; çıkıp aynı isimle dönen yine engelli.
+            /// </summary>
+            public readonly HashSet<string> Engelledikleri = new HashSet<string>();
+            public readonly HashSet<string> Raporladiklari = new HashSet<string>();
+        }
+
+        /// <summary>Birinin gördüğü bir metin (sohbet ya da ifşa olan soru). Sadece rapor için, bellekte.</summary>
+        sealed class GorulenMetin
+        {
+            public DateTime Zaman;
+            public string Tur;
+            public OdaOyuncusu Kimden; // null: yazanı oyuncu değil (atanan soru)
+            public string Kime;
+            public string Metin;
+            public List<OdaOyuncusu> Gorenler;
         }
 
         public readonly string Kod;
@@ -67,13 +90,18 @@ namespace Cakmak.Sunucu
         /// <summary>Temiz mod ihlalleri, isim anahtarına göre: lobide çıkıp aynı isimle girince sıfırlanmasın.</summary>
         readonly Dictionary<string, int> ihlaller = new Dictionary<string, int>();
         int sohbetSayaci;
+        readonly List<GorulenMetin> sonMetinler = new List<GorulenMetin>();
+        /// <summary>Son soruyu yazan (ifşa olunca rapor için). Metinsiz (atanan) soruda null.</summary>
+        OdaOyuncusu sonSoran;
+        readonly Moderasyon moderasyon;
 
         /// <summary>Oda silindi. Bu bayraktan sonra kimse katılamaz.</summary>
         public bool Kapandi { get; private set; }
 
         public Oda(string kod, IReadOnlyDictionary<string, IReadOnlyList<string>> paketler, IReadOnlyList<string> sesliCezalar, IReadOnlyList<string> geceSorulari,
-            Sinirlar sinirlar)
+            Sinirlar sinirlar, Moderasyon moderasyon)
         {
+            this.moderasyon = moderasyon;
             Kod = kod;
             this.paketler = paketler;
             this.sesliCezalar = sesliCezalar;
@@ -112,6 +140,7 @@ namespace Cakmak.Sunucu
                         eski.Baglanti.Kes();
                     }
                     eski.Baglanti = b;
+                    eski.Ip = b.Ip;
                     b.Oda = this;
                     b.Kim = eski.Id;
                     // Oyundan çıkmış oyuncu geri girmez, izler (kural motoru onu bir daha seçmez). Bekleyen yine bekler.
@@ -121,6 +150,7 @@ namespace Cakmak.Sunucu
                         oyun.OyuncuDondu(eski.Id);
                     }
                     b.Yolla(Protokol.Hosgeldin(eski.Id, eski.Anahtar, Kod));
+                    if (eski.Engelledikleri.Count > 0) b.Yolla(Protokol.Engeller(EngelledikleriOdada(eski)));
                     HerkeseDurum();
                     return;
                 }
@@ -143,6 +173,7 @@ namespace Cakmak.Sunucu
                     Isim = temiz,
                     Anahtar = RandomNumberGenerator.GetHexString(32, lowercase: true),
                     Baglanti = b,
+                    Ip = b.Ip,
                     // Oyun sürüyorsa bekleme odasına (Ana Plan 1: "sonraki oyunda oynar").
                     Bekliyor = oyun != null,
                 };
@@ -333,7 +364,7 @@ namespace Cakmak.Sunucu
 
         /// <summary>
         /// Kurucu birini atar (lobide, oyunda ya da bekleme odasında), kendini atamaz. Sonrası <see cref="Cikar"/>.
-        /// ponytail: hesap yok, yeni bir isimle girebilir (Ana Plan 6.4). Rapor + engelleme S6'da.
+        /// ponytail: hesap yok, yeni bir isimle girebilir (Ana Plan 6.4). Rapor gelirse Enes IP'yi yasaklayabilir (Moderasyon).
         /// </summary>
         public void At(Baglanti b, JsonObject m)
         {
@@ -451,6 +482,7 @@ namespace Cakmak.Sunucu
                         sonuc = metin == null && ayarlar.Mod != OyunModu.Curcuna
                             ? Sonuc.GecersizGirdi
                             : oyun.SoruSor(b.Kim, hedef, metin ?? "");
+                        if (sonuc == Sonuc.Tamam) sonSoran = metin == null ? null : yazan;
                         break;
                     case "cevapSec":
                         sonuc = oyun.CevapSec(b.Kim, Protokol.IdCoz(Protokol.Metin(m, "hedef")));
@@ -511,8 +543,9 @@ namespace Cakmak.Sunucu
         /// <summary>
         /// Sohbet (Ana Plan 6.4): <c>kime</c> null ise odadaki herkese (bekleme odası dahil), oyuncuysa sadece ona ve yazana,
         /// kanalsa (<c>"takim"</c>, <c>"katil"</c>, <c>"oluler"</c>) kanalın üyelerine. Kim nereye yazabilir: kural motoru
-        /// (<see cref="Oyun.SohbeteYazabilir"/>, <see cref="Oyun.KanalAlicilari"/>). Sunucu mesaj saklamaz. Temiz modda
-        /// filtreye takılan gönderilmez, yazan uyarılır.
+        /// (<see cref="Oyun.SohbeteYazabilir"/>, <see cref="Oyun.KanalAlicilari"/>). Sunucu mesajı diske yazmaz (rapor hariç). Temiz modda
+        /// filtreye takılan gönderilmez, yazan uyarılır. Engelleyene, engellediğinin mesajı gitmez (yazan bilmez: kendi
+        /// mesajı ona döner). Rapor için bellekte kimin gördüğüyle tutulur.
         /// </summary>
         public void Sohbet(Baglanti b, JsonObject m)
         {
@@ -539,15 +572,109 @@ namespace Cakmak.Sunucu
                     return;
                 }
 
+                var yazan = oyuncular.Find(o => o.Baglanti == b);
+                var yazanIsmi = Oyuncu.IsimAnahtari(yazan.Isim);
                 var json = Protokol.Sohbet(++sohbetSayaci, b.Kim, kime, metin, kanal);
-                if (kanal.HasValue) foreach (var o in oyuncular) { if (alicilar.Contains(o.Id)) o.Baglanti?.Yolla(json); }
-                else if (alan == null) foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
-                else
+                var gorenler = new List<OdaOyuncusu> { yazan };
+                b.Yolla(json);
+                foreach (var o in oyuncular)
                 {
-                    alan.Baglanti?.Yolla(json);
-                    b.Yolla(json);
+                    if (o == yazan || o.Baglanti == null || o.Engelledikleri.Contains(yazanIsmi)) continue;
+                    if (kanal.HasValue ? alicilar.Contains(o.Id) : alan == null || o == alan)
+                    {
+                        o.Baglanti.Yolla(json);
+                        gorenler.Add(o);
+                    }
                 }
+                MetinKaydet("sohbet", yazan, kimeMetni, metin, gorenler);
             }
+        }
+
+        // ------------------------------------------------------------ Rapor ve engelleme
+
+        /// <summary>
+        /// Rapor (Google Play kullanıcı içeriği şartı): raporlayanın bu odada gördüğü son 50 metin (sohbet ve ifşa olan sorular;
+        /// güme giden soru hiç tutulmaz, Ana Plan 8.5) <see cref="Moderasyon"/> ile diske, 30 gün. Raporlanan bilmez. Aynı kişiyi
+        /// ikinci raporlayış yazılmaz, cevap yine gider.
+        /// </summary>
+        public void Rapor(Baglanti b, JsonObject m)
+        {
+            lock (kilit)
+            {
+                if (!UyeMi(b)) return;
+                var ben = oyuncular.Find(o => o.Baglanti == b);
+                var hedef = Hedef(m);
+                if (hedef == null || hedef == ben) { b.Yolla(Protokol.Hata("GECERSIZ_GIRDI")); return; }
+                var hedefIsmi = Oyuncu.IsimAnahtari(hedef.Isim);
+                if (!ben.Raporladiklari.Contains(hedefIsmi))
+                {
+                    var metinler = new JsonArray();
+                    var gordukleri = sonMetinler.FindAll(x => x.Gorenler.Contains(ben));
+                    foreach (var x in gordukleri.GetRange(Math.Max(0, gordukleri.Count - RaporMetni), Math.Min(RaporMetni, gordukleri.Count)))
+                        metinler.Add(new JsonObject
+                        {
+                            ["zaman"] = x.Zaman.ToString("O"),
+                            ["tur"] = x.Tur,
+                            ["kimden"] = x.Kimden == null ? null : Kisi(x.Kimden),
+                            ["kime"] = x.Kime,
+                            ["metin"] = x.Metin,
+                        });
+                    var rapor = new JsonObject
+                    {
+                        ["zaman"] = DateTime.UtcNow.ToString("O"),
+                        ["oda"] = Kod,
+                        ["oyun"] = Protokol.Ad(ayarlar.Oyun),
+                        ["mod"] = Protokol.Ad(ayarlar.Mod),
+                        ["raporlayan"] = Kisi(ben),
+                        ["raporlanan"] = Kisi(hedef),
+                        ["metinler"] = metinler,
+                    };
+                    if (!moderasyon.RaporYaz(rapor)) { b.Yolla(Protokol.Hata("RAPOR_YAZILAMADI")); return; }
+                    ben.Raporladiklari.Add(hedefIsmi);
+                }
+                b.Yolla(Protokol.RaporAlindi(hedef.Id));
+            }
+        }
+
+        /// <summary>
+        /// Engelle (<c>engel</c> yoksa true) ya da kaldır, oda boyunca: engellenenin sohbet ve DM'leri gönderene gitmez.
+        /// Oyunu etkilemez (soru, seçim, oylama aynen). Cevap: engellenenlerin tam listesi.
+        /// </summary>
+        public void Engelle(Baglanti b, JsonObject m)
+        {
+            lock (kilit)
+            {
+                if (!UyeMi(b)) return;
+                var ben = oyuncular.Find(o => o.Baglanti == b);
+                var hedef = Hedef(m);
+                var engel = Protokol.Mantik(m, "engel", false) ?? true;
+                if (hedef == null || hedef == ben) { b.Yolla(Protokol.Hata("GECERSIZ_GIRDI")); return; }
+                if (engel) ben.Engelledikleri.Add(Oyuncu.IsimAnahtari(hedef.Isim));
+                else ben.Engelledikleri.Remove(Oyuncu.IsimAnahtari(hedef.Isim));
+                b.Yolla(Protokol.Engeller(EngelledikleriOdada(ben)));
+            }
+        }
+
+        OdaOyuncusu Hedef(JsonObject m)
+        {
+            var kim = Protokol.IdCoz(Protokol.Metin(m, "kim"));
+            return oyuncular.Find(o => o.Id == kim);
+        }
+
+        List<OyuncuId> EngelledikleriOdada(OdaOyuncusu o)
+        {
+            var liste = new List<OyuncuId>();
+            foreach (var x in oyuncular)
+                if (o.Engelledikleri.Contains(Oyuncu.IsimAnahtari(x.Isim))) liste.Add(x.Id);
+            return liste;
+        }
+
+        static JsonObject Kisi(OdaOyuncusu o) => new JsonObject { ["id"] = Protokol.Id(o.Id), ["isim"] = o.Isim, ["ip"] = o.Ip };
+
+        void MetinKaydet(string tur, OdaOyuncusu kimden, string kime, string metin, List<OdaOyuncusu> gorenler)
+        {
+            sonMetinler.Add(new GorulenMetin { Zaman = DateTime.UtcNow, Tur = tur, Kimden = kimden, Kime = kime, Metin = metin, Gorenler = gorenler });
+            if (sonMetinler.Count > BellektekiMetin) sonMetinler.RemoveAt(0);
         }
 
         /// <summary>Kurucunun takım dağılımı: sayılar 0 ya da 1, hepsi odada. Herkesin olup olmadığı ve denge başlatırken (Kur).</summary>
@@ -696,6 +823,9 @@ namespace Cakmak.Sunucu
             // Kural motoru bir şey değiştirdi. Olay herkese gider, ardından yeni durum.
             degisti = true;
             if (olay.Tur == OlayTuru.OyunBitti) oyunBitti = true;
+            // İfşa olan soru herkese açık: rapora girebilir. Güme giden hiç tutulmaz (Ana Plan 8.5).
+            if (olay.Tur == OlayTuru.Ifsa && !string.IsNullOrEmpty(olay.Soru))
+                MetinKaydet("soru", sonSoran, null, olay.Soru, oyuncular.FindAll(o => o.Baglanti != null));
             var json = Protokol.OlayYaz(olay);
             foreach (var o in oyuncular) o.Baglanti?.Yolla(json);
         }

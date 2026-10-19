@@ -16,7 +16,7 @@ Enes `g2/cakmak-gecesi`'de (öbür 5 dalı içeriyor) bütün testleri koştu, 2
 | Test | Sonuç |
 |---|---|
 | `dotnet test Sunucu/KuralTestleri` | 365/365 |
-| `dotnet test Sunucu/SunucuTestleri` | 184/184 |
+| `dotnet test Sunucu/SunucuTestleri` | 192/192 |
 | Unity EditMode | 594 geçen, 0 kalan, 8 atlanan |
 | Unity `-testCategory "Sunucu"`, yerel sunucu açık | 8/8 (Çakmak Gecesi'nin 8 botu 147 sn) |
 
@@ -82,15 +82,27 @@ Bir kısmı zaten var; telefonda dene, eksikleri tamamla:
 ## 5. Bu dosyada olmayanlar
 
 - **Play Console hesabı, kapalı test (12 kişi × 14 gün), mağaza sayfası, gizlilik metni:** Enes.
-- **Rapor ve engelleme:** Play kullanıcı içeriği olan uygulamada şart. Önce sunucu tarafı (Enes), sonra sana ayrı görev gelecek.
+- **Rapor ve engelleme:** sunucu tarafı hazır (2026-10-19), ekranı aşağıda 6. bölümde.
 - **Sesli sohbet (Vivox):** ilk sürümde olup olmayacağına Enes ile karar verin. Olmazsa mikrofon izni ve onun gizlilik yükü de kalkar.
 - **Satış modeli** (uygulama içi satın alma gerekirse Google Play Billing): karar bekliyor.
 - **3D masa ve görseller:** `docs/Gorsel.md`, birlikte.
 
-## 6. Bitti ölçütü
+## 6. Rapor ve engelleme ekranı (Play şartı)
+
+Protokol: `docs/Protokol.md`, "Rapor ve engelleme". Kısaca: `rapor` ve `engelle` komutları, cevapları `raporAlindi` ve `engeller`.
+
+- **Nereden:** oyuncu listesinde ve sohbette bir kişiye uzun basınca (ya da yanındaki "⋯") "Engelle" ve "Raporla". Kendinde görünmez.
+- **Engelle:** onaysız, hemen; geri alınabilir ("Engeli kaldır"). Engellediklerin `engeller`'den: listede yanında 🚫, sohbette mesajları zaten gelmiyor (sunucu yollamıyor). Oyun aynen sürer; bunu ekranda bir cümleyle söyle ("Mesajlarını görmeyeceksin, oyun aynen sürer").
+- **Raporla:** onay perdesi: "Bu odada gördüğün son mesajlar incelenmek üzere kaydedilecek. Raporladığın kişi bunu bilmeyecek." → `rapor`. `raporAlindi` gelince "Rapor alındı, teşekkürler" ve "Engellemek ister misin?" kısayolu. `RAPOR_YAZILAMADI`'da "Rapor gönderilemedi, tekrar dene".
+- **Elden ele:** sohbet ve kimlik yok, rapor da yok.
+- **Kullanım şartları:** Play, kullanıcı içerik yazmadan önce şartların kabul edilmesini istiyor. Metni Enes yazacak; ekran ilk açılışta bir kez (kabul cihazda saklanır), metin gelene kadar yer tutucu.
+- **Test:** `Cevirici`'de `raporAlindi` ve `engeller`; `SunucuIleOyunTesti`'ne bir adım (bir bot ötekini engeller, mesajı gelmez; raporlar, `raporAlindi` gelir).
+
+## 7. Bitti ölçütü
 
 - Altı dal main'de.
 - AAB çıkıyor, iki telefona kuruluyor, dikey açılıyor.
 - İki telefonda elden ele bir oyun baştan sona; iki telefon + bilgisayarla online bir oyun baştan sona.
 - 3. bölümün her satırı telefonda denendi: geri tuşu, iki klavye, çentik, arka plandan dönüş, paylaşma menüsü.
+- 6. bölüm: engelle, kaldır ve raporla telefonda denendi.
 - 0. bölümdeki dört koşu yeşil.

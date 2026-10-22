@@ -109,6 +109,12 @@ namespace TheLighter.EditorAraclari
                 EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
                 return;
             }
+            // Platform yeni değiştiyse Unity bir süre derler; o sırada build "scripts are compiling" diye düşer.
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+            {
+                EditorUtility.DisplayDialog("Unity derliyor", "Derleme bitince (sağ alttaki çubuk) bu menüyü bir daha seç.", "Tamam");
+                return;
+            }
             AyarlariUygula();
 
             YerelAnahtar anahtar = null;

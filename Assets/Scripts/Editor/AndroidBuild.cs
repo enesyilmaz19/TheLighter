@@ -25,6 +25,9 @@ namespace TheLighter.EditorAraclari
         const string Menu = "TheLighter/Android/";
         const string CiktiKlasoru = "Build/Android";
         const string YerelDosya = "Android.local.json";
+        /// <summary>Yer tutucu uyarlanabilir ikon (arka + ön katman). Görsel kararlar (docs/Gorsel.md) gelince değişir.</summary>
+        const string IkonArka = "Assets/UI/Ikon/ikon-arka.png";
+        const string IkonOn = "Assets/UI/Ikon/ikon-on.png";
 
         /// <summary>Android.local.json: yükleme anahtarının yeri ve şifreleri. Repoya girmez.</summary>
         [Serializable]
@@ -50,10 +53,32 @@ namespace TheLighter.EditorAraclari
                 PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
             // Yerel sunucu (ws://) sadece geliştirme build'inde; yayın hep wss://.
             PlayerSettings.insecureHttpOption = InsecureHttpOption.DevelopmentOnly;
+            IkonuKur();
             AssetDatabase.SaveAssets();
             Debug.Log("[TheLighter] Android ayarları uygulandı: " + Baglantilar.PaketAdi + ", dikey, IL2CPP ARM64, API "
                       + (int)PlayerSettings.Android.minSdkVersion + "+, sürüm " + PlayerSettings.bundleVersion
                       + " (" + PlayerSettings.Android.bundleVersionCode + ")");
+        }
+
+        /// <summary>
+        /// Android uyarlanabilir ikonu iki katman ister (arka + ön; API 26+, en az sürüm de 26). Platform Android değilken
+        /// Android'e özel ikon API'si derlenmez: o zaman bir şey yapmaz, build zaten önce Android'e geçirir.
+        /// </summary>
+        static void IkonuKur()
+        {
+#if UNITY_ANDROID
+            var arka = AssetDatabase.LoadAssetAtPath<Texture2D>(IkonArka);
+            var on = AssetDatabase.LoadAssetAtPath<Texture2D>(IkonOn);
+            if (arka == null || on == null)
+            {
+                Debug.LogWarning("[TheLighter] İkon katmanları bulunamadı: " + IkonArka + ", " + IkonOn);
+                return;
+            }
+            var tur = UnityEditor.Android.AndroidPlatformIconKind.Adaptive;
+            var ikonlar = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, tur);
+            foreach (var ikon in ikonlar) ikon.SetTextures(arka, on);
+            PlayerSettings.SetPlatformIcons(NamedBuildTarget.Android, tur, ikonlar);
+#endif
         }
 
         [MenuItem(Menu + "Sürüm kodunu artır (Play'e yüklemeden önce)")]

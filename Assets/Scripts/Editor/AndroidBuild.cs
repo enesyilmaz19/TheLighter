@@ -165,7 +165,8 @@ namespace TheLighter.EditorAraclari
                 var rapor = BuildPipeline.BuildPlayer(secenekler);
                 if (rapor.summary.result == BuildResult.Succeeded)
                 {
-                    Debug.Log("[TheLighter] Build hazır: " + secenekler.locationPathName + " (" + rapor.summary.totalSize / (1024 * 1024) + " MB)");
+                    long bayt = File.Exists(secenekler.locationPathName) ? new FileInfo(secenekler.locationPathName).Length : 0;
+                    Debug.Log("[TheLighter] Build hazır: " + secenekler.locationPathName + " (" + bayt / (1024 * 1024) + " MB)");
                     if (!calistir) EditorUtility.RevealInFinder(secenekler.locationPathName);
                 }
                 else Debug.LogError("[TheLighter] Build olmadı: " + rapor.summary.result + " (" + rapor.summary.totalErrors + " hata, Console'a bak)");
@@ -175,10 +176,13 @@ namespace TheLighter.EditorAraclari
                 // Anahtarın yeri ve şifreleri proje ayarlarında kalmasın (ProjectSettings repoda).
                 EditorUserBuildSettings.buildAppBundle = eskiAab;
                 PlayerSettings.Android.useCustomKeystore = eskiOzel;
-                PlayerSettings.Android.keystoreName = eskiAnahtar;
-                PlayerSettings.Android.keyaliasName = eskiAlias;
-                PlayerSettings.Android.keystorePass = "";
-                PlayerSettings.Android.keyaliasPass = "";
+                if (anahtar != null)
+                {
+                    PlayerSettings.Android.keystoreName = eskiAnahtar;
+                    PlayerSettings.Android.keyaliasName = eskiAlias;
+                    PlayerSettings.Android.keystorePass = "";
+                    PlayerSettings.Android.keyaliasPass = "";
+                }
             }
         }
 

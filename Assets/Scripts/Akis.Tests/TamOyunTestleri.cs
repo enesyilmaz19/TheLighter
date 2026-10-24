@@ -234,9 +234,11 @@ namespace TheLighter.Tests
                     YanEylemler(a, e, r);
                     if (a.Ekran.Anahtar != e.Anahtar || a.Bitti) break; // yan eylem ekranı değiştirdi (suçlama, casus bildi)
                     if (r.Next(14) == 0 || gr.Secilebilir.Count == 0) { a.Ilerle(TimeSpan.FromSeconds(a.Ayarlar.SoruSuresiSn + 1)); break; }
-                    if (r.Next(6) == 0 && gr.AtananSoru == null) Assert.AreEqual(Sonuc.Tamam, a.OneriCek(), yer);
+                    // Ekrandaki gibi: öneri ve fısıltı sadece soru yazılırken (atanan soruda ve Kör Soru'da yok).
+                    bool yazili = gr.AtananSoru == null && gr.Kaos != KaosKurali.KorSoru;
+                    if (r.Next(6) == 0 && yazili && a.Ayarlar.Mod != OyunModu.Curcuna) Assert.AreEqual(Sonuc.Tamam, a.OneriCek(), yer);
                     var b = gr.Secilebilir[r.Next(gr.Secilebilir.Count)];
-                    if (r.Next(8) == 0 && a.Ayarlar.Mod != OyunModu.Curcuna)
+                    if (r.Next(8) == 0 && yazili)
                     {
                         var f = a.Fisildadim(b);
                         if (f == Sonuc.Tamam) break;

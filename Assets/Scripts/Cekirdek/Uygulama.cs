@@ -152,6 +152,14 @@ namespace TheLighter.Istemci
         void Geri()
         {
             if (!(ekran is IGeriTusu g)) return;
+            // PC'de yazı kutusundayken Esc önce kutudan çıkar: isim yazarken basılan Esc kurulumu kapatmasın.
+            // (Telefonda açık klavyeyi geri tuşu zaten kendisi kapatır.)
+            var odak = belge.rootVisualElement.panel?.focusController?.focusedElement as VisualElement;
+            if (odak?.GetFirstOfType<TextField>() != null && (!TouchScreenKeyboard.isSupported || TouchScreenKeyboard.visible))
+            {
+                odak.Blur();
+                return;
+            }
             var katman = UstKatman(ekran.Kok);
             bool baglaniyorAcik = baglaniyor != null && !baglaniyor.ClassListContains("gizli");
             switch (GeriTusu.Ne(g.GeriTuru, katman != null, baglaniyorAcik))

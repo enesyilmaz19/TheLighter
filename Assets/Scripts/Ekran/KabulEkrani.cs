@@ -31,6 +31,7 @@ namespace TheLighter.Istemci
 
             var kaydirma = new ScrollView(ScrollViewMode.Vertical);
             kaydirma.AddToClassList("kaydirma");
+            kaydirma.Add(Alev("logo-alev-kucuk"));
             kaydirma.Add(Yazi(Metin.Al("menu.baslik"), "logo"));
             kaydirma.Add(Yazi(Metin.Al("sartlar.baslik"), "baslik", "orta"));
             kaydirma.Add(Yazi(Metin.Al("sartlar.metin"), "aciklama"));

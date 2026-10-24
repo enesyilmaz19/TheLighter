@@ -20,6 +20,7 @@ namespace TheLighter.Istemci
             Kok = Kutu("ekran", "ana-menu");
 
             Kok.Add(Esnek());
+            Kok.Add(Alev());
             Kok.Add(Yazi(Metin.Al("menu.baslik"), "logo"));
             Kok.Add(Yazi(Metin.Al("menu.alt_baslik"), "logo-alt"));
             Kok.Add(Esnek());

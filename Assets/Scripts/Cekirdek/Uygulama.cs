@@ -36,6 +36,7 @@ namespace TheLighter.Istemci
         bool genis;
         IEkran ekran;
         VisualElement baglaniyor;
+        Kivilcimlar kivilcimlar;
         Rect sonGuvenliAlan;
         int sonGenislik;
         int sonYukseklik;
@@ -120,6 +121,9 @@ namespace TheLighter.Istemci
             else Debug.LogError("[TheLighter] Stil bulunamadı: Resources/" + StilYolu + ".uss");
 
             kok = Arayuz.Kutu("kok");
+            // Arka planda yükselen kıvılcımlar: her şeyin arkasında, dokunmaya kapalı.
+            kivilcimlar = new Kivilcimlar(22);
+            kok.Add(kivilcimlar.Kok);
             solYan = Arayuz.Kutu("yan", "yan-sol", "gizli");
             sahne = Arayuz.Kutu("sahne");
             sagYan = Arayuz.Kutu("yan", "yan-sag", "gizli");
@@ -255,7 +259,17 @@ namespace TheLighter.Istemci
             sahne.Clear();
             ekran = yeni;
             sahne.Add(yeni.Kok);
+            // Yeni ekran hafifçe aşağıdan süzülerek gelir (Stil.uss ".ekran.giris").
+            Arayuz.Belir(yeni.Kok);
+            kivilcimlar.Sakin = yeni is OyunEkrani;
+            GeceModu(false);
             YanlariKur();
+        }
+
+        /// <summary>Çakmak Gecesi'nin gecesi: arka plan maviye döner, kıvılcımlar söner gibi azalır.</summary>
+        public void GeceModu(bool gece)
+        {
+            kok.EnableInClassList("gece", gece);
         }
 
         /// <summary>Geniş pencerede (PC) ekranın yan sütunları; dar ekranda ekran her şeyi kendi sütununa alır.</summary>

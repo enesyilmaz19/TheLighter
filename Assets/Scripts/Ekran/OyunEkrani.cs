@@ -232,6 +232,7 @@ namespace TheLighter.Istemci
             bildirim.RemoveFromClassList("takim-1");
             bildirim.text = metin;
             bildirim.RemoveFromClassList("gizli");
+            Belir(bildirim);
             bildirimKalan = BildirimSn;
         }
 
@@ -378,12 +379,16 @@ namespace TheLighter.Istemci
             govde.Clear();
             parca = ParcaKur(e);
             govde.Add(parca.Kok);
+            // Her yeni ekran parçası süzülerek gelir; telefon el değiştirirken göze bir "geçiş" verir.
+            Belir(parca.Kok);
             parca.Guncelle(e);
 
             casusSeridi?.Guncelle(e);
             // Elden ele mini oyunda ekranın üst yarısı ters döndüğü için üst çubuk gizlenir.
             ustCubuk.EnableInClassList("gizli", (!akis.Online && e.Tur == EkranTuru.MiniOyun) || e.Tur == EkranTuru.OyunSonu);
             var g = e.Gorunum;
+            // Çakmak Gecesi'nin gecesi: arka plan maviye döner.
+            uygulama.GeceModu(Gece.Mi(g) && (e.Tur == EkranTuru.Gece || (e.Tur == EkranTuru.Perde && e.PerdeNedeni == PerdeNedeni.Gece)));
             // Curcuna soru toplama ve görev turu ilk turdan önce: tur numarası yok.
             turYazisi.text = g.Tur <= 0 ? ""
                 : g.ToplamTur > 0 ? Metin.Al("oyun.tur_sinirli", g.Tur, g.ToplamTur)

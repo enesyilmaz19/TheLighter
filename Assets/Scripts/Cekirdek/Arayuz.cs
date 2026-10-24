@@ -25,7 +25,67 @@ namespace TheLighter.Istemci
         {
             var v = new VisualElement();
             foreach (var s in siniflar) v.AddToClassList(s);
+            Canlandir(v);
             return v;
+        }
+
+        // ---------- Animasyon (USS geçişleriyle; kütüphane yok) ----------
+
+        /// <summary>
+        /// Sınıfına göre kendiliğinden oynayan animasyonlar: katman (menu-perde) her açılışta solup büyüyerek gelir,
+        /// ifşa kartı patlayarak, güme kartı dumanla. Görünüş Stil.uss'te (".acilis", ".giris").
+        /// </summary>
+        static void Canlandir(VisualElement v)
+        {
+            if (v.ClassListContains("menu-perde"))
+            {
+                // Gizliyken (display: none) boyutu sıfır; göründüğü an animasyon başlar.
+                v.RegisterCallback<GeometryChangedEvent>(e =>
+                {
+                    if (e.oldRect.width <= 0f && e.newRect.width > 0f) Belir(v, "acilis");
+                });
+            }
+            if (v.ClassListContains("ifsa-karti") || v.ClassListContains("gume-karti")) Belir(v);
+        }
+
+        /// <summary>
+        /// Giriş animasyonu: sınıf hemen eklenir, birkaç kare sonra kalkar; USS'teki geçiş başlangıçtan son hâline oynar.
+        /// Öğe henüz ekranda değilse eklenince başlar.
+        /// </summary>
+        public static void Belir(VisualElement e, string sinif = "giris")
+        {
+            e.AddToClassList(sinif);
+            e.schedule.Execute(() => e.RemoveFromClassList(sinif)).StartingIn(40);
+        }
+
+        /// <summary>Sınıfı belli aralıkla açıp kapatır (nabız, titreşim). Öğe ekrandan çıkınca kendiliğinden durur.</summary>
+        public static void Nabiz(VisualElement e, string sinif, long ms)
+        {
+            e.schedule.Execute(() => e.ToggleInClassList(sinif)).Every(ms);
+        }
+
+        /// <summary>
+        /// Titreyen alev: logonun üstündeki alev resmi, arkasında hale. Ana menüde ve kabul ekranında.
+        /// </summary>
+        public static VisualElement Alev(string sinif = "logo-alev")
+        {
+            var kap = Kutu(sinif);
+            kap.pickingMode = PickingMode.Ignore;
+            var hale = Kutu("alev-hale");
+            hale.pickingMode = PickingMode.Ignore;
+            var resim = Kutu("alev-resim");
+            resim.pickingMode = PickingMode.Ignore;
+            kap.Add(hale);
+            kap.Add(resim);
+            var r = new System.Random();
+            resim.schedule.Execute(() =>
+            {
+                float s = 0.95f + (float)r.NextDouble() * 0.1f;
+                resim.style.scale = new Scale(new Vector3(s, 0.96f + (float)r.NextDouble() * 0.1f, 1f));
+                resim.style.rotate = new Rotate(new Angle(-3f + (float)r.NextDouble() * 6f, AngleUnit.Degree));
+                hale.style.opacity = 0.55f + (float)r.NextDouble() * 0.45f;
+            }).Every(140);
+            return kap;
         }
 
         public static Label Yazi(string metin, params string[] siniflar)
@@ -59,6 +119,8 @@ namespace TheLighter.Istemci
             var v = Kutu(sinif);
             v.style.backgroundColor = OyuncuRengi(renk);
             v.pickingMode = PickingMode.Ignore;
+            // Perdedeki büyük renk: "telefon sende" diye atar.
+            if (sinif == "perde-renk") Nabiz(v, "nabiz", 900);
             return v;
         }
 
@@ -130,7 +192,10 @@ namespace TheLighter.Istemci
         public static void SureyiYaz(Label etiket, int kalanMs, int azEsikMs = 5000)
         {
             etiket.text = Sure(kalanMs);
-            etiket.EnableInClassList("sure-az", kalanMs <= azEsikMs);
+            bool az = kalanMs <= azEsikMs;
+            etiket.EnableInClassList("sure-az", az);
+            // Süre azken saniyede iki kez büyüyüp küçülür.
+            etiket.EnableInClassList("sure-nabiz", az && kalanMs > 0 && (Environment.TickCount / 250) % 2 == 0);
         }
     }
 }

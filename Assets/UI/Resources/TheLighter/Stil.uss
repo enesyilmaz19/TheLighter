@@ -1308,3 +1308,252 @@
     border-width: 3px;
     border-color: var(--alev);
 }
+
+/* =====================================================================
+   Görünüş ve animasyon (ekranlar; masa ve 3D docs/Gorsel.md'de, ayrı karar).
+   Kütüphane yok: USS geçişleri + Arayuz.Belir/Nabiz. Görseller kodla üretilmiş
+   yer tutucular (Resources/TheLighter/Gorsel).
+   ===================================================================== */
+
+/* Arka plan: üstte sıcak bir çakmak ışığı, kenarlar karanlık. Gecede mavi ay ışığı. */
+.kok {
+    background-image: resource("TheLighter/Gorsel/arka");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.kok.gece {
+    background-image: resource("TheLighter/Gorsel/arka-gece");
+}
+
+/* Kıvılcımlar: ekranların arkasında yükselen küçük ışıklar. */
+.kivilcimlar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    transition-property: opacity;
+    transition-duration: 0.8s;
+}
+
+.kivilcim {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.kivilcimlar-sakin {
+    opacity: 0.45;
+}
+
+.kok.gece .kivilcimlar {
+    opacity: 0.15;
+}
+
+/* Ekran geçişi: yeni ekran aşağıdan süzülür. */
+.ekran {
+    transition-property: opacity, translate;
+    transition-duration: 0.3s, 0.35s;
+    transition-timing-function: ease-out, ease-out-cubic;
+}
+
+.ekran.giris {
+    opacity: 0;
+    translate: 0 48px;
+}
+
+/* Oyun içinde her yeni parça (perde, soru, mini oyun...) aynı şekilde. */
+.parca {
+    transition-property: opacity, translate;
+    transition-duration: 0.25s, 0.3s;
+    transition-timing-function: ease-out, ease-out-cubic;
+}
+
+.parca.giris {
+    opacity: 0;
+    translate: 0 36px;
+}
+
+/* Katmanlar (menü, ayarlar, sohbet, onay...): perde solarak, kutu büyüyerek açılır. */
+.menu-perde {
+    transition-property: opacity;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
+
+.menu-perde.acilis {
+    opacity: 0;
+}
+
+.menu-perde > .menu-kutu {
+    transition-property: scale, translate;
+    transition-duration: 0.3s, 0.3s;
+    transition-timing-function: ease-out-back, ease-out-cubic;
+}
+
+.menu-perde.acilis > .menu-kutu {
+    scale: 0.92 0.92;
+    translate: 0 40px;
+}
+
+.menu-kutu {
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Düğmeler: basınca hafifçe içeri göçer. Birincil düğme turuncu degrade. */
+.unity-button.buton {
+    transition-property: background-color, opacity, scale, -unity-background-image-tint-color;
+    transition-duration: 0.12s, 0.12s, 0.08s, 0.12s;
+}
+
+.unity-button.buton:active {
+    scale: 0.96 0.96;
+}
+
+.unity-button.buton-birincil {
+    background-image: resource("TheLighter/Gorsel/dugme-birincil");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.unity-button.buton-birincil:hover {
+    -unity-background-image-tint-color: rgb(255, 236, 214);
+}
+
+.unity-button.buton-birincil:active {
+    -unity-background-image-tint-color: rgb(235, 200, 170);
+}
+
+.unity-button.buton-birincil:disabled {
+    -unity-background-image-tint-color: rgb(150, 150, 150);
+}
+
+/* Seçilen çip ve seçenek öne çıkar. */
+.unity-button.cip {
+    transition-property: scale, border-color, background-color;
+    transition-duration: 0.15s, 0.15s, 0.15s;
+    transition-timing-function: ease-out-back, ease-out, ease-out;
+}
+
+.unity-button.cip.secili {
+    scale: 1.05 1.05;
+}
+
+.unity-button.secenek {
+    transition-property: scale, background-color, color;
+    transition-duration: 0.15s, 0.12s, 0.12s;
+    transition-timing-function: ease-out-back, ease-out, ease-out;
+}
+
+.unity-button.secenek.secili {
+    scale: 1.04 1.04;
+}
+
+/* Perdedeki büyük renk: telefon kimdeyse onun rengi atar gibi büyüyüp küçülür. */
+.perde-renk {
+    border-width: 12px;
+    border-color: rgba(255, 255, 255, 0.14);
+    transition-property: scale, border-color;
+    transition-duration: 0.9s, 0.9s;
+    transition-timing-function: ease-in-out-sine, ease-in-out-sine;
+}
+
+.perde-renk.nabiz {
+    scale: 1.12 1.12;
+    border-color: rgba(255, 255, 255, 0.32);
+}
+
+/* Kalan süre azalınca saniyede iki kez atar. */
+.kok .sure {
+    transition-property: scale, color;
+    transition-duration: 0.2s, 0.2s;
+}
+
+.kok .sure.sure-nabiz {
+    scale: 1.2 1.2;
+}
+
+/* İfşa: kart patlayarak gelir. Güme: duman gibi yukarıdan belirir. */
+.ifsa-karti {
+    transition-property: scale, opacity, rotate;
+    transition-duration: 0.5s, 0.25s, 0.5s;
+    transition-timing-function: ease-out-back, ease-out, ease-out-back;
+}
+
+.ifsa-karti.giris {
+    scale: 0.55 0.55;
+    opacity: 0;
+    rotate: -6deg;
+}
+
+.gume-karti {
+    transition-property: opacity, translate, scale;
+    transition-duration: 0.7s, 0.7s, 0.7s;
+    transition-timing-function: ease-out, ease-out-cubic, ease-out;
+}
+
+.gume-karti.giris {
+    opacity: 0;
+    translate: 0 -50px;
+    scale: 1.08 1.08;
+}
+
+/* Bildirim şeridi yukarıdan düşer. */
+.kok .bildirim {
+    transition-property: translate, opacity;
+    transition-duration: 0.3s, 0.2s;
+    transition-timing-function: ease-out-back, ease-out;
+}
+
+.kok .bildirim.giris {
+    translate: 0 -40px;
+    opacity: 0;
+}
+
+/* Logo: alev titrer, yazı parlar. */
+.kok .logo {
+    text-shadow: 0 6px 30px rgba(255, 138, 31, 0.55);
+    letter-spacing: 2px;
+}
+
+.logo-alev,
+.logo-alev-kucuk {
+    align-self: center;
+    width: 280px;
+    height: 280px;
+    margin-bottom: -40px;
+}
+
+.logo-alev-kucuk {
+    width: 180px;
+    height: 180px;
+    margin-bottom: -20px;
+}
+
+.alev-hale {
+    position: absolute;
+    left: -60px;
+    right: -60px;
+    top: -60px;
+    bottom: -60px;
+    background-image: resource("TheLighter/Gorsel/isik");
+    -unity-background-scale-mode: stretch-to-fill;
+    transition-property: opacity;
+    transition-duration: 0.14s;
+}
+
+.alev-resim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: resource("TheLighter/Gorsel/alev");
+    -unity-background-scale-mode: scale-to-fit;
+    transform-origin: 50% 85%;
+    transition-property: scale, rotate;
+    transition-duration: 0.14s, 0.14s;
+    transition-timing-function: ease-in-out, ease-in-out;
+}

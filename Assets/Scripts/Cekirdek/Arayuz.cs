@@ -119,9 +119,19 @@ namespace TheLighter.Istemci
             var v = Kutu(sinif);
             v.style.backgroundColor = OyuncuRengi(renk);
             v.pickingMode = PickingMode.Ignore;
-            // Perdedeki büyük renk: "telefon sende" diye atar.
-            if (sinif == "perde-renk") Nabiz(v, "nabiz", 900);
-            return v;
+            if (sinif != "perde-renk") return v;
+
+            // Perdedeki büyük renk: "telefon sende" diye atar, arkasında kendi renginde bir hale.
+            var kap = Kutu("perde-renk-kap");
+            kap.pickingMode = PickingMode.Ignore;
+            var hale = Kutu("perde-hale");
+            hale.pickingMode = PickingMode.Ignore;
+            hale.style.unityBackgroundImageTintColor = OyuncuRengi(renk);
+            kap.Add(hale);
+            kap.Add(v);
+            Nabiz(v, "nabiz", 900);
+            Nabiz(hale, "nabiz", 900);
+            return kap;
         }
 
         /// <summary>Oyuncu seçme çipi: renk noktası + isim.</summary>

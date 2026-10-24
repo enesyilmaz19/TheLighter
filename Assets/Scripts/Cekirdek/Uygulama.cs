@@ -122,7 +122,7 @@ namespace TheLighter.Istemci
 
             kok = Arayuz.Kutu("kok");
             // Arka planda yükselen kıvılcımlar: her şeyin arkasında, dokunmaya kapalı.
-            kivilcimlar = new Kivilcimlar(22);
+            kivilcimlar = new Kivilcimlar(28);
             kok.Add(kivilcimlar.Kok);
             solYan = Arayuz.Kutu("yan", "yan-sol", "gizli");
             sahne = Arayuz.Kutu("sahne");

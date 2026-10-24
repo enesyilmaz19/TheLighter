@@ -39,7 +39,7 @@ namespace TheLighter.Istemci
                 var k = new Kivilcim { Oge = new VisualElement() };
                 k.Oge.AddToClassList("kivilcim");
                 k.Oge.pickingMode = PickingMode.Ignore;
-                float boy = 6f + (float)r.NextDouble() * 10f;
+                float boy = 8f + (float)r.NextDouble() * 14f;
                 k.Oge.style.width = boy;
                 k.Oge.style.height = boy;
                 k.Oge.style.borderTopLeftRadius = k.Oge.style.borderTopRightRadius =

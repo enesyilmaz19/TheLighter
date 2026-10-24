@@ -1451,7 +1451,37 @@
     scale: 1.04 1.04;
 }
 
-/* Perdedeki büyük renk: telefon kimdeyse onun rengi atar gibi büyüyüp küçülür. */
+/* Perdedeki büyük renk: telefon kimdeyse onun rengi atar gibi büyüyüp küçülür, arkasında kendi renginde hale. */
+.perde-renk-kap {
+    align-self: center;
+    width: 180px;
+    height: 180px;
+    margin-bottom: 40px;
+}
+
+.perde-renk-kap > .perde-renk {
+    margin: 0;
+}
+
+.perde-hale {
+    position: absolute;
+    left: -110px;
+    right: -110px;
+    top: -110px;
+    bottom: -110px;
+    background-image: resource("TheLighter/Gorsel/isik");
+    -unity-background-scale-mode: stretch-to-fill;
+    opacity: 0.35;
+    transition-property: opacity, scale;
+    transition-duration: 0.9s, 0.9s;
+    transition-timing-function: ease-in-out-sine, ease-in-out-sine;
+}
+
+.perde-hale.nabiz {
+    opacity: 0.6;
+    scale: 1.15 1.15;
+}
+
 .perde-renk {
     border-width: 12px;
     border-color: rgba(255, 255, 255, 0.14);
@@ -1521,23 +1551,23 @@
 .logo-alev,
 .logo-alev-kucuk {
     align-self: center;
-    width: 280px;
-    height: 280px;
-    margin-bottom: -40px;
+    width: 220px;
+    height: 220px;
+    margin-bottom: 8px;
 }
 
 .logo-alev-kucuk {
-    width: 180px;
-    height: 180px;
-    margin-bottom: -20px;
+    width: 150px;
+    height: 150px;
+    margin-bottom: 0;
 }
 
 .alev-hale {
     position: absolute;
-    left: -60px;
-    right: -60px;
-    top: -60px;
-    bottom: -60px;
+    left: -110px;
+    right: -110px;
+    top: -90px;
+    bottom: -130px;
     background-image: resource("TheLighter/Gorsel/isik");
     -unity-background-scale-mode: stretch-to-fill;
     transition-property: opacity;

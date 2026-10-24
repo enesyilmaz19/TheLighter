@@ -1587,3 +1587,41 @@
     transition-duration: 0.14s, 0.14s;
     transition-timing-function: ease-in-out, ease-in-out;
 }
+
+/* Mini oyun perdesi: çakmak B'nin renginden C'nin rengine dönerek uçar. */
+.ucus {
+    align-self: center;
+    width: 600px;
+    height: 150px;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.ucus-nokta {
+    width: 90px;
+    height: 90px;
+    border-radius: 45px;
+    border-width: 8px;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.ucan-alev {
+    position: absolute;
+    left: 480px;
+    top: 0;
+    width: 120px;
+    height: 120px;
+    background-image: resource("TheLighter/Gorsel/alev");
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: left, rotate, scale, translate;
+    transition-duration: 0.9s, 0.9s, 0.9s, 0.9s;
+    transition-timing-function: ease-out-cubic, ease-out-cubic, ease-out-back, ease-out-bounce;
+}
+
+.ucan-alev.giris {
+    left: 0;
+    rotate: -720deg;
+    scale: 0.5 0.5;
+    translate: 0 -60px;
+}

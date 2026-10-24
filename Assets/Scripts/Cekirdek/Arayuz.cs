@@ -52,10 +52,28 @@ namespace TheLighter.Istemci
         /// Giriş animasyonu: sınıf hemen eklenir, birkaç kare sonra kalkar; USS'teki geçiş başlangıçtan son hâline oynar.
         /// Öğe henüz ekranda değilse eklenince başlar.
         /// </summary>
-        public static void Belir(VisualElement e, string sinif = "giris")
+        public static void Belir(VisualElement e, string sinif = "giris", long gecikmeMs = 40)
         {
             e.AddToClassList(sinif);
-            e.schedule.Execute(() => e.RemoveFromClassList(sinif)).StartingIn(40);
+            e.schedule.Execute(() => e.RemoveFromClassList(sinif)).StartingIn(gecikmeMs);
+        }
+
+        /// <summary>
+        /// Çakmak B'den C'ye dönerek uçar (mini oyun perdesi): solda B'nin rengi, sağda C'nin, aradan alev geçer.
+        /// Masa ve 3D çakmak ayrı karar (docs/Gorsel.md); bu, ekranlardaki yer tutucu.
+        /// </summary>
+        public static VisualElement CakmakUcusu(int renkB, int renkC)
+        {
+            var kap = Kutu("ucus");
+            kap.pickingMode = PickingMode.Ignore;
+            kap.Add(RenkNoktasi(renkB, "ucus-nokta"));
+            kap.Add(Esnek());
+            kap.Add(RenkNoktasi(renkC, "ucus-nokta"));
+            var alev = Kutu("ucan-alev");
+            alev.pickingMode = PickingMode.Ignore;
+            kap.Add(alev);
+            Belir(alev, "giris", 300);
+            return kap;
         }
 
         /// <summary>Sınıfı belli aralıkla açıp kapatır (nabız, titreşim). Öğe ekrandan çıkınca kendiliğinden durur.</summary>

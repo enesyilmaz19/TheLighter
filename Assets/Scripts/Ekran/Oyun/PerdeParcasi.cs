@@ -124,6 +124,8 @@ namespace TheLighter.Istemci
             if (g.Kaos != KaosKurali.Yok) Kok.Add(Tekrar.KaosSeridi(g.Kaos));
 
             Kok.Add(Esnek());
+            // Çakmak B'den C'ye uçar.
+            if (g.B.HasValue && g.C.HasValue) Kok.Add(CakmakUcusu(akis.Sira(g.B.Value), akis.Sira(g.C.Value)));
             // Rus Ruleti finali: soru yok, sorusuz ikili düello.
             Kok.Add(Yazi(g.Final ? Metin.Al("rus.final_duello", b, c) : Metin.Al("mini.perde_verdi", b, c, TurkceEk.Yonelme(c)), "perde-ust"));
             Kok.Add(Yazi(Metin.Al("mini.ad." + tur), "perde-buyuk"));

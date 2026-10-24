@@ -1469,7 +1469,7 @@
     right: -110px;
     top: -110px;
     bottom: -110px;
-    background-image: resource("TheLighter/Gorsel/isik");
+    background-image: resource("TheLighter/Gorsel/isik-beyaz");
     -unity-background-scale-mode: stretch-to-fill;
     opacity: 0.35;
     transition-property: opacity, scale;
@@ -1544,7 +1544,7 @@
 
 /* Logo: alev titrer, yazı parlar. */
 .kok .logo {
-    text-shadow: 0 6px 30px rgba(255, 138, 31, 0.55);
+    text-shadow: 0 4px 18px rgba(255, 138, 31, 0.45);
     letter-spacing: 2px;
 }
 

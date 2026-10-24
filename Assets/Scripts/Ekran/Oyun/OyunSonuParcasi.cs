@@ -34,6 +34,7 @@ namespace TheLighter.Istemci
             this.uygulama = uygulama;
             this.akis = akis;
             ozet = e.Ozet;
+            uygulama.Kutla();
             var g = e.Gorunum;
 
             Kok = Kutu("parca", "oyun-sonu");

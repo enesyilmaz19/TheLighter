@@ -266,6 +266,9 @@ namespace TheLighter.Istemci
             YanlariKur();
         }
 
+        /// <summary>Oyun sonu: kıvılcımlar bir süre hızlanıp parlar.</summary>
+        public void Kutla() => kivilcimlar.Kutla();
+
         /// <summary>Çakmak Gecesi'nin gecesi: arka plan maviye döner, kıvılcımlar söner gibi azalır.</summary>
         public void GeceModu(bool gece)
         {

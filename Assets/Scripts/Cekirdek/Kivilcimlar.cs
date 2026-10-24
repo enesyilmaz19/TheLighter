@@ -26,6 +26,7 @@ namespace TheLighter.Istemci
         readonly List<Kivilcim> kivilcimlar = new List<Kivilcim>();
         readonly System.Random r = new System.Random();
         bool sakin;
+        float kutlama;
 
         public VisualElement Kok { get; }
 
@@ -63,6 +64,13 @@ namespace TheLighter.Istemci
             }
         }
 
+        /// <summary>Oyun sonu: birkaç saniye kıvılcımlar hızlanır ve parlar (sakin olsa da).</summary>
+        public void Kutla(float sn = 3.5f)
+        {
+            kutlama = sn;
+            Kok.RemoveFromClassList("kivilcimlar-sakin");
+        }
+
         void Yenile(Kivilcim k, bool ilk)
         {
             k.X = (float)r.NextDouble();
@@ -80,10 +88,17 @@ namespace TheLighter.Istemci
             float w = Kok.resolvedStyle.width, h = Kok.resolvedStyle.height;
             if (float.IsNaN(w) || float.IsNaN(h) || w <= 0 || h <= 0) return;
             dt = Mathf.Clamp(dt, 0f, 0.1f);
+            float hiz = 1f;
+            if (kutlama > 0f)
+            {
+                kutlama -= dt;
+                hiz = 1f + 5f * Mathf.Clamp01(kutlama / 1.5f);
+                if (kutlama <= 0f) Kok.EnableInClassList("kivilcimlar-sakin", sakin);
+            }
             foreach (var k in kivilcimlar)
             {
-                k.Yas += dt;
-                k.Y -= k.Hiz * dt;
+                k.Yas += dt * hiz;
+                k.Y -= k.Hiz * dt * hiz;
                 if (k.Yas >= k.Omur || k.Y < -0.05f) Yenile(k, ilk: false);
                 float salinim = Mathf.Sin(k.Faz + k.Yas * k.Salinim) * 0.02f;
                 k.Oge.style.translate = new Translate((k.X + salinim) * w, k.Y * h);
